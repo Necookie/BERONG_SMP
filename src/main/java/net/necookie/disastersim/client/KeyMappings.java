@@ -1,20 +1,22 @@
 package net.necookie.disastersim.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
-import net.necookie.disastersim.BerongSMP;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
-import org.lwjgl.glfw.GLFW;
 
 /**
- * Global key mappings for the mod.
+ * Manages the registration of custom key mappings (keybindings) for BerongSMP.
  */
 public class KeyMappings {
-    // Removed PULL_PIN mapping as it is no longer used by the new fire extinguisher.
 
+    /**
+     * Registers all custom keybindings to the game.
+     * Called during the client setup phase.
+     * 
+     * @param event The key mapping registration event.
+     */
     @SubscribeEvent
     public static void register(RegisterKeyMappingsEvent event) {
-        // No custom key mappings to register currently.
+        // Currently, no custom keybindings are required for the mod.
+        // If a "pull pin" or "reset simulation" key is needed, it would be registered here.
     }
 }

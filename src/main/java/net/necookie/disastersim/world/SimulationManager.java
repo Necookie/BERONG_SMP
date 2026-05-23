@@ -19,29 +19,53 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.Collections;
-import net.minecraft.world.entity.Relative;
 import java.util.Random;
 
+/**
+ * Manager class for the disaster simulation system.
+ * Handles the state, logic, and lifecycle of fire and earthquake simulations.
+ */
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class SimulationManager {
+    /** The identifier for the main simulation structure (LSPU Library). */
     private static final Identifier STRUCTURE_ID = Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrary_main");
+    
+    /** The center position where the simulation structure is loaded. */
     public static final BlockPos SIM_POS = new BlockPos(100, 64, 100);
+    
+    /** The return position (lobby) for players after a simulation ends. */
     public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
 
+    /** Current state of the simulation. */
     private static SimulationState currentState = SimulationState.IDLE;
+    
+    /** Remaining time in ticks for the current simulation. */
     private static int timer = 0;
+    
+    /** The player currently participating in the simulation. */
     private static ServerPlayer activePlayer = null;
+    
+    /** Random instance for procedural disaster effects. */
     private static final Random random = new Random();
 
+    /**
+     * Enum representing the possible states of the simulation.
+     */
     public enum SimulationState {
-        IDLE,
-        FIRE,
-        EARTHQUAKE
+        IDLE,       // No simulation in progress
+        FIRE,       // Fire disaster simulation
+        EARTHQUAKE  // Earthquake disaster simulation
     }
 
+    /**
+     * Starts a new simulation for a specific player.
+     * 
+     * @param player The player to participate in the simulation.
+     * @param state The type of simulation to start.
+     */
     public static void startSimulation(ServerPlayer player, SimulationState state) {
+        // Prevent starting multiple simulations at once
         if (currentState != SimulationState.IDLE) {
             player.sendSystemMessage(Component.literal("A simulation is already in progress!"));
             return;
@@ -49,15 +73,25 @@ public class SimulationManager {
 
         currentState = state;
         activePlayer = player;
-        timer = 2400; // 2 minutes
+        timer = 2400; // 2 minutes (2400 ticks @ 20tps)
 
-        ServerLevel level = ((ServerLevel)player.level());
+        ServerLevel level = (ServerLevel) player.level();
+        
+        // Load the simulation area
         loadStructure(level, SIM_POS);
         
+        // Teleport player to the start of the simulation area
         player.teleportTo(level, SIM_POS.getX() + 5.5, SIM_POS.getY() + 1.0, SIM_POS.getZ() + 5.5, Collections.emptySet(), player.getYRot(), player.getXRot(), true);
         player.sendSystemMessage(Component.literal("Starting " + state.name() + " Simulation!"));
     }
 
+    /**
+     * Loads the simulation structure into the world.
+     * Clears the area of previous blocks before placement.
+     * 
+     * @param level The server level.
+     * @param pos The position to place the structure.
+     */
     private static void loadStructure(ServerLevel level, BlockPos pos) {
         StructureTemplateManager manager = level.getStructureManager();
         Optional<StructureTemplate> templateOpt = manager.get(STRUCTURE_ID);
@@ -69,6 +103,7 @@ public class SimulationManager {
                     .setRotation(Rotation.NONE)
                     .setIgnoreEntities(false);
             
+            // Clear the simulation area (approx. 40x30x40 area)
             for (int x = -5; x < 35; x++) {
                 for (int y = -5; y < 25; y++) {
                     for (int z = -5; z < 35; z++) {
@@ -77,60 +112,98 @@ public class SimulationManager {
                 }
             }
 
+            // Place the structure template
             template.placeInWorld(level, pos, pos, settings, level.getRandom(), 2);
         } else {
             BerongSMP.LOGGER.error("Failed to load structure: {}", STRUCTURE_ID);
         }
     }
 
+    /**
+     * Main server tick listener for the simulation logic.
+     * Updates the timer and triggers disaster effects.
+     * 
+     * @param event The server tick event.
+     */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        // Only tick if a simulation is active
         if (currentState == SimulationState.IDLE || activePlayer == null) return;
 
         timer--;
 
+        // Check if simulation time has expired
         if (timer <= 0) {
             endSimulation();
             return;
         }
 
+        // Trigger fire effects every second (20 ticks)
         if (currentState == SimulationState.FIRE && timer % 20 == 0) {
-            simulateFire(((ServerLevel)activePlayer.level()));
-        } else if (currentState == SimulationState.EARTHQUAKE && timer % 10 == 0) {
-            simulateEarthquake(((ServerLevel)activePlayer.level()));
+            simulateFire((ServerLevel) activePlayer.level());
+        } 
+        // Trigger earthquake effects every half-second (10 ticks)
+        else if (currentState == SimulationState.EARTHQUAKE && timer % 10 == 0) {
+            simulateEarthquake((ServerLevel) activePlayer.level());
         }
 
+        // Send status updates to the client every 10 ticks
         if (timer % 10 == 0) {
             PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload(currentState.name(), timer / 20));
         }
     }
 
+    /**
+     * Procedural fire simulation logic.
+     * Randomly spawns fire blocks within the simulation area.
+     * 
+     * @param level The server level.
+     */
     private static void simulateFire(ServerLevel level) {
         for (int i = 0; i < 3; i++) {
             BlockPos firePos = SIM_POS.offset(random.nextInt(25), random.nextInt(10), random.nextInt(25));
+            // Only place fire in air blocks
             if (level.getBlockState(firePos).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
             }
         }
     }
 
+    /**
+     * Procedural earthquake simulation logic.
+     * Randomly destroys blocks within the simulation area.
+     * 
+     * @param level The server level.
+     */
     private static void simulateEarthquake(ServerLevel level) {
         for (int i = 0; i < 2; i++) {
             BlockPos breakPos = SIM_POS.offset(random.nextInt(25), random.nextInt(10), random.nextInt(25));
+            // Destroy non-air blocks, excluding bedrock
             if (!level.getBlockState(breakPos).isAir() && level.getBlockState(breakPos).getBlock() != Blocks.BEDROCK) {
                 level.destroyBlock(breakPos, false);
             }
         }
     }
 
+    /**
+     * Ends the current simulation.
+     * Returns the player to the lobby and resets the simulation area.
+     */
     private static void endSimulation() {
         if (activePlayer != null) {
+            // Reset client HUD
             PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload("", 0));
+            
             activePlayer.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-            activePlayer.teleportTo(((ServerLevel)activePlayer.level()), LOBBY_POS.getX() + 0.5, LOBBY_POS.getY() + 1.0, LOBBY_POS.getZ() + 0.5, Collections.emptySet(), 0.0f, 0.0f, true);
-            loadStructure(((ServerLevel)activePlayer.level()), SIM_POS);
+            
+            // Return player to lobby
+            activePlayer.teleportTo((ServerLevel) activePlayer.level(), LOBBY_POS.getX() + 0.5, LOBBY_POS.getY() + 1.0, LOBBY_POS.getZ() + 0.5, Collections.emptySet(), 0.0f, 0.0f, true);
+            
+            // Clean up and restore the simulation structure
+            loadStructure((ServerLevel) activePlayer.level(), SIM_POS);
         }
         
+        // Reset manager state
         currentState = SimulationState.IDLE;
         activePlayer = null;
         timer = 0;

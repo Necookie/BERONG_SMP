@@ -6,21 +6,27 @@ import net.minecraft.world.level.block.Blocks;
 import net.necookie.disastersim.api.building.BuildingComponent;
 
 /**
- * A 10x12 laboratory room featuring continuous white desks and black computer monitors.
+ * A modular laboratory room component.
+ * Dimensions: 10x12 blocks.
+ * Features: Light-colored tiled floor, continuous white desks, and black computer monitors.
  */
 public class CCS_Lab_Module implements BuildingComponent {
+
+    /**
+     * Places the laboratory room in the world.
+     */
     @Override
     public void place(Level level, BlockPos pos) {
-        // Walls and Floor
+        // --- Structural Logic (Walls, Floor, Ceiling) ---
         for (int x = 0; x < 10; x++) {
             for (int z = 0; z < 12; z++) {
-                // Floor: Updated to light tiles (Polished Diorite) to match the photo
+                // Floor: Light tiles (Polished Diorite)
                 level.setBlock(pos.offset(x, 0, z), Blocks.POLISHED_DIORITE.defaultBlockState(), 3);
 
-                // Ceiling
+                // Ceiling: Smooth stone slabs
                 level.setBlock(pos.offset(x, 4, z), Blocks.SMOOTH_STONE_SLAB.defaultBlockState(), 3);
 
-                // Walls: White concrete
+                // Outer Walls: 4-block high White Concrete
                 if (x == 0 || x == 9 || z == 0 || z == 11) {
                     for (int y = 1; y < 4; y++) {
                         level.setBlock(pos.offset(x, y, z), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
@@ -29,21 +35,22 @@ public class CCS_Lab_Module implements BuildingComponent {
             }
         }
 
-        // Furniture: Continuous rows of desks with monitors
-        for (int z = 2; z < 10; z += 3) {
-            for (int x = 1; x < 9; x++) {
-                // Leave an aisle in the middle of the room
-                if (x == 4 || x == 5) continue;
+        // --- Interior Logic (Furniture and Computers) ---
+        // Arrange desks in three main rows (Z-axis)
+        for (int rowZ = 2; rowZ < 10; rowZ += 3) {
+            for (int colX = 1; colX < 9; colX++) {
+                // Leave a 2-block wide center aisle (X = 4, 5)
+                if (colX == 4 || colX == 5) continue;
 
-                BlockPos deskPos = pos.offset(x, 1, z);
+                BlockPos deskPos = pos.offset(colX, 1, rowZ);
 
-                // Continuous white tables (Smooth Quartz)
+                // Continuous white tables (Smooth Quartz blocks)
                 level.setBlock(deskPos, Blocks.SMOOTH_QUARTZ.defaultBlockState(), 3);
 
-                // Monitors: Updated to Black Concrete to match the photo
+                // Computer Monitors (Black Concrete blocks placed on the desk)
                 level.setBlock(deskPos.above(), Blocks.BLACK_CONCRETE.defaultBlockState(), 3);
 
-                // "Keyboard/Mouse" on the desk
+                // Peripheral Simulation (Stone Button as a keyboard/mouse proxy)
                 level.setBlock(deskPos.offset(0, 1, 1), Blocks.STONE_BUTTON.defaultBlockState(), 3);
             }
         }

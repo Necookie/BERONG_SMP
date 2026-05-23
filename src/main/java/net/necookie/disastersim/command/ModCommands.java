@@ -11,15 +11,27 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
 
+/**
+ * Handles the registration and execution of custom commands for BerongSMP.
+ */
 public class ModCommands {
-    public static void register(CommandDispatcher<net.minecraft.commands.CommandSourceStack> dispatcher) {
+
+    /**
+     * Registers all custom commands to the command dispatcher.
+     * 
+     * @param dispatcher The dispatcher to register commands to.
+     */
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        // Command to manually spawn the LSPU building (requires GM permissions)
         dispatcher.register(Commands.literal("spawn_lspu")
                 .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(ModCommands::spawnLSPU));
 
+        // Command to give the fire extinguisher to the player
         dispatcher.register(Commands.literal("get_extinguisher")
                 .executes(ModCommands::getExtinguisher));
 
+        // Command to manually trigger a fire simulation
         dispatcher.register(Commands.literal("sim_fire")
                 .executes(context -> {
                     if (context.getSource().isPlayer()) {
@@ -29,6 +41,7 @@ public class ModCommands {
                     return 0;
                 }));
 
+        // Command to manually trigger an earthquake simulation
         dispatcher.register(Commands.literal("sim_earthquake")
                 .executes(context -> {
                     if (context.getSource().isPlayer()) {
@@ -39,12 +52,21 @@ public class ModCommands {
                 }));
     }
 
-    private static int spawnLSPU(CommandContext<net.minecraft.commands.CommandSourceStack> context) {
+    /**
+     * Logic for spawning the LSPU building at the player's position.
+     * 
+     * @param context The command context.
+     * @return 1 for success, 0 for failure.
+     */
+    private static int spawnLSPU(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         if (source.isPlayer()) {
             ServerPlayer player = source.getPlayer();
             BlockPos pos = player.blockPosition();
+            
+            // Construct the building using the specialized constructor
             new CCSBuildingConstructor().construct(player.level(), pos);
+            
             source.sendSuccess(() -> Component.literal("LSPU Building spawned at your position!"), true);
             return 1;
         } else {
@@ -53,11 +75,20 @@ public class ModCommands {
         }
     }
 
-    private static int getExtinguisher(CommandContext<net.minecraft.commands.CommandSourceStack> context) {
+    /**
+     * Logic for giving the fire extinguisher item to the player.
+     * 
+     * @param context The command context.
+     * @return 1 for success, 0 for failure.
+     */
+    private static int getExtinguisher(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         if (source.isPlayer()) {
             ServerPlayer player = source.getPlayer();
+            
+            // Add the item to the player's inventory
             player.getInventory().add(BerongSMP.FIRE_EXTINGUISHER.get().getDefaultInstance());
+            
             source.sendSuccess(() -> Component.literal("Fire Extinguisher added to your inventory!"), true);
             return 1;
         } else {
