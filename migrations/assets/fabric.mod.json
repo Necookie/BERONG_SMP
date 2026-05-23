@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "fireextinguisherprototype",
+  "version": "${version}",
+  "name": "Fire Extinguisher Prototype",
+  "description": "A Minecraft mod that adds a functional fire extinguisher tool.",
+  "authors": [
+    "necookie"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.necookie.fireextinguisherprototype.FireExtinguisherPrototype"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.6",
+    "minecraft": "~1.21",
+    "java": ">=17",
+    "fabric-api": "*"
+  }
+}
