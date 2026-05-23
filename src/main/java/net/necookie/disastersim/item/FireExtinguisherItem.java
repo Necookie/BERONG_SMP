@@ -236,8 +236,8 @@ public class FireExtinguisherItem extends Item {
      * Adds instructional text to the item's tooltip.
      */
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.literal("§7Hold right click to spray a dense extinguishing foam cone."));
-        tooltip.add(Component.literal("§7Puts out fire, soul fire, candles, and campfires in front of you."));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.literal("§7Hold right click to spray a dense extinguishing foam cone."));
+        tooltip.accept(Component.literal("§7Puts out fire, soul fire, candles, and campfires in front of you."));
     }
 }
