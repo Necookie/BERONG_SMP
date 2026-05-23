@@ -1,7 +1,6 @@
 package net.necookie.disastersim;
 
 import net.minecraft.client.Minecraft;
-import net.necookie.disastersim.client.FireExtinguisherHud;
 import net.necookie.disastersim.client.SimulationHud;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,7 +28,6 @@ public class BerongSMPClient {
 
     @SubscribeEvent
     static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
-        FireExtinguisherHud.registerGuiLayers(event);
         SimulationHud.registerGuiLayers(event);
     }
 }

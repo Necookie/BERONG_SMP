@@ -46,8 +46,8 @@ public class BerongSMP {
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
 
-    public static final DeferredItem<net.necookie.disastersim.item.ModularExtinguisher> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
-            net.necookie.disastersim.item.ModularExtinguisher::new);
+    public static final DeferredItem<net.necookie.disastersim.item.FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
+            net.necookie.disastersim.item.FireExtinguisherItem::new);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp"))
@@ -63,7 +63,6 @@ public class BerongSMP {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
-        modEventBus.register(net.necookie.disastersim.network.PullPinPayload.class);
         modEventBus.register(net.necookie.disastersim.network.SimulationStatusPayload.class);
         modEventBus.register(net.necookie.disastersim.BerongSMPClient.class);
         
