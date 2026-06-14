@@ -29,7 +29,7 @@ import java.util.Random;
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class SimulationManager {
     /** The identifier for the main simulation structure (LSPU Library). */
-    private static final Identifier STRUCTURE_ID = Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrary_main");
+    private static final Identifier STRUCTURE_ID = Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain");
     
     /** The center position where the simulation structure is loaded. */
     public static final BlockPos SIM_POS = new BlockPos(100, 64, 100);
