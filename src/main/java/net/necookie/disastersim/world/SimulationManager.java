@@ -32,7 +32,7 @@ public class SimulationManager {
     private static final Identifier STRUCTURE_ID = Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain");
     
     /** The center position where the simulation structure is loaded. */
-    public static final BlockPos SIM_POS = new BlockPos(100, 64, 100);
+    public static final BlockPos SIM_POS = new BlockPos(30, -33, 83);
     
     /** The return position (lobby) for players after a simulation ends. */
     public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
@@ -104,8 +104,9 @@ public class SimulationManager {
                     .setIgnoreEntities(false);
             
             // Clear the simulation area (approx. 40x30x40 area)
+            // Fixed: Starts clearing exactly at the SIM_POS Y-level and goes up
             for (int x = -5; x < 35; x++) {
-                for (int y = -5; y < 25; y++) {
+                for (int y = 0; y < 25; y++) { // Changed -5 to 0
                     for (int z = -5; z < 35; z++) {
                         level.setBlockAndUpdate(pos.offset(x, y, z), Blocks.AIR.defaultBlockState());
                     }
