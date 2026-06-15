@@ -30,22 +30,22 @@ import java.util.Random;
 public class SimulationManager {
     /** The identifier for the main simulation structure (LSPU Library). */
     private static final Identifier STRUCTURE_ID = Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain");
-    
+
     /** The center position where the simulation structure is loaded. */
-    public static final BlockPos SIM_POS = new BlockPos(30, -33, 83);
-    
+    public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
+
     /** The return position (lobby) for players after a simulation ends. */
     public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
 
     /** Current state of the simulation. */
     private static SimulationState currentState = SimulationState.IDLE;
-    
+
     /** Remaining time in ticks for the current simulation. */
     private static int timer = 0;
-    
+
     /** The player currently participating in the simulation. */
     private static ServerPlayer activePlayer = null;
-    
+
     /** Random instance for procedural disaster effects. */
     private static final Random random = new Random();
 
@@ -60,8 +60,7 @@ public class SimulationManager {
 
     /**
      * Starts a new simulation for a specific player.
-     * 
-     * @param player The player to participate in the simulation.
+     * * @param player The player to participate in the simulation.
      * @param state The type of simulation to start.
      */
     public static void startSimulation(ServerPlayer player, SimulationState state) {
@@ -76,10 +75,10 @@ public class SimulationManager {
         timer = 2400; // 2 minutes (2400 ticks @ 20tps)
 
         ServerLevel level = (ServerLevel) player.level();
-        
+
         // Load the simulation area
         loadStructure(level, SIM_POS);
-        
+
         // Teleport player to the start of the simulation area
         player.teleportTo(level, SIM_POS.getX() + 5.5, SIM_POS.getY() + 1.0, SIM_POS.getZ() + 5.5, Collections.emptySet(), player.getYRot(), player.getXRot(), true);
         player.sendSystemMessage(Component.literal("Starting " + state.name() + " Simulation!"));
@@ -87,9 +86,7 @@ public class SimulationManager {
 
     /**
      * Loads the simulation structure into the world.
-     * Clears the area of previous blocks before placement.
-     * 
-     * @param level The server level.
+     * * @param level The server level.
      * @param pos The position to place the structure.
      */
     private static void loadStructure(ServerLevel level, BlockPos pos) {
@@ -102,16 +99,6 @@ public class SimulationManager {
                     .setMirror(Mirror.NONE)
                     .setRotation(Rotation.NONE)
                     .setIgnoreEntities(false);
-            
-            // Clear the simulation area (approx. 40x30x40 area)
-            // Fixed: Starts clearing exactly at the SIM_POS Y-level and goes up
-            for (int x = -5; x < 35; x++) {
-                for (int y = 0; y < 25; y++) { // Changed -5 to 0
-                    for (int z = -5; z < 35; z++) {
-                        level.setBlockAndUpdate(pos.offset(x, y, z), Blocks.AIR.defaultBlockState());
-                    }
-                }
-            }
 
             // Place the structure template
             template.placeInWorld(level, pos, pos, settings, level.getRandom(), 2);
@@ -123,8 +110,7 @@ public class SimulationManager {
     /**
      * Main server tick listener for the simulation logic.
      * Updates the timer and triggers disaster effects.
-     * 
-     * @param event The server tick event.
+     * * @param event The server tick event.
      */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
@@ -142,7 +128,7 @@ public class SimulationManager {
         // Trigger fire effects every second (20 ticks)
         if (currentState == SimulationState.FIRE && timer % 20 == 0) {
             simulateFire((ServerLevel) activePlayer.level());
-        } 
+        }
         // Trigger earthquake effects every half-second (10 ticks)
         else if (currentState == SimulationState.EARTHQUAKE && timer % 10 == 0) {
             simulateEarthquake((ServerLevel) activePlayer.level());
@@ -157,8 +143,7 @@ public class SimulationManager {
     /**
      * Procedural fire simulation logic.
      * Randomly spawns fire blocks within the simulation area.
-     * 
-     * @param level The server level.
+     * * @param level The server level.
      */
     private static void simulateFire(ServerLevel level) {
         for (int i = 0; i < 3; i++) {
@@ -173,8 +158,7 @@ public class SimulationManager {
     /**
      * Procedural earthquake simulation logic.
      * Randomly destroys blocks within the simulation area.
-     * 
-     * @param level The server level.
+     * * @param level The server level.
      */
     private static void simulateEarthquake(ServerLevel level) {
         for (int i = 0; i < 2; i++) {
@@ -194,16 +178,16 @@ public class SimulationManager {
         if (activePlayer != null) {
             // Reset client HUD
             PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload("", 0));
-            
+
             activePlayer.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-            
+
             // Return player to lobby
             activePlayer.teleportTo((ServerLevel) activePlayer.level(), LOBBY_POS.getX() + 0.5, LOBBY_POS.getY() + 1.0, LOBBY_POS.getZ() + 0.5, Collections.emptySet(), 0.0f, 0.0f, true);
-            
+
             // Clean up and restore the simulation structure
             loadStructure((ServerLevel) activePlayer.level(), SIM_POS);
         }
-        
+
         // Reset manager state
         currentState = SimulationState.IDLE;
         activePlayer = null;
