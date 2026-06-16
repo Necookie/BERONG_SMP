@@ -1,80 +1,95 @@
 package net.necookie.disastersim.world;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.necookie.disastersim.BerongSMP;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.minecraft.server.level.ServerPlayer;
 
-/**
- * Manages the lobby area where players can start simulations.
- * Handles lobby generation and interaction with simulation start buttons.
- */
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class LobbyManager {
-    /** Central position of the lobby. */
     public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
-    
-    /** Position of the button used to start the fire simulation. */
-    public static final BlockPos FIRE_BUTTON_POS = LOBBY_POS.offset(3, 1, -1);
-    
-    /** Position of the button used to start the earthquake simulation. */
-    public static final BlockPos QUAKE_BUTTON_POS = LOBBY_POS.offset(3, 1, 1);
 
-    /**
-     * Generates the lobby structure in the world.
-     * This is typically called when the server starts.
-     * 
-     * @param level The level in which to create the lobby.
-     */
-    public static void createLobby(Level level) {
-        // Create the floor (11x11 area of Polished Andesite)
-        for (int x = -5; x <= 5; x++) {
-            for (int z = -5; z <= 5; z++) {
-                level.setBlockAndUpdate(LOBBY_POS.offset(x, -1, z), Blocks.POLISHED_ANDESITE.defaultBlockState());
-            }
+    private static final Identifier LOBBY_STRUCTURE_ID =
+            Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lobby_structure");
+
+    // Discovered at load time by scanning the placed structure for buttons.
+    // Sorted by ascending Z: lower Z = fire, higher Z = earthquake.
+    private static BlockPos fireButtonPos = null;
+    private static BlockPos quakeButtonPos = null;
+
+    public static void createLobby(ServerLevel level) {
+        StructureTemplateManager manager = level.getStructureManager();
+        Optional<StructureTemplate> templateOpt = manager.get(LOBBY_STRUCTURE_ID);
+
+        if (templateOpt.isPresent()) {
+            StructureTemplate template = templateOpt.get();
+            StructurePlaceSettings settings = new StructurePlaceSettings()
+                    .setMirror(Mirror.NONE)
+                    .setRotation(Rotation.NONE)
+                    .setIgnoreEntities(false);
+
+            template.placeInWorld(level, LOBBY_POS, LOBBY_POS, settings, level.getRandom(), 2);
+            scanForButtons(level, LOBBY_POS, template.getSize());
+            BerongSMP.LOGGER.info("BerongSMP Lobby loaded from NBT at {}", LOBBY_POS);
+        } else {
+            BerongSMP.LOGGER.error("Failed to load lobby structure: {}", LOBBY_STRUCTURE_ID);
         }
-
-        // Create a wall to hold the buttons (Stone Bricks)
-        for (int z = -2; z <= 2; z++) {
-            for (int y = 0; y <= 2; y++) {
-                level.setBlockAndUpdate(LOBBY_POS.offset(4, y, z), Blocks.STONE_BRICKS.defaultBlockState());
-            }
-        }
-
-        // Place the interaction buttons
-        level.setBlockAndUpdate(FIRE_BUTTON_POS, Blocks.OAK_BUTTON.defaultBlockState());
-        level.setBlockAndUpdate(QUAKE_BUTTON_POS, Blocks.OAK_BUTTON.defaultBlockState());
-        
-        BerongSMP.LOGGER.info("BerongSMP Lobby created at {}", LOBBY_POS);
     }
 
-    /**
-     * Listens for players right-clicking blocks.
-     * Used to detect interactions with simulation start buttons.
-     * 
-     * @param event The interaction event.
-     */
+    // Scans the placed structure bounds for button blocks and assigns fire/quake positions.
+    private static void scanForButtons(ServerLevel level, BlockPos origin, Vec3i size) {
+        List<BlockPos> buttons = new ArrayList<>();
+
+        for (int x = 0; x < size.getX(); x++) {
+            for (int y = 0; y < size.getY(); y++) {
+                for (int z = 0; z < size.getZ(); z++) {
+                    BlockPos pos = origin.offset(x, y, z);
+                    if (level.getBlockState(pos).getBlock() instanceof ButtonBlock) {
+                        buttons.add(pos.immutable());
+                    }
+                }
+            }
+        }
+
+        // Sort ascending by Z so the button with lower Z = fire, higher Z = earthquake
+        buttons.sort(Comparator.comparingInt(BlockPos::getZ));
+
+        fireButtonPos  = buttons.size() >= 1 ? buttons.get(0) : null;
+        quakeButtonPos = buttons.size() >= 2 ? buttons.get(1) : null;
+
+        BerongSMP.LOGGER.info("Lobby buttons found: {} total. Fire={}, Quake={}",
+                buttons.size(), fireButtonPos, quakeButtonPos);
+    }
+
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        // Only handle logic on the server side
         if (event.getLevel().isClientSide()) return;
-        
+
         BlockPos pos = event.getPos();
         ServerPlayer player = (ServerPlayer) event.getEntity();
 
-        // Check if the clicked block is the fire simulation button
-        if (pos.equals(FIRE_BUTTON_POS)) {
+        if (fireButtonPos != null && pos.equals(fireButtonPos)) {
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.FIRE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
-        } 
-        // Check if the clicked block is the earthquake simulation button
-        else if (pos.equals(QUAKE_BUTTON_POS)) {
+        } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);

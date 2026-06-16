@@ -136,8 +136,8 @@ public class BerongSMP {
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
         
         net.minecraft.server.level.ServerLevel level = event.getServer().overworld();
-        
-        // Create the initial lobby area
+
+        // Load the lobby from NBT and discover button positions
         LobbyManager.createLobby(level);
         
         // Set default world settings for the simulation environment
