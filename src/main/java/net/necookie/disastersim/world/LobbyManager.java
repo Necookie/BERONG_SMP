@@ -15,16 +15,24 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.necookie.disastersim.BerongSMP;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class LobbyManager {
-    public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
+    // Y matches the library structure so both areas sit at the same elevation.
+    public static final BlockPos LOBBY_POS = new BlockPos(0, -33, 0);
+
+    // Exact player spawn point inside the lobby (used on login and simulation return).
+    public static final double SPAWN_X = 8.8;
+    public static final double SPAWN_Y = -31.0;
+    public static final double SPAWN_Z = 8.0;
 
     private static final Identifier LOBBY_STRUCTURE_ID =
             Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lobby_structure");
@@ -76,6 +84,17 @@ public class LobbyManager {
 
         BerongSMP.LOGGER.info("Lobby buttons found: {} total. Fire={}, Quake={}",
                 buttons.size(), fireButtonPos, quakeButtonPos);
+    }
+
+    // Teleports every player to the lobby the moment they log in.
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.level().isClientSide()) return;
+
+        ServerLevel level = (ServerLevel) player.level();
+        player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
+                Collections.emptySet(), 0.0f, 0.0f, true);
     }
 
     @SubscribeEvent

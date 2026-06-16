@@ -34,9 +34,6 @@ public class SimulationManager {
     /** The center position where the simulation structure is loaded. */
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
 
-    /** The return position (lobby) for players after a simulation ends. */
-    public static final BlockPos LOBBY_POS = new BlockPos(0, 64, 0);
-
     /** Current state of the simulation. */
     private static SimulationState currentState = SimulationState.IDLE;
 
@@ -80,7 +77,7 @@ public class SimulationManager {
         loadStructure(level, SIM_POS);
 
         // Teleport player to the start of the simulation area
-        player.teleportTo(level, SIM_POS.getX() + 5.5, SIM_POS.getY() + 1.0, SIM_POS.getZ() + 5.5, Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+        player.teleportTo(level, SIM_POS.getX() + 5.5, SIM_POS.getY() + 2.0, SIM_POS.getZ() + 5.5, Collections.emptySet(), player.getYRot(), player.getXRot(), true);
         player.sendSystemMessage(Component.literal("Starting " + state.name() + " Simulation!"));
     }
 
@@ -182,7 +179,7 @@ public class SimulationManager {
             activePlayer.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
 
             // Return player to lobby
-            activePlayer.teleportTo((ServerLevel) activePlayer.level(), LOBBY_POS.getX() + 0.5, LOBBY_POS.getY() + 1.0, LOBBY_POS.getZ() + 0.5, Collections.emptySet(), 0.0f, 0.0f, true);
+            activePlayer.teleportTo((ServerLevel) activePlayer.level(), LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z, Collections.emptySet(), 0.0f, 0.0f, true);
 
             // Clean up and restore the simulation structure
             loadStructure((ServerLevel) activePlayer.level(), SIM_POS);

@@ -142,7 +142,7 @@ public class BerongSMP {
         
         // Set default world settings for the simulation environment
         net.minecraft.commands.CommandSourceStack source = event.getServer().createCommandSourceStack().withSuppressedOutput();
-        event.getServer().getCommands().performPrefixedCommand(source, "setworldspawn 0 65 0 0");
+        event.getServer().getCommands().performPrefixedCommand(source, "setworldspawn 8 -31 8 0");
         event.getServer().getCommands().performPrefixedCommand(source, "gamerule doDaylightCycle false");
         event.getServer().getCommands().performPrefixedCommand(source, "gamerule doWeatherCycle false");
     }
