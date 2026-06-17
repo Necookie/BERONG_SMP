@@ -17,6 +17,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -77,6 +78,13 @@ public class SimulationManager {
 
     /** One active session per player UUID; allows multiple players to run concurrently. */
     private static final Map<UUID, SimulationSession> activeSessions = new ConcurrentHashMap<>();
+
+    /**
+     * Players who died during a simulation and still need to be sent to the lobby
+     * on their next respawn. Populated by {@link #endSimulation} when the player
+     * is dead; consumed and cleared by {@link #onPlayerRespawn}.
+     */
+    private static final Set<UUID> pendingLobbyRespawn = ConcurrentHashMap.newKeySet();
 
     /** Loads and places the LSPU Library structure when a simulation starts or ends. */
     private static final SimulationStructureLoader STRUCTURE_LOADER =
@@ -157,6 +165,9 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                     Collections.emptySet(), 0.0f, 0.0f, true);
+        } else {
+            // Player died mid-simulation; defer lobby teleport until they click Respawn.
+            pendingLobbyRespawn.add(uuid);
         }
     }
 
@@ -198,6 +209,10 @@ public class SimulationManager {
                 EFFECTS.simulateEarthquake(level);
             }
 
+            if (session.getState() == SimulationState.FIRE && ticks % 40 == 0) {
+                EFFECTS.cleanupFireOutsideBounds(level);
+            }
+
             if (ticks % HUD_SYNC_INTERVAL_TICKS == 0) {
                 // Ceiling division converts ticks to whole seconds so the display
                 // never shows 0 while time remains.
@@ -209,10 +224,27 @@ public class SimulationManager {
     }
 
     /**
+     * Sends players who died mid-simulation to the lobby when they respawn.
+     */
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!pendingLobbyRespawn.remove(player.getUUID())) return;
+        ServerLevel level = (ServerLevel) player.level();
+        PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
+        player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
+        player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
+                Collections.emptySet(), 0.0f, 0.0f, true);
+    }
+
+    /**
      * Ends a player's active simulation when they disconnect.
+     * Also clears any pending respawn redirect so it does not fire on next login.
      */
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        endSimulation(event.getEntity().getUUID());
+        UUID uuid = event.getEntity().getUUID();
+        pendingLobbyRespawn.remove(uuid);
+        endSimulation(uuid);
     }
 }

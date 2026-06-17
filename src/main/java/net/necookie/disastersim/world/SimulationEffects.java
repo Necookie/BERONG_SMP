@@ -38,8 +38,36 @@ public class SimulationEffects {
                     level.getRandom().nextInt(areaSize),
                     level.getRandom().nextInt(areaHeight),
                     level.getRandom().nextInt(areaSize));
-            if (level.getBlockState(firePos).isAir()) {
+            if (level.getBlockState(firePos).isAir()
+                    && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
+            }
+        }
+    }
+
+    /**
+     * Removes any fire blocks that have spread outside the simulation arena bounds.
+     * Scans a margin of 3 blocks beyond the configured area on each axis and
+     * extinguishes fire found there.
+     *
+     * @param level The server level to clean up.
+     */
+    public void cleanupFireOutsideBounds(ServerLevel level) {
+        int size   = Config.SIM_AREA_SIZE.get();
+        int height = Config.SIM_AREA_HEIGHT.get();
+        int margin = 3;
+
+        for (int dx = -margin; dx < size + margin; dx++) {
+            for (int dy = -margin; dy < height + margin; dy++) {
+                for (int dz = -margin; dz < size + margin; dz++) {
+                    if (dx >= 0 && dx < size && dy >= 0 && dy < height && dz >= 0 && dz < size) {
+                        continue;
+                    }
+                    BlockPos pos = SimulationManager.SIM_POS.offset(dx, dy, dz);
+                    if (level.getBlockState(pos).getBlock() == Blocks.FIRE) {
+                        level.removeBlock(pos, false);
+                    }
+                }
             }
         }
     }
