@@ -50,6 +50,14 @@ public class ModCommands {
                     }
                     return 0;
                 }));
+
+        // Command to stop the current simulation early
+        dispatcher.register(Commands.literal("sim_stop")
+                .executes(context -> {
+                    SimulationManager.endSimulation();
+                    context.getSource().sendSuccess(() -> Component.literal("Simulation stopped."), true);
+                    return 1;
+                }));
     }
 
     /**

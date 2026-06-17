@@ -21,7 +21,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Optional;
 import java.util.Collections;
-import java.util.Random;
 
 /**
  * Manager class for the disaster simulation system.
@@ -43,9 +42,6 @@ public class SimulationManager {
 
     /** The player currently participating in the simulation. */
     private static volatile ServerPlayer activePlayer = null;
-
-    /** Random instance for procedural disaster effects. */
-    private static final Random random = new Random();
 
     /**
      * Enum representing the possible states of the simulation.
@@ -136,7 +132,7 @@ public class SimulationManager {
 
         // Send status updates to the client every 10 ticks
         if (timer % 10 == 0) {
-            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload(currentState.name(), timer / 20));
+            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload(currentState.name(), (timer + 19) / 20));
         }
     }
 
@@ -147,7 +143,7 @@ public class SimulationManager {
      */
     private static void simulateFire(ServerLevel level) {
         for (int i = 0; i < 3; i++) {
-            BlockPos firePos = SIM_POS.offset(random.nextInt(25), random.nextInt(10), random.nextInt(25));
+            BlockPos firePos = SIM_POS.offset(level.getRandom().nextInt(25), level.getRandom().nextInt(10), level.getRandom().nextInt(25));
             // Only place fire in air blocks
             if (level.getBlockState(firePos).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
@@ -162,7 +158,7 @@ public class SimulationManager {
      */
     private static void simulateEarthquake(ServerLevel level) {
         for (int i = 0; i < 2; i++) {
-            BlockPos breakPos = SIM_POS.offset(random.nextInt(25), random.nextInt(10), random.nextInt(25));
+            BlockPos breakPos = SIM_POS.offset(level.getRandom().nextInt(25), level.getRandom().nextInt(10), level.getRandom().nextInt(25));
             // Destroy non-air blocks, excluding bedrock
             if (!level.getBlockState(breakPos).isAir() && level.getBlockState(breakPos).getBlock() != Blocks.BEDROCK) {
                 level.destroyBlock(breakPos, false);
@@ -181,7 +177,7 @@ public class SimulationManager {
      * Ends the current simulation.
      * Returns the player to the lobby and resets the simulation area.
      */
-    private static synchronized void endSimulation() {
+    public static synchronized void endSimulation() {
         if (activePlayer != null) {
             // Reset client HUD
             PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload("", 0));
