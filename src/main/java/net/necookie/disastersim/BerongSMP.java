@@ -2,6 +2,7 @@ package net.necookie.disastersim;
 
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.food.FoodProperties;
@@ -9,8 +10,11 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -134,16 +138,22 @@ public class BerongSMP {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
-        
-        net.minecraft.server.level.ServerLevel level = event.getServer().overworld();
+
+        net.minecraft.server.MinecraftServer server = event.getServer();
+        net.minecraft.server.level.ServerLevel level = server.overworld();
 
         // Load the lobby from NBT and discover button positions
         LobbyManager.createLobby(level);
-        
-        // Set default world settings for the simulation environment
-        net.minecraft.commands.CommandSourceStack source = event.getServer().createCommandSourceStack().withSuppressedOutput();
-        event.getServer().getCommands().performPrefixedCommand(source, "setworldspawn 8 -31 8 0");
-        event.getServer().getCommands().performPrefixedCommand(source, "gamerule doDaylightCycle false");
-        event.getServer().getCommands().performPrefixedCommand(source, "gamerule doWeatherCycle false");
+
+        // Set the world spawn to match the lobby spawn point (Y=−31, centre of the lobby).
+        // Using the type-safe API rather than a command string avoids locale/version fragility.
+        level.setRespawnData(LevelData.RespawnData.of(Level.OVERWORLD, new BlockPos(8, -31, 8), 0.0f, 0.0f));
+
+        // Disable time progression and weather changes so the simulation environment
+        // remains at constant lighting and weather. ADVANCE_TIME replaced doDaylightCycle
+        // and ADVANCE_WEATHER replaced doWeatherCycle in Minecraft 26.x.
+        GameRules rules = level.getGameRules();
+        rules.set(GameRules.ADVANCE_TIME, false, server);
+        rules.set(GameRules.ADVANCE_WEATHER, false, server);
     }
 }

@@ -2,52 +2,61 @@ package net.necookie.disastersim.world.building;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.necookie.disastersim.world.building.modules.CCS_Lab_Module;
-import net.necookie.disastersim.world.building.modules.LSPU_Facade_Module;
-import net.necookie.disastersim.world.building.modules.LSPU_Hallway_Module;
+import net.necookie.disastersim.world.building.modules.CcsLabModule;
+import net.necookie.disastersim.world.building.modules.LspuFacadeModule;
+import net.necookie.disastersim.world.building.modules.LspuHallwayModule;
 
 /**
- * Assembler class for the LSPU CCS (College of Computer Studies) Building Digital Twin.
- * Orchestrates multiple building modules to construct a cohesive multi-story structure.
+ * Assembler for the LSPU CCS (College of Computer Studies) building digital twin.
+ *
+ * <p>Orchestrates multiple {@link net.necookie.disastersim.api.building.BuildingComponent}
+ * modules — hallways, labs, and the exterior facade — into a cohesive multi-storey
+ * structure. Each module is responsible for its own internal geometry; this class
+ * is responsible only for positioning them relative to {@code startPos}.
+ *
+ * <p>Note: this constructor is not currently wired into the active simulation path.
+ * The live simulation uses the pre-built {@code lspulibrarymain} NBT structure instead.
  */
 public class CCSBuildingConstructor {
 
+    // Floor heights relative to startPos.Y
+    private static final int FLOOR_HEIGHT = 5; // blocks between floor levels (wall + slab)
+
+    // Lab X offset: labs branch off to the left of the hallway
+    private static final int LAB_X_OFFSET = -10;
+
+    // Z positions for the two second-floor labs along the hallway
+    private static final int LAB_1_Z = 0;
+    private static final int LAB_2_Z = 15;
+
+    // Facade is placed one block in front of the hallway (negative Z)
+    private static final int FACADE_Z_OFFSET = -1;
+
+    // Second facade section starts 5 blocks along X from the first
+    private static final int FACADE_2_X_OFFSET = 5;
+
     /**
      * Constructs the full CCS building at the specified starting position.
-     * 
-     * @param level The level in which to construct the building.
-     * @param startPos The base bottom-left corner of the building.
+     *
+     * @param level    The level in which to construct the building.
+     * @param startPos The base bottom-northwest corner of the building.
      */
     public void construct(Level level, BlockPos startPos) {
-        
-        // --- 1st Floor (Ground Floor) ---
-        // Basic Lobby/Hallway extending 30 blocks
-        LSPU_Hallway_Module groundFloorHall = new LSPU_Hallway_Module(30);
-        groundFloorHall.place(level, startPos);
 
-        // --- 2nd Floor ---
-        // Offset by 5 blocks upwards to account for wall height + ceiling
-        BlockPos secondFloorPos = startPos.above(5);
-        
-        // Central Hallway for the 2nd floor
-        LSPU_Hallway_Module secondFloorHall = new LSPU_Hallway_Module(30);
-        secondFloorHall.place(level, secondFloorPos);
+        // --- Ground floor ---
+        new LspuHallwayModule(30).place(level, startPos);
 
-        // Labs on the left side (offset -10 in X)
-        // Lab 1
-        CCS_Lab_Module lab1 = new CCS_Lab_Module();
-        lab1.place(level, secondFloorPos.offset(-10, 0, 0));
-        
-        // Lab 2 (further down the hall)
-        CCS_Lab_Module lab2 = new CCS_Lab_Module();
-        lab2.place(level, secondFloorPos.offset(-10, 0, 15));
+        // --- Second floor (offset one floor height upward) ---
+        BlockPos secondFloor = startPos.above(FLOOR_HEIGHT);
+        new LspuHallwayModule(30).place(level, secondFloor);
 
-        // --- Exterior Facade ---
-        // Places green/blue decorative walls along the side of the building
-        LSPU_Facade_Module facade = new LSPU_Facade_Module(30, 10);
-        
-        // Place facade on both sides of the entrance/hallway
-        facade.place(level, startPos.offset(0, 0, -1));
-        facade.place(level, startPos.offset(5, 0, -1)); 
+        // Labs on the left side of the second-floor hallway
+        new CcsLabModule().place(level, secondFloor.offset(LAB_X_OFFSET, 0, LAB_1_Z));
+        new CcsLabModule().place(level, secondFloor.offset(LAB_X_OFFSET, 0, LAB_2_Z));
+
+        // --- Exterior facade (placed along the front of the ground floor) ---
+        LspuFacadeModule facade = new LspuFacadeModule(30, 10);
+        facade.place(level, startPos.offset(0,               0, FACADE_Z_OFFSET));
+        facade.place(level, startPos.offset(FACADE_2_X_OFFSET, 0, FACADE_Z_OFFSET));
     }
 }
