@@ -7,6 +7,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import java.util.UUID;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
@@ -51,10 +52,13 @@ public class ModCommands {
                     return 0;
                 }));
 
-        // Command to stop the current simulation early
+        // Command to stop the calling player's simulation early
         dispatcher.register(Commands.literal("sim_stop")
                 .executes(context -> {
-                    SimulationManager.endSimulation();
+                    if (context.getSource().isPlayer()) {
+                        UUID uuid = context.getSource().getPlayer().getUUID();
+                        SimulationManager.endSimulation(uuid);
+                    }
                     context.getSource().sendSuccess(() -> Component.literal("Simulation stopped."), true);
                     return 1;
                 }));
