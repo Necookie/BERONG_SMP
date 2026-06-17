@@ -178,22 +178,21 @@ public class SimulationManager {
      * Returns the player to the lobby and resets the simulation area.
      */
     public static synchronized void endSimulation() {
-        if (activePlayer != null) {
-            // Reset client HUD
-            PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload("", 0));
+        ServerPlayer player = activePlayer; // capture before clearing
 
-            activePlayer.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-
-            // Return player to lobby
-            activePlayer.teleportTo((ServerLevel) activePlayer.level(), LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z, Collections.emptySet(), 0.0f, 0.0f, true);
-
-            // Clean up and restore the simulation structure
-            loadStructure((ServerLevel) activePlayer.level(), SIM_POS);
-        }
-
-        // Reset manager state
+        // Reset state first so the tick handler stops immediately
         currentState = SimulationState.IDLE;
         activePlayer = null;
         timer = 0;
+
+        if (player != null && player.isAlive()) {
+            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
+            player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
+
+            ServerLevel level = (ServerLevel) player.level();
+            player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
+                    Collections.emptySet(), 0.0f, 0.0f, true);
+            loadStructure(level, SIM_POS);
+        }
     }
 }

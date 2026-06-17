@@ -2,6 +2,7 @@ package net.necookie.disastersim.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,6 +42,7 @@ public class LobbyManager {
     // Sorted by ascending Z: lower Z = fire, higher Z = earthquake.
     private static BlockPos fireButtonPos = null;
     private static BlockPos quakeButtonPos = null;
+    private static boolean lobbyReady = false;
 
     public static void createLobby(ServerLevel level) {
         StructureTemplateManager manager = level.getStructureManager();
@@ -55,6 +57,7 @@ public class LobbyManager {
 
             template.placeInWorld(level, LOBBY_POS, LOBBY_POS, settings, level.getRandom(), 2);
             scanForButtons(level, LOBBY_POS, template.getSize());
+            lobbyReady = true;
             BerongSMP.LOGGER.info("BerongSMP Lobby loaded from NBT at {}", LOBBY_POS);
         } else {
             BerongSMP.LOGGER.error("Failed to load lobby structure: {}", LOBBY_STRUCTURE_ID);
@@ -100,6 +103,13 @@ public class LobbyManager {
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getLevel().isClientSide()) return;
+
+        if (!lobbyReady) {
+            ((ServerPlayer) event.getEntity()).sendSystemMessage(
+                Component.literal("The lobby is still loading, please wait a moment.")
+            );
+            return;
+        }
 
         BlockPos pos = event.getPos();
         ServerPlayer player = (ServerPlayer) event.getEntity();
