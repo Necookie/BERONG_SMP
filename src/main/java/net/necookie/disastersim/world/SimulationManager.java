@@ -15,6 +15,7 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -35,13 +36,13 @@ public class SimulationManager {
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
 
     /** Current state of the simulation. */
-    private static SimulationState currentState = SimulationState.IDLE;
+    private static volatile SimulationState currentState = SimulationState.IDLE;
 
     /** Remaining time in ticks for the current simulation. */
-    private static int timer = 0;
+    private static volatile int timer = 0;
 
     /** The player currently participating in the simulation. */
-    private static ServerPlayer activePlayer = null;
+    private static volatile ServerPlayer activePlayer = null;
 
     /** Random instance for procedural disaster effects. */
     private static final Random random = new Random();
@@ -60,7 +61,7 @@ public class SimulationManager {
      * * @param player The player to participate in the simulation.
      * @param state The type of simulation to start.
      */
-    public static void startSimulation(ServerPlayer player, SimulationState state) {
+    public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
         // Prevent starting multiple simulations at once
         if (currentState != SimulationState.IDLE) {
             player.sendSystemMessage(Component.literal("A simulation is already in progress!"));
@@ -111,8 +112,8 @@ public class SimulationManager {
      */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        // Only tick if a simulation is active
-        if (currentState == SimulationState.IDLE || activePlayer == null) return;
+        ServerPlayer player = activePlayer; // capture once to avoid null race
+        if (currentState == SimulationState.IDLE || player == null) return;
 
         timer--;
 
@@ -122,18 +123,20 @@ public class SimulationManager {
             return;
         }
 
+        ServerLevel level = (ServerLevel) player.level();
+
         // Trigger fire effects every second (20 ticks)
         if (currentState == SimulationState.FIRE && timer % 20 == 0) {
-            simulateFire((ServerLevel) activePlayer.level());
+            simulateFire(level);
         }
         // Trigger earthquake effects every half-second (10 ticks)
         else if (currentState == SimulationState.EARTHQUAKE && timer % 10 == 0) {
-            simulateEarthquake((ServerLevel) activePlayer.level());
+            simulateEarthquake(level);
         }
 
         // Send status updates to the client every 10 ticks
         if (timer % 10 == 0) {
-            PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload(currentState.name(), timer / 20));
+            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload(currentState.name(), timer / 20));
         }
     }
 
@@ -167,11 +170,18 @@ public class SimulationManager {
         }
     }
 
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (activePlayer != null && event.getEntity().getUUID().equals(activePlayer.getUUID())) {
+            endSimulation();
+        }
+    }
+
     /**
      * Ends the current simulation.
      * Returns the player to the lobby and resets the simulation area.
      */
-    private static void endSimulation() {
+    private static synchronized void endSimulation() {
         if (activePlayer != null) {
             // Reset client HUD
             PacketDistributor.sendToPlayer(activePlayer, new SimulationStatusPayload("", 0));
