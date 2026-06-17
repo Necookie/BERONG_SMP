@@ -81,22 +81,37 @@ public class LobbyManager {
      * @param level The overworld server level to place the lobby in.
      */
     public static void createLobby(ServerLevel level) {
+        // StructureTemplateManager loads .nbt files from
+        // src/main/resources/data/<modid>/structure/<name>.nbt at runtime.
         StructureTemplateManager manager = level.getStructureManager();
         Optional<StructureTemplate> templateOpt = manager.get(LOBBY_STRUCTURE_ID);
 
         if (templateOpt.isPresent()) {
             StructureTemplate template = templateOpt.get();
-            // Flags: 2 = UPDATE_CLIENTS | UPDATE_NOTIFY
+
+            // No mirroring or rotation — the lobby is designed to face its default direction.
+            // setIgnoreEntities(false) preserves any entities stored in the NBT
+            // (e.g., item frames, armour stands used as props).
             StructurePlaceSettings settings = new StructurePlaceSettings()
                     .setMirror(Mirror.NONE)
                     .setRotation(Rotation.NONE)
                     .setIgnoreEntities(false);
 
+            // Place the structure. The second argument (pivot) and third argument (pos)
+            // are both LOBBY_POS here — the pivot is used to apply rotation/mirror offset,
+            // which is irrelevant since we use NONE for both.
+            // Flag 2 = UPDATE_CLIENTS | UPDATE_NOTIFY: notifies neighbouring blocks and
+            // sends block change packets to connected players.
             template.placeInWorld(level, LOBBY_POS, LOBBY_POS, settings, level.getRandom(), 2);
+
+            // Scan the bounding box of the placed structure for ButtonBlock instances
+            // so we know which positions to listen for in onRightClickBlock.
             scanForButtons(level, LOBBY_POS, template.getSize());
             lobbyReady = true;
             BerongSMP.LOGGER.info("BerongSMP Lobby loaded from NBT at {}", LOBBY_POS);
         } else {
+            // This means the .nbt file is missing from the resources folder.
+            // Players won't see a lobby, and button clicks won't trigger simulations.
             BerongSMP.LOGGER.error("Failed to load lobby structure: {}", LOBBY_STRUCTURE_ID);
         }
     }
@@ -116,24 +131,37 @@ public class LobbyManager {
     private static void scanForButtons(ServerLevel level, BlockPos origin, Vec3i size) {
         List<BlockPos> buttons = new ArrayList<>();
 
+        // Walk every block position inside the structure's bounding box.
+        // size.getX/Y/Z() returns the total block count on each axis, not the max coordinate.
         for (int x = 0; x < size.getX(); x++) {
             for (int y = 0; y < size.getY(); y++) {
                 for (int z = 0; z < size.getZ(); z++) {
                     BlockPos pos = origin.offset(x, y, z);
+                    // ButtonBlock is the common superclass for all button types
+                    // (stone, oak, birch, etc.), so this catches any button variant.
                     if (level.getBlockState(pos).getBlock() instanceof ButtonBlock) {
+                        // pos.immutable() is important: BlockPos.offset() can return a
+                        // mutable MutableBlockPos that gets reused in the next iteration,
+                        // so we must snapshot it before storing.
                         buttons.add(pos.immutable());
                     }
                 }
             }
         }
 
-        // Sort ascending by Z so the button with the lower Z coordinate is the fire trigger.
+        // Sort buttons by their Z coordinate (ascending).
+        // Convention: the button physically closer to Z=0 (lower Z) is the fire trigger,
+        // and the one further along Z is the earthquake trigger.
+        // This relies on the lobby_structure NBT placing the fire button before the quake button
+        // along the Z axis — if the NBT is redesigned, update this sorting key accordingly.
         buttons.sort(Comparator.comparingInt(BlockPos::getZ));
 
         fireButtonPos  = buttons.size() >= 1 ? buttons.get(0) : null;
         quakeButtonPos = buttons.size() >= 2 ? buttons.get(1) : null;
 
         if (buttons.size() < 2) {
+            // Fewer than 2 buttons means the lobby NBT is missing button blocks.
+            // Simulations can still be started via /sim_fire and /sim_earthquake commands.
             BerongSMP.LOGGER.warn(
                     "Lobby button scan found only {} button(s); expected 2. "
                     + "Fire={}, Quake={}. Check the lobby_structure NBT.",
@@ -153,10 +181,18 @@ public class LobbyManager {
      */
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        // Filter to server-side ServerPlayer only — this event fires on both sides
+        // in some NeoForge versions; the isClientSide check is an extra safety guard.
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.level().isClientSide()) return;
 
         ServerLevel level = (ServerLevel) player.level();
+
+        // Every player that connects (fresh join or reconnect) is sent to the lobby
+        // spawn so they always start inside the lobby building, not at world origin.
+        // This does NOT conflict with SimulationManager's respawn redirect because
+        // PlayerLoggedInEvent fires on first connection, while PlayerRespawnEvent fires
+        // after the player clicks "Respawn" on the death screen — two distinct events.
         player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
     }
@@ -170,9 +206,12 @@ public class LobbyManager {
      */
     @SubscribeEvent
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        // This event fires on both sides; only run server-side logic here.
         if (event.getLevel().isClientSide()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
+        // If createLobby hasn't completed yet (e.g., server still starting), ignore
+        // the click to prevent starting a simulation against an incomplete structure.
         if (!lobbyReady) {
             player.sendSystemMessage(
                 Component.literal("The lobby is still loading, please wait a moment."));
@@ -182,13 +221,18 @@ public class LobbyManager {
         BlockPos pos = event.getPos();
 
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
+            // Player right-clicked the fire simulation button.
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.FIRE);
+            // Mark the event as SUCCESS and cancel it so the button doesn't also
+            // play its vanilla click animation (it has no functional meaning here).
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
+            // Player right-clicked the earthquake simulation button.
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
+        // Any other block right-clicked in the lobby passes through normally.
     }
 }

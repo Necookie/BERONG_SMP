@@ -49,21 +49,38 @@ public class SimulationStructureLoader {
      *         if the template could not be resolved (logged as an error).
      */
     public boolean placeStructure(ServerLevel level, BlockPos pos) {
+        // Retrieve the compiled NBT structure template from the level's structure
+        // manager, which scans data/<modid>/structure/ in the mod JAR and any
+        // datapack folders.  Returns empty if the file is missing or malformed.
         StructureTemplateManager manager = level.getStructureManager();
         Optional<StructureTemplate> templateOpt = manager.get(structureId);
 
         if (templateOpt.isEmpty()) {
+            // Log the error but don't crash — the simulation will still run, just
+            // without the correct building in place.
             BerongSMP.LOGGER.error("Failed to load structure: {}", structureId);
             return false;
         }
 
         StructureTemplate template = templateOpt.get();
+
+        // NONE mirror and rotation means the structure is placed exactly as it was
+        // saved in the NBT editor — no flipping or turning.
+        // setIgnoreEntities(false) keeps any entities (item frames, armour stands)
+        // that were saved as part of the NBT template.
         StructurePlaceSettings settings = new StructurePlaceSettings()
                 .setMirror(Mirror.NONE)
                 .setRotation(Rotation.NONE)
                 .setIgnoreEntities(false);
 
-        // Flags: 2 = UPDATE_CLIENTS | UPDATE_NOTIFY — notifies neighbours and syncs to clients.
+        // placeInWorld arguments:
+        //   level    — the world to place into
+        //   pos      — where to anchor the structure (bottom-northwest corner)
+        //   pos      — the pivot for rotation/mirror (same as pos since we use NONE)
+        //   settings — placement configuration (rotation, mirror, entity handling)
+        //   random   — used for random blocks like falling sand (not relevant here)
+        //   2        — block update flags: 1 = notify neighbours, 2 = send to clients
+        //              Combined flag 2 is UPDATE_CLIENTS which also notifies neighbours.
         template.placeInWorld(level, pos, pos, settings, level.getRandom(), 2);
         return true;
     }

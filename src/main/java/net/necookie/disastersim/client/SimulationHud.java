@@ -40,28 +40,33 @@ public class SimulationHud {
      * @param deltaTracker Tracker for frame delta time.
      */
     private static void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
-        // Only render if there is an active simulation status or time remaining
+        // When the simulation ends, SimulationStatusPayload sends status="" and timeLeft=0.
+        // Both conditions being true means no simulation is active, so we skip rendering.
         if (currentStatus.isEmpty() && timeLeft <= 0) return;
 
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
-        
-        // Prepare the display strings
-        String statusText = "SIMULATION STATUS: " + currentStatus;
-        String timerText = "TIME REMAINING: " + timeLeft + "s";
 
-        // Screen coordinates for the HUD element
+        // Build the two lines to display.  currentStatus contains the enum name
+        // ("FIRE" or "EARTHQUAKE"), set by SimulationStatusPayload.handle().
+        String statusText = "SIMULATION STATUS: " + currentStatus;
+        String timerText  = "TIME REMAINING: " + timeLeft + "s";
+
+        // Top-left corner of the HUD panel (10 pixels from each edge).
         int xPos = 10;
         int yPos = 10;
 
-        // Draw a semi-transparent black background box for readability
-        // fill(x1, y1, x2, y2, color)
+        // Draw a semi-transparent black rectangle behind the text for contrast.
+        // Colour format is ARGB: 0x80000000 = 50% opacity black.
+        // Dimensions: 162 px wide, 30 px tall — enough for two lines of default font text.
         guiGraphics.fill(xPos - 2, yPos - 2, xPos + 160, yPos + 28, 0x80000000);
-        
-        // Draw the status text in white
+
+        // First line: status name in white (0xFFFFFFFF = fully opaque white).
+        // The final 'true' enables drop shadow for readability over bright backgrounds.
         guiGraphics.text(font, statusText, xPos, yPos, 0xFFFFFFFF, true);
-        
-        // Draw the timer text in red to emphasize urgency
+
+        // Second line: timer in red (0xFFFF0000) to create visual urgency.
+        // Offset by 14 pixels down (approximate line height of the default Minecraft font).
         guiGraphics.text(font, timerText, xPos, yPos + 14, 0xFFFF0000, true);
     }
 }

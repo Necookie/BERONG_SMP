@@ -79,79 +79,132 @@ public class BerongSMP {
 
     /**
      * Constructor for BerongSMP. Registers registers and listeners to the mod event bus.
-     * 
-     * @param modEventBus The event bus for mod-specific events.
-     * @param modContainer The container for this mod.
+     *
+     * <p>NeoForge has two separate event buses:
+     * <ul>
+     *   <li>{@code modEventBus} — fires mod lifecycle events (setup, registration, client setup).
+     *       Only this mod's classes listen here.</li>
+     *   <li>{@code NeoForge.EVENT_BUS} — fires runtime game events (server start, player join,
+     *       block interact, ticks). Shared across all mods.</li>
+     * </ul>
+     *
+     * @param modEventBus The event bus for mod-specific lifecycle events.
+     * @param modContainer The container for this mod (holds config, extension points).
      */
     public BerongSMP(IEventBus modEventBus, ModContainer modContainer) {
-        // Register lifecycle events
+        // Wire up our common setup listener so it runs during FML's common setup phase,
+        // which fires after all registries are filled but before the server/client starts.
         modEventBus.addListener(this::commonSetup);
-        
-        // Register our DeferredRegisters
+
+        // DeferredRegisters batch-register objects (blocks, items, tabs) into the correct
+        // vanilla registries when NeoForge fires the matching RegistryEvent.
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
-        
-        // Register network payloads and client-side setup
+
+        // SimulationStatusPayload registers its own network channel via @SubscribeEvent
+        // on the mod bus — it must be registered here so NeoForge picks it up.
         modEventBus.register(net.necookie.disastersim.network.SimulationStatusPayload.class);
+
+        // BerongSMPClient is annotated @Mod(dist = CLIENT) so it only loads on the
+        // physical client, keeping server JARs free of client-only Minecraft classes.
         modEventBus.register(net.necookie.disastersim.BerongSMPClient.class);
+
+        // KeyMappings registers custom keybindings during the client setup phase.
         modEventBus.register(net.necookie.disastersim.client.KeyMappings.class);
 
-        // Register with the global NeoForge event bus
+        // Register 'this' on the global runtime bus so @SubscribeEvent methods in this
+        // class (e.g., onServerStarting) receive game events.
         NeoForge.EVENT_BUS.register(this);
+
+        // RegisterCommandsEvent fires on the runtime bus, so we attach it separately.
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
-        
-        // Add items to vanilla creative tabs
+
+        // BuildCreativeModeTabContentsEvent lets us inject items into vanilla creative tabs.
         modEventBus.addListener(this::addCreative);
-        
-        // Register mod configuration
+
+        // Load berongsmp-common.toml and bind it to our Config class.
+        // COMMON type means the file lives server-side; values sync to clients on join.
         modContainer.registerConfig(ModConfig.Type.COMMON, net.necookie.disastersim.Config.SPEC);
     }
 
     /**
-     * Registers custom commands when the server starts.
+     * Delegates command registration to {@link net.necookie.disastersim.command.ModCommands}.
+     * This fires before the server opens for connections, so all commands are available
+     * from the first tick.
+     *
+     * @param event Provides the Brigadier {@link com.mojang.brigadier.CommandDispatcher}
+     *              that maps command literals to execution logic.
      */
     private void onRegisterCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
         net.necookie.disastersim.command.ModCommands.register(event.getDispatcher());
     }
 
     /**
-     * Common setup logic that runs on both client and server.
+     * Common setup logic that runs on both the physical client and dedicated server.
+     * This phase is the right place for cross-side initialisation that doesn't depend
+     * on the world being loaded (e.g., capability registration, recipe unlocking).
+     * Currently a no-op; expand here if shared setup is needed in future.
+     *
+     * @param event The FML common setup event (enqueued, not immediate).
      */
     private void commonSetup(FMLCommonSetupEvent event) {
-        // Future common setup logic can be added here
+        // No cross-side setup required at this time.
     }
 
     /**
-     * Adds mod items to vanilla creative mode tabs.
+     * Injects mod items into vanilla creative mode tabs when NeoForge rebuilds
+     * the tab contents. The example block is added to the Building Blocks tab
+     * as a developer reference; production content should use the mod's own tab.
+     *
+     * @param event Provides the tab key and an output list to append items to.
      */
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        // Only inject into the vanilla Building Blocks tab
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(EXAMPLE_BLOCK_ITEM);
         }
     }
 
     /**
-     * Server-side initialization logic.
-     * Handles lobby creation and world settings.
+     * Server-side initialisation that runs once after the world is loaded but
+     * before any players can connect.
+     *
+     * <p>Steps performed:
+     * <ol>
+     *   <li>Place the lobby NBT structure and discover the two simulation buttons.</li>
+     *   <li>Pin the world respawn point to the lobby centre so that players who die
+     *       outside a simulation (no {@code pendingLobbyRespawn} entry) still land
+     *       inside the lobby rather than at world origin (0, 0, 0).</li>
+     *   <li>Freeze the sun and weather so the arena lighting is always consistent
+     *       regardless of how long a session has been running.</li>
+     * </ol>
+     *
+     * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
      */
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
 
         net.minecraft.server.MinecraftServer server = event.getServer();
+
+        // The overworld is the dimension that hosts both the lobby and the simulation arena.
         net.minecraft.server.level.ServerLevel level = server.overworld();
 
-        // Load the lobby from NBT and discover button positions
+        // Parse and place the lobby_structure NBT file, then scan it for ButtonBlock
+        // instances to determine which button triggers fire vs. earthquake.
         LobbyManager.createLobby(level);
 
-        // Set the world spawn to match the lobby spawn point (Y=−31, centre of the lobby).
-        // Using the type-safe API rather than a command string avoids locale/version fragility.
+        // setRespawnData pins the global world spawn.  This is the fallback respawn
+        // position used when a player has no bed or individual respawn anchor.
+        // BlockPos(8, -31, 8) is the centre of the lobby floor at lobby elevation.
+        // Using the type-safe API avoids locale or version fragility compared to
+        // running a /setworldspawn command string.
         level.setRespawnData(LevelData.RespawnData.of(Level.OVERWORLD, new BlockPos(8, -31, 8), 0.0f, 0.0f));
 
-        // Disable time progression and weather changes so the simulation environment
-        // remains at constant lighting and weather. ADVANCE_TIME replaced doDaylightCycle
-        // and ADVANCE_WEATHER replaced doWeatherCycle in Minecraft 26.x.
+        // ADVANCE_TIME (formerly doDaylightCycle) — stops the sun from moving.
+        // ADVANCE_WEATHER (formerly doWeatherCycle) — stops rain/thunder from starting.
+        // Both gamerules were renamed in Minecraft 1.21 / NeoForge 26.x.
         GameRules rules = level.getGameRules();
         rules.set(GameRules.ADVANCE_TIME, false, server);
         rules.set(GameRules.ADVANCE_WEATHER, false, server);

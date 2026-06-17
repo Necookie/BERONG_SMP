@@ -121,15 +121,27 @@ public class SimulationManager {
      */
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
         UUID uuid = player.getUUID();
+
+        // Prevent a player from starting a second session while one is already running.
+        // This can happen if they click the button twice quickly or via a command.
         if (activeSessions.containsKey(uuid)) {
             player.sendSystemMessage(Component.literal("You already have a simulation in progress!"));
             return;
         }
 
+        // Create and register the session.  SimulationSession initialises the timer
+        // from Config.SIM_DURATION_TICKS so it can be tuned without recompiling.
         activeSessions.put(uuid, new SimulationSession(player, state));
 
         ServerLevel level = (ServerLevel) player.level();
+
+        // (Re-)place the library NBT structure so that every session starts with a
+        // clean, undamaged building — regardless of damage from the previous run.
         STRUCTURE_LOADER.placeStructure(level, SIM_POS);
+
+        // Teleport the player just inside the front door of the structure.
+        // The offset puts them 5.5 blocks east and 5.5 blocks south of the structure
+        // origin (SIM_POS), landing them at ground level (Y + 2) inside the entrance.
         player.teleportTo(level,
                 SIM_POS.getX() + SIM_ENTRY_OFFSET_X,
                 SIM_POS.getY() + SIM_ENTRY_OFFSET_Y,
@@ -149,24 +161,34 @@ public class SimulationManager {
      * @param uuid The UUID of the player whose session should be terminated.
      */
     public static synchronized void endSimulation(UUID uuid) {
+        // Remove the session atomically.  If no session existed (e.g., called twice),
+        // bail out immediately — nothing to clean up.
         SimulationSession session = activeSessions.remove(uuid);
         if (session == null) return;
 
         ServerPlayer player = session.getPlayer();
+        // player should always be non-null because sessions hold a direct reference,
+        // but guard anyway to avoid NPEs during edge-case shutdown sequences.
         if (player == null) return;
 
-        // Always restore the arena, even if the player died or disconnected,
-        // so the structure is clean for the next participant.
+        // Re-place the library structure unconditionally so the arena is clean for
+        // the next player, even if this session ended via death or disconnect.
         ServerLevel level = (ServerLevel) player.level();
         STRUCTURE_LOADER.placeStructure(level, SIM_POS);
 
         if (player.isAlive()) {
+            // --- Normal end (timer expired or /sim_stop) ---
+            // Clear the HUD by sending an empty status with 0 seconds left.
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
+            // Teleport the player back to the lobby spawn point.
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                     Collections.emptySet(), 0.0f, 0.0f, true);
         } else {
-            // Player died mid-simulation; defer lobby teleport until they click Respawn.
+            // --- Death end ---
+            // The player is in the death screen right now; teleportTo would be ignored.
+            // Mark this UUID so that onPlayerRespawn can intercept the next respawn
+            // event and redirect them to the lobby instead of the world spawn.
             pendingLobbyRespawn.add(uuid);
         }
     }
@@ -182,17 +204,29 @@ public class SimulationManager {
      */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        // Snapshot the key set before iterating so that endSimulation (which removes
+        // entries from activeSessions) does not cause a ConcurrentModificationException.
         for (UUID uuid : new ArrayList<>(activeSessions.keySet())) {
             SimulationSession session = activeSessions.get(uuid);
+            // The session may have been removed by a concurrent endSimulation call
+            // (e.g., a logout event) between the snapshot and this iteration step.
             if (session == null) continue;
 
+            // Decrement the session's internal tick counter by 1.
             session.tick();
+
+            // If the timer hit zero, the simulation has run its full duration.
+            // End it and move on to the next session.
             if (session.isExpired()) {
                 endSimulation(uuid);
                 continue;
             }
 
             ServerPlayer player = session.getPlayer();
+            // Safety guard: if the player reference is gone or they are dead (the death
+            // event hasn't fired yet), end the session now so we don't waste ticks on
+            // a ghost session.  The dead-player case also triggers pendingLobbyRespawn
+            // inside endSimulation so the respawn redirect still works.
             if (player == null || !player.isAlive()) {
                 endSimulation(uuid);
                 continue;
@@ -201,6 +235,9 @@ public class SimulationManager {
             ServerLevel level = (ServerLevel) player.level();
             int ticks = session.getTimerTicks();
 
+            // Dispatch the correct disaster effect at its configured interval.
+            // 'ticks % interval == 0' fires once every N ticks — e.g., with the
+            // default FIRE_SPAWN_INTERVAL of 20, fire spawns once per second.
             if (session.getState() == SimulationState.FIRE
                     && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
                 EFFECTS.simulateFire(level);
@@ -209,13 +246,18 @@ public class SimulationManager {
                 EFFECTS.simulateEarthquake(level);
             }
 
+            // Vanilla fire spreading (FireBlock#tick) can move fire outside the
+            // simulation arena without triggering any hookable NeoForge event.
+            // Every 40 ticks (2 seconds) we scan the border region and remove
+            // any fire that escaped the structure's bounding box.
             if (session.getState() == SimulationState.FIRE && ticks % 40 == 0) {
                 EFFECTS.cleanupFireOutsideBounds(level);
             }
 
+            // Send an updated HUD packet at HUD_SYNC_INTERVAL_TICKS (every 10 ticks = 0.5s).
+            // Ceiling division converts ticks to whole seconds so the HUD timer
+            // shows "1" on the last tick rather than jumping straight to "0".
             if (ticks % HUD_SYNC_INTERVAL_TICKS == 0) {
-                // Ceiling division converts ticks to whole seconds so the display
-                // never shows 0 while time remains.
                 int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
                 PacketDistributor.sendToPlayer(player,
                         new SimulationStatusPayload(session.getState().name(), secondsLeft));
@@ -228,11 +270,23 @@ public class SimulationManager {
      */
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        // Filter: we only care about server-side players.
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+
+        // pendingLobbyRespawn.remove returns true only if the UUID was present.
+        // If this player didn't die during a simulation, the set won't contain their
+        // UUID and we fall through without interfering with a normal respawn.
         if (!pendingLobbyRespawn.remove(player.getUUID())) return;
+
+        // At this point the player has clicked "Respawn" and is alive again.
+        // Redirect them to the lobby instead of the world spawn.
         ServerLevel level = (ServerLevel) player.level();
+
+        // Clear the HUD (empty status, 0 seconds) so the simulation overlay disappears.
         PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
         player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
+
+        // Teleport to the lobby spawn point.
         player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
     }
@@ -244,7 +298,14 @@ public class SimulationManager {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID uuid = event.getEntity().getUUID();
+
+        // Remove from the pending-respawn set first.  If we called endSimulation first
+        // and the player was dead, endSimulation would add them to pendingLobbyRespawn —
+        // and then this remove would still work, but ordering is cleaner this way.
         pendingLobbyRespawn.remove(uuid);
+
+        // End (and clean up) the session if one exists.  Safe to call even if the
+        // player had no active session — endSimulation is a no-op in that case.
         endSimulation(uuid);
     }
 }

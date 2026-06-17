@@ -29,15 +29,23 @@ public class SimulationEffects {
      * @param level The server level containing the simulation arena.
      */
     public void simulateFire(ServerLevel level) {
-        int count      = Config.FIRE_SPAWN_COUNT.get();
-        int areaSize   = Config.SIM_AREA_SIZE.get();
-        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        int count      = Config.FIRE_SPAWN_COUNT.get();   // How many fire blocks to try placing this call
+        int areaSize   = Config.SIM_AREA_SIZE.get();      // X and Z range (e.g., 25 blocks)
+        int areaHeight = Config.SIM_AREA_HEIGHT.get();    // Y range above SIM_POS (e.g., 10 blocks)
 
         for (int i = 0; i < count; i++) {
+            // Pick a random position inside the simulation arena bounding box.
+            // nextInt(areaSize) returns 0..(areaSize-1), so fire stays within the box.
             BlockPos firePos = SimulationManager.SIM_POS.offset(
                     level.getRandom().nextInt(areaSize),
                     level.getRandom().nextInt(areaHeight),
                     level.getRandom().nextInt(areaSize));
+
+            // Only place fire if:
+            //   1. The target position is air (don't overwrite solid blocks).
+            //   2. The block directly below is NOT air (require a solid floor).
+            // Condition 2 prevents fire from appearing mid-air in open spaces outside
+            // the library walls, which would look wrong and spread uncontrollably.
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
@@ -53,16 +61,28 @@ public class SimulationEffects {
      * @param level The server level to clean up.
      */
     public void cleanupFireOutsideBounds(ServerLevel level) {
-        int size   = Config.SIM_AREA_SIZE.get();
-        int height = Config.SIM_AREA_HEIGHT.get();
-        int margin = 3;
+        int size   = Config.SIM_AREA_SIZE.get();   // Legitimate X/Z span of the arena
+        int height = Config.SIM_AREA_HEIGHT.get(); // Legitimate Y span of the arena
+        int margin = 3; // Extra blocks scanned beyond the arena edge to catch fire that spread out
 
+        // The triple loop walks every position in the arena + its surrounding margin.
+        // dx/dy/dz are offsets relative to SIM_POS, so the full scan covers:
+        //   X: SIM_POS.x - 3  ..  SIM_POS.x + size + 2
+        //   Y: SIM_POS.y - 3  ..  SIM_POS.y + height + 2
+        //   Z: SIM_POS.z - 3  ..  SIM_POS.z + size + 2
         for (int dx = -margin; dx < size + margin; dx++) {
             for (int dy = -margin; dy < height + margin; dy++) {
                 for (int dz = -margin; dz < size + margin; dz++) {
+
+                    // Skip positions that are INSIDE the legitimate arena bounds —
+                    // fire there is intentional and should not be removed.
+                    // A position is inside if all three offsets are in [0, size/height).
                     if (dx >= 0 && dx < size && dy >= 0 && dy < height && dz >= 0 && dz < size) {
                         continue;
                     }
+
+                    // For every position in the margin zone, check for rogue fire and
+                    // remove it.  removeBlock(pos, false) removes without dropping items.
                     BlockPos pos = SimulationManager.SIM_POS.offset(dx, dy, dz);
                     if (level.getBlockState(pos).getBlock() == Blocks.FIRE) {
                         level.removeBlock(pos, false);
@@ -83,15 +103,22 @@ public class SimulationEffects {
      * @param level The server level containing the simulation arena.
      */
     public void simulateEarthquake(ServerLevel level) {
-        int count      = Config.QUAKE_BREAK_COUNT.get();
+        int count      = Config.QUAKE_BREAK_COUNT.get();   // Blocks to destroy per call
         int areaSize   = Config.SIM_AREA_SIZE.get();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
 
         for (int i = 0; i < count; i++) {
+            // Pick a random block position inside the arena, same logic as simulateFire.
             BlockPos breakPos = SimulationManager.SIM_POS.offset(
                     level.getRandom().nextInt(areaSize),
                     level.getRandom().nextInt(areaHeight),
                     level.getRandom().nextInt(areaSize));
+
+            // Only break the block if:
+            //   1. It is not air (no point "breaking" empty space).
+            //   2. It is not bedrock (bedrock is indestructible; we use it as arena walls
+            //      or boundaries in some configurations and should never break it).
+            // destroyBlock(pos, false) removes the block without dropping any items.
             if (!level.getBlockState(breakPos).isAir()
                     && level.getBlockState(breakPos).getBlock() != Blocks.BEDROCK) {
                 level.destroyBlock(breakPos, false);
