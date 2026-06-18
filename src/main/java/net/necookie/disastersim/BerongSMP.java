@@ -65,7 +65,7 @@ public class BerongSMP {
 
     /** The Fire Extinguisher item registration. */
     public static final DeferredItem<net.necookie.disastersim.item.FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
-            net.necookie.disastersim.item.FireExtinguisherItem::new);
+            props -> new net.necookie.disastersim.item.FireExtinguisherItem(props.durability(300)));
 
     /** Custom Creative Mode Tab for BerongSMP items. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()

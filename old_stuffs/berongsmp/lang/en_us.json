@@ -1,0 +1,15 @@
+{
+  "itemGroup.berongsmp": "Example Mod Tab",
+  "block.berongsmp.example_block": "Example Block",
+  "item.berongsmp.example_item": "Example Item",
+  "item.berongsmp.fire_extinguisher": "Fire Extinguisher",
+  "berongsmp.main": "Berong SMP",
+
+  "berongsmp.configuration.title": "Berong SMP Configs",
+  "berongsmp.configuration.section.berongsmp.common.toml": "Berong SMP Configs",
+  "berongsmp.configuration.section.berongsmp.common.toml.title": "Berong SMP Configs",
+  "berongsmp.configuration.items": "Item List",
+  "berongsmp.configuration.logDirtBlock": "Log Dirt Block",
+  "berongsmp.configuration.magicNumberIntroduction": "Magic Number Text",
+  "berongsmp.configuration.magicNumber": "Magic Number"
+}

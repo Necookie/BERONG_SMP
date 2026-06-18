@@ -1,9 +1,12 @@
 package net.necookie.disastersim.item;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -12,71 +15,95 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.world.SimulationManager;
+import net.necookie.disastersim.world.SimulationSession;
 
-import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * A functional Fire Extinguisher tool.
- * When used, it sprays a dense cone of extinguishing foam that puts out fires
- * and unlights blocks like candles and campfires within a specific range.
- */
 public class FireExtinguisherItem extends Item {
-    /** The effective range of the spray in blocks. */
-    private static final double SPRAY_RANGE = 5.5D;
-    
-    /** The maximum duration the item can be held in use (effectively infinite). */
-    private static final int MAX_USE_TICKS = 72_000;
 
-    /**
-     * Constructor for the Fire Extinguisher.
-     * 
-     * @param properties The item properties.
-     */
+    private static final double SPRAY_RANGE = 5.5D;
+    private static final int MAX_USE_TICKS = 72_000;
+    private static final String TAG_PIN_PULLED = "pin_pulled";
+
     public FireExtinguisherItem(Properties properties) {
         super(properties);
     }
 
-    /**
-     * Triggered when the player right-clicks with the item.
-     * Starts the 'using' state for continuous spraying.
-     */
+    // -----------------------------------------------------------------------
+    // Pin helpers — stored via DataComponents.CUSTOM_DATA (1.21 NBT API)
+    // -----------------------------------------------------------------------
+
+    public static boolean isPinPulled(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+        if (data == null) return false;
+        return data.copyTag().getBoolean(TAG_PIN_PULLED).orElse(false);
+    }
+
+    public static void pullPin(ItemStack stack) {
+        CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        tag.putBoolean(TAG_PIN_PULLED, true);
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+    }
+
+    // -----------------------------------------------------------------------
+    // Use flow — gates on pin state
+    // -----------------------------------------------------------------------
+
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        ItemStack stack = player.getItemInHand(hand);
+
+        if (!isPinPulled(stack)) {
+            // Pull step — first right-click removes the safety pin.
+            if (!(level instanceof ServerLevel)) return InteractionResult.SUCCESS;
+            pullPin(stack);
+            level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                    SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.8F, 1.4F);
+            player.sendSystemMessage(Component.literal("§ePIN PULLED — ready to spray! Hold right-click to discharge."));
+            return InteractionResult.SUCCESS;
+        }
+
+        // Squeeze step — begin continuous spray.
         player.startUsingItem(hand);
         return InteractionResult.CONSUME;
     }
 
-    /**
-     * Logic executed every tick while the item is being used (right-click held).
-     * Handles spray calculation, sound effects, and fire extinguishing.
-     */
     @Override
     public void onUseTick(Level level, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (user instanceof Player player) {
-            // Play the extinguish sound every 6 ticks (approx. 3 times per second) for a looping effect
-            boolean playSound = remainingUseTicks % 6 == 0;
-            
-            if (level instanceof ServerLevel serverLevel) {
-                // Server-side: Handle fire extinguishing and multi-player particle sync
-                sprayServer(serverLevel, player, playSound);
-                
-                // Log usage once when the spray starts
-                if (remainingUseTicks == MAX_USE_TICKS) {
-                    logUsage(player);
-                }
-            } else {
-                // Client-side: Handle local smooth particle feedback and local sounds
-                sprayClient(level, player, playSound);
+        if (!(user instanceof Player player)) return;
+
+        // Safety net: abort if pin was somehow never pulled.
+        if (!isPinPulled(stack)) {
+            user.stopUsingItem();
+            return;
+        }
+
+        boolean sputtering = stack.getDamageValue() >= stack.getMaxDamage() - 60;
+
+        // During sputtering, skip every other tick to simulate dying pressure.
+        if (sputtering && remainingUseTicks % 2 != 0) return;
+
+        boolean playSound = remainingUseTicks % 6 == 0;
+
+        if (level instanceof ServerLevel serverLevel) {
+            sprayServer(serverLevel, player, stack, playSound, sputtering);
+
+            if (remainingUseTicks == MAX_USE_TICKS) {
+                BerongSMP.LOGGER.info("{} started using the fire extinguisher at {}",
+                        player.getName().getString(), player.blockPosition());
             }
+        } else {
+            sprayClient(level, player, playSound, sputtering);
         }
     }
 
@@ -87,67 +114,18 @@ public class FireExtinguisherItem extends Item {
 
     @Override
     public ItemUseAnimation getUseAnimation(ItemStack stack) {
-        // No vanilla animation (like eating or bow drawing)
         return ItemUseAnimation.NONE;
     }
 
-    /**
-     * Server-side spray logic.
-     * Calculates the spray cone, extinguishes fires, and sends particles to all nearby players.
-     * 
-     * @param level The server level.
-     * @param user The player using the extinguisher.
-     * @param playSound Whether to play the sound effect this tick.
-     */
-    private void sprayServer(ServerLevel level, Player user, boolean playSound) {
-        // --- Vector Math for Spray Cone ---
-        // 1. Get the direction the player is looking
-        Vec3 lookDirection = user.getViewVector(1.0F).normalize();
-        
-        // 2. Determine the starting point (slightly in front of eyes)
-        Vec3 origin = user.getEyePosition().add(lookDirection.scale(0.75D));
-        
-        // 3. Calculate orthogonal vectors to define the width and height of the cone
-        Vec3 sideways = lookDirection.cross(new Vec3(0.0D, 1.0D, 0.0D));
-        if (sideways.lengthSqr() < 1.0E-4D) {
-            sideways = new Vec3(1.0D, 0.0D, 0.0D); // Edge case for looking straight up/down
-        } else {
-            sideways = sideways.normalize();
-        }
-        Vec3 upwards = sideways.cross(lookDirection).normalize();
+    // -----------------------------------------------------------------------
+    // Server spray
+    // -----------------------------------------------------------------------
 
-        // 4. Sample points along the cone and extinguish fires
-        for (int i = 1; i <= 7; i++) {
-            double distance = i * (SPRAY_RANGE / 7.0D);
-            Vec3 centerPoint = origin.add(lookDirection.scale(distance));
-            
-            // Extinguish at the center, left, right, top, and bottom of the cone cross-section
-            extinguishAt(level, BlockPos.containing(centerPoint));
-            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(0.35D))));
-            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(-0.35D))));
-            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(0.25D))));
-            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(-0.2D))));
-        }
-
-        // 5. Sync spray particles to all clients in range
-        spawnSprayParticlesServer(level, origin, lookDirection, sideways, upwards);
-
-        // 6. Play the sound globally
-        if (playSound) {
-            level.playSound(null, user.getX(), user.getY(), user.getZ(), 
-                    SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, 
-                    0.9F + level.getRandom().nextFloat() * 0.2F);
-        }
-    }
-
-    /**
-     * Client-side spray logic.
-     * Handles local-only visual feedback for the player using the extinguisher.
-     */
-    private void sprayClient(Level level, Player user, boolean playSound) {
+    private void sprayServer(ServerLevel level, Player user, ItemStack stack,
+                             boolean playSound, boolean sputtering) {
         Vec3 lookDirection = user.getViewVector(1.0F).normalize();
         Vec3 origin = user.getEyePosition().add(lookDirection.scale(0.75D));
-        
+
         Vec3 sideways = lookDirection.cross(new Vec3(0.0D, 1.0D, 0.0D));
         if (sideways.lengthSqr() < 1.0E-4D) {
             sideways = new Vec3(1.0D, 0.0D, 0.0D);
@@ -156,88 +134,148 @@ public class FireExtinguisherItem extends Item {
         }
         Vec3 upwards = sideways.cross(lookDirection).normalize();
 
-        // Spawn high-frequency local particles for smoothness
-        spawnSprayParticlesClient(level, origin, lookDirection);
+        for (int i = 1; i <= 7; i++) {
+            double distance = i * (SPRAY_RANGE / 7.0D);
+            Vec3 centerPoint = origin.add(lookDirection.scale(distance));
 
-        // Play local-only sound for the user
+            extinguishAt(level, BlockPos.containing(centerPoint), user);
+            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(0.35D))), user);
+            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(-0.35D))), user);
+            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(0.25D))), user);
+            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(-0.2D))), user);
+        }
+
+        spawnSprayParticlesServer(level, origin, lookDirection, sideways, upwards, sputtering);
+
         if (playSound) {
-            level.playLocalSound(user.getX(), user.getY(), user.getZ(), 
-                    SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, 
-                    0.9F + level.getRandom().nextFloat() * 0.2F, false);
+            float pitch = sputtering
+                    ? 1.2F + level.getRandom().nextFloat() * 0.3F
+                    : 0.9F + level.getRandom().nextFloat() * 0.2F;
+            level.playSound(null, user.getX(), user.getY(), user.getZ(),
+                    SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, pitch);
+        }
+
+        // Drain one charge per active tick. Item breaks naturally at max damage.
+        int newDamage = stack.getDamageValue() + 1;
+        if (newDamage >= stack.getMaxDamage()) {
+            stack.shrink(1);
+        } else {
+            stack.setDamageValue(newDamage);
         }
     }
 
-    /**
-     * Logic to extinguish fire or unlight a block at a specific position.
-     * 
-     * @param level The server level.
-     * @param pos The block position to check.
-     */
-    private void extinguishAt(ServerLevel level, BlockPos pos) {
-        BlockState state = level.getBlockState(pos);
+    // -----------------------------------------------------------------------
+    // Client spray
+    // -----------------------------------------------------------------------
 
-        // Handle Fire and Soul Fire blocks
+    private void sprayClient(Level level, Player user, boolean playSound, boolean sputtering) {
+        Vec3 lookDirection = user.getViewVector(1.0F).normalize();
+        Vec3 origin = user.getEyePosition().add(lookDirection.scale(0.75D));
+
+        spawnSprayParticlesClient(level, origin, lookDirection, sputtering);
+
+        if (playSound) {
+            float pitch = sputtering
+                    ? 1.2F + level.getRandom().nextFloat() * 0.3F
+                    : 0.9F + level.getRandom().nextFloat() * 0.2F;
+            level.playLocalSound(user.getX(), user.getY(), user.getZ(),
+                    SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, pitch, false);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Extinguish logic — records to simulation session if active
+    // -----------------------------------------------------------------------
+
+    private void extinguishAt(ServerLevel level, BlockPos pos, Player user) {
+        BlockState state = level.getBlockState(pos);
+        boolean extinguished = false;
+
         if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
             level.destroyBlock(pos, false);
-            level.levelEvent(null, 1009, pos, 0); // Play fire extinguish event (particles + sound)
-            return;
-        }
-
-        // Handle blocks with the 'LIT' property (Candles, Campfires, etc.)
-        if (state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT)) {
+            level.levelEvent(null, 1009, pos, 0);
+            extinguished = true;
+        } else if (state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT)) {
             level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 3);
             level.levelEvent(null, 1009, pos, 0);
+            extinguished = true;
+        }
+
+        if (extinguished && user instanceof ServerPlayer) {
+            SimulationSession session = SimulationManager.getSession(user.getUUID());
+            if (session != null && session.getState() == SimulationManager.SimulationState.FIRE) {
+                session.recordExtinguish(1);
+            }
         }
     }
 
-    /**
-     * Spawns networked particles for the spray.
-     * Uses Cloud, Poof, and Smoke particles to simulate dense foam.
-     */
-    private void spawnSprayParticlesServer(ServerLevel level, Vec3 origin, Vec3 direction, Vec3 sideways, Vec3 upwards) {
+    // -----------------------------------------------------------------------
+    // Particles
+    // -----------------------------------------------------------------------
+
+    private void spawnSprayParticlesServer(ServerLevel level, Vec3 origin, Vec3 direction,
+                                           Vec3 sideways, Vec3 upwards, boolean sputtering) {
         Vec3 center = origin.add(direction.scale(0.5D));
-        
-        // Dense Cloud particles form the main body of the foam
-        level.sendParticles(ParticleTypes.CLOUD, center.x, center.y, center.z, 24, 
-                Math.abs(sideways.x) * 0.22D + 0.08D, Math.abs(upwards.y) * 0.16D + 0.08D, Math.abs(sideways.z) * 0.22D + 0.08D, 0.05D);
-        
-        // Poof particles add "fluffiness" to the spray
-        level.sendParticles(ParticleTypes.POOF, center.x + direction.x * 0.3D, center.y + direction.y * 0.3D, center.z + direction.z * 0.3D, 12, 0.16D, 0.16D, 0.16D, 0.03D);
-        
-        // Minimal Smoke particles for a lingering effect
-        level.sendParticles(ParticleTypes.SMOKE, center.x + direction.x * 0.4D, center.y + direction.y * 0.4D, center.z + direction.z * 0.4D, 5, 0.12D, 0.08D, 0.12D, 0.01D);
+        int cloudCount = sputtering ? 10 : 24;
+        int poofCount  = sputtering ? 5  : 12;
+        int smokeCount = sputtering ? 2  : 5;
+
+        level.sendParticles(ParticleTypes.CLOUD, center.x, center.y, center.z, cloudCount,
+                Math.abs(sideways.x) * 0.22D + 0.08D,
+                Math.abs(upwards.y) * 0.16D + 0.08D,
+                Math.abs(sideways.z) * 0.22D + 0.08D, 0.05D);
+
+        level.sendParticles(ParticleTypes.POOF,
+                center.x + direction.x * 0.3D,
+                center.y + direction.y * 0.3D,
+                center.z + direction.z * 0.3D,
+                poofCount, 0.16D, 0.16D, 0.16D, 0.03D);
+
+        level.sendParticles(ParticleTypes.SMOKE,
+                center.x + direction.x * 0.4D,
+                center.y + direction.y * 0.4D,
+                center.z + direction.z * 0.4D,
+                smokeCount, 0.12D, 0.08D, 0.12D, 0.01D);
     }
 
-    /**
-     * Spawns local-only particles for the player using the tool.
-     * Provides immediate visual feedback without waiting for server sync.
-     */
-    private void spawnSprayParticlesClient(Level level, Vec3 origin, Vec3 direction) {
+    private void spawnSprayParticlesClient(Level level, Vec3 origin, Vec3 direction, boolean sputtering) {
         Vec3 center = origin.add(direction.scale(0.5D));
-        for (int i = 0; i < 12; i++) {
-            level.addParticle(ParticleTypes.CLOUD, 
-                    center.x + (level.getRandom().nextDouble() - 0.5) * 0.3, 
-                    center.y + (level.getRandom().nextDouble() - 0.5) * 0.3, 
-                    center.z + (level.getRandom().nextDouble() - 0.5) * 0.3, 
-                    direction.x * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05, 
-                    direction.y * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05, 
+        int count = sputtering ? 5 : 12;
+        for (int i = 0; i < count; i++) {
+            level.addParticle(ParticleTypes.CLOUD,
+                    center.x + (level.getRandom().nextDouble() - 0.5) * 0.3,
+                    center.y + (level.getRandom().nextDouble() - 0.5) * 0.3,
+                    center.z + (level.getRandom().nextDouble() - 0.5) * 0.3,
+                    direction.x * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05,
+                    direction.y * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05,
                     direction.z * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05);
         }
     }
 
-    /**
-     * Logs the usage of the fire extinguisher for administrative/debugging purposes.
-     */
-    private void logUsage(Player user) {
-        BerongSMP.LOGGER.info("{} started using the fire extinguisher at {}", user.getName().getString(), user.blockPosition());
-    }
+    // -----------------------------------------------------------------------
+    // Tooltip
+    // -----------------------------------------------------------------------
 
-    /**
-     * Adds instructional text to the item's tooltip.
-     */
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<net.minecraft.network.chat.Component> tooltip, TooltipFlag flag) {
-        tooltip.accept(Component.literal("§7Hold right click to spray a dense extinguishing foam cone."));
-        tooltip.accept(Component.literal("§7Puts out fire, soul fire, candles, and campfires in front of you."));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context,
+                                net.minecraft.world.item.component.TooltipDisplay display,
+                                Consumer<Component> tooltip, TooltipFlag flag) {
+        if (!isPinPulled(stack)) {
+            tooltip.accept(Component.literal("§c[PIN IN] Right-click to pull the pin first."));
+        } else {
+            tooltip.accept(Component.literal("§a[PIN PULLED] Hold right-click to spray."));
+        }
+
+        int maxDmg = stack.getMaxDamage();
+        if (maxDmg > 0) {
+            int charge = (int) ((1.0 - (double) stack.getDamageValue() / maxDmg) * 100);
+            if (charge < 20) {
+                tooltip.accept(Component.literal("§cAlmost empty! Charge: " + charge + "%"));
+            } else {
+                tooltip.accept(Component.literal("§7Charge: " + charge + "%"));
+            }
+        }
+
+        tooltip.accept(Component.literal("§7Puts out fire, soul fire, candles, and campfires."));
     }
 }

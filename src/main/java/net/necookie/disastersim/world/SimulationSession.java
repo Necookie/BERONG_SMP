@@ -17,6 +17,8 @@ public class SimulationSession {
     private final ServerPlayer player;
     /** Remaining simulation time in server ticks. Decremented once per tick via {@link #tick()}. */
     private int timerTicks;
+    /** Total fire/soul-fire blocks extinguished by the player during this session. */
+    private int firesExtinguished;
 
     /**
      * Creates a new session for the given player and disaster type.
@@ -78,5 +80,15 @@ public class SimulationSession {
      */
     public int getTimerTicks() {
         return timerTicks;
+    }
+
+    /** Increments the fires-extinguished counter by {@code count}. */
+    public void recordExtinguish(int count) {
+        firesExtinguished += count;
+    }
+
+    /** Returns the total number of fire blocks extinguished during this session. */
+    public int getFiresExtinguished() {
+        return firesExtinguished;
     }
 }

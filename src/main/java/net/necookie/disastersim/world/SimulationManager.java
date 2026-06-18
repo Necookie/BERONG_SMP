@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.network.SimulationStatusPayload;
@@ -147,6 +148,15 @@ public class SimulationManager {
                 SIM_POS.getY() + SIM_ENTRY_OFFSET_Y,
                 SIM_POS.getZ() + SIM_ENTRY_OFFSET_Z,
                 Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+
+        // For FIRE simulations, hand the player a pinned fire extinguisher in hotbar slot 0.
+        // Pin is intentionally NOT pulled — they must right-click once to pull it (the P in PASS).
+        if (state == SimulationState.FIRE) {
+            ItemStack extinguisher = new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get());
+            player.getInventory().setItem(0, extinguisher);
+            player.sendSystemMessage(Component.literal("§eYou have been given a Fire Extinguisher in slot 1. Remember: Pull the pin first before spraying! (PASS)"));
+        }
+
         player.sendSystemMessage(Component.literal("Starting " + state.name() + " Simulation!"));
     }
 
@@ -178,10 +188,19 @@ public class SimulationManager {
 
         if (player.isAlive()) {
             // --- Normal end (timer expired or /sim_stop) ---
-            // Clear the HUD by sending an empty status with 0 seconds left.
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-            // Teleport the player back to the lobby spawn point.
+
+            // Send PASS score report for FIRE simulations.
+            if (session.getState() == SimulationState.FIRE) {
+                int fires = session.getFiresExtinguished();
+                int score = Math.min(100, fires * 2);
+                player.sendSystemMessage(Component.literal("§6--- Fire Drill Results ---"));
+                player.sendSystemMessage(Component.literal("§eFires extinguished: " + fires));
+                player.sendSystemMessage(Component.literal("§aScore: " + score + " / 100"));
+                player.sendSystemMessage(Component.literal("§7Tip: Remember PASS — Pull, Aim at the base, Squeeze, Sweep side to side."));
+            }
+
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                     Collections.emptySet(), 0.0f, 0.0f, true);
         } else {
@@ -191,6 +210,20 @@ public class SimulationManager {
             // event and redirect them to the lobby instead of the world spawn.
             pendingLobbyRespawn.add(uuid);
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // Session query
+    // -----------------------------------------------------------------------
+
+    /**
+     * Returns the active {@link SimulationSession} for the given player UUID, or
+     * {@code null} if no session is currently running for that player.
+     * Used by {@code FireExtinguisherItem} to record extinguishes without coupling
+     * to session internals directly.
+     */
+    public static SimulationSession getSession(java.util.UUID uuid) {
+        return activeSessions.get(uuid);
     }
 
     // -----------------------------------------------------------------------
