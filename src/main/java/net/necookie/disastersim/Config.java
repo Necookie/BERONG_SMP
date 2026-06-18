@@ -125,15 +125,15 @@ public class Config {
             .comment("Ticks for the RUMBLE phase (pre-quake low-intensity shaking). Default: 200 = 10s.")
             .defineInRange("quakeRumbleDuration", 200, 20, 2400);
 
-    /** Ticks for the PEAK phase (maximum-intensity structural collapse). 600 ticks = 30 s. */
+    /** Ticks for the PEAK phase (maximum-intensity structural collapse). 900 ticks = 45 s. */
     public static final ModConfigSpec.IntValue QUAKE_PEAK_DURATION = BUILDER
-            .comment("Ticks for the PEAK phase (maximum-intensity block destruction). Default: 600 = 30s.")
-            .defineInRange("quakePeakDuration", 600, 20, 2400);
+            .comment("Ticks for the PEAK phase (maximum-intensity block destruction). Default: 900 = 45s.")
+            .defineInRange("quakePeakDuration", 900, 20, 2400);
 
-    /** Ticks for the AFTERSHOCK phase (reduced-intensity sporadic destruction). 200 ticks = 10 s. */
+    /** Ticks per aftershock wave (2–4 waves follow the main quake). 300 ticks = 15 s each. */
     public static final ModConfigSpec.IntValue QUAKE_AFTERSHOCK_DURATION = BUILDER
-            .comment("Ticks for the AFTERSHOCK phase (reduced-intensity sporadic destruction). Default: 200 = 10s.")
-            .defineInRange("quakeAftershockDuration", 200, 20, 2400);
+            .comment("Ticks per aftershock wave (2–4 waves follow the main quake). Default: 300 = 15s each.")
+            .defineInRange("quakeAftershockDuration", 300, 20, 2400);
 
     // -----------------------------------------------------------------------
     // Internal

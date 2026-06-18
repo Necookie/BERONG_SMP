@@ -172,8 +172,9 @@ public class SimulationEffects {
     }
 
     private void doRumble(ServerLevel level, SimulationSession session) {
-        int count  = Config.QUAKE_BREAK_COUNT.get();
-        int radius = Math.max(5, (int) (session.getSessionMagnitude() * 3));
+        double mag = session.getSessionMagnitude();
+        int count  = Math.max(1, (int) Math.ceil(Config.QUAKE_BREAK_COUNT.get() * mag / 5.0));
+        int radius = Math.max(5, (int) (mag * 3));
         BlockPos epicenter = session.getEpicenter();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
         for (int i = 0; i < count; i++) {
@@ -217,9 +218,9 @@ public class SimulationEffects {
     }
 
     private void doAftershock(ServerLevel level, SimulationSession session) {
-        // Half the normal break count at the same area, mimicking reduced residual shaking.
-        int count  = Math.max(1, Config.QUAKE_BREAK_COUNT.get() / 2);
-        int radius = Math.max(3, (int) (session.getSessionMagnitude() * 2));
+        double mag = session.getSessionMagnitude() * session.getAftershockMagnitudeScale();
+        int count  = Math.max(1, (int) Math.ceil(Config.QUAKE_BREAK_COUNT.get() * mag / 5.0));
+        int radius = Math.max(3, (int) (mag * 2.5));
         BlockPos epicenter = session.getEpicenter();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
         for (int i = 0; i < count; i++) {

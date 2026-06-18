@@ -44,21 +44,28 @@ Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.st
   → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
   → teleports player inside library structure
   → (FIRE only) gives fire extinguisher in hotbar slot 0
-  → (EARTHQUAKE only) session.initEarthquake(random, magnitude) picks random epicenter within the arena
+  → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
+      → epicenter fixed 3–9 blocks from SIM_POS in XZ so destruction concentrates inside the structure
+      → aftershockCount initialised to 2–4 (random) for multi-wave aftershock support
       → button press uses random strong magnitude (6.0–9.5); command uses config default or explicit arg
       → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
   → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval; cleanupFireOutsideBounds every 40 ticks
-  → (EARTHQUAKE) session.tickQuakePhase() advances RUMBLE→PEAK→AFTERSHOCK→END state machine
+  → (EARTHQUAKE) session.tickQuakePhase(level.getRandom()) advances RUMBLE→PEAK→AFTERSHOCK(×2–4)→END
+      → phase transitions send chat messages: "intensifying!" / "Aftershock!" / "shaking has stopped"
+      → AFTERSHOCK re-enters itself aftershockCount times; each wave gets a random scale (0.2–0.55×
+        normal; 25% chance of stronger 0.6–1.1× wave) before finally reaching END
       → at quakeInterval: SimulationEffects.simulateEarthquake(level, session) — phase dispatch:
-          RUMBLE: random block destruction within magnitude*3 radius of epicenter
+          RUMBLE: breakOrDebris count = ceil(baseCount × magnitude / 5) within magnitude×3 radius
           PEAK: enqueuePeakDestructions — scans for unsupported (air below) blocks sorted
                 closest-first; adds batch to pendingDestructions queue
-          AFTERSHOCK: random block destruction at half count, smaller radius
+          AFTERSHOCK: breakOrDebris count = ceil(baseCount × effectiveMag / 5); effectiveMag =
+                      sessionMagnitude × aftershockMagnitudeScale; radius = effectiveMag × 2.5
       → all three phases use breakOrDebris(): wood/glass blocks spawn FallingBlockEntity
         (visible, gravity-driven, deals 2×fallBlocks fall damage up to 40, then discards);
         non-debris blocks vanish instantly via destroyBlock. DEBRIS_BLOCKS is a static Set for O(1) lookup.
+        Debris count scales with effective magnitude so stronger quakes produce more falling blocks.
       → every tick: drainEarthquakePending — breaks 2 blocks from cascade queue (PEAK only)
       → every 20 ticks: clearFireInArena — removes vanilla fire that spreads during block destruction
   → sends SimulationStatusPayload HUD sync every 10 ticks
@@ -76,8 +83,8 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 |---|---|
 | `BerongSMP` | Mod entry point, item/block registration, server startup init |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
-| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude |
-| `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK → END`; drives block-destruction rate and HUD intensity |
+| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale |
+| `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
 | `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
@@ -120,8 +127,8 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakeMagnitude` | 5.0 | Epicenter intensity (0.1–10.0); also scales destruction radius |
 | `quakeDecayRate` | 0.05 | Intensity falloff per block of distance from epicenter |
 | `quakeRumbleDuration` | 200 | Ticks in RUMBLE phase (10 s) |
-| `quakePeakDuration` | 600 | Ticks in PEAK phase (30 s) |
-| `quakeAftershockDuration` | 200 | Ticks in AFTERSHOCK phase (10 s) |
+| `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
+| `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
 
 ### Thread Safety
 

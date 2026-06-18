@@ -281,8 +281,19 @@ public class SimulationManager {
                     && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
                 EFFECTS.simulateFire(level);
             } else if (session.getState() == SimulationState.EARTHQUAKE) {
-                // Advance the phase state machine every tick.
-                session.tickQuakePhase();
+                // Advance the phase state machine every tick and notify on transitions.
+                SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
+                session.tickQuakePhase(level.getRandom());
+                SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
+                if (phaseBefore != phaseAfter) {
+                    if (phaseAfter == SimulationSession.EarthquakePhase.PEAK) {
+                        player.sendSystemMessage(Component.literal("§c⚠ Earthquake is intensifying!"));
+                    } else if (phaseAfter == SimulationSession.EarthquakePhase.AFTERSHOCK) {
+                        player.sendSystemMessage(Component.literal("§e⚠ Aftershock!"));
+                    } else if (phaseAfter == SimulationSession.EarthquakePhase.END) {
+                        player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
+                    }
+                }
                 // Periodic effect (fills cascade queue or breaks blocks directly).
                 if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
                     EFFECTS.simulateEarthquake(level, session);

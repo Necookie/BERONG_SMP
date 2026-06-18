@@ -38,6 +38,10 @@ public class SimulationSession {
     private final ArrayDeque<BlockPos> pendingDestructions = new ArrayDeque<>();
     /** Per-session magnitude (0.1–10.0); set at session start and optionally changed live. */
     private double sessionMagnitude;
+    /** Remaining aftershocks after the initial AFTERSHOCK phase. */
+    private int aftershockCount;
+    /** Magnitude scale for the current aftershock relative to sessionMagnitude. */
+    private double aftershockMagnitudeScale = 1.0;
 
     /**
      * Creates a new session for the given player and disaster type.
@@ -117,14 +121,17 @@ public class SimulationSession {
 
     /** Initialises epicenter, phase state, and magnitude for an EARTHQUAKE session. Called once by SimulationManager after session creation. */
     public void initEarthquake(RandomSource random, double magnitude) {
-        int areaSize = Config.SIM_AREA_SIZE.get();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        // Epicenter fixed inside the library interior (3–9 blocks from SIM_POS in XZ)
+        // so destruction concentrates inside the structure, not scattered across the arena.
         this.epicenter = SimulationManager.SIM_POS.offset(
-                random.nextInt(areaSize),
-                random.nextInt(Math.max(1, areaHeight / 2)),
-                random.nextInt(areaSize));
-        this.sessionMagnitude = magnitude;
-        this.quakePhase = EarthquakePhase.RUMBLE;
+                3 + random.nextInt(7),
+                random.nextInt(Math.max(1, areaHeight / 3)),
+                3 + random.nextInt(7));
+        this.sessionMagnitude        = magnitude;
+        this.aftershockCount         = 2 + random.nextInt(3); // 2–4 aftershocks
+        this.aftershockMagnitudeScale = 1.0;
+        this.quakePhase     = EarthquakePhase.RUMBLE;
         this.quakePhaseTimer = 0;
     }
 
@@ -133,7 +140,7 @@ public class SimulationSession {
      * Transitions RUMBLE → PEAK → AFTERSHOCK → END based on configured durations.
      * Must be called each tick from SimulationManager for EARTHQUAKE sessions.
      */
-    public void tickQuakePhase() {
+    public void tickQuakePhase(RandomSource random) {
         if (quakePhase == null || quakePhase == EarthquakePhase.END) return;
         quakePhaseTimer++;
         int duration = switch (quakePhase) {
@@ -145,10 +152,20 @@ public class SimulationSession {
         if (quakePhaseTimer >= duration) {
             quakePhaseTimer = 0;
             quakePhase = switch (quakePhase) {
-                case RUMBLE     -> EarthquakePhase.PEAK;
-                case PEAK       -> { pendingDestructions.clear(); yield EarthquakePhase.AFTERSHOCK; }
-                case AFTERSHOCK -> EarthquakePhase.END;
-                default         -> EarthquakePhase.END;
+                case RUMBLE -> EarthquakePhase.PEAK;
+                case PEAK   -> { pendingDestructions.clear(); yield EarthquakePhase.AFTERSHOCK; }
+                case AFTERSHOCK -> {
+                    if (aftershockCount > 0) {
+                        aftershockCount--;
+                        // 25% chance of a stronger aftershock (0.6–1.1×), otherwise weaker (0.2–0.55×)
+                        aftershockMagnitudeScale = (random.nextFloat() < 0.25f)
+                                ? 0.6 + random.nextFloat() * 0.5
+                                : 0.2 + random.nextFloat() * 0.35;
+                        yield EarthquakePhase.AFTERSHOCK;
+                    }
+                    yield EarthquakePhase.END;
+                }
+                default -> EarthquakePhase.END;
             };
         }
     }
@@ -182,6 +199,9 @@ public class SimulationSession {
 
     /** Returns the per-session magnitude used for intensity and radius calculations. */
     public double getSessionMagnitude() { return sessionMagnitude; }
+
+    /** Returns the magnitude scale for the current aftershock phase (relative to sessionMagnitude). */
+    public double getAftershockMagnitudeScale() { return aftershockMagnitudeScale; }
 
     /** Updates the per-session magnitude live; takes effect on the next tick. */
     public void setSessionMagnitude(double magnitude) { this.sessionMagnitude = magnitude; }
