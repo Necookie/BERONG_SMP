@@ -56,6 +56,9 @@ SimulationManager.onServerTick (every tick):
           PEAK: enqueuePeakDestructions — scans for unsupported (air below) blocks sorted
                 closest-first; adds batch to pendingDestructions queue
           AFTERSHOCK: random block destruction at half count, smaller radius
+      → all three phases use breakOrDebris(): wood/glass blocks spawn FallingBlockEntity
+        (visible, gravity-driven, deals 2×fallBlocks fall damage up to 40, then discards);
+        non-debris blocks vanish instantly via destroyBlock. DEBRIS_BLOCKS is a static Set for O(1) lookup.
       → every tick: drainEarthquakePending — breaks 2 blocks from cascade queue (PEAK only)
       → every 20 ticks: clearFireInArena — removes vanilla fire that spreads during block destruction
   → sends SimulationStatusPayload HUD sync every 10 ticks
@@ -75,7 +78,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK → END`; drives block-destruction rate and HUD intensity |
-| `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain) |
+| `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
@@ -116,9 +119,9 @@ All values are read at call time via `.get()` — changes take effect without re
 | `simAreaHeight` | 10 | Y arena height for random effects |
 | `quakeMagnitude` | 5.0 | Epicenter intensity (0.1–10.0); also scales destruction radius |
 | `quakeDecayRate` | 0.05 | Intensity falloff per block of distance from epicenter |
-| `quakeRumbleDuration` | 100 | Ticks in RUMBLE phase (5 s) |
-| `quakePeakDuration` | 200 | Ticks in PEAK phase (10 s) |
-| `quakeAftershockDuration` | 100 | Ticks in AFTERSHOCK phase (5 s) |
+| `quakeRumbleDuration` | 200 | Ticks in RUMBLE phase (10 s) |
+| `quakePeakDuration` | 600 | Ticks in PEAK phase (30 s) |
+| `quakeAftershockDuration` | 200 | Ticks in AFTERSHOCK phase (10 s) |
 
 ### Thread Safety
 

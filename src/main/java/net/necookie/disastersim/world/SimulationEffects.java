@@ -2,12 +2,16 @@ package net.necookie.disastersim.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.Config;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Applies the per-tick world effects for each disaster type.
@@ -21,6 +25,24 @@ import java.util.List;
  * <p>All methods must be called on the server thread.
  */
 public class SimulationEffects {
+
+    /**
+     * Blocks that become visible falling entities (and deal fall damage) when broken by the earthquake.
+     * Uses Set.of for O(1) membership test — extend this list to add more debris types.
+     */
+    private static final Set<Block> DEBRIS_BLOCKS = Set.of(
+        Blocks.OAK_PLANKS,  Blocks.OAK_SLAB,  Blocks.OAK_STAIRS,
+        Blocks.OAK_FENCE,   Blocks.OAK_FENCE_GATE, Blocks.OAK_TRAPDOOR,
+        Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_SLAB, Blocks.SPRUCE_STAIRS,
+        Blocks.SPRUCE_FENCE,  Blocks.SPRUCE_FENCE_GATE, Blocks.SPRUCE_TRAPDOOR,
+        Blocks.BIRCH_PLANKS, Blocks.BIRCH_SLAB, Blocks.BIRCH_STAIRS,
+        Blocks.DARK_OAK_PLANKS, Blocks.DARK_OAK_SLAB, Blocks.DARK_OAK_STAIRS,
+        Blocks.DARK_OAK_FENCE, Blocks.DARK_OAK_FENCE_GATE,
+        Blocks.JUNGLE_PLANKS, Blocks.ACACIA_PLANKS, Blocks.MANGROVE_PLANKS, Blocks.CHERRY_PLANKS,
+        Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.DARK_OAK_LOG,
+        Blocks.BOOKSHELF, Blocks.CHISELED_BOOKSHELF,
+        Blocks.GLASS, Blocks.GLASS_PANE
+    );
 
     /**
      * Places a small cluster of fire blocks at random air positions within the
@@ -126,14 +148,28 @@ public class SimulationEffects {
         int toBreak = Math.min(2, queue.size());
         for (int i = 0; i < toBreak; i++) {
             BlockPos pos = queue.poll();
-            if (pos != null && !level.getBlockState(pos).isAir()
-                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
-                level.destroyBlock(pos, false);
-            }
+            if (pos != null) breakOrDebris(level, pos);
         }
     }
 
     // --- Phase helpers ---
+
+    /**
+     * Breaks one block. Debris-eligible blocks (wood, glass) become a FallingBlockEntity
+     * that is visible, falls with gravity, and deals fall damage on landing.
+     * Other blocks vanish instantly. Bedrock and air are skipped.
+     */
+    private void breakOrDebris(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir() || state.getBlock() == Blocks.BEDROCK) return;
+        if (DEBRIS_BLOCKS.contains(state.getBlock())) {
+            FallingBlockEntity debris = FallingBlockEntity.fall(level, pos, state);
+            debris.setHurtsEntities(2.0f, 40);
+            debris.disableDrop();
+        } else {
+            level.destroyBlock(pos, false);
+        }
+    }
 
     private void doRumble(ServerLevel level, SimulationSession session) {
         int count  = Config.QUAKE_BREAK_COUNT.get();
@@ -144,11 +180,7 @@ public class SimulationEffects {
             int dx = level.getRandom().nextInt(radius * 2 + 1) - radius;
             int dy = level.getRandom().nextInt(areaHeight);
             int dz = level.getRandom().nextInt(radius * 2 + 1) - radius;
-            BlockPos pos = epicenter.offset(dx, dy, dz);
-            if (!level.getBlockState(pos).isAir()
-                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
-                level.destroyBlock(pos, false);
-            }
+            breakOrDebris(level, epicenter.offset(dx, dy, dz));
         }
     }
 
@@ -194,11 +226,7 @@ public class SimulationEffects {
             int dx = level.getRandom().nextInt(radius * 2 + 1) - radius;
             int dy = level.getRandom().nextInt(areaHeight);
             int dz = level.getRandom().nextInt(radius * 2 + 1) - radius;
-            BlockPos pos = epicenter.offset(dx, dy, dz);
-            if (!level.getBlockState(pos).isAir()
-                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
-                level.destroyBlock(pos, false);
-            }
+            breakOrDebris(level, epicenter.offset(dx, dy, dz));
         }
     }
 
