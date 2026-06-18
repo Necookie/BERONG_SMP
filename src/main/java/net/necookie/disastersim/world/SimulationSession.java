@@ -36,6 +36,8 @@ public class SimulationSession {
     private int quakePhaseTimer;
     /** Pending block positions queued for cascading destruction during the PEAK phase. */
     private final ArrayDeque<BlockPos> pendingDestructions = new ArrayDeque<>();
+    /** Per-session magnitude (0.1–10.0); set at session start and optionally changed live. */
+    private double sessionMagnitude;
 
     /**
      * Creates a new session for the given player and disaster type.
@@ -113,14 +115,15 @@ public class SimulationSession {
     // Earthquake lifecycle
     // -----------------------------------------------------------------------
 
-    /** Initialises epicenter and phase state for an EARTHQUAKE session. Called once by SimulationManager after session creation. */
-    public void initEarthquake(RandomSource random) {
+    /** Initialises epicenter, phase state, and magnitude for an EARTHQUAKE session. Called once by SimulationManager after session creation. */
+    public void initEarthquake(RandomSource random, double magnitude) {
         int areaSize = Config.SIM_AREA_SIZE.get();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
         this.epicenter = SimulationManager.SIM_POS.offset(
                 random.nextInt(areaSize),
                 random.nextInt(Math.max(1, areaHeight / 2)),
                 random.nextInt(areaSize));
+        this.sessionMagnitude = magnitude;
         this.quakePhase = EarthquakePhase.RUMBLE;
         this.quakePhaseTimer = 0;
     }
@@ -156,7 +159,7 @@ public class SimulationSession {
      */
     public double computeIntensityAt(BlockPos pos) {
         if (epicenter == null || quakePhase == null || quakePhase == EarthquakePhase.END) return 0.0;
-        double magnitude  = Config.QUAKE_MAGNITUDE.get();
+        double magnitude  = sessionMagnitude;
         double decayRate  = Config.QUAKE_DECAY_RATE.get();
         double distance   = Math.sqrt(epicenter.distSqr(pos));
         double phaseScale = switch (quakePhase) {
@@ -176,4 +179,10 @@ public class SimulationSession {
 
     /** Returns the pending-destructions deque used for cascade block-breaking during PEAK. */
     public ArrayDeque<BlockPos> getPendingDestructions() { return pendingDestructions; }
+
+    /** Returns the per-session magnitude used for intensity and radius calculations. */
+    public double getSessionMagnitude() { return sessionMagnitude; }
+
+    /** Updates the per-session magnitude live; takes effect on the next tick. */
+    public void setSessionMagnitude(double magnitude) { this.sessionMagnitude = magnitude; }
 }

@@ -137,7 +137,7 @@ public class SimulationEffects {
 
     private void doRumble(ServerLevel level, SimulationSession session) {
         int count  = Config.QUAKE_BREAK_COUNT.get();
-        int radius = Math.max(5, (int) (Config.QUAKE_MAGNITUDE.get() * 3));
+        int radius = Math.max(5, (int) (session.getSessionMagnitude() * 3));
         BlockPos epicenter = session.getEpicenter();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
         for (int i = 0; i < count; i++) {
@@ -160,7 +160,7 @@ public class SimulationEffects {
         if (queue.size() >= batchMax) return; // queue already full, let the drain catch up
 
         BlockPos epicenter = session.getEpicenter();
-        int radius     = (int) Math.min(Config.SIM_AREA_SIZE.get() / 2.0, Config.QUAKE_MAGNITUDE.get() * 4);
+        int radius     = (int) Math.min(Config.SIM_AREA_SIZE.get() / 2.0, session.getSessionMagnitude() * 4);
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
 
         List<BlockPos> candidates = new ArrayList<>();
@@ -187,7 +187,7 @@ public class SimulationEffects {
     private void doAftershock(ServerLevel level, SimulationSession session) {
         // Half the normal break count at the same area, mimicking reduced residual shaking.
         int count  = Math.max(1, Config.QUAKE_BREAK_COUNT.get() / 2);
-        int radius = Math.max(3, (int) (Config.QUAKE_MAGNITUDE.get() * 2));
+        int radius = Math.max(3, (int) (session.getSessionMagnitude() * 2));
         BlockPos epicenter = session.getEpicenter();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
         for (int i = 0; i < count; i++) {
@@ -198,6 +198,27 @@ public class SimulationEffects {
             if (!level.getBlockState(pos).isAir()
                     && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
                 level.destroyBlock(pos, false);
+            }
+        }
+    }
+
+    /**
+     * Removes all fire blocks within (and just outside) the simulation arena.
+     * Called each tick during EARTHQUAKE sessions to suppress vanilla fire spreading
+     * that can occur when blocks are broken near campfires or other ignition sources.
+     */
+    public void clearFireInArena(ServerLevel level) {
+        int size   = Config.SIM_AREA_SIZE.get();
+        int height = Config.SIM_AREA_HEIGHT.get();
+        int margin = 3;
+        for (int dx = -margin; dx < size + margin; dx++) {
+            for (int dy = -margin; dy < height + margin; dy++) {
+                for (int dz = -margin; dz < size + margin; dz++) {
+                    BlockPos pos = SimulationManager.SIM_POS.offset(dx, dy, dz);
+                    if (level.getBlockState(pos).getBlock() == Blocks.FIRE) {
+                        level.removeBlock(pos, false);
+                    }
+                }
             }
         }
     }

@@ -117,56 +117,56 @@ public class SimulationManager {
     // -----------------------------------------------------------------------
 
     /**
-     * Starts a new simulation for the given player.
-     * If the player already has an active session, a message is sent and no new
-     * session is created.
-     *
-     * <p>Thread safety: {@code synchronized} to guard against concurrent calls
-     * from button-press and other server-thread events.
-     *
-     * @param player The player triggering the simulation.
-     * @param state  The type of disaster to simulate.
+     * Convenience overload that starts a simulation using the config-default magnitude.
+     * Use the two-argument overload to pass an explicit magnitude (e.g., from button or command).
      */
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
+        startSimulation(player, state, Config.QUAKE_MAGNITUDE.get());
+    }
+
+    /**
+     * Starts a new simulation for the given player with an explicit earthquake magnitude.
+     * For FIRE sessions the magnitude parameter is ignored.
+     * If the player already has an active session, a message is sent and no new session is created.
+     *
+     * @param player    The player triggering the simulation.
+     * @param state     The type of disaster to simulate.
+     * @param magnitude Earthquake magnitude (0.1–10.0); only used for EARTHQUAKE sessions.
+     */
+    public static synchronized void startSimulation(ServerPlayer player, SimulationState state, double magnitude) {
         UUID uuid = player.getUUID();
 
-        // Prevent a player from starting a second session while one is already running.
-        // This can happen if they click the button twice quickly or via a command.
         if (activeSessions.containsKey(uuid)) {
             player.sendSystemMessage(Component.literal("You already have a simulation in progress!"));
             return;
         }
 
-        // Create and register the session.
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
 
         ServerLevel level = (ServerLevel) player.level();
         if (state == SimulationState.EARTHQUAKE) {
-            session.initEarthquake(level.getRandom());
+            session.initEarthquake(level.getRandom(), magnitude);
         }
 
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
-        // Teleport the player just inside the front door of the structure.
-        // The offset puts them 5.5 blocks east and 5.5 blocks south of the structure
-        // origin (SIM_POS), landing them at ground level (Y + 2) inside the entrance.
         player.teleportTo(level,
                 SIM_POS.getX() + SIM_ENTRY_OFFSET_X,
                 SIM_POS.getY() + SIM_ENTRY_OFFSET_Y,
                 SIM_POS.getZ() + SIM_ENTRY_OFFSET_Z,
                 Collections.emptySet(), player.getYRot(), player.getXRot(), true);
 
-        // For FIRE simulations, hand the player a pinned fire extinguisher in hotbar slot 0.
-        // Pin is intentionally NOT pulled — they must right-click once to pull it (the P in PASS).
         if (state == SimulationState.FIRE) {
             ItemStack extinguisher = new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get());
             player.getInventory().setItem(0, extinguisher);
             player.sendSystemMessage(Component.literal("§eYou have been given a Fire Extinguisher in slot 1. Remember: Pull the pin first before spraying! (PASS)"));
+            player.sendSystemMessage(Component.literal("§6Starting FIRE Simulation!"));
+        } else if (state == SimulationState.EARTHQUAKE) {
+            player.sendSystemMessage(Component.literal(
+                    String.format("§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!", magnitude)));
         }
-
-        player.sendSystemMessage(Component.literal("Starting " + state.name() + " Simulation!"));
     }
 
     /**
@@ -289,6 +289,10 @@ public class SimulationManager {
                 }
                 // Drain cascade queue every tick for gradual PEAK-phase collapse.
                 EFFECTS.drainEarthquakePending(level, session);
+                // Suppress vanilla fire spreading triggered by block destruction.
+                if (ticks % 20 == 0) {
+                    EFFECTS.clearFireInArena(level);
+                }
             }
 
             // Vanilla fire spreading (FireBlock#tick) can move fire outside the

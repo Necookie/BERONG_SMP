@@ -1,6 +1,7 @@
 package net.necookie.disastersim.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -9,7 +10,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.Config;
 import net.necookie.disastersim.world.SimulationManager;
+import net.necookie.disastersim.world.SimulationSession;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
 
 /**
@@ -48,17 +51,50 @@ public class ModCommands {
                     return 0; // Return 0 if not run by a player (e.g., console)
                 }));
 
-        // /sim_earthquake — Same as /sim_fire but starts the EARTHQUAKE simulation instead.
+        // /sim_earthquake [magnitude] — Starts the EARTHQUAKE simulation.
+        // Omitting magnitude uses the config default; supplying it (0.1–10.0) overrides it.
         dispatcher.register(Commands.literal("sim_earthquake")
                 .executes(context -> {
-                    if (context.getSource().isPlayer()) {
-                        SimulationManager.startSimulation(
-                                context.getSource().getPlayer(),
-                                SimulationManager.SimulationState.EARTHQUAKE);
-                        return 1;
-                    }
-                    return 0;
-                }));
+                    if (!context.getSource().isPlayer()) return 0;
+                    SimulationManager.startSimulation(
+                            context.getSource().getPlayer(),
+                            SimulationManager.SimulationState.EARTHQUAKE);
+                    return 1;
+                })
+                .then(Commands.argument("magnitude", DoubleArgumentType.doubleArg(0.1, 10.0))
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            double mag = DoubleArgumentType.getDouble(context, "magnitude");
+                            SimulationManager.startSimulation(
+                                    context.getSource().getPlayer(),
+                                    SimulationManager.SimulationState.EARTHQUAKE,
+                                    mag);
+                            return 1;
+                        })));
+
+        // /sim_magnitude <value> — Changes the magnitude of the caller's active earthquake session live.
+        // Restricted to game masters so players cannot exploit it to trivialise the simulation.
+        dispatcher.register(Commands.literal("sim_magnitude")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .then(Commands.argument("value", DoubleArgumentType.doubleArg(0.1, 10.0))
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            ServerPlayer player = context.getSource().getPlayer();
+                            SimulationSession session = SimulationManager.getSession(player.getUUID());
+                            if (session == null
+                                    || session.getState() != SimulationManager.SimulationState.EARTHQUAKE) {
+                                context.getSource().sendFailure(
+                                        Component.literal("No active earthquake simulation to adjust."));
+                                return 0;
+                            }
+                            double val = DoubleArgumentType.getDouble(context, "value");
+                            session.setSessionMagnitude(val);
+                            context.getSource().sendSuccess(
+                                    () -> Component.literal(String.format(
+                                            "§eMagnitude updated to %.1f — takes effect next tick.", val)),
+                                    true);
+                            return 1;
+                        })));
 
         // /sim_stop — Ends the calling player's active simulation early.
         // Works the same as the timer expiring naturally: restores the structure,

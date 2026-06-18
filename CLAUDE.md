@@ -44,7 +44,9 @@ Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.st
   → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
   → teleports player inside library structure
   → (FIRE only) gives fire extinguisher in hotbar slot 0
-  → (EARTHQUAKE only) session.initEarthquake() picks random epicenter within the arena
+  → (EARTHQUAKE only) session.initEarthquake(random, magnitude) picks random epicenter within the arena
+      → button press uses random strong magnitude (6.0–9.5); command uses config default or explicit arg
+      → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
   → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval; cleanupFireOutsideBounds every 40 ticks
@@ -55,6 +57,7 @@ SimulationManager.onServerTick (every tick):
                 closest-first; adds batch to pendingDestructions queue
           AFTERSHOCK: random block destruction at half count, smaller radius
       → every tick: drainEarthquakePending — breaks 2 blocks from cascade queue (PEAK only)
+      → every 20 ticks: clearFireInArena — removes vanilla fire that spreads during block destruction
   → sends SimulationStatusPayload HUD sync every 10 ticks
       → includes per-player intensity = magnitude * exp(-decayRate * distance) * phaseScale
       → client SimulationHud.onCameraAngles applies sinusoidal rumble + random jitter scaled by intensity
@@ -70,7 +73,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 |---|---|
 | `BerongSMP` | Mod entry point, item/block registration, server startup init |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
-| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue |
+| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK → END`; drives block-destruction rate and HUD intensity |
 | `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
@@ -80,7 +83,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `SimulationHud` | Client-side HUD renderer; also drives camera shake via `ViewportEvent.ComputeCameraAngles` using `intensity` |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
-| `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake`, `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
+| `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
 
 ### World Coordinates

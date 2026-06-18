@@ -228,8 +228,9 @@ public class LobbyManager {
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
-            // Player right-clicked the earthquake simulation button.
-            SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE);
+            // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
+            double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;
+            SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE, magnitude);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
