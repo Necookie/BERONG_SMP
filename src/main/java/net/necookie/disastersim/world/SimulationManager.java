@@ -17,6 +17,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -48,12 +49,11 @@ public class SimulationManager {
     // Constants
     // -----------------------------------------------------------------------
 
-    /** Namespaced path of the LSPU Library NBT structure template. */
-    private static final Identifier STRUCTURE_ID =
-            Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain");
-
-    /** World origin of the simulation arena (bottom-northwest corner of the structure). */
+    /** World origin of the simulation arena (bottom-northwest corner of the LSPU Library). */
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
+
+    /** World origin of the SSC building placed alongside the simulation arena. */
+    private static final BlockPos SSC_POS = new BlockPos(11, -33, 90);
 
     /**
      * How often the HUD sync packet is sent to the client (in ticks).
@@ -87,9 +87,16 @@ public class SimulationManager {
      */
     private static final Set<UUID> pendingLobbyRespawn = ConcurrentHashMap.newKeySet();
 
-    /** Loads and places the LSPU Library structure when a simulation starts or ends. */
-    private static final SimulationStructureLoader STRUCTURE_LOADER =
-            new SimulationStructureLoader(STRUCTURE_ID);
+    /**
+     * All buildings that are placed/restored together each simulation session.
+     * Each entry pairs a loader with the world position it targets.
+     */
+    private static final List<Map.Entry<StructurePlacer, BlockPos>> BUILDINGS = List.of(
+            Map.entry(new SimulationStructureLoader(
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain")), SIM_POS),
+            Map.entry(new SchemLoader(
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS)
+    );
 
     /** Applies per-tick fire and earthquake world effects. */
     private static final SimulationEffects EFFECTS = new SimulationEffects();
@@ -136,9 +143,8 @@ public class SimulationManager {
 
         ServerLevel level = (ServerLevel) player.level();
 
-        // (Re-)place the library NBT structure so that every session starts with a
-        // clean, undamaged building — regardless of damage from the previous run.
-        STRUCTURE_LOADER.placeStructure(level, SIM_POS);
+        // Place all buildings so every session starts with clean, undamaged structures.
+        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
         // Teleport the player just inside the front door of the structure.
         // The offset puts them 5.5 blocks east and 5.5 blocks south of the structure
@@ -181,10 +187,9 @@ public class SimulationManager {
         // but guard anyway to avoid NPEs during edge-case shutdown sequences.
         if (player == null) return;
 
-        // Re-place the library structure unconditionally so the arena is clean for
-        // the next player, even if this session ended via death or disconnect.
+        // Restore all buildings so the arena is clean for the next player.
         ServerLevel level = (ServerLevel) player.level();
-        STRUCTURE_LOADER.placeStructure(level, SIM_POS);
+        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
         if (player.isAlive()) {
             // --- Normal end (timer expired or /sim_stop) ---

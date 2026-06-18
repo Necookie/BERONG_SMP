@@ -41,8 +41,8 @@ NeoForge uses two separate event buses — a core pattern throughout this codeba
 ```
 Player logs in → LobbyManager.onPlayerLogin → teleport to lobby
 Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.startSimulation
-  → places LSPU Library NBT structure
-  → teleports player inside structure
+  → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
+  → teleports player inside library structure
   → (FIRE only) gives fire extinguisher in hotbar slot 0
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
@@ -50,7 +50,7 @@ SimulationManager.onServerTick (every tick):
   → cleanupFireOutsideBounds every 40 ticks (FIRE only)
   → sends SimulationStatusPayload HUD sync every 10 ticks
 Session expires / player dies / /sim_stop → SimulationManager.endSimulation
-  → restores structure via SimulationStructureLoader
+  → restores all buildings via BUILDINGS list
   → teleports alive player to lobby OR marks UUID in pendingLobbyRespawn (dead player)
 Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if pending
 ```
@@ -64,7 +64,9 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count |
 | `SimulationEffects` | Stateless world mutation: fire placement, earthquake block destruction, fire cleanup |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
-| `SimulationStructureLoader` | Wraps `StructureTemplateManager` to place the LSPU Library NBT on session start/end |
+| `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
+| `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
+| `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), and places blocks |
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`) for HUD sync |
 | `SimulationHud` | Client-side HUD renderer reading `currentStatus` / `timeLeft` static fields |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
@@ -75,12 +77,16 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 
 - **Lobby**: origin `BlockPos(0, -33, 0)`, player spawn at `(8.8, -31, 8)`
 - **Simulation arena**: `SIM_POS = BlockPos(30, -34, 83)`, player entry offset `+5.5, +2, +5.5`
+- **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
 
-### NBT Structures
+### Structures
 
 Stored under `src/main/resources/data/berongsmp/structure/`:
-- `lobby_structure.nbt` — the lobby building with two buttons
-- `lspulibrarymain.nbt` — the simulation arena placed/restored each session
+- `lobby_structure.nbt` — lobby building with two buttons (NBT, placed once at server start)
+- `lspulibrarymain.nbt` — simulation arena (NBT, placed/restored each session)
+- `ssc_building.schem` — SSC building adjacent to the arena (Sponge Schematic v3, placed/restored each session with 1 CCW rotation)
+
+`SimulationManager.BUILDINGS` holds the full list of `StructurePlacer`+`BlockPos` pairs iterated on session start and end.
 
 ### Config Knobs (`berongsmp-common.toml`)
 

@@ -21,7 +21,7 @@ import java.util.Optional;
  *
  * <p>Thread safety: all methods must be called on the server thread.
  */
-public class SimulationStructureLoader {
+public class SimulationStructureLoader implements StructurePlacer {
 
     private final Identifier structureId;
 
@@ -48,7 +48,8 @@ public class SimulationStructureLoader {
      * @return {@code true} if the structure was found and placed, {@code false}
      *         if the template could not be resolved (logged as an error).
      */
-    public boolean placeStructure(ServerLevel level, BlockPos pos) {
+    @Override
+    public boolean place(ServerLevel level, BlockPos pos) {
         // Retrieve the compiled NBT structure template from the level's structure
         // manager, which scans data/<modid>/structure/ in the mod JAR and any
         // datapack folders.  Returns empty if the file is missing or malformed.
