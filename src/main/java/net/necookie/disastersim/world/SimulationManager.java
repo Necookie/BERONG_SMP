@@ -137,11 +137,14 @@ public class SimulationManager {
             return;
         }
 
-        // Create and register the session.  SimulationSession initialises the timer
-        // from Config.SIM_DURATION_TICKS so it can be tuned without recompiling.
-        activeSessions.put(uuid, new SimulationSession(player, state));
+        // Create and register the session.
+        SimulationSession session = new SimulationSession(player, state);
+        activeSessions.put(uuid, session);
 
         ServerLevel level = (ServerLevel) player.level();
+        if (state == SimulationState.EARTHQUAKE) {
+            session.initEarthquake(level.getRandom());
+        }
 
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
@@ -193,7 +196,7 @@ public class SimulationManager {
 
         if (player.isAlive()) {
             // --- Normal end (timer expired or /sim_stop) ---
-            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
+            PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
 
             // Send PASS score report for FIRE simulations.
@@ -274,14 +277,18 @@ public class SimulationManager {
             int ticks = session.getTimerTicks();
 
             // Dispatch the correct disaster effect at its configured interval.
-            // 'ticks % interval == 0' fires once every N ticks — e.g., with the
-            // default FIRE_SPAWN_INTERVAL of 20, fire spawns once per second.
             if (session.getState() == SimulationState.FIRE
                     && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
                 EFFECTS.simulateFire(level);
-            } else if (session.getState() == SimulationState.EARTHQUAKE
-                    && ticks % Config.QUAKE_INTERVAL.get() == 0) {
-                EFFECTS.simulateEarthquake(level);
+            } else if (session.getState() == SimulationState.EARTHQUAKE) {
+                // Advance the phase state machine every tick.
+                session.tickQuakePhase();
+                // Periodic effect (fills cascade queue or breaks blocks directly).
+                if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
+                    EFFECTS.simulateEarthquake(level, session);
+                }
+                // Drain cascade queue every tick for gradual PEAK-phase collapse.
+                EFFECTS.drainEarthquakePending(level, session);
             }
 
             // Vanilla fire spreading (FireBlock#tick) can move fire outside the
@@ -297,8 +304,11 @@ public class SimulationManager {
             // shows "1" on the last tick rather than jumping straight to "0".
             if (ticks % HUD_SYNC_INTERVAL_TICKS == 0) {
                 int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
+                float intensity = (session.getState() == SimulationState.EARTHQUAKE)
+                        ? (float) session.computeIntensityAt(player.blockPosition())
+                        : 0f;
                 PacketDistributor.sendToPlayer(player,
-                        new SimulationStatusPayload(session.getState().name(), secondsLeft));
+                        new SimulationStatusPayload(session.getState().name(), secondsLeft, intensity));
             }
         }
     }
@@ -321,7 +331,7 @@ public class SimulationManager {
         ServerLevel level = (ServerLevel) player.level();
 
         // Clear the HUD (empty status, 0 seconds) so the simulation overlay disappears.
-        PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0));
+        PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
         player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
 
         // Teleport to the lobby spawn point.

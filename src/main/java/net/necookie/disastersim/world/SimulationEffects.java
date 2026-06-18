@@ -5,6 +5,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.necookie.disastersim.Config;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Applies the per-tick world effects for each disaster type.
  *
@@ -93,35 +97,107 @@ public class SimulationEffects {
     }
 
     /**
-     * Destroys a small number of randomly chosen non-bedrock blocks within the
-     * simulation arena to simulate structural collapse.
+     * Phase-aware earthquake effect dispatcher. Delegates to a phase-specific helper
+     * and is called at {@link Config#QUAKE_INTERVAL} ticks by SimulationManager.
+     * PEAK-phase also queues unsupported blocks; drain those each tick via
+     * {@link #drainEarthquakePending}.
      *
-     * <p>The number of blocks broken and the area they can appear in are controlled
-     * by {@link Config#QUAKE_BREAK_COUNT} and {@link Config#SIM_AREA_SIZE}/
-     * {@link Config#SIM_AREA_HEIGHT}.
-     *
-     * @param level The server level containing the simulation arena.
+     * @param level   The server level containing the simulation arena.
+     * @param session The active session carrying epicenter, phase, and cascade queue.
      */
-    public void simulateEarthquake(ServerLevel level) {
-        int count      = Config.QUAKE_BREAK_COUNT.get();   // Blocks to destroy per call
-        int areaSize   = Config.SIM_AREA_SIZE.get();
+    public void simulateEarthquake(ServerLevel level, SimulationSession session) {
+        if (session.getEpicenter() == null || session.getQuakePhase() == null) return;
+        switch (session.getQuakePhase()) {
+            case RUMBLE     -> doRumble(level, session);
+            case PEAK       -> enqueuePeakDestructions(level, session);
+            case AFTERSHOCK -> doAftershock(level, session);
+            case END        -> {} // nothing to do
+        }
+    }
+
+    /**
+     * Drains up to 2 entries from the cascade queue and destroys them.
+     * Called every tick (not just at the quake interval) so destruction spreads gradually.
+     * No-op when the queue is empty or the session is not in PEAK phase.
+     */
+    public void drainEarthquakePending(ServerLevel level, SimulationSession session) {
+        if (session.getQuakePhase() != SimulationSession.EarthquakePhase.PEAK) return;
+        var queue = session.getPendingDestructions();
+        int toBreak = Math.min(2, queue.size());
+        for (int i = 0; i < toBreak; i++) {
+            BlockPos pos = queue.poll();
+            if (pos != null && !level.getBlockState(pos).isAir()
+                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
+                level.destroyBlock(pos, false);
+            }
+        }
+    }
+
+    // --- Phase helpers ---
+
+    private void doRumble(ServerLevel level, SimulationSession session) {
+        int count  = Config.QUAKE_BREAK_COUNT.get();
+        int radius = Math.max(5, (int) (Config.QUAKE_MAGNITUDE.get() * 3));
+        BlockPos epicenter = session.getEpicenter();
+        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        for (int i = 0; i < count; i++) {
+            int dx = level.getRandom().nextInt(radius * 2 + 1) - radius;
+            int dy = level.getRandom().nextInt(areaHeight);
+            int dz = level.getRandom().nextInt(radius * 2 + 1) - radius;
+            BlockPos pos = epicenter.offset(dx, dy, dz);
+            if (!level.getBlockState(pos).isAir()
+                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
+                level.destroyBlock(pos, false);
+            }
+        }
+    }
+
+    // Scans for unsupported blocks near the epicenter and enqueues them closest-first
+    // for cascading destruction by drainEarthquakePending.
+    private void enqueuePeakDestructions(ServerLevel level, SimulationSession session) {
+        var queue = session.getPendingDestructions();
+        int batchMax = Config.QUAKE_BREAK_COUNT.get() * 3;
+        if (queue.size() >= batchMax) return; // queue already full, let the drain catch up
+
+        BlockPos epicenter = session.getEpicenter();
+        int radius     = (int) Math.min(Config.SIM_AREA_SIZE.get() / 2.0, Config.QUAKE_MAGNITUDE.get() * 4);
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
 
-        for (int i = 0; i < count; i++) {
-            // Pick a random block position inside the arena, same logic as simulateFire.
-            BlockPos breakPos = SimulationManager.SIM_POS.offset(
-                    level.getRandom().nextInt(areaSize),
-                    level.getRandom().nextInt(areaHeight),
-                    level.getRandom().nextInt(areaSize));
+        List<BlockPos> candidates = new ArrayList<>();
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                for (int dy = 0; dy < areaHeight; dy++) {
+                    BlockPos pos = epicenter.offset(dx, dy, dz);
+                    if (!level.getBlockState(pos).isAir()
+                            && level.getBlockState(pos).getBlock() != Blocks.BEDROCK
+                            && level.getBlockState(pos.below()).isAir()) { // unsupported = nothing below
+                        candidates.add(pos);
+                    }
+                }
+            }
+        }
+        // Sort closest to epicenter first so the cascade radiates outward.
+        candidates.sort(Comparator.comparingDouble(p -> epicenter.distSqr(p)));
+        int toAdd = Math.min(batchMax - queue.size(), candidates.size());
+        for (int i = 0; i < toAdd; i++) {
+            queue.add(candidates.get(i));
+        }
+    }
 
-            // Only break the block if:
-            //   1. It is not air (no point "breaking" empty space).
-            //   2. It is not bedrock (bedrock is indestructible; we use it as arena walls
-            //      or boundaries in some configurations and should never break it).
-            // destroyBlock(pos, false) removes the block without dropping any items.
-            if (!level.getBlockState(breakPos).isAir()
-                    && level.getBlockState(breakPos).getBlock() != Blocks.BEDROCK) {
-                level.destroyBlock(breakPos, false);
+    private void doAftershock(ServerLevel level, SimulationSession session) {
+        // Half the normal break count at the same area, mimicking reduced residual shaking.
+        int count  = Math.max(1, Config.QUAKE_BREAK_COUNT.get() / 2);
+        int radius = Math.max(3, (int) (Config.QUAKE_MAGNITUDE.get() * 2));
+        BlockPos epicenter = session.getEpicenter();
+        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        for (int i = 0; i < count; i++) {
+            int dx = level.getRandom().nextInt(radius * 2 + 1) - radius;
+            int dy = level.getRandom().nextInt(areaHeight);
+            int dz = level.getRandom().nextInt(radius * 2 + 1) - radius;
+            BlockPos pos = epicenter.offset(dx, dy, dz);
+            if (!level.getBlockState(pos).isAir()
+                    && level.getBlockState(pos).getBlock() != Blocks.BEDROCK) {
+                level.destroyBlock(pos, false);
             }
         }
     }

@@ -13,20 +13,22 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * Network payload for synchronizing simulation status from server to client.
- * Contains the current simulation state and the time remaining.
- * 
- * @param status The name of the current simulation state (e.g., "FIRE", "EARTHQUAKE").
- * @param timeLeft The time remaining in the simulation, in seconds.
+ * Contains the current simulation state, time remaining, and earthquake intensity.
+ *
+ * @param status    The name of the current simulation state (e.g., "FIRE", "EARTHQUAKE").
+ * @param timeLeft  The time remaining in the simulation, in seconds.
+ * @param intensity Per-player earthquake intensity (0.0 when not an earthquake or at END phase).
  */
-public record SimulationStatusPayload(String status, int timeLeft) implements CustomPacketPayload {
-    
+public record SimulationStatusPayload(String status, int timeLeft, float intensity) implements CustomPacketPayload {
+
     /** The unique identifier for this packet payload. */
     public static final Type<SimulationStatusPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "sim_status"));
-    
+
     /** The codec used to serialize and deserialize this payload over the network. */
     public static final StreamCodec<FriendlyByteBuf, SimulationStatusPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.STRING_UTF8, SimulationStatusPayload::status,
-            ByteBufCodecs.INT, SimulationStatusPayload::timeLeft,
+            ByteBufCodecs.INT,         SimulationStatusPayload::timeLeft,
+            ByteBufCodecs.FLOAT,       SimulationStatusPayload::intensity,
             SimulationStatusPayload::new
     );
 
@@ -43,7 +45,7 @@ public record SimulationStatusPayload(String status, int timeLeft) implements Cu
      */
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
-        event.registrar("1").playToClient(TYPE, STREAM_CODEC, SimulationStatusPayload::handle);
+        event.registrar("2").playToClient(TYPE, STREAM_CODEC, SimulationStatusPayload::handle);
     }
 
     /**
@@ -59,8 +61,9 @@ public record SimulationStatusPayload(String status, int timeLeft) implements Cu
         // updates to run on the main thread so there's no race condition with the HUD
         // renderer reading SimulationHud.currentStatus / timeLeft at the same time.
         context.enqueueWork(() -> {
-            SimulationHud.currentStatus = payload.status();  // e.g., "FIRE" or "" when ended
-            SimulationHud.timeLeft = payload.timeLeft();     // seconds remaining; 0 hides the HUD
+            SimulationHud.currentStatus = payload.status();   // e.g., "FIRE" or "" when ended
+            SimulationHud.timeLeft      = payload.timeLeft(); // seconds remaining; 0 hides the HUD
+            SimulationHud.intensity     = payload.intensity(); // earthquake intensity for camera shake
         });
     }
 

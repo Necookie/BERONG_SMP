@@ -40,6 +40,8 @@ public class BerongSMPClient {
         
         // Register client-specific tick listener to the NeoForge event bus
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onClientTick);
+        // Drive camera shake for earthquake simulations
+        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
     }
 
     /**

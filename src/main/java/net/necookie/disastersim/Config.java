@@ -107,6 +107,35 @@ public class Config {
             .defineInRange("simAreaHeight", 10, 2, 256);
 
     // -----------------------------------------------------------------------
+    // Earthquake phase / intensity tuning
+    // -----------------------------------------------------------------------
+
+    /** Epicenter magnitude (0.0–10.0). Intensity at the epicenter = magnitude; decays with distance. */
+    public static final ModConfigSpec.DoubleValue QUAKE_MAGNITUDE = BUILDER
+            .comment("Earthquake magnitude (0.0–10.0). Scales intensity at the epicenter.")
+            .defineInRange("quakeMagnitude", 5.0, 0.1, 10.0);
+
+    /** Intensity decay rate per block of distance from the epicenter. Higher = sharper falloff. */
+    public static final ModConfigSpec.DoubleValue QUAKE_DECAY_RATE = BUILDER
+            .comment("Intensity decay rate per block of distance from the epicenter. Higher = faster dropoff.")
+            .defineInRange("quakeDecayRate", 0.05, 0.001, 1.0);
+
+    /** Ticks for the RUMBLE phase (low-intensity pre-quake shaking). 100 ticks = 5 s. */
+    public static final ModConfigSpec.IntValue QUAKE_RUMBLE_DURATION = BUILDER
+            .comment("Ticks for the RUMBLE phase (pre-quake low-intensity shaking). Default: 100 = 5s.")
+            .defineInRange("quakeRumbleDuration", 100, 20, 2400);
+
+    /** Ticks for the PEAK phase (maximum-intensity structural collapse). 200 ticks = 10 s. */
+    public static final ModConfigSpec.IntValue QUAKE_PEAK_DURATION = BUILDER
+            .comment("Ticks for the PEAK phase (maximum-intensity block destruction). Default: 200 = 10s.")
+            .defineInRange("quakePeakDuration", 200, 20, 2400);
+
+    /** Ticks for the AFTERSHOCK phase (reduced-intensity sporadic destruction). 100 ticks = 5 s. */
+    public static final ModConfigSpec.IntValue QUAKE_AFTERSHOCK_DURATION = BUILDER
+            .comment("Ticks for the AFTERSHOCK phase (reduced-intensity sporadic destruction). Default: 100 = 5s.")
+            .defineInRange("quakeAftershockDuration", 100, 20, 2400);
+
+    // -----------------------------------------------------------------------
     // Internal
     // -----------------------------------------------------------------------
 

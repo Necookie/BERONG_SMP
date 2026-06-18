@@ -1,7 +1,11 @@
 package net.necookie.disastersim.world;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.Config;
+
+import java.util.ArrayDeque;
 
 /**
  * Holds the mutable runtime state for a single player's active simulation run.
@@ -13,12 +17,25 @@ import net.necookie.disastersim.Config;
  */
 public class SimulationSession {
 
+    /** Phases of an earthquake simulation, progressing RUMBLE → PEAK → AFTERSHOCK → END. */
+    public enum EarthquakePhase { RUMBLE, PEAK, AFTERSHOCK, END }
+
     private final SimulationManager.SimulationState state;
     private final ServerPlayer player;
     /** Remaining simulation time in server ticks. Decremented once per tick via {@link #tick()}. */
     private int timerTicks;
     /** Total fire/soul-fire blocks extinguished by the player during this session. */
     private int firesExtinguished;
+
+    // --- Earthquake state ---
+    /** Random epicenter within the simulation arena; null when not an EARTHQUAKE session. */
+    private BlockPos epicenter;
+    /** Current phase of the earthquake progression; null when not an EARTHQUAKE session. */
+    private EarthquakePhase quakePhase;
+    /** Ticks elapsed inside the current earthquake phase. */
+    private int quakePhaseTimer;
+    /** Pending block positions queued for cascading destruction during the PEAK phase. */
+    private final ArrayDeque<BlockPos> pendingDestructions = new ArrayDeque<>();
 
     /**
      * Creates a new session for the given player and disaster type.
@@ -91,4 +108,72 @@ public class SimulationSession {
     public int getFiresExtinguished() {
         return firesExtinguished;
     }
+
+    // -----------------------------------------------------------------------
+    // Earthquake lifecycle
+    // -----------------------------------------------------------------------
+
+    /** Initialises epicenter and phase state for an EARTHQUAKE session. Called once by SimulationManager after session creation. */
+    public void initEarthquake(RandomSource random) {
+        int areaSize = Config.SIM_AREA_SIZE.get();
+        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        this.epicenter = SimulationManager.SIM_POS.offset(
+                random.nextInt(areaSize),
+                random.nextInt(Math.max(1, areaHeight / 2)),
+                random.nextInt(areaSize));
+        this.quakePhase = EarthquakePhase.RUMBLE;
+        this.quakePhaseTimer = 0;
+    }
+
+    /**
+     * Advances the earthquake phase state machine by one tick.
+     * Transitions RUMBLE → PEAK → AFTERSHOCK → END based on configured durations.
+     * Must be called each tick from SimulationManager for EARTHQUAKE sessions.
+     */
+    public void tickQuakePhase() {
+        if (quakePhase == null || quakePhase == EarthquakePhase.END) return;
+        quakePhaseTimer++;
+        int duration = switch (quakePhase) {
+            case RUMBLE     -> Config.QUAKE_RUMBLE_DURATION.get();
+            case PEAK       -> Config.QUAKE_PEAK_DURATION.get();
+            case AFTERSHOCK -> Config.QUAKE_AFTERSHOCK_DURATION.get();
+            default         -> Integer.MAX_VALUE;
+        };
+        if (quakePhaseTimer >= duration) {
+            quakePhaseTimer = 0;
+            quakePhase = switch (quakePhase) {
+                case RUMBLE     -> EarthquakePhase.PEAK;
+                case PEAK       -> { pendingDestructions.clear(); yield EarthquakePhase.AFTERSHOCK; }
+                case AFTERSHOCK -> EarthquakePhase.END;
+                default         -> EarthquakePhase.END;
+            };
+        }
+    }
+
+    /**
+     * Computes the player's current earthquake intensity at the given block position.
+     * Uses an exponential decay: {@code intensity = magnitude * exp(-decayRate * distance) * phaseScale}.
+     */
+    public double computeIntensityAt(BlockPos pos) {
+        if (epicenter == null || quakePhase == null || quakePhase == EarthquakePhase.END) return 0.0;
+        double magnitude  = Config.QUAKE_MAGNITUDE.get();
+        double decayRate  = Config.QUAKE_DECAY_RATE.get();
+        double distance   = Math.sqrt(epicenter.distSqr(pos));
+        double phaseScale = switch (quakePhase) {
+            case RUMBLE     -> 0.4;
+            case PEAK       -> 1.0;
+            case AFTERSHOCK -> 0.25;
+            default         -> 0.0;
+        };
+        return magnitude * Math.exp(-decayRate * distance) * phaseScale;
+    }
+
+    /** Returns the random epicenter chosen at session start; {@code null} for non-EARTHQUAKE sessions. */
+    public BlockPos getEpicenter() { return epicenter; }
+
+    /** Returns the current earthquake phase; {@code null} for non-EARTHQUAKE sessions. */
+    public EarthquakePhase getQuakePhase() { return quakePhase; }
+
+    /** Returns the pending-destructions deque used for cascade block-breaking during PEAK. */
+    public ArrayDeque<BlockPos> getPendingDestructions() { return pendingDestructions; }
 }

@@ -44,11 +44,20 @@ Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.st
   → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
   → teleports player inside library structure
   → (FIRE only) gives fire extinguisher in hotbar slot 0
+  → (EARTHQUAKE only) session.initEarthquake() picks random epicenter within the arena
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
-  → SimulationEffects.simulateFire / simulateEarthquake at configured intervals
-  → cleanupFireOutsideBounds every 40 ticks (FIRE only)
+  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval; cleanupFireOutsideBounds every 40 ticks
+  → (EARTHQUAKE) session.tickQuakePhase() advances RUMBLE→PEAK→AFTERSHOCK→END state machine
+      → at quakeInterval: SimulationEffects.simulateEarthquake(level, session) — phase dispatch:
+          RUMBLE: random block destruction within magnitude*3 radius of epicenter
+          PEAK: enqueuePeakDestructions — scans for unsupported (air below) blocks sorted
+                closest-first; adds batch to pendingDestructions queue
+          AFTERSHOCK: random block destruction at half count, smaller radius
+      → every tick: drainEarthquakePending — breaks 2 blocks from cascade queue (PEAK only)
   → sends SimulationStatusPayload HUD sync every 10 ticks
+      → includes per-player intensity = magnitude * exp(-decayRate * distance) * phaseScale
+      → client SimulationHud.onCameraAngles applies sinusoidal rumble + random jitter scaled by intensity
 Session expires / player dies / /sim_stop → SimulationManager.endSimulation
   → restores all buildings via BUILDINGS list
   → teleports alive player to lobby OR marks UUID in pendingLobbyRespawn (dead player)
@@ -61,14 +70,15 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 |---|---|
 | `BerongSMP` | Mod entry point, item/block registration, server startup init |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
-| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count |
-| `SimulationEffects` | Stateless world mutation: fire placement, earthquake block destruction, fire cleanup |
+| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue |
+| `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK → END`; drives block-destruction rate and HUD intensity |
+| `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
 | `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), and places blocks |
-| `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`) for HUD sync |
-| `SimulationHud` | Client-side HUD renderer reading `currentStatus` / `timeLeft` static fields |
+| `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
+| `SimulationHud` | Client-side HUD renderer; also drives camera shake via `ViewportEvent.ComputeCameraAngles` using `intensity` |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
 | `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake`, `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
@@ -101,10 +111,15 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakeInterval` | 10 | Ticks between quake events |
 | `simAreaSize` | 25 | XZ arena radius for random effects |
 | `simAreaHeight` | 10 | Y arena height for random effects |
+| `quakeMagnitude` | 5.0 | Epicenter intensity (0.1–10.0); also scales destruction radius |
+| `quakeDecayRate` | 0.05 | Intensity falloff per block of distance from epicenter |
+| `quakeRumbleDuration` | 100 | Ticks in RUMBLE phase (5 s) |
+| `quakePeakDuration` | 200 | Ticks in PEAK phase (10 s) |
+| `quakeAftershockDuration` | 100 | Ticks in AFTERSHOCK phase (5 s) |
 
 ### Thread Safety
 
-`SimulationManager.activeSessions` is a `ConcurrentHashMap`. `startSimulation` and `endSimulation` are `synchronized`. Tick-driven mutations are single-threaded via `ServerTickEvent.Post`. Network packet handling uses `context.enqueueWork()` to marshal HUD updates onto the main client thread.
+`SimulationManager.activeSessions` is a `ConcurrentHashMap`. `startSimulation` and `endSimulation` are `synchronized`. Tick-driven mutations are single-threaded via `ServerTickEvent.Post`. Network packet handling uses `context.enqueueWork()` to marshal HUD updates (including the new `intensity` field) onto the main client thread. `SimulationHud.intensity` is written on the main client thread and read from `ViewportEvent.ComputeCameraAngles`, which also fires on the main client thread — no extra synchronisation needed.
 
 ### Client–Server Split
 

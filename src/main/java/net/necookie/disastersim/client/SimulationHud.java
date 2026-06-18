@@ -7,6 +7,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import net.necookie.disastersim.BerongSMP;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 /**
@@ -22,6 +23,9 @@ public class SimulationHud {
     
     /** The time remaining in the simulation, in seconds (synced from server). */
     public static int timeLeft = 0;
+
+    /** Per-player earthquake intensity (0–magnitude); drives camera shake amplitude. */
+    public static float intensity = 0f;
 
     /**
      * Registers the custom HUD layer to the NeoForge GUI system.
@@ -68,5 +72,23 @@ public class SimulationHud {
         // Second line: timer in red (0xFFFF0000) to create visual urgency.
         // Offset by 14 pixels down (approximate line height of the default Minecraft font).
         guiGraphics.text(font, timerText, xPos, yPos + 14, 0xFFFF0000, true);
+    }
+
+    /**
+     * Applies camera shake proportional to the current earthquake intensity.
+     * Two layers: a slow sinusoidal rumble and a fast random jitter, both scaled by intensity.
+     * Registered to the NeoForge event bus from BerongSMPClient so it only runs client-side.
+     */
+    public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
+        if (intensity <= 0f) return;
+        Minecraft mc = Minecraft.getInstance();
+        long time = (mc.level != null) ? mc.level.getGameTime() : System.currentTimeMillis() / 50L;
+        // Slow oscillation (~1 Hz) for the low-frequency rumble layer.
+        float rumble = (float) Math.sin(time * 0.314) * intensity * 0.4f;
+        // Fast random jitter for high-frequency structural noise.
+        float jitterYaw   = ((float) Math.random() * 2f - 1f) * intensity * 0.25f;
+        float jitterPitch = ((float) Math.random() * 2f - 1f) * intensity * 0.15f;
+        event.setYaw((float) event.getYaw() + rumble + jitterYaw);
+        event.setPitch((float) event.getPitch() + jitterPitch);
     }
 }
