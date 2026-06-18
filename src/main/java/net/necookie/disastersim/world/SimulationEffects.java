@@ -1,7 +1,11 @@
 package net.necookie.disastersim.world;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -75,6 +79,13 @@ public class SimulationEffects {
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
+                // Dense smoke column above each new fire block
+                for (int s = 0; s < 5; s++) {
+                    double px = firePos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
+                    double py = firePos.getY() + 0.6 + level.getRandom().nextDouble() * 1.5;
+                    double pz = firePos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
+                    level.sendParticles(ParticleTypes.LARGE_SMOKE, px, py, pz, 1, 0.0, 0.08, 0.0, 0.01);
+                }
             }
         }
     }
@@ -164,7 +175,7 @@ public class SimulationEffects {
         if (state.isAir() || state.getBlock() == Blocks.BEDROCK) return;
         if (DEBRIS_BLOCKS.contains(state.getBlock())) {
             FallingBlockEntity debris = FallingBlockEntity.fall(level, pos, state);
-            debris.setHurtsEntities(2.0f, 40);
+            debris.setHurtsEntities(8.0f, 80); // realistic structural debris damage
             debris.disableDrop();
         } else {
             level.destroyBlock(pos, false);
@@ -228,6 +239,47 @@ public class SimulationEffects {
             int dy = level.getRandom().nextInt(areaHeight);
             int dz = level.getRandom().nextInt(radius * 2 + 1) - radius;
             breakOrDebris(level, epicenter.offset(dx, dy, dz));
+        }
+    }
+
+    /**
+     * Applies smoke suffocation and proximity damage when the player is near active fire.
+     * Called every 20 ticks (1 s) during FIRE sessions.
+     * Smoke inhalation (nausea + blindness) scales with fire density; damage scales with
+     * the closest fire block distance so being surrounded is significantly more lethal.
+     */
+    public void applyFireProximityEffects(ServerLevel level, ServerPlayer player) {
+        BlockPos playerPos = player.blockPosition();
+        int fireCount = 0;
+        double closestDist = Double.MAX_VALUE;
+        int radius = 7;
+
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -2; dy <= 4; dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    if (level.getBlockState(playerPos.offset(dx, dy, dz)).getBlock() == Blocks.FIRE) {
+                        fireCount++;
+                        double d = Math.sqrt((double) (dx * dx + dy * dy + dz * dz));
+                        if (d < closestDist) closestDist = d;
+                    }
+                }
+            }
+        }
+
+        if (fireCount == 0) return;
+
+        // Smoke inhalation damage — capped at 3 hearts per second; proximity multiplies it
+        double proximityBonus = Math.max(0.0, 4.0 - closestDist); // up to +4 when touching fire
+        float damage = (float) Math.min(6.0, fireCount * 0.35 + proximityBonus);
+        player.hurtServer(level, level.damageSources().magic(), damage);
+
+        // Nausea from smoke; amplifier 0–2 based on fire density
+        int nauseaAmp = Math.min(2, fireCount / 4);
+        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, nauseaAmp, false, true));
+
+        // Blindness from thick smoke when very close or many fires present
+        if (closestDist <= 3.0 || fireCount >= 7) {
+            player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0, false, true));
         }
     }
 

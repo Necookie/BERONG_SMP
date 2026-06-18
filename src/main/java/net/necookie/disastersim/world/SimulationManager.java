@@ -5,6 +5,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
@@ -277,9 +279,14 @@ public class SimulationManager {
             int ticks = session.getTimerTicks();
 
             // Dispatch the correct disaster effect at its configured interval.
-            if (session.getState() == SimulationState.FIRE
-                    && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-                EFFECTS.simulateFire(level);
+            if (session.getState() == SimulationState.FIRE) {
+                if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
+                    EFFECTS.simulateFire(level);
+                }
+                // Smoke suffocation and proximity damage once per second
+                if (ticks % 20 == 0) {
+                    EFFECTS.applyFireProximityEffects(level, player);
+                }
             } else if (session.getState() == SimulationState.EARTHQUAKE) {
                 // Advance the phase state machine every tick and notify on transitions.
                 SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
@@ -293,6 +300,16 @@ public class SimulationManager {
                     } else if (phaseAfter == SimulationSession.EarthquakePhase.END) {
                         player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
                     }
+                }
+                // Nausea/dizziness from seismic vibrations — stronger during PEAK
+                if (ticks % 60 == 0 && session.getQuakePhase() != SimulationSession.EarthquakePhase.END) {
+                    int nauseaAmp = switch (session.getQuakePhase()) {
+                        case PEAK       -> (int) Math.min(3, session.getSessionMagnitude() / 2.5);
+                        case AFTERSHOCK -> (int) Math.min(2,
+                                session.getSessionMagnitude() * session.getAftershockMagnitudeScale() / 3.0);
+                        default         -> 0;
+                    };
+                    player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
                 }
                 // Periodic effect (fills cascade queue or breaks blocks directly).
                 if (ticks % Config.QUAKE_INTERVAL.get() == 0) {

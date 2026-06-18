@@ -51,11 +51,16 @@ Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.st
       → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
-  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval; cleanupFireOutsideBounds every 40 ticks
+  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval (spawns 5 LARGE_SMOKE particles per fire block placed);
+           cleanupFireOutsideBounds every 40 ticks;
+           applyFireProximityEffects every 20 ticks — scans 7-block radius, deals magic damage scaling with
+           fire density + proximity (up to 3 hearts/s), applies Nausea (amp 0–2) and Blindness (thick smoke)
   → (EARTHQUAKE) session.tickQuakePhase(level.getRandom()) advances RUMBLE→PEAK→AFTERSHOCK(×2–4)→END
       → phase transitions send chat messages: "intensifying!" / "Aftershock!" / "shaking has stopped"
       → AFTERSHOCK re-enters itself aftershockCount times; each wave gets a random scale (0.2–0.55×
         normal; 25% chance of stronger 0.6–1.1× wave) before finally reaching END
+      → every 60 ticks: Nausea applied based on phase (PEAK: amp 0–3 scaled by magnitude;
+        AFTERSHOCK: amp 0–2 scaled by effectiveMag) for realistic dizziness
       → at quakeInterval: SimulationEffects.simulateEarthquake(level, session) — phase dispatch:
           RUMBLE: breakOrDebris count = ceil(baseCount × magnitude / 5) within magnitude×3 radius
           PEAK: enqueuePeakDestructions — scans for unsupported (air below) blocks sorted
@@ -63,14 +68,15 @@ SimulationManager.onServerTick (every tick):
           AFTERSHOCK: breakOrDebris count = ceil(baseCount × effectiveMag / 5); effectiveMag =
                       sessionMagnitude × aftershockMagnitudeScale; radius = effectiveMag × 2.5
       → all three phases use breakOrDebris(): wood/glass blocks spawn FallingBlockEntity
-        (visible, gravity-driven, deals 2×fallBlocks fall damage up to 40, then discards);
+        (visible, gravity-driven, deals 8×fallBlocks fall damage up to 80, then discards);
         non-debris blocks vanish instantly via destroyBlock. DEBRIS_BLOCKS is a static Set for O(1) lookup.
         Debris count scales with effective magnitude so stronger quakes produce more falling blocks.
       → every tick: drainEarthquakePending — breaks 2 blocks from cascade queue (PEAK only)
       → every 20 ticks: clearFireInArena — removes vanilla fire that spreads during block destruction
   → sends SimulationStatusPayload HUD sync every 10 ticks
       → includes per-player intensity = magnitude * exp(-decayRate * distance) * phaseScale
-      → client SimulationHud.onCameraAngles applies sinusoidal rumble + random jitter scaled by intensity
+      → client SimulationHud.onCameraAngles applies multi-layer shake (slow 1 Hz + mid 3 Hz oscillations +
+        random jitter + roll tilt) all scaled by intensity for realistic dizziness; roll uses setRoll()
 Session expires / player dies / /sim_stop → SimulationManager.endSimulation
   → restores all buildings via BUILDINGS list
   → teleports alive player to lobby OR marks UUID in pendingLobbyRespawn (dead player)
@@ -85,13 +91,13 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
-| `SimulationEffects` | World mutation: fire placement, fire cleanup; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris) |
+| `SimulationEffects` | World mutation: fire placement + smoke particles + proximity damage/nausea/blindness; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris with 8× damage multiplier) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
 | `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), and places blocks |
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
-| `SimulationHud` | Client-side HUD renderer; also drives camera shake via `ViewportEvent.ComputeCameraAngles` using `intensity` |
+| `SimulationHud` | Client-side HUD renderer; drives multi-layer camera shake (1 Hz + 3 Hz oscillations + jitter + roll) via `ViewportEvent.ComputeCameraAngles` using `intensity` |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
 | `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
