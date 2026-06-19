@@ -79,12 +79,12 @@ public class SimulationEffects {
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
-                // Dense smoke column above each new fire block
-                for (int s = 0; s < 5; s++) {
-                    double px = firePos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
-                    double py = firePos.getY() + 0.6 + level.getRandom().nextDouble() * 1.5;
-                    double pz = firePos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
-                    level.sendParticles(ParticleTypes.LARGE_SMOKE, px, py, pz, 1, 0.0, 0.08, 0.0, 0.01);
+                // Dense smoke plume above each new fire block
+                for (int s = 0; s < 14; s++) {
+                    double px = firePos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
+                    double py = firePos.getY() + 0.6 + level.getRandom().nextDouble() * 3.0;
+                    double pz = firePos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
+                    level.sendParticles(ParticleTypes.LARGE_SMOKE, px, py, pz, 1, 0.0, 0.15, 0.0, 0.03);
                 }
             }
         }
@@ -243,10 +243,10 @@ public class SimulationEffects {
     }
 
     /**
-     * Applies smoke suffocation and proximity damage when the player is near active fire.
+     * Applies smoke inhalation effects when the player is near active fire.
      * Called every 20 ticks (1 s) during FIRE sessions.
-     * Smoke inhalation (nausea + blindness) scales with fire density; damage scales with
-     * the closest fire block distance so being surrounded is significantly more lethal.
+     * Nausea scales with fire density; air supply drains to simulate oxygen depletion
+     * (vanilla suffocation kicks in naturally when air reaches zero).
      */
     public void applyFireProximityEffects(ServerLevel level, ServerPlayer player) {
         BlockPos playerPos = player.blockPosition();
@@ -268,19 +268,14 @@ public class SimulationEffects {
 
         if (fireCount == 0) return;
 
-        // Smoke inhalation damage — capped at 3 hearts per second; proximity multiplies it
-        double proximityBonus = Math.max(0.0, 4.0 - closestDist); // up to +4 when touching fire
-        float damage = (float) Math.min(6.0, fireCount * 0.35 + proximityBonus);
-        player.hurtServer(level, level.damageSources().magic(), damage);
-
         // Nausea from smoke; amplifier 0–2 based on fire density
         int nauseaAmp = Math.min(2, fireCount / 4);
         player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 80, nauseaAmp, false, true));
 
-        // Blindness from thick smoke when very close or many fires present
-        if (closestDist <= 3.0 || fireCount >= 7) {
-            player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0, false, true));
-        }
+        // Oxygen depletion — drains air supply; vanilla suffocation damage triggers at zero
+        int proximityBonus = closestDist <= 3.0 ? 30 : 0;
+        int airDrain = Math.min(80, fireCount * 6 + proximityBonus);
+        player.setAirSupply(Math.max(-20, player.getAirSupply() - airDrain));
     }
 
     /**

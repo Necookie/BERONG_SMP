@@ -51,10 +51,11 @@ Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.st
       → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
-  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval (spawns 5 LARGE_SMOKE particles per fire block placed);
+  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval (spawns 14 LARGE_SMOKE particles per fire block placed with wide 2.2-block XZ spread and 3-block Y rise);
            cleanupFireOutsideBounds every 40 ticks;
-           applyFireProximityEffects every 20 ticks — scans 7-block radius, deals magic damage scaling with
-           fire density + proximity (up to 3 hearts/s), applies Nausea (amp 0–2) and Blindness (thick smoke)
+           applyFireProximityEffects every 20 ticks — scans 7-block radius, applies Nausea (amp 0–2) and
+           drains air supply (oxygen depletion; vanilla suffocation triggers at zero) scaling with fire density +
+           proximity; no direct damage, no blindness
   → (EARTHQUAKE) session.tickQuakePhase(level.getRandom()) advances RUMBLE→PEAK→AFTERSHOCK(×2–4)→END
       → phase transitions send chat messages: "intensifying!" / "Aftershock!" / "shaking has stopped"
       → AFTERSHOCK re-enters itself aftershockCount times; each wave gets a random scale (0.2–0.55×
@@ -91,7 +92,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
-| `SimulationEffects` | World mutation: fire placement + smoke particles + proximity damage/nausea/blindness; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris with 8× damage multiplier) |
+| `SimulationEffects` | World mutation: fire placement + smoke particles (14×, wide plume) + proximity nausea/air-drain; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris with 8× damage multiplier) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
