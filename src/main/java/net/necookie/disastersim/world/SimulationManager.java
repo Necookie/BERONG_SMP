@@ -154,10 +154,11 @@ public class SimulationManager {
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
+        BlockPos spawnPos = findRandomSpawnInLibrary(level);
         player.teleportTo(level,
-                SIM_POS.getX() + SIM_ENTRY_OFFSET_X,
-                SIM_POS.getY() + SIM_ENTRY_OFFSET_Y,
-                SIM_POS.getZ() + SIM_ENTRY_OFFSET_Z,
+                spawnPos.getX() + 0.5,
+                spawnPos.getY(),
+                spawnPos.getZ() + 0.5,
                 Collections.emptySet(), player.getYRot(), player.getXRot(), true);
 
         if (state == SimulationState.FIRE) {
@@ -369,6 +370,37 @@ public class SimulationManager {
         // Teleport to the lobby spawn point.
         player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
+    }
+
+    /**
+     * Scans the simulation arena for valid player spawn positions on any floor and
+     * returns one at random. A position is valid when the block below is solid,
+     * the block at foot level is air, and the block at head level is air.
+     * Falls back to the original front-door entry if no candidates are found.
+     */
+    private static BlockPos findRandomSpawnInLibrary(ServerLevel level) {
+        int areaSize   = Config.SIM_AREA_SIZE.get();
+        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        List<BlockPos> candidates = new ArrayList<>();
+        // margin of 2 on XZ avoids spawning inside perimeter walls
+        for (int dx = 2; dx < areaSize - 2; dx++) {
+            for (int dz = 2; dz < areaSize - 2; dz++) {
+                // dy starts at 1 so pos.below() is never below SIM_POS;
+                // stops 2 below the ceiling so the head block check stays in-bounds
+                for (int dy = 1; dy < areaHeight - 2; dy++) {
+                    BlockPos pos = SIM_POS.offset(dx, dy, dz);
+                    if (!level.getBlockState(pos.below()).isAir()
+                            && level.getBlockState(pos).isAir()
+                            && level.getBlockState(pos.above()).isAir()) {
+                        candidates.add(pos);
+                    }
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            return SIM_POS.offset((int) SIM_ENTRY_OFFSET_X, (int) SIM_ENTRY_OFFSET_Y, (int) SIM_ENTRY_OFFSET_Z);
+        }
+        return candidates.get(level.getRandom().nextInt(candidates.size()));
     }
 
     /**

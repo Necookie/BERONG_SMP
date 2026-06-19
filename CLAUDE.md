@@ -42,7 +42,7 @@ NeoForge uses two separate event buses — a core pattern throughout this codeba
 Player logs in → LobbyManager.onPlayerLogin → teleport to lobby
 Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.startSimulation
   → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
-  → teleports player inside library structure
+  → teleports player to a random valid position inside the library (any floor); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to front-door entry if none found
   → (FIRE only) gives fire extinguisher in hotbar slot 0
   → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
       → epicenter fixed 3–9 blocks from SIM_POS in XZ so destruction concentrates inside the structure
