@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 
@@ -201,11 +202,13 @@ public class FireExtinguisherItem extends Item {
             extinguished = true;
         }
 
-        if (extinguished && user instanceof ServerPlayer) {
-            SimulationSession session = SimulationManager.getSession(user.getUUID());
+        if (extinguished && user instanceof ServerPlayer serverPlayer) {
+            SimulationSession session = SimulationManager.getSession(serverPlayer.getUUID());
             if (session != null && session.getState() == SimulationManager.SimulationState.FIRE) {
                 session.recordExtinguish(1);
             }
+            // Tutorial PASS_SPRAY stage: count extinguishes regardless of active simulation
+            TutorialManager.onExtinguish(serverPlayer);
         }
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlac
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.tutorial.TutorialManager;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -107,6 +108,7 @@ public class LobbyManager {
             // Scan the bounding box of the placed structure for ButtonBlock instances
             // so we know which positions to listen for in onRightClickBlock.
             scanForButtons(level, LOBBY_POS, template.getSize());
+            TutorialManager.placeStations(level);
             lobbyReady = true;
             BerongSMP.LOGGER.info("BerongSMP Lobby loaded from NBT at {}", LOBBY_POS);
         } else {
@@ -220,7 +222,21 @@ public class LobbyManager {
 
         BlockPos pos = event.getPos();
 
+        // Tutorial station interaction — must come before the sim button checks
+        if (TutorialManager.isStationPos(pos)) {
+            TutorialManager.onInteract(player, pos);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+            event.setCanceled(true);
+            return;
+        }
+
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
+            if (!TutorialManager.isComplete(player.getUUID())) {
+                player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
+                event.setCancellationResult(InteractionResult.FAIL);
+                event.setCanceled(true);
+                return;
+            }
             // Player right-clicked the fire simulation button.
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.FIRE);
             // Mark the event as SUCCESS and cancel it so the button doesn't also
@@ -228,6 +244,12 @@ public class LobbyManager {
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
+            if (!TutorialManager.isComplete(player.getUUID())) {
+                player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
+                event.setCancellationResult(InteractionResult.FAIL);
+                event.setCanceled(true);
+                return;
+            }
             // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
             double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE, magnitude);

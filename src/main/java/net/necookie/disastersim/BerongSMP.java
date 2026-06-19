@@ -105,6 +105,7 @@ public class BerongSMP {
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
         // on the mod bus — it must be registered here so NeoForge picks it up.
         modEventBus.register(net.necookie.disastersim.network.SimulationStatusPayload.class);
+        modEventBus.register(net.necookie.disastersim.network.TutorialStatusPayload.class);
 
         // BerongSMPClient is annotated @Mod(dist = CLIENT) so it only loads on the
         // physical client, keeping server JARs free of client-only Minecraft classes.

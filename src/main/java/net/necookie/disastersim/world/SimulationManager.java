@@ -3,6 +3,7 @@ package net.necookie.disastersim.world;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.necookie.disastersim.tutorial.TutorialManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -248,6 +249,12 @@ public class SimulationManager {
      */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        // Advance tutorial state machines for all online players
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            TutorialManager.tick(server.overworld());
+        }
+
         // Snapshot the key set before iterating so that endSimulation (which removes
         // entries from activeSessions) does not cause a ConcurrentModificationException.
         for (UUID uuid : new ArrayList<>(activeSessions.keySet())) {

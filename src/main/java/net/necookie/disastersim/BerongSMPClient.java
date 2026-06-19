@@ -42,6 +42,8 @@ public class BerongSMPClient {
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onClientTick);
         // Drive camera shake for earthquake simulations
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
+        // Drive camera shake for QUAKE tutorial stages
+        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.TutorialHud::onCameraAngles);
     }
 
     /**
@@ -52,5 +54,6 @@ public class BerongSMPClient {
     @SubscribeEvent
     static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         SimulationHud.registerGuiLayers(event);
+        net.necookie.disastersim.client.TutorialHud.registerGuiLayers(event);
     }
 }
