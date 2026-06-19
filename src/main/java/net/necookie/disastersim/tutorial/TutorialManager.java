@@ -99,7 +99,7 @@ public class TutorialManager {
         if (pos.equals(STATION_PULL)) {
             if (stage == TutorialStage.NOT_STARTED) {
                 giveExtinguisher(player);
-                spawnPracticeFires(player.serverLevel());
+                spawnPracticeFires((ServerLevel) player.level());
                 advanceTo(player, TutorialStage.PASS_SPRAY);
                 sendPrompt(player, "§ePull the pin (right-click extinguisher), then aim and spray the fire!", 0f);
                 player.sendSystemMessage(Component.literal(
@@ -171,7 +171,7 @@ public class TutorialManager {
 
         if (count >= 3) {
             extinguishCounts.remove(player.getUUID());
-            removePracticeFires(player.serverLevel());
+            removePracticeFires((ServerLevel) player.level());
             player.sendSystemMessage(Component.literal(
                     "§a✓ PASS method complete! Great job extinguishing the fire.\n"
                     + "§eNow learn about extinguisher types. Right-click the Class A station."));
@@ -257,11 +257,11 @@ public class TutorialManager {
     // -----------------------------------------------------------------------
 
     private static TutorialStage getStage(ServerPlayer player) {
-        return TutorialSavedData.get(player.serverLevel()).getStage(player.getUUID());
+        return TutorialSavedData.get((ServerLevel) player.level()).getStage(player.getUUID());
     }
 
     private static void advanceTo(ServerPlayer player, TutorialStage next) {
-        TutorialSavedData.get(player.serverLevel()).setStage(player.getUUID(), next);
+        TutorialSavedData.get((ServerLevel) player.level()).setStage(player.getUUID(), next);
     }
 
     private static void sendPrompt(ServerPlayer player, String text, float intensity) {
