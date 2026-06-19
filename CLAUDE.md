@@ -36,6 +36,35 @@ NeoForge uses two separate event buses — a core pattern throughout this codeba
 - **`modEventBus`** — mod lifecycle events (registration, client setup). Used in `BerongSMP` constructor for `DeferredRegister`, network payload registration, and `BuildCreativeModeTabContentsEvent`.
 - **`NeoForge.EVENT_BUS`** — runtime game events (server tick, player join, block interact). Classes annotated with `@EventBusSubscriber` auto-register here.
 
+### Tutorial Flow
+
+Players must complete a safety tutorial before simulation buttons become active. Progress persists across disconnects via `TutorialSavedData`.
+
+```
+Stage order: NOT_STARTED → PASS_SPRAY → EXT_TYPE_A → EXT_TYPE_B → EXT_TYPE_C
+             → QUAKE_DROP → QUAKE_COVER → QUAKE_HOLDON → COMPLETED
+
+Player right-clicks STATION_PULL (lobby offset +5,2,14):
+  → given FireExtinguisher (pin NOT pulled), 5 practice fire blocks spawned in cross at PRACTICE_FIRE (+11,2,18)
+  → stage = PASS_SPRAY
+
+FireExtinguisherItem.extinguishAt → TutorialManager.onExtinguish (unconditional, after session check):
+  → counts extinguishes while stage == PASS_SPRAY; at 3 → remove practice fires, stage = EXT_TYPE_A
+
+Player right-clicks STATION_EXT_A/B/C in order → class info message, stage advances A→B→C→QUAKE_DROP
+
+TutorialManager.tick (called from SimulationManager.onServerTick every tick):
+  QUAKE_DROP  → shake prompt every 10 ticks; player crouches → QUAKE_COVER
+  QUAKE_COVER → player crouches + solid block at blockPos.above(2) → QUAKE_HOLDON
+  QUAKE_HOLDON → hold condition 100 ticks; intensity fades 1.5→0; break cover resets timer
+               → at 100 ticks: stage = COMPLETED, confetti particles, clear HUD
+
+LobbyManager.onRightClickBlock gates fire/quake buttons:
+  if (!TutorialManager.isComplete(uuid)) → "Complete the safety tutorial first!" — no simulation starts
+```
+
+Station constants in `TutorialManager` (offsets from `LobbyManager.LOBBY_POS = (0,-33,0)`) are **placeholder values** — tune them against the actual lobby interior when running `./gradlew runServer`.
+
 ### Simulation Flow
 
 ```
@@ -102,6 +131,11 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
 | `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
+| `TutorialStage` | Enum of all tutorial stages: `NOT_STARTED → PASS_SPRAY → EXT_TYPE_A/B/C → QUAKE_DROP/COVER/HOLDON → COMPLETED` |
+| `TutorialManager` | Static utility: station placement, interaction dispatch, extinguish counting, QUAKE tick detection, completion. Gates simulation buttons via `isComplete(UUID)` |
+| `TutorialSavedData` | Extends `SavedData`; persists `Map<UUID, TutorialStage>` to `world/data/berongsmp_tutorial.dat` |
+| `TutorialStatusPayload` | Server→client packet carrying `prompt` (String) and `intensity` (float) for tutorial HUD and camera shake |
+| `TutorialHud` | Client-side HUD renderer for tutorial prompts; drives camera shake during QUAKE stages; hidden when SimulationHud is active |
 
 ### World Coordinates
 
