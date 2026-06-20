@@ -184,11 +184,33 @@ public class TursoClient {
     // Private helpers
     // -----------------------------------------------------------------------
 
+    // -----------------------------------------------------------------------
+    // Session telemetry write helpers
+    // -----------------------------------------------------------------------
+
+    /** Updates student identity columns on the most recent active row for this UUID. */
+    public static void updateStudentInfo(String accountUuid, String studentId, String section) {
+        executeAsync(
+            "UPDATE sessions SET student_id=?, section=? WHERE account_uuid=? AND status='active'",
+            studentId, section, accountUuid);
+    }
+
+    /** Writes the serialized event log JSON to the session row identified by its DB id. */
+    public static void updateEventLog(long sessionId, String eventLogJson) {
+        executeAsync("UPDATE sessions SET event_log=? WHERE id=?", eventLogJson, sessionId);
+    }
+
+    // -----------------------------------------------------------------------
+    // Schema
+    // -----------------------------------------------------------------------
+
     private static void createSchemaAsync() {
         String ddl = """
                 CREATE TABLE IF NOT EXISTS sessions (
                     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
                     student_name        TEXT    NOT NULL,
+                    student_id          TEXT,
+                    section             TEXT,
                     station_account     TEXT    NOT NULL,
                     account_uuid        TEXT    NOT NULL,
                     start_time          TEXT    NOT NULL,
@@ -199,13 +221,35 @@ public class TursoClient {
                     simulation_type     TEXT,
                     simulation_score    INTEGER DEFAULT 0,
                     passed              INTEGER DEFAULT 0,
+                    event_log           TEXT,
+                    prep_level          TEXT,
+                    confidence          REAL,
+                    bfp_notes           TEXT,
                     notes               TEXT
                 )""";
-        executeAsync(ddl).thenRun(() ->
-                executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_student ON sessions(student_name)")
-        ).thenRun(() ->
-                executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_start ON sessions(start_time)")
-        );
+        // Run CREATE TABLE first, then add columns to existing DBs (safe to ignore errors)
+        executeAsync(ddl)
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN student_id TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN section TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN event_log TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN prep_level TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN confidence REAL"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN bfp_notes TEXT"))
+            .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_student ON sessions(student_name)"))
+            .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_start ON sessions(start_time)"));
+    }
+
+    /** Runs an ALTER TABLE statement, silently swallowing the error if the column already exists. */
+    private static void silentAlter(String sql) {
+        if (!ready) return;
+        String body = buildBody(sql, new Object[0]);
+        CompletableFuture.runAsync(() -> {
+            try {
+                HttpRequest req = buildRequest(body);
+                httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                // Intentionally ignore status — Turso returns error if column exists, which is fine
+            } catch (Exception ignored) {}
+        });
     }
 
     private static HttpRequest buildRequest(String body) {

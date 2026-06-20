@@ -15,6 +15,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.registration.RegistrationManager;
 import net.necookie.disastersim.tutorial.NpcRole;
 import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
@@ -277,6 +278,12 @@ public class LobbyManager {
         BlockPos pos = event.getPos();
 
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
+            if (!RegistrationManager.isRegistered(player)) {
+                player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
+                event.setCancellationResult(InteractionResult.FAIL);
+                event.setCanceled(true);
+                return;
+            }
             if (!TutorialManager.isComplete(player.getUUID())) {
                 player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
                 event.setCancellationResult(InteractionResult.FAIL);
@@ -290,6 +297,12 @@ public class LobbyManager {
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
+            if (!RegistrationManager.isRegistered(player)) {
+                player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
+                event.setCancellationResult(InteractionResult.FAIL);
+                event.setCanceled(true);
+                return;
+            }
             if (!TutorialManager.isComplete(player.getUUID())) {
                 player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
                 event.setCancellationResult(InteractionResult.FAIL);

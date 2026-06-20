@@ -40,7 +40,7 @@
 
 | Phase | Name | Status |
 |---|---|---|
-| 1 | Data Foundation (mod side) | `[ ] not started` |
+| 1 | Data Foundation (mod side) | `[x] done` |
 | 2 | Dashboard Live Data | `[ ] not started` |
 | 3 | Synthetic Data Generator | `[ ] not started` |
 | 4 | Thesis Extras | `[ ] not started` |

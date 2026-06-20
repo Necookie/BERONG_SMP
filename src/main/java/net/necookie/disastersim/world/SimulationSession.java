@@ -26,6 +26,10 @@ public class SimulationSession {
     private int timerTicks;
     /** Total fire/soul-fire blocks extinguished by the player during this session. */
     private int firesExtinguished;
+    /** Total fire blocks spread/placed by the simulation during this session. */
+    private int fireSpreadCount;
+    /** Buffers behavioral events; serialized to JSON and flushed to Turso on session end. */
+    public final SimulationEventLogger logger = new SimulationEventLogger();
 
     // --- Earthquake state ---
     /** Random epicenter within the simulation arena; null when not an EARTHQUAKE session. */
@@ -114,6 +118,12 @@ public class SimulationSession {
     public int getFiresExtinguished() {
         return firesExtinguished;
     }
+
+    /** Increments the count of fire blocks spread by the simulation. */
+    public void incrementFireSpread() { fireSpreadCount++; }
+
+    /** Returns the total fire blocks spread by the simulation during this session. */
+    public int getFireSpreadCount() { return fireSpreadCount; }
 
     // -----------------------------------------------------------------------
     // Earthquake lifecycle

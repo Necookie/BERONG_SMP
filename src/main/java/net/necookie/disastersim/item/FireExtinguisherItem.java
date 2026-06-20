@@ -71,6 +71,13 @@ public class FireExtinguisherItem extends Item {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.8F, 1.4F);
             player.sendSystemMessage(Component.literal("§ePIN PULLED — ready to spray! Hold right-click to discharge."));
+            // Log pin pull event for behavioral telemetry
+            if (player instanceof ServerPlayer sp) {
+                SimulationSession session = SimulationManager.getSession(sp.getUUID());
+                if (session != null) {
+                    session.logger.log("EXT_PIN_PULL", java.util.Map.of("pulled", true));
+                }
+            }
             return InteractionResult.SUCCESS;
         }
 
@@ -135,15 +142,29 @@ public class FireExtinguisherItem extends Item {
         }
         Vec3 upwards = sideways.cross(lookDirection).normalize();
 
+        boolean anyHit = false;
         for (int i = 1; i <= 7; i++) {
             double distance = i * (SPRAY_RANGE / 7.0D);
             Vec3 centerPoint = origin.add(lookDirection.scale(distance));
 
-            extinguishAt(level, BlockPos.containing(centerPoint), user);
-            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(0.35D))), user);
-            extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(-0.35D))), user);
-            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(0.25D))), user);
-            extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(-0.2D))), user);
+            if (extinguishAt(level, BlockPos.containing(centerPoint), user)) anyHit = true;
+            if (extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(0.35D))), user)) anyHit = true;
+            if (extinguishAt(level, BlockPos.containing(centerPoint.add(sideways.scale(-0.35D))), user)) anyHit = true;
+            if (extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(0.25D))), user)) anyHit = true;
+            if (extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(-0.2D))), user)) anyHit = true;
+        }
+
+        // Log EXT_SPRAY once per second (every 20 ticks) to keep the event log manageable
+        if (user instanceof ServerPlayer sp) {
+            SimulationSession session = SimulationManager.getSession(sp.getUUID());
+            if (session != null && stack.getDamageValue() % 20 == 0) {
+                double nearestFire = nearestFireDist(level, user.blockPosition());
+                boolean finalAnyHit = anyHit;
+                session.logger.log("EXT_SPRAY", java.util.Map.of(
+                    "hit_fire", finalAnyHit,
+                    "distance_to_fire", Math.round(nearestFire * 10.0) / 10.0
+                ));
+            }
         }
 
         spawnSprayParticlesServer(level, origin, lookDirection, sideways, upwards, sputtering);
@@ -188,7 +209,7 @@ public class FireExtinguisherItem extends Item {
     // Extinguish logic — records to simulation session if active
     // -----------------------------------------------------------------------
 
-    private void extinguishAt(ServerLevel level, BlockPos pos, Player user) {
+    private boolean extinguishAt(ServerLevel level, BlockPos pos, Player user) {
         BlockState state = level.getBlockState(pos);
         boolean extinguished = false;
 
@@ -210,6 +231,18 @@ public class FireExtinguisherItem extends Item {
             // Tutorial PASS_SPRAY stage: count extinguishes regardless of active simulation
             TutorialManager.onExtinguish(serverPlayer);
         }
+        return extinguished;
+    }
+
+    private static double nearestFireDist(ServerLevel level, BlockPos origin) {
+        double minDist = Double.MAX_VALUE;
+        for (BlockPos check : BlockPos.betweenClosed(origin.offset(-8, -4, -8), origin.offset(8, 4, 8))) {
+            if (level.getBlockState(check).is(Blocks.FIRE) || level.getBlockState(check).is(Blocks.SOUL_FIRE)) {
+                double d = origin.distSqr(check);
+                if (d < minDist) minDist = d;
+            }
+        }
+        return minDist == Double.MAX_VALUE ? 99.0 : Math.sqrt(minDist);
     }
 
     // -----------------------------------------------------------------------

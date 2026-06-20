@@ -59,6 +59,10 @@ public class SimulationEffects {
      * @param level The server level containing the simulation arena.
      */
     public void simulateFire(ServerLevel level) {
+        simulateFire(level, null);
+    }
+
+    public void simulateFire(ServerLevel level, SimulationSession session) {
         int count      = Config.FIRE_SPAWN_COUNT.get();   // How many fire blocks to try placing this call
         int areaSize   = Config.SIM_AREA_SIZE.get();      // X and Z range (e.g., 25 blocks)
         int areaHeight = Config.SIM_AREA_HEIGHT.get();    // Y range above SIM_POS (e.g., 10 blocks)
@@ -79,6 +83,13 @@ public class SimulationEffects {
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
+                if (session != null) {
+                    session.incrementFireSpread();
+                    session.logger.log("FIRE_SPREAD", java.util.Map.of(
+                        "x", firePos.getX(), "y", firePos.getY(), "z", firePos.getZ(),
+                        "total_count", session.getFireSpreadCount()
+                    ));
+                }
                 // Dense smoke plume above each new fire block
                 for (int s = 0; s < 14; s++) {
                     double px = firePos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;

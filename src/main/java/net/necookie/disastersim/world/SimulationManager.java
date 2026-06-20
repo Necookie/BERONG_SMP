@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.network.SimulationStatusPayload;
+import net.necookie.disastersim.session.TursoClient;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -152,6 +153,11 @@ public class SimulationManager {
             session.initEarthquake(level.getRandom(), magnitude);
         }
 
+        session.logger.log("SIM_START", java.util.Map.of(
+            "sim_type", state.name(),
+            "magnitude", state == SimulationState.EARTHQUAKE ? magnitude : 0.0
+        ));
+
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
@@ -201,6 +207,24 @@ public class SimulationManager {
         ServerLevel level = (ServerLevel) player.level();
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
 
+        // Compute score, log SIM_END, flush event log to Turso
+        int finalScore = 0;
+        if (session.getState() == SimulationState.FIRE) {
+            finalScore = Math.min(100, session.getFiresExtinguished() * 2);
+        }
+        session.logger.log("SIM_END", java.util.Map.of(
+            "fires_extinguished", session.getFiresExtinguished(),
+            "fire_spread_count", session.getFireSpreadCount(),
+            "score", finalScore,
+            "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
+        ));
+        // Flush event log asynchronously — use SessionManager's tracked row ID
+        net.necookie.disastersim.session.StudentSession studentSession =
+            net.necookie.disastersim.session.SessionManager.getActiveSession(uuid);
+        if (studentSession != null && studentSession.getDbRowId() > 0) {
+            TursoClient.updateEventLog(studentSession.getDbRowId(), session.logger.toJson());
+        }
+
         if (player.isAlive()) {
             // --- Normal end (timer expired or /sim_stop) ---
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
@@ -209,7 +233,7 @@ public class SimulationManager {
             // Send PASS score report for FIRE simulations.
             if (session.getState() == SimulationState.FIRE) {
                 int fires = session.getFiresExtinguished();
-                int score = Math.min(100, fires * 2);
+                int score = finalScore;
                 player.sendSystemMessage(Component.literal("§6--- Fire Drill Results ---"));
                 player.sendSystemMessage(Component.literal("§eFires extinguished: " + fires));
                 player.sendSystemMessage(Component.literal("§aScore: " + score + " / 100"));
@@ -289,10 +313,22 @@ public class SimulationManager {
             ServerLevel level = (ServerLevel) player.level();
             int ticks = session.getTimerTicks();
 
+            // Log player position + nearest fire distance once per second
+            if (ticks % 20 == 0) {
+                BlockPos pos = player.blockPosition();
+                SimRoom room = SimRoom.fromPos(pos, SIM_POS);
+                double nearestFire = nearestFireDistance(level, pos);
+                session.logger.log("PLAYER_TICK", java.util.Map.of(
+                    "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                    "room", room.name(),
+                    "nearest_fire_dist", Math.round(nearestFire * 10.0) / 10.0
+                ));
+            }
+
             // Dispatch the correct disaster effect at its configured interval.
             if (session.getState() == SimulationState.FIRE) {
                 if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-                    EFFECTS.simulateFire(level);
+                    EFFECTS.simulateFire(level, session);
                 }
                 // Smoke suffocation and proximity damage once per second
                 if (ticks % 20 == 0) {
@@ -380,6 +416,20 @@ public class SimulationManager {
         // Teleport to the lobby spawn point.
         player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
+    }
+
+    /** Returns the distance to the nearest fire block within 10 blocks of origin, or 99 if none. */
+    static double nearestFireDistance(ServerLevel level, BlockPos origin) {
+        double minSq = Double.MAX_VALUE;
+        for (BlockPos check : BlockPos.betweenClosed(origin.offset(-10, -5, -10), origin.offset(10, 5, 10))) {
+            net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
+            if (bs.is(net.minecraft.world.level.block.Blocks.FIRE) ||
+                bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
+                double d = origin.distSqr(check);
+                if (d < minSq) minSq = d;
+            }
+        }
+        return minSq == Double.MAX_VALUE ? 99.0 : Math.sqrt(minSq);
     }
 
     /**

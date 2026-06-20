@@ -27,6 +27,8 @@ import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
 import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
+import net.necookie.disastersim.registration.RegistrationManager;
+import net.necookie.disastersim.registration.StudentRegistration;
 import net.necookie.disastersim.world.LobbyManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
@@ -56,6 +58,30 @@ public class ModCommands {
      * @param dispatcher The dispatcher to register commands to.
      */
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        // /register <student_id> <section> <full_name> — Student self-registration.
+        // Syntax puts greedy full_name last so multi-word names work (e.g., "Juan dela Cruz").
+        dispatcher.register(Commands.literal("register")
+                .then(Commands.argument("student_id", StringArgumentType.word())
+                        .then(Commands.argument("section", StringArgumentType.word())
+                                .then(Commands.argument("full_name", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            if (!ctx.getSource().isPlayer()) return 0;
+                                            ServerPlayer player = ctx.getSource().getPlayer();
+                                            String studentId = StringArgumentType.getString(ctx, "student_id");
+                                            String section   = StringArgumentType.getString(ctx, "section");
+                                            String fullName  = StringArgumentType.getString(ctx, "full_name");
+                                            RegistrationManager.register(player, studentId, section, fullName);
+                                            // Also create/update the Turso session row via SessionManager
+                                            SessionManager.checkin(player.getUUID(), player.getName().getString(), fullName);
+                                            net.necookie.disastersim.session.TursoClient.updateStudentInfo(
+                                                player.getUUID().toString(), studentId, section);
+                                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                                "§a✓ Registered as §f" + fullName +
+                                                " §7(§f" + studentId + "§7) — Section §f" + section +
+                                                "\n§eYou may now begin the tutorial."), false);
+                                            return 1;
+                                        })))));
+
         // /spawn_lspu — Places the LSPU CCS building at the caller's feet.
         // Restricted to game masters (op level 2+) because it modifies the world
         // permanently and is intended for admin/dev use only.
