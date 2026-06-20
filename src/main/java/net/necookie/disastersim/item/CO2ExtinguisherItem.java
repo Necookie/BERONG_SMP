@@ -184,13 +184,15 @@ public class CO2ExtinguisherItem extends Item {
         } else if (state.getBlock() instanceof ComputerBlock
                 && state.hasProperty(ComputerBlock.BURNING)
                 && state.getValue(ComputerBlock.BURNING)) {
-            level.setBlock(pos, state.setValue(ComputerBlock.BURNING, false)
-                                     .setValue(ComputerBlock.LIT, false), 3);
+            level.setBlock(pos, state
+                    .setValue(ComputerBlock.BURNING, false)
+                    .setValue(ComputerBlock.LIT, false)
+                    .setValue(ComputerBlock.BROKEN, true), 3);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
             if (user instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal(
-                        "§a✓ Electrical fire suppressed with CO2!"));
+                        "§a✓ Electrical fire suppressed! §7(Computer destroyed — replace it)"));
             }
         }
 

@@ -1,0 +1,7 @@
+{
+  "parent": "berongsmp:block/computer_block",
+  "textures": {
+    "screen": "berongsmp:block/computer_screen_broken",
+    "case":   "berongsmp:block/computer_case_broken"
+  }
+}
