@@ -182,8 +182,8 @@ public class TutorialLobbyManager {
 
         // ── SECTION 3: Extinguisher Types (Z=15-18) ────────────────────────
         fill(level, base, 1, 1, 15, 14, 1, 18, Blocks.LIGHT_BLUE_CONCRETE);
-        // Instructor desk
-        fill(level, base, 3, 2, 15, 7, 2, 15, Blocks.OAK_PLANKS);
+        // Instructor desk — kept to X=1-4 so it never blocks the passage at X=5-6
+        fill(level, base, 1, 2, 15, 4, 2, 15, Blocks.OAK_PLANKS);
         // Class A display — green (ordinary combustibles)
         set(level, base, 2, 2, 17, Blocks.STONE_BRICKS); set(level, base, 3, 2, 17, Blocks.STONE_BRICKS);
         set(level, base, 2, 3, 17, Blocks.GREEN_WOOL);   set(level, base, 3, 3, 17, Blocks.GREEN_WOOL);
@@ -214,8 +214,8 @@ public class TutorialLobbyManager {
         set(level, base, 12, 2, 22, Blocks.COBBLESTONE);
         set(level, base, 13, 2, 24, Blocks.COBBLESTONE);
         set(level, base, 12, 2, 25, Blocks.STONE);
-        // Safety officer desk
-        fill(level, base, 3, 2, 20, 6, 2, 20, Blocks.OAK_PLANKS);
+        // Safety officer desk — kept to X=1-4 so it never blocks the passage at X=5-6
+        fill(level, base, 1, 2, 20, 4, 2, 20, Blocks.OAK_PLANKS);
         // BFP badge on back wall
         fill(level, base, 6, 2, 27, 9, 3, 27, Blocks.YELLOW_CONCRETE);
         set(level, base, 7, 2, 27, Blocks.RED_CONCRETE); set(level, base, 8, 2, 27, Blocks.RED_CONCRETE);

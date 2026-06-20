@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TutorialManager {
 
     /** Center of the practice fire cluster in the BFP tutorial lobby. */
-    static final BlockPos PRACTICE_FIRE = TutorialLobbyManager.TUTORIAL_LOBBY_POS.offset(12, 2, 9);
+    static final BlockPos PRACTICE_FIRE = TutorialLobbyManager.TUTORIAL_LOBBY_POS.offset(7, 2, 11);
 
     /** Practice fire cross pattern (center + 4 cardinal neighbours). */
     private static final List<BlockPos> PRACTICE_FIRE_POSITIONS = List.of(
@@ -217,13 +217,11 @@ public class TutorialManager {
         return TutorialSavedData.get(server.overworld()).getStage(uuid) == TutorialStage.COMPLETED;
     }
 
-    /** Spawns 5 practice fire blocks (cross pattern) in the tutorial lobby. */
+    /** Spawns 5 practice fire blocks (cross pattern) in the tutorial lobby, burning on oak planks. */
     public static void spawnPracticeFires(ServerLevel level) {
         for (BlockPos firePos : PRACTICE_FIRE_POSITIONS) {
-            BlockPos floorPos = firePos.below();
-            if (level.getBlockState(floorPos).isAir()) {
-                level.setBlock(floorPos, Blocks.STONE.defaultBlockState(), 3);
-            }
+            // Place an oak plank beneath each fire so it visually burns on wood
+            level.setBlock(firePos.below(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
             level.setBlock(firePos, Blocks.FIRE.defaultBlockState(), 3);
         }
     }
@@ -254,6 +252,11 @@ public class TutorialManager {
             BlockState state = level.getBlockState(firePos);
             if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
                 level.removeBlock(firePos, false);
+            }
+            // Remove the oak plank base placed beneath each practice fire
+            BlockState below = level.getBlockState(firePos.below());
+            if (below.is(Blocks.OAK_PLANKS)) {
+                level.removeBlock(firePos.below(), false);
             }
         }
     }
