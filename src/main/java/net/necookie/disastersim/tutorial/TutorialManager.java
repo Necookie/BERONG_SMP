@@ -5,6 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -252,8 +253,9 @@ public class TutorialManager {
         PacketDistributor.sendToPlayer(player, new TutorialStatusPayload(text, intensity));
     }
 
-    /** Plays an NPC voice line for a single player only (no broadcast to others). */
+    /** Plays an NPC voice line for a single player only, stopping any previous VOICE sound first. */
     private static void playNpcSound(ServerPlayer player, String soundKey) {
+        player.connection.send(new ClientboundStopSoundPacket(null, SoundSource.VOICE));
         Identifier rl = Identifier.fromNamespaceAndPath(BerongSMP.MODID, soundKey);
         SoundEvent event = SoundEvent.createVariableRangeEvent(rl);
         player.connection.send(new ClientboundSoundPacket(
