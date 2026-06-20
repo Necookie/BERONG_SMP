@@ -192,6 +192,8 @@ def turso_execute(statements: list[dict]):
               + [{"type": "close"}]},
         timeout=15,
     )
+    if not resp.ok:
+        print(f"[HTTP {resp.status_code}] {resp.text[:500]}")
     resp.raise_for_status()
     return resp.json()
 
@@ -222,10 +224,10 @@ def insert_session(
             {"type": "text",    "value": f"synthetic-{random.randint(100000,999999)}"},
             {"type": "text",    "value": start.isoformat()},
             {"type": "text",    "value": end.isoformat()},
-            {"type": "integer", "value": tutorial_duration_s},
+            {"type": "integer", "value": str(tutorial_duration_s)},
             {"type": "text",    "value": sim_type},
-            {"type": "integer", "value": score},
-            {"type": "integer", "value": 1 if passed else 0},
+            {"type": "integer", "value": str(score)},
+            {"type": "integer", "value": "1" if passed else "0"},
             {"type": "text",    "value": event_log_json},
             {"type": "text",    "value": prep_level},
         ],
@@ -239,9 +241,31 @@ def insert_session(
 SESSIONS_PER_LEVEL = 20
 FIRE_RATIO         = 0.6   # 60% FIRE, 40% EARTHQUAKE per level
 
+def setup_schema():
+    """Add any missing columns to the sessions table (idempotent)."""
+    alters = [
+        "ALTER TABLE sessions ADD COLUMN student_id   TEXT",
+        "ALTER TABLE sessions ADD COLUMN section      TEXT",
+        "ALTER TABLE sessions ADD COLUMN event_log    TEXT",
+        "ALTER TABLE sessions ADD COLUMN prep_level   TEXT",
+        "ALTER TABLE sessions ADD COLUMN confidence   REAL",
+        "ALTER TABLE sessions ADD COLUMN bfp_notes    TEXT",
+    ]
+    for sql in alters:
+        try:
+            turso_execute([{"sql": sql, "args": []}])
+            print(f"[SCHEMA] {sql.split('ADD COLUMN')[1].strip()}")
+        except Exception:
+            pass  # column already exists — fine
+
+
 def main():
     if DRY_RUN:
         print("[dry-run] No data will be written to Turso.\n")
+    else:
+        print("[SCHEMA] Ensuring columns exist...")
+        setup_schema()
+        print()
 
     total = 0
     for prep_level, profile in PROFILES.items():
