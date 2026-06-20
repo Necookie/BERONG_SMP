@@ -4,6 +4,7 @@
   "block.berongsmp.computer_block": "Computer",
   "item.berongsmp.example_item": "Example Item",
   "item.berongsmp.fire_extinguisher": "Fire Extinguisher",
+  "item.berongsmp.co2_extinguisher": "CO2 Extinguisher",
   "berongsmp.main": "Berong SMP",
 
   "berongsmp.configuration.title": "Berong SMP Configs",

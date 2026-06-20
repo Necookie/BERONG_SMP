@@ -133,6 +133,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
 | `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher`; `/bfp` admin tree (see below) |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
+| `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires. Same pin-pull → hold-spray flow as `FireExtinguisherItem`. Targets `ComputerBlock` with `LIT=true` (sets to `LIT=false`) and regular fire/soul fire. Emits snowflake + cloud particles for the cold CO2 discharge look. Sends "§a✓ Electrical fire suppressed" message on hit. 200 durability. |
 | `ComputerBlock` | Custom block in `block/` package; has `FACING` (horizontal) + `LIT` states. Right-click toggles screen on/off (click sound + electric spark particles). `animateTick` emits ambient sparks while lit. Registered via `BLOCKS.registerBlock(name, Constructor::new, () -> Props)` pattern required by NeoForge 26.x. |
 | `TutorialStage` | Enum of all tutorial stages: `NOT_STARTED → PASS_SPRAY → EXT_TYPE_A/B/C → QUAKE_DROP/COVER/HOLDON → COMPLETED` |
 | `TutorialManager` | Static utility: station placement, interaction dispatch, extinguish counting, QUAKE tick detection, completion. Gates simulation buttons via `isComplete(UUID)` |

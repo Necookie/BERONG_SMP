@@ -83,6 +83,10 @@ public class BerongSMP {
     public static final DeferredItem<net.necookie.disastersim.item.FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
             props -> new net.necookie.disastersim.item.FireExtinguisherItem(props.durability(300)));
 
+    /** CO2 extinguisher — for Class C (electrical) fires; targets lit ComputerBlocks. */
+    public static final DeferredItem<net.necookie.disastersim.item.CO2ExtinguisherItem> CO2_EXTINGUISHER = ITEMS.registerItem("co2_extinguisher",
+            props -> new net.necookie.disastersim.item.CO2ExtinguisherItem(props.durability(200)));
+
     /** Custom Creative Mode Tab for BerongSMP items. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp"))
@@ -91,6 +95,7 @@ public class BerongSMP {
             .displayItems((parameters, output) -> {
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(FIRE_EXTINGUISHER.get());
+                output.accept(CO2_EXTINGUISHER.get());
                 output.accept(COMPUTER_BLOCK_ITEM.get());
             }).build());
 
