@@ -129,13 +129,16 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `SimulationHud` | Client-side HUD renderer; drives multi-layer camera shake (1 Hz + 3 Hz oscillations + jitter + roll) via `ViewportEvent.ComputeCameraAngles` using `intensity` |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
-| `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher` |
+| `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher`; `/bfp` admin tree (see below) |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
 | `TutorialStage` | Enum of all tutorial stages: `NOT_STARTED → PASS_SPRAY → EXT_TYPE_A/B/C → QUAKE_DROP/COVER/HOLDON → COMPLETED` |
 | `TutorialManager` | Static utility: station placement, interaction dispatch, extinguish counting, QUAKE tick detection, completion. Gates simulation buttons via `isComplete(UUID)` |
 | `TutorialSavedData` | Extends `SavedData`; persists `Map<UUID, TutorialStage>` to `world/data/berongsmp_tutorial.dat` |
 | `TutorialStatusPayload` | Server→client packet carrying `prompt` (String) and `intensity` (float) for tutorial HUD and camera shake |
 | `TutorialHud` | Client-side HUD renderer for tutorial prompts; drives camera shake during QUAKE stages; hidden when SimulationHud is active |
+| `StudentSession` | POJO holding per-student data: name, account UUID, start/end times, tutorial timing, simulation type/score/passed, Turso row ID |
+| `TursoClient` | HTTP wrapper for the Turso libSQL REST API (`/v2/pipeline`); fire-and-forget async writes via `CompletableFuture`, synchronous reads for commands; creates schema on first init |
+| `SessionManager` | Manages `Map<UUID, StudentSession>` for shared station accounts; hooks into tutorial completion and simulation end to persist scores; exposes `/bfp` admin flow |
 
 ### World Coordinates
 
@@ -167,9 +170,31 @@ All values are read at call time via `.get()` — changes take effect without re
 | `simAreaHeight` | 10 | Y arena height for random effects |
 | `quakeMagnitude` | 5.0 | Epicenter intensity (0.1–10.0); also scales destruction radius |
 | `quakeDecayRate` | 0.05 | Intensity falloff per block of distance from epicenter |
+| `tursoUrl` | `""` | Turso database HTTPS URL (e.g. `https://mydb-org.turso.io`). Leave blank to disable session tracking |
+| `tursoToken` | `""` | Turso Bearer auth token from the Turso dashboard |
+| `passThresholdFire` | 5 | Fires extinguished required for a FIRE session to be marked `passed=1` |
 | `quakeRumbleDuration` | 200 | Ticks in RUMBLE phase (10 s) |
 | `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
 | `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
+
+### Student Session System (`session/` package)
+
+Shared station accounts (e.g. `station1`) rotate through multiple students. `SessionManager` tracks a `StudentSession` per account UUID, persisted to the **Turso** cloud database via HTTP (no JDBC driver — uses Java's built-in `HttpClient` + Gson). All writes are fire-and-forget (`CompletableFuture.runAsync`). `TursoClient` creates the schema on first `init()` call.
+
+**`/bfp` admin commands** (OP level 2):
+
+| Command | Effect |
+|---|---|
+| `/bfp checkin <student_name>` | Start session for caller; resets tutorial state |
+| `/bfp checkin <player> <student_name>` | Start session for target player |
+| `/bfp checkout` | Finalise and save the caller's session |
+| `/bfp reset [player]` | Wipe tutorial + delete DB row (no record kept) |
+| `/bfp session info` | Print current session details to chat |
+| `/bfp sessions list [page]` | List 10 most recent sessions from DB |
+| `/bfp sessions export` | Write all sessions to `run/bfp_sessions_export.csv` |
+| `/bfp student <name>` | Look up all sessions for a student name |
+
+**Auto-hooks**: `TutorialManager.completeTutorial` → `SessionManager.onTutorialComplete` (records tutorial duration); `SimulationManager.endSimulation` → `SessionManager.onSimulationEnd` (records type/score/passed, closes row).
 
 ### Thread Safety
 

@@ -190,6 +190,9 @@ public class SimulationManager {
         if (session == null) return;
 
         ServerPlayer player = session.getPlayer();
+        if (player != null) {
+            net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
+        }
         // player should always be non-null because sessions hold a direct reference,
         // but guard anyway to avoid NPEs during edge-case shutdown sequences.
         if (player == null) return;

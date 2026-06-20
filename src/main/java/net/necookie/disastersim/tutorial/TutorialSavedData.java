@@ -43,6 +43,12 @@ public class TutorialSavedData extends SavedData {
         setDirty();
     }
 
+    /** Removes the stored stage for the given UUID, resetting the player to NOT_STARTED. */
+    public void reset(UUID uuid) {
+        stages.remove(uuid);
+        setDirty();
+    }
+
     public static TutorialSavedData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(TYPE);
     }

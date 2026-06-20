@@ -136,6 +136,25 @@ public class Config {
             .defineInRange("quakeAftershockDuration", 300, 20, 2400);
 
     // -----------------------------------------------------------------------
+    // Student session / scoring
+    // -----------------------------------------------------------------------
+
+    /** Turso database HTTPS URL (e.g. https://mydb-org.turso.io). Leave blank to disable session tracking. */
+    public static final ModConfigSpec.ConfigValue<String> TURSO_URL = BUILDER
+            .comment("Turso database URL for student session tracking. Leave blank to disable.")
+            .define("tursoUrl", "");
+
+    /** Turso auth token (Bearer token from the Turso dashboard). */
+    public static final ModConfigSpec.ConfigValue<String> TURSO_TOKEN = BUILDER
+            .comment("Turso authentication token. Leave blank to disable session tracking.")
+            .define("tursoToken", "");
+
+    /** Minimum fires extinguished for a FIRE simulation to be marked as passed. */
+    public static final ModConfigSpec.IntValue PASS_THRESHOLD_FIRE = BUILDER
+            .comment("Fires extinguished required to pass the fire simulation.")
+            .defineInRange("passThresholdFire", 5, 1, 100);
+
+    // -----------------------------------------------------------------------
     // Internal
     // -----------------------------------------------------------------------
 

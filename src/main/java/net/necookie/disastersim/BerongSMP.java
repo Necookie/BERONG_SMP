@@ -122,6 +122,9 @@ public class BerongSMP {
         // RegisterCommandsEvent fires on the runtime bus, so we attach it separately.
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
 
+        // Shut down the session manager and flush pending DB writes on server stop.
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
+
         // BuildCreativeModeTabContentsEvent lets us inject items into vanilla creative tabs.
         modEventBus.addListener(this::addCreative);
 
@@ -185,6 +188,11 @@ public class BerongSMP {
      * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
      */
     @SubscribeEvent
+    public void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
+        net.necookie.disastersim.session.SessionManager.shutdown();
+    }
+
+    @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
 
@@ -197,6 +205,7 @@ public class BerongSMP {
         // instances to determine which button triggers fire vs. earthquake.
         LobbyManager.createLobby(level);
         TutorialLobbyManager.createTutorialLobby(level);
+        net.necookie.disastersim.session.SessionManager.init(server);
 
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.

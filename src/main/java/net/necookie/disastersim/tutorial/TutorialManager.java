@@ -260,6 +260,7 @@ public class TutorialManager {
     }
 
     private static void completeTutorial(ServerPlayer player, ServerLevel level) {
+        net.necookie.disastersim.session.SessionManager.onTutorialComplete(player);
         advanceTo(player, TutorialStage.COMPLETED);
         sendPrompt(player, "", 0f);
         player.sendSystemMessage(Component.literal(
