@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Master Plan
+
+See **`docs/major_plan.md`** for the full phased implementation plan, architecture overview, Turso schema, and phase status tracking. Update that file whenever a phase completes.
+
+Phase instruction briefs (self-contained Claude prompts):
+- `docs/instructions/phase-1-data-foundation.md` — `/register`, event logging, room mapping
+- `docs/instructions/phase-2-dashboard-live-data.md` — Turso → Astro dashboard
+- `docs/instructions/phase-3-synthetic-data.md` — Python script for RF training data
+- `docs/instructions/phase-4-thesis-extras.md` — adaptive feedback, cohort view, BFP notes
+
+---
+
 ## Project Overview
 
 BerongSMP is a NeoForge mod for Minecraft 26.1.2 (NeoForge 26.1.2.36-beta) that implements a disaster simulation minigame. Players enter a lobby, press buttons to trigger fire or earthquake simulations inside an LSPU Library NBT structure, and are scored on their response. The mod is built with Java 25.
