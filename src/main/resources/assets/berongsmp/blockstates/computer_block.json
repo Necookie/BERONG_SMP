@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,lit=false": { "model": "berongsmp:block/computer_block",     "y": 0   },
+    "facing=south,lit=false": { "model": "berongsmp:block/computer_block",     "y": 180 },
+    "facing=west,lit=false":  { "model": "berongsmp:block/computer_block",     "y": 270 },
+    "facing=east,lit=false":  { "model": "berongsmp:block/computer_block",     "y": 90  },
+    "facing=north,lit=true":  { "model": "berongsmp:block/computer_block_lit", "y": 0   },
+    "facing=south,lit=true":  { "model": "berongsmp:block/computer_block_lit", "y": 180 },
+    "facing=west,lit=true":   { "model": "berongsmp:block/computer_block_lit", "y": 270 },
+    "facing=east,lit=true":   { "model": "berongsmp:block/computer_block_lit", "y": 90  }
+  }
+}

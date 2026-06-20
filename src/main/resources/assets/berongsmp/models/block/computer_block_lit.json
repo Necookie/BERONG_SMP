@@ -1,0 +1,6 @@
+{
+  "parent": "berongsmp:block/computer_block",
+  "textures": {
+    "screen": "berongsmp:block/computer_screen_on"
+  }
+}

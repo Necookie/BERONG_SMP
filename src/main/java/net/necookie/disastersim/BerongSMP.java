@@ -12,8 +12,10 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.MapColor;
+import net.necookie.disastersim.block.ComputerBlock;
 import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;
@@ -57,9 +59,21 @@ public class BerongSMP {
 
     /** Example block registration. */
     public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
-    
+
     /** Example block item registration. */
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
+
+    /** Computer/terminal block — can be set LIT=true for Class C electrical fire scenarios. */
+    public static final DeferredBlock<ComputerBlock> COMPUTER_BLOCK = BLOCKS.registerBlock("computer_block",
+            ComputerBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(MapColor.METAL)
+                    .strength(1.5f, 6.0f)
+                    .sound(SoundType.METAL)
+                    .lightLevel(state -> state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) ? 7 : 0));
+
+    /** Computer block item. */
+    public static final DeferredItem<BlockItem> COMPUTER_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("computer_block", COMPUTER_BLOCK);
 
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
@@ -77,6 +91,7 @@ public class BerongSMP {
             .displayItems((parameters, output) -> {
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(FIRE_EXTINGUISHER.get());
+                output.accept(COMPUTER_BLOCK_ITEM.get());
             }).build());
 
     /**
