@@ -261,6 +261,16 @@ public class TutorialLobbyManager {
     // -----------------------------------------------------------------------
 
     private static void clearOldNpcs(ServerLevel level) {
+        // Tutorial lobby chunks are not loaded at server start, so entity queries
+        // return nothing and old NPCs accumulate. Force-load them first.
+        int cx1 = TUTORIAL_LOBBY_POS.getX() >> 4;
+        int cx2 = (TUTORIAL_LOBBY_POS.getX() + 20) >> 4;
+        int cz1 = TUTORIAL_LOBBY_POS.getZ() >> 4;
+        int cz2 = (TUTORIAL_LOBBY_POS.getZ() + 40) >> 4;
+        for (int cx = cx1; cx <= cx2; cx++)
+            for (int cz = cz1; cz <= cz2; cz++)
+                level.getChunk(cx, cz);
+
         level.getEntitiesOfClass(Villager.class, WORLD_BOUNDS,
             v -> v.getPersistentData().contains(NPC_ROLE_TAG))
             .forEach(v -> v.discard());
