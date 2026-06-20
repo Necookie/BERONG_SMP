@@ -67,10 +67,11 @@ public class TutorialLobbyManager {
     // -----------------------------------------------------------------------
 
     /**
-     * Creates the tutorial lobby. Tries to load {@code bfp_tutorial_lobby.nbt}; if missing,
-     * builds the room programmatically. Always clears and re-spawns the three instructor NPCs.
+     * Places the tutorial lobby structure. Call from {@code ServerStartingEvent} so the
+     * building exists before the first player login. NPCs are handled separately in
+     * {@link #initNpcs(ServerLevel)} once entity storage is fully loaded.
      */
-    public static void createTutorialLobby(ServerLevel level) {
+    public static void buildLobby(ServerLevel level) {
         boolean nbtLoaded = new SimulationStructureLoader(
             Identifier.fromNamespaceAndPath(BerongSMP.MODID, "bfp_tutorial_lobby"))
             .place(level, TUTORIAL_LOBBY_POS);
@@ -79,13 +80,27 @@ public class TutorialLobbyManager {
             BerongSMP.LOGGER.info("bfp_tutorial_lobby.nbt not found — building BFP lobby programmatically.");
             buildStructure(level, TUTORIAL_LOBBY_POS);
         }
+        BerongSMP.LOGGER.info("BFP Tutorial Lobby structure placed at {}", TUTORIAL_LOBBY_POS);
+    }
 
+    /**
+     * Clears any previously spawned instructor NPCs and spawns fresh ones.
+     * Must be called from {@code ServerStartedEvent} (not {@code ServerStartingEvent})
+     * so that entity chunk storage is loaded and old NPCs can actually be found and removed.
+     */
+    public static void initNpcs(ServerLevel level) {
         clearOldNpcs(level);
         spawnNpc(level, TUTORIAL_LOBBY_POS.offset(NPC_TRAINER_OFFSET),        NpcRole.TRAINER,        "§6Sgt. Reyes");
         spawnNpc(level, TUTORIAL_LOBBY_POS.offset(NPC_EXT_EXPERT_OFFSET),     NpcRole.EXT_EXPERT,     "§aOfficer Cruz");
         spawnNpc(level, TUTORIAL_LOBBY_POS.offset(NPC_SAFETY_OFFICER_OFFSET), NpcRole.SAFETY_OFFICER, "§cCapt. Santos");
+        BerongSMP.LOGGER.info("BFP Tutorial Lobby NPCs spawned.");
+    }
 
-        BerongSMP.LOGGER.info("BFP Tutorial Lobby initialised at {}", TUTORIAL_LOBBY_POS);
+    /** @deprecated Use {@link #buildLobby} + {@link #initNpcs} separately. */
+    @Deprecated
+    public static void createTutorialLobby(ServerLevel level) {
+        buildLobby(level);
+        initNpcs(level);
     }
 
     /** Returns {@code true} if the player has not yet completed the tutorial. */
@@ -261,16 +276,6 @@ public class TutorialLobbyManager {
     // -----------------------------------------------------------------------
 
     private static void clearOldNpcs(ServerLevel level) {
-        // Tutorial lobby chunks are not loaded at server start, so entity queries
-        // return nothing and old NPCs accumulate. Force-load them first.
-        int cx1 = TUTORIAL_LOBBY_POS.getX() >> 4;
-        int cx2 = (TUTORIAL_LOBBY_POS.getX() + 20) >> 4;
-        int cz1 = TUTORIAL_LOBBY_POS.getZ() >> 4;
-        int cz2 = (TUTORIAL_LOBBY_POS.getZ() + 40) >> 4;
-        for (int cx = cx1; cx <= cx2; cx++)
-            for (int cz = cz1; cz <= cz2; cz++)
-                level.getChunk(cx, cz);
-
         level.getEntitiesOfClass(Villager.class, WORLD_BOUNDS,
             v -> v.getPersistentData().contains(NPC_ROLE_TAG))
             .forEach(v -> v.discard());

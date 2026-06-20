@@ -24,6 +24,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -188,6 +189,12 @@ public class BerongSMP {
      * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
      */
     @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event) {
+        // Entity chunk storage is fully loaded by now — safe to find and remove old NPCs
+        TutorialLobbyManager.initNpcs(event.getServer().overworld());
+    }
+
+    @SubscribeEvent
     public void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         net.necookie.disastersim.session.SessionManager.shutdown();
     }
@@ -204,7 +211,7 @@ public class BerongSMP {
         // Parse and place the lobby_structure NBT file, then scan it for ButtonBlock
         // instances to determine which button triggers fire vs. earthquake.
         LobbyManager.createLobby(level);
-        TutorialLobbyManager.createTutorialLobby(level);
+        TutorialLobbyManager.buildLobby(level); // structure only — NPCs need entity storage loaded first
         net.necookie.disastersim.session.SessionManager.init(server);
         net.necookie.disastersim.command.ModCommands.clearAuthorizations();
 
