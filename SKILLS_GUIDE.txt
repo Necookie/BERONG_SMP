@@ -1,0 +1,213 @@
+BerongSMP Claude Code Skills Guide
+====================================
+
+Skills are reusable task shortcuts for Claude Code. Instead of re-explaining the project
+context every time, you just type the skill name and Claude already knows the codebase.
+
+HOW TO USE A SKILL
+------------------
+Type the skill name with a leading slash in the Claude Code prompt:
+
+    /run-server
+    /tune-stations
+    /place-structure lspu
+    /check-tutorial
+    /sim-status
+    /build-check
+    /new-command sim_reset op
+    /new-stage EXAM_PASS click
+
+Skills are stored in .claude/skills/ as markdown files. You can read or edit them
+directly to change their behavior.
+
+
+SKILL REFERENCE
+---------------
+
+/run-server
+    What it does:
+        Starts the NeoForge dev server (./gradlew runServer) in the background
+        and tells you how to monitor the log and what in-game commands to use.
+    When to use:
+        Any time you want to test the mod in a live server environment.
+    Tips:
+        - Run /build-check first to catch compile errors before starting the server
+        - Server log is at run/logs/latest.log
+        - Config file is at run/config/berongsmp-common.toml (hot-reloads, no restart needed)
+        - To stop: type "stop" in the server console or kill the Gradle process
+
+
+/tune-stations
+    What it does:
+        Reads all hardcoded BlockPos offsets in TutorialManager and TutorialLobbyManager,
+        shows you a table of what each one controls, then helps you update them once you
+        provide the real in-game coordinates from F3.
+    When to use:
+        When tutorial NPCs or station blocks are in the wrong position relative to the
+        tutorial lobby structure (common after placing or editing the lobby NBT).
+    How to use:
+        1. Run /run-server and join the server
+        2. Walk to each station block/NPC in the tutorial lobby and press F3 to read XYZ
+        3. Come back to Claude and say the coordinates — Claude will compute the offsets
+           and apply them automatically
+    Tip:
+        PRACTICE_FIRE is only the center block of the fire cross — the 4 cardinal
+        neighbors are computed in code, so you only need to report the center position.
+
+
+/place-structure [lobby|lspu|ssc|tutorial|all]
+    What it does:
+        Guides you through testing that a specific structure places correctly in-game,
+        then helps diagnose offset, rotation, or file-path issues if it does not.
+    When to use:
+        After editing a .nbt or .schem file, changing a BlockPos constant, or
+        modifying SchemLoader/SimulationStructureLoader.
+    Arguments:
+        lobby      - main sim lobby (auto-placed on server start)
+        lspu       - LSPU Library NBT via /spawn_lspu (op required)
+        ssc        - SSC Building .schem (placed alongside LSPU on sim start)
+        tutorial   - Tutorial lobby NBT
+        all        - start a full fire sim (/sim_fire) to test all structures together
+    Example:
+        /place-structure ssc
+        /place-structure all
+
+
+/check-tutorial
+    What it does:
+        Audits every TutorialStage enum value and every place in the code that reads or
+        writes tutorial stages. Reports which stages have handlers and which are orphaned
+        or unreachable.
+    When to use:
+        - After adding a new TutorialStage (use /new-stage first, then verify with this)
+        - When a player reports getting stuck and not advancing past a stage
+        - Before a release to confirm the full tutorial flow is wired correctly
+    Output:
+        A checklist of each stage with PASS/FAIL, plus a list of any missing handlers,
+        any stages not in TutorialStage.java, and any broken gate checks.
+
+
+/sim-status
+    What it does:
+        Compiles the mod (./gradlew compileJava) and then scans the latest server log
+        for errors, warnings, and known failure patterns from this codebase.
+    When to use:
+        Quick "is everything OK?" check before starting a session, or when something
+        feels broken but you're not sure where to look.
+    Output:
+        Two lines: compile result (PASS/FAIL) and log health (CLEAN / N issues).
+        If there are issues, they are listed with context.
+    Tip:
+        Use /build-check if you only want the compile step and don't need the log scan.
+
+
+/build-check
+    What it does:
+        Runs ./gradlew compileJava and formats any errors with file path, line number,
+        and a suggested fix based on known error patterns in this project.
+    When to use:
+        Before running the server, before committing, or any time you edit Java files.
+    Common errors it handles:
+        - SavedData API changes (MC 26.1.2 uses SavedDataType pattern)
+        - ServerPlayer.level() -> serverLevel() rename
+        - KeyMapping class moved between MC versions
+        - StructurePlacer implementation mismatches
+    Tip:
+        This is the fastest feedback loop — much quicker than a full ./gradlew build.
+
+
+/new-command <name> [op] [arg:<type>]
+    What it does:
+        Scaffolds a new Brigadier command in ModCommands.java with correct boilerplate,
+        permission checks, and argument handling for this project.
+    When to use:
+        Any time you want to add a new /command to the mod.
+    Arguments:
+        <name>        the command name (without the slash), e.g. sim_reset
+        op            (optional) adds requires(LEVEL_GAMEMASTERS) permission check
+        arg:<type>    (optional) adds one argument; type is double, int, or string
+    Examples:
+        /new-command sim_reset
+            Creates: /sim_reset  (no permission, no args)
+
+        /new-command sim_setmag op arg:double
+            Creates: /sim_setmag <value>  (op only, takes a double argument)
+
+        /new-command debug_tp arg:string
+            Creates: /debug_tp <target>  (no permission, takes a string argument)
+    Tip:
+        Run /build-check after the scaffold to confirm it compiles before testing in-game.
+
+
+/new-stage <NAME> <click|tick|extinguish>
+    What it does:
+        Adds a new value to the TutorialStage enum and wires up the correct handler
+        in TutorialManager based on what triggers the stage to advance.
+    When to use:
+        When you want to add a new step to the safety tutorial (e.g., a new NPC
+        dialogue, a new physical drill, a new fire extinguisher task).
+    Arguments:
+        <NAME>          the enum name in UPPER_SNAKE_CASE, e.g. EXAM_PASS
+        click           stage advances when player right-clicks a block or NPC
+        tick            stage advances on a tick-driven condition (crouching, timer, etc.)
+        extinguish      stage advances when player extinguishes N fire blocks
+    Examples:
+        /new-stage EXAM_PASS click
+            Adds EXAM_PASS to TutorialStage and wires a click handler in TutorialManager.
+
+        /new-stage HOLD_BREATH tick
+            Adds HOLD_BREATH and wires a tick condition handler.
+
+        /new-stage SPRAY_BONUS extinguish
+            Adds SPRAY_BONUS and wires into the extinguish count logic.
+    After using this skill:
+        Run /check-tutorial to verify the new stage is fully connected.
+    Important:
+        New stages must be placed in the correct position in the enum — the tutorial
+        flows top-to-bottom through the enum order. Discuss placement with Claude before
+        it edits the file.
+
+
+RECOMMENDED WORKFLOWS
+---------------------
+
+Starting a new coding session:
+    /build-check            <- make sure you're starting from a clean state
+
+Adding a new tutorial step:
+    /new-stage NAME type    <- scaffold the stage
+    /check-tutorial         <- verify everything is connected
+    /build-check            <- confirm it compiles
+    /run-server             <- test it in-game
+
+After editing a structure file (.nbt / .schem):
+    /build-check            <- catch any related Java errors first
+    /run-server             <- start the server
+    /place-structure <name> <- walk through placement verification
+
+After moving or editing the tutorial lobby NBT:
+    /run-server
+    /tune-stations          <- re-align all station offsets to the new layout
+
+Something is broken and you don't know where:
+    /sim-status             <- compile + log scan in one shot
+
+Adding an admin/debug command:
+    /new-command <name> op  <- scaffold with op permission
+    /build-check            <- compile check
+
+
+SKILL FILES LOCATION
+--------------------
+    .claude/skills/run-server.md
+    .claude/skills/tune-stations.md
+    .claude/skills/place-structure.md
+    .claude/skills/check-tutorial.md
+    .claude/skills/sim-status.md
+    .claude/skills/build-check.md
+    .claude/skills/new-command.md
+    .claude/skills/new-stage.md
+
+You can edit any skill file to change its behavior — just open it and describe
+what you want Claude to do differently. Changes take effect immediately on the
+next /skill invocation.
