@@ -197,6 +197,25 @@ Wipes tutorial state and **deletes** the active DB row — no record is kept. Us
 
 ---
 
+### `/bfp tutorial [player]`
+
+**Syntax:** `/bfp tutorial` or `/bfp tutorial <player>`
+
+Resets a player's tutorial state and immediately teleports them to the tutorial lobby — no relog required. Also re-initialises all tutorial NPCs (fixing any duplicates).
+
+**What happens:**
+1. `SessionManager.reset` wipes the tutorial save and any active session
+2. Tutorial NPCs are re-spawned at their correct positions
+3. Target player is teleported to the tutorial spawn
+
+**Examples:**
+```
+/bfp tutorial
+/bfp tutorial station2
+```
+
+---
+
 ### `/bfp session info`
 
 **Syntax:** `/bfp session info`
@@ -292,6 +311,7 @@ Spawns the **LSPU CCS Building** at your current position using the `CCSBuilding
 | `/bfp checkin <player> <student_name>` | Op or PIN | Start session for target player |
 | `/bfp checkout` | Op or PIN | Finalise and save current session to DB |
 | `/bfp reset [player]` | Op or PIN | Wipe tutorial + delete DB row, no record kept |
+| `/bfp tutorial [player]` | Op or PIN | Reset tutorial + teleport to tutorial lobby, re-init NPCs |
 | `/bfp session info` | Op or PIN | Print current session details to chat |
 | `/bfp sessions list [page]` | Op or PIN | List 10 most recent sessions from DB |
 | `/bfp sessions export` | Op or PIN | Export all sessions to `run/bfp_sessions_export.csv` |
