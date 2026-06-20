@@ -30,6 +30,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.necookie.disastersim.world.LobbyManager;
+import net.necookie.disastersim.world.TutorialLobbyManager;
 
 /**
  * Main entry point for the BerongSMP mod.
@@ -195,6 +196,7 @@ public class BerongSMP {
         // Parse and place the lobby_structure NBT file, then scan it for ButtonBlock
         // instances to determine which button triggers fire vs. earthquake.
         LobbyManager.createLobby(level);
+        TutorialLobbyManager.createTutorialLobby(level);
 
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.

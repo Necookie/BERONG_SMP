@@ -13,8 +13,12 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.tutorial.NpcRole;
 import net.necookie.disastersim.tutorial.TutorialManager;
+import net.necookie.disastersim.tutorial.TutorialSavedData;
+import net.necookie.disastersim.tutorial.TutorialStage;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -108,7 +112,6 @@ public class LobbyManager {
             // Scan the bounding box of the placed structure for ButtonBlock instances
             // so we know which positions to listen for in onRightClickBlock.
             scanForButtons(level, LOBBY_POS, template.getSize());
-            TutorialManager.placeStations(level);
             lobbyReady = true;
             BerongSMP.LOGGER.info("BerongSMP Lobby loaded from NBT at {}", LOBBY_POS);
         } else {
@@ -179,24 +182,75 @@ public class LobbyManager {
     // -----------------------------------------------------------------------
 
     /**
-     * Teleports every player to the lobby spawn point the moment they log in.
+     * Routes the connecting player to the tutorial lobby or main lobby based on tutorial progress.
      */
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        // Filter to server-side ServerPlayer only — this event fires on both sides
-        // in some NeoForge versions; the isClientSide check is an extra safety guard.
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.level().isClientSide()) return;
 
         ServerLevel level = (ServerLevel) player.level();
+        routePlayer(player, level);
+    }
 
-        // Every player that connects (fresh join or reconnect) is sent to the lobby
-        // spawn so they always start inside the lobby building, not at world origin.
-        // This does NOT conflict with SimulationManager's respawn redirect because
-        // PlayerLoggedInEvent fires on first connection, while PlayerRespawnEvent fires
-        // after the player clicks "Respawn" on the death screen — two distinct events.
-        player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
+    /**
+     * Routes a respawning player back to the correct lobby. Tutorial players land in the
+     * BFP tutorial lobby; completed-tutorial players land in the main lobby.
+     * SimulationManager handles respawn for players who died mid-simulation separately.
+     */
+    @SubscribeEvent
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!TutorialLobbyManager.needsTutorialLobby(player.getUUID())) return;
+
+        ServerLevel level = (ServerLevel) player.level();
+        routePlayer(player, level);
+    }
+
+    /**
+     * Intercepts right-clicks on BFP tutorial NPCs (Villagers tagged with {@code bfp_role})
+     * and dispatches dialogue to {@link TutorialManager#onNpcInteract}, cancelling the
+     * vanilla villager trading GUI.
+     */
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        if (event.getLevel().isClientSide()) return;
+        if (event.getHand() != net.minecraft.world.InteractionHand.MAIN_HAND) return;
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!(event.getTarget() instanceof Villager villager)) return;
+
+        if (!villager.getPersistentData().contains(TutorialLobbyManager.NPC_ROLE_TAG)) return;
+
+        String roleName = villager.getPersistentData().getString(TutorialLobbyManager.NPC_ROLE_TAG).orElse("");
+        if (roleName.isEmpty()) return;
+
+        NpcRole role;
+        try {
+            role = NpcRole.valueOf(roleName);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+
+        event.setCanceled(true);
+        event.setCancellationResult(InteractionResult.SUCCESS);
+        TutorialManager.onNpcInteract(player, role);
+    }
+
+    /** Sends player to tutorial lobby or main lobby depending on tutorial completion state. */
+    private static void routePlayer(ServerPlayer player, ServerLevel level) {
+        if (TutorialLobbyManager.needsTutorialLobby(player.getUUID())) {
+            player.teleportTo(level,
+                TutorialLobbyManager.TSPAWN_X, TutorialLobbyManager.TSPAWN_Y, TutorialLobbyManager.TSPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
+            // Re-give extinguisher and fires if player reconnected mid-PASS_SPRAY stage
+            if (TutorialSavedData.get(level).getStage(player.getUUID()) == TutorialStage.PASS_SPRAY) {
+                TutorialManager.spawnPracticeFires(level);
+                TutorialManager.giveExtinguisher(player);
+            }
+        } else {
+            player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
+                Collections.emptySet(), 0.0f, 0.0f, true);
+        }
     }
 
     /**
@@ -221,14 +275,6 @@ public class LobbyManager {
         }
 
         BlockPos pos = event.getPos();
-
-        // Tutorial station interaction — must come before the sim button checks
-        if (TutorialManager.isStationPos(pos)) {
-            TutorialManager.onInteract(player, pos);
-            event.setCancellationResult(InteractionResult.SUCCESS);
-            event.setCanceled(true);
-            return;
-        }
 
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
             if (!TutorialManager.isComplete(player.getUUID())) {
