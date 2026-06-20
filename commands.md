@@ -136,6 +136,88 @@ Changes the **magnitude of your currently active earthquake session live**, taki
 
 ---
 
+## BFP Admin Commands
+
+All `/bfp` sub-commands require **Op level 2+**. They manage the student session system — tracking individual students across shared station accounts and persisting results to the Turso cloud database.
+
+---
+
+### `/bfp checkin <student_name>`
+
+**Syntax:** `/bfp checkin <student_name>` or `/bfp checkin <player> <student_name>`
+
+Starts a new session for a student sitting at the station.
+
+**What happens:**
+1. Any existing session for that account is closed and saved
+2. Tutorial saved data for the account UUID is wiped (fresh start)
+3. A new row is inserted into Turso with `status='active'`
+
+**Examples:**
+```
+/bfp checkin Juan dela Cruz
+/bfp checkin station2 Maria Santos
+```
+
+---
+
+### `/bfp checkout`
+
+**Syntax:** `/bfp checkout`
+
+Finalises the calling player's current session and writes `end_time` + `status='completed'` to Turso. Use this when a student finishes and leaves without triggering a simulation end.
+
+---
+
+### `/bfp reset [player]`
+
+**Syntax:** `/bfp reset` or `/bfp reset <player>`
+
+Wipes tutorial state and **deletes** the active DB row — no record is kept. Use when a session was started by mistake or needs to be discarded.
+
+---
+
+### `/bfp session info`
+
+**Syntax:** `/bfp session info`
+
+Prints the current session details to chat:
+- Student name, station account
+- Session start time
+- Whether the tutorial is complete
+- Simulation type, score, and pass/fail
+
+---
+
+### `/bfp sessions list [page]`
+
+**Syntax:** `/bfp sessions list` or `/bfp sessions list <page>`
+
+Lists the 10 most recent sessions from Turso in chat, paginated. Each entry shows student name, account, simulation type, score, pass status, and session status.
+
+---
+
+### `/bfp sessions export`
+
+**Syntax:** `/bfp sessions export`
+
+Queries all sessions from Turso and writes them to `run/bfp_sessions_export.csv`. Columns: `id, student_name, station_account, account_uuid, start_time, end_time, status, tutorial_completed, tutorial_duration_s, simulation_type, simulation_score, passed, notes`.
+
+---
+
+### `/bfp student <name>`
+
+**Syntax:** `/bfp student <name>`
+
+Looks up the last 10 sessions for a given student name and prints them to chat. Useful for checking a student's history across multiple attempts.
+
+**Example:**
+```
+/bfp student Juan dela Cruz
+```
+
+---
+
 ## Utility Commands
 
 ### `/get_extinguisher`
@@ -176,14 +258,22 @@ Spawns the **LSPU CCS Building** at your current position using the `CCSBuilding
 
 ## Quick Reference Table
 
-| Command | Permission | Starts simulation | Needs player | Notes |
-|---|---|---|---|---|
-| `/sim_fire` | Any player | Yes (FIRE) | Yes | Bypasses lobby button |
-| `/sim_earthquake [magnitude]` | Any player | Yes (EARTHQUAKE) | Yes | Optional magnitude 0.1–10.0 |
-| `/sim_stop` | Any player | No | No* | Also works from console |
-| `/sim_magnitude <value>` | Op (level 2+) | No | Yes | Live-adjust running earthquake only |
-| `/get_extinguisher` | Any player | No | Yes | Gives extinguisher item |
-| `/spawn_lspu` | Op (level 2+) | No | Yes | Permanent world change |
+| Command | Permission | Notes |
+|---|---|---|
+| `/sim_fire` | Any player | Start fire simulation, bypasses lobby button |
+| `/sim_earthquake [magnitude]` | Any player | Start earthquake simulation, optional magnitude 0.1–10.0 |
+| `/sim_stop` | Any player | End active simulation early |
+| `/sim_magnitude <value>` | Op (level 2+) | Live-adjust running earthquake magnitude |
+| `/get_extinguisher` | Any player | Gives fire extinguisher item |
+| `/spawn_lspu` | Op (level 2+) | Permanent world change — places CCS building |
+| `/bfp checkin <student_name>` | Op (level 2+) | Start session for caller; wipes tutorial state |
+| `/bfp checkin <player> <student_name>` | Op (level 2+) | Start session for target player |
+| `/bfp checkout` | Op (level 2+) | Finalise and save current session to DB |
+| `/bfp reset [player]` | Op (level 2+) | Wipe tutorial + delete DB row, no record kept |
+| `/bfp session info` | Op (level 2+) | Print current session details to chat |
+| `/bfp sessions list [page]` | Op (level 2+) | List 10 most recent sessions from DB |
+| `/bfp sessions export` | Op (level 2+) | Export all sessions to `run/bfp_sessions_export.csv` |
+| `/bfp student <name>` | Op (level 2+) | Look up last 10 sessions for a student name |
 
 *`/sim_stop` accepts console input but the stop targets the calling player — from console it resolves to no player UUID, so use it in-game.
 
@@ -204,3 +294,6 @@ These values live in `run/config/berongsmp-common.toml` and are hot-reloadable (
 | `quakeInterval` | 10 ticks | How often earthquake effect fires |
 | `fireSpawnCount` | 3 | Fire blocks placed per spawn interval |
 | `fireSpawnInterval` | 20 ticks (1 s) | How often fire is placed |
+| `tursoUrl` | `""` | Turso HTTPS database URL for session tracking |
+| `tursoToken` | `""` | Turso Bearer auth token |
+| `passThresholdFire` | 5 | Fires extinguished required to mark a session as passed |
