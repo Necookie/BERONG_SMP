@@ -1,7 +1,7 @@
 # BerongSMP — Master Implementation Plan
 
 > **Thesis:** "Minecraft as a Platform for AI-Enhanced Disaster Risk Simulation and Adaptive Educational Preparedness"
-> **Last updated:** 2026-06-21
+> **Last updated:** 2026-06-21 — Phase 2 complete
 > **Update this file** whenever a phase is completed or a decision changes.
 
 ---
@@ -41,7 +41,7 @@
 | Phase | Name | Status |
 |---|---|---|
 | 1 | Data Foundation (mod side) | `[x] done` |
-| 2 | Dashboard Live Data | `[ ] not started` |
+| 2 | Dashboard Live Data | `[x] done` |
 | 3 | Synthetic Data Generator | `[ ] not started` |
 | 4 | Thesis Extras | `[ ] not started` |
 
