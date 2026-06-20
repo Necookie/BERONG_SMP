@@ -41,17 +41,19 @@ NeoForge uses two separate event buses — a core pattern throughout this codeba
 Players must complete a safety tutorial before simulation buttons become active. Progress persists across disconnects via `TutorialSavedData`.
 
 ```
-Stage order: NOT_STARTED → PASS_SPRAY → EXT_TYPE_A → EXT_TYPE_B → EXT_TYPE_C
-             → QUAKE_DROP → QUAKE_COVER → QUAKE_HOLDON → COMPLETED
+Stage order: NOT_STARTED → PASS_PULL → PASS_SPRAY → EXT_TYPE_A → EXT_TYPE_B → EXT_TYPE_C
+             → QUAKE_INTRO → QUAKE_DROP → QUAKE_COVER → QUAKE_HOLDON → COMPLETED
 
-Player right-clicks STATION_PULL (lobby offset +5,2,14):
-  → given FireExtinguisher (pin NOT pulled), 5 practice fire blocks spawned in cross at PRACTICE_FIRE (+11,2,18)
+Sgt. Reyes NPC (TRAINER): talks during NOT_STARTED/PASS_PULL → gives extinguisher, spawns 5 campfires at PRACTICE_FIRE (+7,2,11)
   → stage = PASS_SPRAY
 
-FireExtinguisherItem.extinguishAt → TutorialManager.onExtinguish (unconditional, after session check):
-  → counts extinguishes while stage == PASS_SPRAY; at 3 → remove practice fires, stage = EXT_TYPE_A
+FireExtinguisherItem.extinguishAt → TutorialManager.onExtinguish (unconditional):
+  → counts extinguishes while stage == PASS_SPRAY; at 3 → remove campfires, stage = EXT_TYPE_A
 
-Player right-clicks STATION_EXT_A/B/C in order → class info message, stage advances A→B→C→QUAKE_DROP
+Officer Cruz NPC (EXT_EXPERT): talks during EXT_TYPE_A/B/C in order → class info, stage advances A→B→C→QUAKE_INTRO
+
+Capt. Santos NPC (SAFETY_OFFICER): talks during QUAKE_INTRO (5 lines, last advancesStage=true)
+  → final line triggers QUAKE_DROP; earthquake drill begins
 
 TutorialManager.tick (called from SimulationManager.onServerTick every tick):
   QUAKE_DROP  → shake prompt every 10 ticks; player crouches → QUAKE_COVER

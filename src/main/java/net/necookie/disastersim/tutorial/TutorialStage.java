@@ -8,6 +8,7 @@ public enum TutorialStage {
     EXT_TYPE_A,
     EXT_TYPE_B,
     EXT_TYPE_C,
+    QUAKE_INTRO,
     QUAKE_DROP,
     QUAKE_COVER,
     QUAKE_HOLDON,

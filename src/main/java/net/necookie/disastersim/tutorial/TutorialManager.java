@@ -120,6 +120,10 @@ public class TutorialManager {
                 sendPrompt(player, "§eTalk to §a[Officer Cruz]§e about Class C fires.", 0f);
             }
             case EXT_TYPE_C -> {
+                advanceTo(player, TutorialStage.QUAKE_INTRO);
+                sendPrompt(player, "§eTalk to §c[Capt. Santos]§e in the earthquake zone!", 0f);
+            }
+            case QUAKE_INTRO -> {
                 advanceTo(player, TutorialStage.QUAKE_DROP);
                 sendPrompt(player, "§c⚠ EARTHQUAKE! Press [SHIFT] to DROP!", 1.5f);
             }

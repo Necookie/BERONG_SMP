@@ -42,8 +42,11 @@ public final class NpcDialogue {
         entry(TutorialStage.EXT_TYPE_C, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7Almost done with the fire lessons! Go finish up with §aOfficer Cruz§7 for the last class.", false, "npc.sgt_reyes.sgt_reyes_redirect_c")
         )),
-        entry(TutorialStage.QUAKE_DROP, List.of(
+        entry(TutorialStage.QUAKE_INTRO, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7Now head over to §cCaptain Santos§7 in the earthquake zone — she will teach you what to do when the ground shakes!", false, "npc.sgt_reyes.sgt_reyes_redirect_quake")
+        )),
+        entry(TutorialStage.QUAKE_DROP, List.of(
+            new DialogueLine("§6[Sgt. Reyes] §7Stay in the drill! Press [SHIFT] to DROP!", false, "npc.sgt_reyes.sgt_reyes_redirect_quake")
         )),
         entry(TutorialStage.QUAKE_COVER, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7Stay in the drill! Get under something solid and keep crouching!", false, "npc.sgt_reyes.sgt_reyes_redirect_cover")
@@ -88,12 +91,12 @@ public final class NpcDialogue {
     // ── Capt. Santos — Earthquake Drill Zone ─────────────────────────────────
 
     public static final Map<TutorialStage, List<DialogueLine>> SAFETY_OFFICER_LINES = Map.of(
-        TutorialStage.QUAKE_DROP, List.of(
+        TutorialStage.QUAKE_INTRO, List.of(
             new DialogueLine("§c[Capt. Santos] §fGreat work on all the fire training! I am Captain Santos, and I am here to teach you what to do when the ground starts shaking — an earthquake!", false, "npc.sgt_santos.santos_0"),
             new DialogueLine("§c[Capt. Santos] §fThe Philippines is located in a very special — but also very dangerous — place on Earth where big pieces of the ground called tectonic plates push against each other and cause the ground to shake!", false, "npc.sgt_santos.santos_1"),
             new DialogueLine("§c[Capt. Santos] §fEvery year, the Philippines has more than 2,000 earthquakes! Most are too small to feel, but some are very strong and can knock down buildings, break furniture, and hurt people.", false, "npc.sgt_santos.santos_2"),
             new DialogueLine("§c[Capt. Santos] §fThe most important thing to remember during an earthquake is three words: §e§lDROP — COVER — HOLD ON! §r§fFirst you DROP low to the ground so you do not fall over. Then you get COVER under something strong like a table.", false, "npc.sgt_santos.santos_3"),
-            new DialogueLine("§c[Capt. Santos] §fI am starting the drill right now! When you feel the shaking — SHIFT to crouch and DROP immediately! Then move under a solid block for COVER and HOLD ON until it stops. Ready? Here we go!", false, "npc.sgt_santos.santos_4")
+            new DialogueLine("§c[Capt. Santos] §fI am starting the drill right now! When you feel the shaking — SHIFT to crouch and DROP immediately! Then move under a solid block for COVER and HOLD ON until it stops. Ready? Here we go!", true, "npc.sgt_santos.santos_4")
         ),
         TutorialStage.COMPLETED, List.of(
             new DialogueLine("§c[Capt. Santos] §f§lWow! Outstanding work, trainee! You are amazing!", false, "npc.sgt_santos.santos_done_0"),
