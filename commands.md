@@ -295,6 +295,27 @@ Spawns the **LSPU CCS Building** at your current position using the `CCSBuilding
 
 ---
 
+## Giving Items & Blocks (Vanilla `/give`)
+
+All BerongSMP items and blocks are obtainable via the vanilla `/give` command using their namespaced IDs. No custom command needed.
+
+| Item / Block | `/give` ID | Notes |
+|---|---|---|
+| Fire Extinguisher | `berongsmp:fire_extinguisher` | Class A/B extinguisher; right-click to pull pin, then spray |
+| CO2 Extinguisher | `berongsmp:co2_extinguisher` | Class C extinguisher for electrical fires; targets `BURNING` computer blocks |
+| Computer Block | `berongsmp:computer_block` | Placeable; right-click to toggle ON/OFF; use flint & steel to ignite (BURNING state); extinguish with CO2 |
+
+**Examples:**
+```
+/give @s berongsmp:co2_extinguisher
+/give @s berongsmp:computer_block
+/give @s berongsmp:fire_extinguisher
+```
+
+> `berongsmp:example_block` and `berongsmp:example_item` are leftover template placeholders — ignore them.
+
+---
+
 ## Quick Reference Table
 
 | Command | Permission | Notes |
