@@ -259,6 +259,7 @@ public class TutorialLobbyManager {
         Villager villager = new Villager(EntityType.VILLAGER, level);
         villager.setNoAi(true);
         villager.setSilent(true);
+        villager.setInvulnerable(true);
         villager.setPersistenceRequired();
         villager.setCustomName(Component.literal(name));
         villager.setCustomNameVisible(true);
