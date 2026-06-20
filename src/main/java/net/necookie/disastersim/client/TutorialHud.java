@@ -10,6 +10,9 @@ import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Client-side HUD for tutorial prompts and QUAKE-stage camera shake.
  * Hidden whenever the simulation HUD is active, so the two overlays never stack.
@@ -36,14 +39,50 @@ public class TutorialHud {
 
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
+        int screenW = mc.getWindow().getGuiScaledWidth();
+        int screenH = mc.getWindow().getGuiScaledHeight();
 
-        int screenWidth  = mc.getWindow().getGuiScaledWidth();
-        int textWidth    = font.width(prompt);
-        int xPos         = (screenWidth - textWidth) / 2;
-        int yPos         = mc.getWindow().getGuiScaledHeight() - 80;
+        // Word-wrap to at most 70% of screen width (max 460 px) so text never overflows
+        int maxWidth = Math.min((int)(screenW * 0.70f), 460);
+        List<String> lines = wrapText(font, prompt, maxWidth);
 
-        guiGraphics.fill(xPos - 4, yPos - 4, xPos + textWidth + 4, yPos + 14, 0xB0000000);
-        guiGraphics.text(font, prompt, xPos, yPos, 0xFFFFFF00, true);
+        int lineH   = font.lineHeight + 2;
+        int totalH  = lines.size() * lineH - 2;
+
+        // Measure the widest rendered line for the background box
+        int boxW = 0;
+        for (String line : lines) boxW = Math.max(boxW, font.width(line));
+
+        // Anchor: bottom of text block sits at screenH - 72; grows upward for multi-line
+        int yStart = screenH - 72 - totalH;
+        int xBox   = (screenW - boxW) / 2;
+
+        guiGraphics.fill(xBox - 4, yStart - 4, xBox + boxW + 4, yStart + totalH + 4, 0xB0000000);
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            int xLine = (screenW - font.width(line)) / 2;
+            guiGraphics.text(font, line, xLine, yStart + i * lineH, 0xFFFFFFFF, true);
+        }
+    }
+
+    /** Splits {@code text} (which may contain §-codes) into lines that fit within {@code maxWidth}. */
+    private static List<String> wrapText(Font font, String text, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder current = new StringBuilder();
+        for (String word : words) {
+            String candidate = current.length() == 0 ? word : current + " " + word;
+            if (font.width(candidate) <= maxWidth) {
+                if (current.length() > 0) current.append(' ');
+                current.append(word);
+            } else {
+                if (current.length() > 0) lines.add(current.toString());
+                current = new StringBuilder(word);
+            }
+        }
+        if (current.length() > 0) lines.add(current.toString());
+        return lines.isEmpty() ? List.of(text) : lines;
     }
 
     /** Applies camera shake for QUAKE tutorial stages — same multi-layer approach as SimulationHud. */
