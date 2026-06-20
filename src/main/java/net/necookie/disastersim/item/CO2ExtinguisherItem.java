@@ -21,7 +21,6 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.ComputerBlock;
@@ -183,9 +182,10 @@ public class CO2ExtinguisherItem extends Item {
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
         } else if (state.getBlock() instanceof ComputerBlock
-                && state.hasProperty(BlockStateProperties.LIT)
-                && state.getValue(BlockStateProperties.LIT)) {
-            level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 3);
+                && state.hasProperty(ComputerBlock.BURNING)
+                && state.getValue(ComputerBlock.BURNING)) {
+            level.setBlock(pos, state.setValue(ComputerBlock.BURNING, false)
+                                     .setValue(ComputerBlock.LIT, false), 3);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
             if (user instanceof ServerPlayer sp) {

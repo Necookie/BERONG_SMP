@@ -70,7 +70,11 @@ public class BerongSMP {
                     .mapColor(MapColor.METAL)
                     .strength(1.5f, 6.0f)
                     .sound(SoundType.METAL)
-                    .lightLevel(state -> state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT) ? 7 : 0));
+                    .lightLevel(state -> {
+                        if (state.getValue(ComputerBlock.BURNING)) return 15;
+                        if (state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) return 7;
+                        return 0;
+                    }));
 
     /** Computer block item. */
     public static final DeferredItem<BlockItem> COMPUTER_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("computer_block", COMPUTER_BLOCK);

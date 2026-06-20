@@ -1,12 +1,20 @@
 {
   "variants": {
-    "facing=north,lit=false": { "model": "berongsmp:block/computer_block",     "y": 0   },
-    "facing=south,lit=false": { "model": "berongsmp:block/computer_block",     "y": 180 },
-    "facing=west,lit=false":  { "model": "berongsmp:block/computer_block",     "y": 270 },
-    "facing=east,lit=false":  { "model": "berongsmp:block/computer_block",     "y": 90  },
-    "facing=north,lit=true":  { "model": "berongsmp:block/computer_block_lit", "y": 0   },
-    "facing=south,lit=true":  { "model": "berongsmp:block/computer_block_lit", "y": 180 },
-    "facing=west,lit=true":   { "model": "berongsmp:block/computer_block_lit", "y": 270 },
-    "facing=east,lit=true":   { "model": "berongsmp:block/computer_block_lit", "y": 90  }
+    "burning=false,facing=north,lit=false": { "model": "berongsmp:block/computer_block",         "y": 0   },
+    "burning=false,facing=south,lit=false": { "model": "berongsmp:block/computer_block",         "y": 180 },
+    "burning=false,facing=west,lit=false":  { "model": "berongsmp:block/computer_block",         "y": 270 },
+    "burning=false,facing=east,lit=false":  { "model": "berongsmp:block/computer_block",         "y": 90  },
+    "burning=false,facing=north,lit=true":  { "model": "berongsmp:block/computer_block_lit",     "y": 0   },
+    "burning=false,facing=south,lit=true":  { "model": "berongsmp:block/computer_block_lit",     "y": 180 },
+    "burning=false,facing=west,lit=true":   { "model": "berongsmp:block/computer_block_lit",     "y": 270 },
+    "burning=false,facing=east,lit=true":   { "model": "berongsmp:block/computer_block_lit",     "y": 90  },
+    "burning=true,facing=north,lit=false":  { "model": "berongsmp:block/computer_block_burning", "y": 0   },
+    "burning=true,facing=south,lit=false":  { "model": "berongsmp:block/computer_block_burning", "y": 180 },
+    "burning=true,facing=west,lit=false":   { "model": "berongsmp:block/computer_block_burning", "y": 270 },
+    "burning=true,facing=east,lit=false":   { "model": "berongsmp:block/computer_block_burning", "y": 90  },
+    "burning=true,facing=north,lit=true":   { "model": "berongsmp:block/computer_block_burning", "y": 0   },
+    "burning=true,facing=south,lit=true":   { "model": "berongsmp:block/computer_block_burning", "y": 180 },
+    "burning=true,facing=west,lit=true":    { "model": "berongsmp:block/computer_block_burning", "y": 270 },
+    "burning=true,facing=east,lit=true":    { "model": "berongsmp:block/computer_block_burning", "y": 90  }
   }
 }
