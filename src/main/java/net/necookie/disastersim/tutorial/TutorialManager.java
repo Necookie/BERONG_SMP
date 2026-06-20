@@ -78,7 +78,6 @@ public class TutorialManager {
         if (step >= lines.size()) step = 0;
 
         NpcDialogue.DialogueLine line = lines.get(step);
-        player.sendSystemMessage(Component.literal(line.text()));
         sendPrompt(player, line.text(), 0f);
 
         int nextStep = step + 1;
