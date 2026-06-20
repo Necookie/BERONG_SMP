@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TutorialManager {
 
     /** Center of the practice fire cluster in the BFP tutorial lobby. */
-    static final BlockPos PRACTICE_FIRE = TutorialLobbyManager.TUTORIAL_LOBBY_POS.offset(7, 2, 11);
+    static final BlockPos PRACTICE_FIRE = TutorialLobbyManager.TUTORIAL_LOBBY_POS.offset(12, 2, 15);
 
     /** Practice fire cross pattern (center + 4 cardinal neighbours). */
     private static final List<BlockPos> PRACTICE_FIRE_POSITIONS = List.of(

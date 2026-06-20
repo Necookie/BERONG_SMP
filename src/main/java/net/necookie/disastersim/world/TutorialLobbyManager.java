@@ -23,16 +23,16 @@ import java.util.UUID;
  * named Villager NPCs are tagged via persistent data so that the entity-interact handler
  * in {@link LobbyManager} can dispatch clicks to {@link TutorialManager#onNpcInteract}.
  *
- * <p>Room layout (offsets from {@link #TUTORIAL_LOBBY_POS}):
+ * <p>Room layout — X 0-19 (20 wide), Z 0-39 (40 long), Y 0-6 (7 tall):
  * <pre>
- *   Z  0     : Front entrance wall (door at X=7-8)
- *   Z  1- 7  : Entry hall — Sgt. Reyes (TRAINER) at X=5, Z=3
- *   Z  8     : Section divider
- *   Z  9-13  : Fire practice area (practice fires at X=10-12, Z=8-10)
- *   Z 14     : Section divider
- *   Z 15-18  : Extinguisher types — Officer Cruz (EXT_EXPERT) at X=5, Z=15
- *   Z 19     : Section divider
- *   Z 20-27  : Earthquake drill zone — Capt. Santos (SAFETY_OFFICER) at X=5, Z=21
+ *   Z  0     : Front entrance wall (4-wide door at X=8-11)
+ *   Z  1- 9  : Entry hall — Sgt. Reyes (TRAINER) at X=4, Z=5
+ *   Z 10     : Section divider (passage X=9-11)
+ *   Z 11-20  : Fire practice area (campfires at offset X=12, Z=15)
+ *   Z 21     : Section divider
+ *   Z 22-30  : Extinguisher types — Officer Cruz (EXT_EXPERT) at X=4, Z=25
+ *   Z 31     : Section divider
+ *   Z 32-39  : Earthquake drill zone — Capt. Santos (SAFETY_OFFICER) at X=4, Z=35
  * </pre>
  */
 public class TutorialLobbyManager {
@@ -40,18 +40,24 @@ public class TutorialLobbyManager {
     /** World origin of the tutorial lobby structure (bottom-northwest corner). */
     public static final BlockPos TUTORIAL_LOBBY_POS = new BlockPos(-60, -33, 0);
 
-    /** Player spawn coordinates inside the tutorial lobby. */
-    public static final double TSPAWN_X = -52.5;
+    /**
+     * Room dimensions: X 0-19 (20 wide), Z 0-39 (40 long), Y 0-6 (7 tall).
+     * Sections (Z offsets): Entry Hall 1-9 | divider 10 | Fire Practice 11-20
+     *   | divider 21 | Extinguisher Types 22-30 | divider 31 | Earthquake Drill 32-39
+     */
+
+    /** Player spawn coordinates inside the tutorial lobby (entry hall centre). */
+    public static final double TSPAWN_X = -50.5;
     public static final double TSPAWN_Y = -31.0;
-    public static final double TSPAWN_Z =   3.5;
+    public static final double TSPAWN_Z =   4.5;
 
     /** PersistentData key used to identify BFP NPCs and store their role. */
     public static final String NPC_ROLE_TAG = "bfp_role";
 
     // NPC offsets from TUTORIAL_LOBBY_POS
-    private static final BlockPos NPC_TRAINER_OFFSET        = new BlockPos(5, 2,  3);
-    private static final BlockPos NPC_EXT_EXPERT_OFFSET     = new BlockPos(5, 2, 15);
-    private static final BlockPos NPC_SAFETY_OFFICER_OFFSET = new BlockPos(5, 2, 21);
+    private static final BlockPos NPC_TRAINER_OFFSET        = new BlockPos(4, 2,  5);
+    private static final BlockPos NPC_EXT_EXPERT_OFFSET     = new BlockPos(4, 2, 25);
+    private static final BlockPos NPC_SAFETY_OFFICER_OFFSET = new BlockPos(4, 2, 35);
 
     // Bounded AABB covering all loaded chunks — avoids section-storage overflow from AABB.INFINITE
     private static final AABB WORLD_BOUNDS = new AABB(-32000, -512, -32000, 32000, 512, 32000);
@@ -94,139 +100,144 @@ public class TutorialLobbyManager {
     /**
      * Programmatically builds the BFP National Fire Training Center.
      *
-     * <p>Room occupies offsets X 0-15, Y 0-5, Z 0-27 from {@code base}:
+     * <p>Room occupies offsets X 0-19, Y 0-6, Z 0-39 from {@code base}:
      * <ul>
      *   <li>Y=0 — stone-brick foundation</li>
      *   <li>Y=1 — floor surface (section-coloured)</li>
-     *   <li>Y=2-4 — air (interior / walls)</li>
-     *   <li>Y=5 — red-concrete ceiling with embedded sea-lanterns</li>
+     *   <li>Y=2-5 — air interior / walls</li>
+     *   <li>Y=6 — red-concrete ceiling with sea-lanterns</li>
      * </ul>
+     * Sections: Entry Hall Z=1-9 | Fire Practice Z=11-20 | Extinguisher Types Z=22-30 | Quake Drill Z=32-39
+     * Section dividers at Z=10, 21, 31 — passage X=9-11, Y=2-3.
      */
     private static void buildStructure(ServerLevel level, BlockPos base) {
-        // Clear room volume (keep Y=0 foundation intact below)
-        for (int x = 0; x <= 15; x++)
-            for (int y = 1; y <= 5; y++)
-                for (int z = 0; z <= 27; z++)
+        // Clear entire volume first
+        for (int x = 0; x <= 19; x++)
+            for (int y = 1; y <= 6; y++)
+                for (int z = 0; z <= 39; z++)
                     level.setBlock(base.offset(x, y, z), Blocks.AIR.defaultBlockState(), 3);
 
         // Foundation
-        fill(level, base, 0, 0, 0, 15, 0, 27, Blocks.STONE_BRICKS);
+        fill(level, base, 0, 0, 0, 19, 0, 39, Blocks.STONE_BRICKS);
 
-        // Ceiling — red concrete (BFP brand colour) with embedded sea-lanterns for lighting
-        fill(level, base, 0, 5, 0, 15, 5, 27, Blocks.RED_CONCRETE);
-        set(level, base, 7, 5,  3, Blocks.SEA_LANTERN);
-        set(level, base, 3, 5, 11, Blocks.SEA_LANTERN);
-        set(level, base, 11, 5, 11, Blocks.SEA_LANTERN);
-        set(level, base, 7, 5, 16, Blocks.SEA_LANTERN);
-        set(level, base, 5, 5, 23, Blocks.SEA_LANTERN);
-        set(level, base, 11, 5, 23, Blocks.SEA_LANTERN);
-
-        // Outer walls — red concrete
-        fill(level, base,  0, 1,  0, 15, 4,  0, Blocks.RED_CONCRETE); // front (Z=0)
-        fill(level, base,  0, 1, 27, 15, 4, 27, Blocks.RED_CONCRETE); // back  (Z=27)
-        fill(level, base,  0, 1,  0,  0, 4, 27, Blocks.RED_CONCRETE); // west  (X=0)
-        fill(level, base, 15, 1,  0, 15, 4, 27, Blocks.RED_CONCRETE); // east  (X=15)
-
-        // Default floor (polished andesite); sections override below
-        fill(level, base, 1, 1, 1, 14, 1, 26, Blocks.POLISHED_ANDESITE);
-
-        // Door opening at front wall X=7-8, Y=2-3
-        set(level, base, 7, 2, 0, Blocks.AIR); set(level, base, 7, 3, 0, Blocks.AIR);
-        set(level, base, 8, 2, 0, Blocks.AIR); set(level, base, 8, 3, 0, Blocks.AIR);
-        // Yellow door frame
-        set(level, base, 6, 2, 0, Blocks.YELLOW_CONCRETE); set(level, base, 6, 3, 0, Blocks.YELLOW_CONCRETE);
-        set(level, base, 9, 2, 0, Blocks.YELLOW_CONCRETE); set(level, base, 9, 3, 0, Blocks.YELLOW_CONCRETE);
-        fill(level, base, 6, 4, 0, 9, 4, 0, Blocks.YELLOW_CONCRETE); // lintel
-
-        // Side windows (plain glass)
-        for (int wz : new int[]{4, 11, 16, 22}) {
-            set(level, base,  0, 3, wz, Blocks.GLASS);
-            set(level, base, 15, 3, wz, Blocks.GLASS);
+        // Ceiling — red concrete with sea-lanterns (2 columns per section)
+        fill(level, base, 0, 6, 0, 19, 6, 39, Blocks.RED_CONCRETE);
+        for (int lz : new int[]{4, 8, 15, 19, 25, 28, 34, 38}) {
+            set(level, base,  5, 6, lz, Blocks.SEA_LANTERN);
+            set(level, base, 14, 6, lz, Blocks.SEA_LANTERN);
         }
 
-        // Section dividers (white concrete, passage at X=5-6, Y=2-3)
-        sectionDivider(level, base,  8);
-        sectionDivider(level, base, 14);
-        sectionDivider(level, base, 19);
+        // Outer walls — red concrete, Y=1-5
+        fill(level, base,  0, 1,  0, 19, 5,  0, Blocks.RED_CONCRETE); // front
+        fill(level, base,  0, 1, 39, 19, 5, 39, Blocks.RED_CONCRETE); // back
+        fill(level, base,  0, 1,  0,  0, 5, 39, Blocks.RED_CONCRETE); // west
+        fill(level, base, 19, 1,  0, 19, 5, 39, Blocks.RED_CONCRETE); // east
 
-        // ── SECTION 1: Entry Hall (Z=1-7) ──────────────────────────────────
-        // BFP emblem on floor (red base, yellow centre cross)
-        fill(level, base, 6, 1, 3,  9, 1,  6, Blocks.RED_CONCRETE);
-        fill(level, base, 7, 1, 3,  8, 1,  6, Blocks.YELLOW_CONCRETE);
-        fill(level, base, 6, 1, 4,  9, 1,  5, Blocks.YELLOW_CONCRETE);
-        set(level, base, 7, 1, 4, Blocks.RED_CONCRETE); set(level, base, 8, 1, 4, Blocks.RED_CONCRETE);
-        set(level, base, 7, 1, 5, Blocks.RED_CONCRETE); set(level, base, 8, 1, 5, Blocks.RED_CONCRETE);
-        // Reception counter (trainer stands behind it)
-        fill(level, base, 3, 2, 1, 7, 2, 1, Blocks.OAK_PLANKS);
-        fill(level, base, 3, 3, 1, 7, 3, 1, Blocks.OAK_PLANKS);
-        // Waiting bench on east side
-        fill(level, base, 12, 2, 2, 14, 2, 6, Blocks.OAK_PLANKS);
-        // Poster on west wall: red/white alternating blocks
-        set(level, base, 0, 2, 3, Blocks.RED_CONCRETE);  set(level, base, 0, 3, 3, Blocks.WHITE_CONCRETE);
-        set(level, base, 0, 2, 4, Blocks.WHITE_CONCRETE); set(level, base, 0, 3, 4, Blocks.RED_CONCRETE);
-        set(level, base, 0, 2, 5, Blocks.RED_CONCRETE);  set(level, base, 0, 3, 5, Blocks.WHITE_CONCRETE);
+        // Default floor (polished andesite); sections override below
+        fill(level, base, 1, 1, 1, 18, 1, 38, Blocks.POLISHED_ANDESITE);
 
-        // ── SECTION 2: Fire Practice Area (Z=9-13) ─────────────────────────
-        // Danger floor: orange with yellow border, red interior
-        fill(level, base,  1, 1,  9, 14, 1,  9, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  1, 1, 13, 14, 1, 13, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  1, 1,  9,  1, 1, 13, Blocks.YELLOW_CONCRETE);
-        fill(level, base, 14, 1,  9, 14, 1, 13, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  2, 1, 10, 13, 1, 12, Blocks.ORANGE_CONCRETE);
+        // Front entrance door — 4 wide (X=8-11), 3 tall (Y=2-4)
+        for (int dx = 8; dx <= 11; dx++) {
+            set(level, base, dx, 2, 0, Blocks.AIR);
+            set(level, base, dx, 3, 0, Blocks.AIR);
+            set(level, base, dx, 4, 0, Blocks.AIR);
+        }
+        // Yellow door frame + lintel
+        for (int dy = 2; dy <= 4; dy++) {
+            set(level, base, 7,  dy, 0, Blocks.YELLOW_CONCRETE);
+            set(level, base, 12, dy, 0, Blocks.YELLOW_CONCRETE);
+        }
+        fill(level, base, 7, 5, 0, 12, 5, 0, Blocks.YELLOW_CONCRETE);
+
+        // Side windows — 2 blocks tall at regular Z intervals
+        for (int wz : new int[]{5, 15, 25, 35}) {
+            set(level, base,  0, 3, wz, Blocks.GLASS);
+            set(level, base,  0, 4, wz, Blocks.GLASS);
+            set(level, base, 19, 3, wz, Blocks.GLASS);
+            set(level, base, 19, 4, wz, Blocks.GLASS);
+        }
+
+        // Section dividers (white concrete; passage X=9-11, Y=2-3)
+        sectionDivider(level, base, 10);
+        sectionDivider(level, base, 21);
+        sectionDivider(level, base, 31);
+
+        // ── SECTION 1: Entry Hall (Z=1-9) ──────────────────────────────────
+        // BFP emblem centred on floor (5×5 red + yellow cross)
+        fill(level, base,  8, 1, 4, 12, 1, 8, Blocks.RED_CONCRETE);
+        fill(level, base,  9, 1, 4, 11, 1, 8, Blocks.YELLOW_CONCRETE);
+        fill(level, base,  8, 1, 5, 12, 1, 7, Blocks.YELLOW_CONCRETE);
+        fill(level, base,  9, 1, 5, 11, 1, 7, Blocks.RED_CONCRETE); // centre cross back to red
+        // Reception counter — Sgt. Reyes stands at NPC_TRAINER_OFFSET (X=4,Z=5)
+        fill(level, base, 2, 2, 2, 7, 2, 2, Blocks.OAK_PLANKS);
+        fill(level, base, 2, 3, 2, 7, 3, 2, Blocks.OAK_PLANKS);
+        // Waiting benches on east side
+        fill(level, base, 14, 2, 2, 17, 2, 8, Blocks.OAK_PLANKS);
+        // BFP colour stripe on west wall
+        for (int pz = 3; pz <= 8; pz++) {
+            set(level, base, 0, 3, pz, pz % 2 == 0 ? Blocks.RED_CONCRETE   : Blocks.WHITE_CONCRETE);
+            set(level, base, 0, 4, pz, pz % 2 == 0 ? Blocks.WHITE_CONCRETE : Blocks.RED_CONCRETE);
+        }
+
+        // ── SECTION 2: Fire Practice Area (Z=11-20) ────────────────────────
+        // Danger floor: yellow border, orange interior
+        fill(level, base,  1, 1, 11, 18, 1, 20, Blocks.YELLOW_CONCRETE);
+        fill(level, base,  2, 1, 12, 17, 1, 19, Blocks.ORANGE_CONCRETE);
         // Extinguisher rack on east wall
-        fill(level, base, 14, 2, 10, 14, 3, 12, Blocks.RED_CONCRETE);
-        // Warning chevrons on back of divider Z=8 (visible from fire side)
-        set(level, base,  9, 2, 8, Blocks.YELLOW_CONCRETE); set(level, base, 10, 2, 8, Blocks.RED_CONCRETE);
-        set(level, base, 11, 2, 8, Blocks.YELLOW_CONCRETE); set(level, base, 12, 2, 8, Blocks.RED_CONCRETE);
-        set(level, base, 13, 2, 8, Blocks.YELLOW_CONCRETE);
+        fill(level, base, 18, 2, 13, 18, 5, 18, Blocks.RED_CONCRETE);
+        // Warning chevrons on divider Z=10 (south-facing)
+        for (int cx = 9; cx <= 18; cx++)
+            set(level, base, cx, 2, 10, cx % 2 == 0 ? Blocks.YELLOW_CONCRETE : Blocks.RED_CONCRETE);
 
-        // ── SECTION 3: Extinguisher Types (Z=15-18) ────────────────────────
-        fill(level, base, 1, 1, 15, 14, 1, 18, Blocks.LIGHT_BLUE_CONCRETE);
-        // Instructor desk — kept to X=1-4 so it never blocks the passage at X=5-6
-        fill(level, base, 1, 2, 15, 4, 2, 15, Blocks.OAK_PLANKS);
-        // Class A display — green (ordinary combustibles)
-        set(level, base, 2, 2, 17, Blocks.STONE_BRICKS); set(level, base, 3, 2, 17, Blocks.STONE_BRICKS);
-        set(level, base, 2, 3, 17, Blocks.GREEN_WOOL);   set(level, base, 3, 3, 17, Blocks.GREEN_WOOL);
-        // Class B display — yellow (flammable liquids)
-        set(level, base, 7, 2, 17, Blocks.STONE_BRICKS); set(level, base, 8, 2, 17, Blocks.STONE_BRICKS);
-        set(level, base, 7, 3, 17, Blocks.YELLOW_WOOL);  set(level, base, 8, 3, 17, Blocks.YELLOW_WOOL);
-        // Class C display — blue (electrical)
-        set(level, base, 12, 2, 17, Blocks.STONE_BRICKS); set(level, base, 13, 2, 17, Blocks.STONE_BRICKS);
-        set(level, base, 12, 3, 17, Blocks.BLUE_WOOL);    set(level, base, 13, 3, 17, Blocks.BLUE_WOOL);
-        // A/B/C labels below pedestals (coloured floor)
-        fill(level, base, 2, 1, 17, 3, 1, 17, Blocks.GREEN_CONCRETE);
-        fill(level, base, 7, 1, 17, 8, 1, 17, Blocks.YELLOW_CONCRETE);
-        fill(level, base, 12, 1, 17, 13, 1, 17, Blocks.BLUE_CONCRETE);
+        // ── SECTION 3: Extinguisher Types Room (Z=22-30) ───────────────────
+        fill(level, base, 1, 1, 22, 18, 1, 30, Blocks.LIGHT_BLUE_CONCRETE);
+        // Instructor desk (Officer Cruz at X=4,Z=25)
+        fill(level, base, 1, 2, 22, 6, 2, 22, Blocks.OAK_PLANKS);
+        fill(level, base, 1, 3, 22, 6, 3, 22, Blocks.OAK_PLANKS);
+        // Class A pedestal — green (ordinary combustibles) at X=3-4, Z=28
+        fill(level, base, 3, 2, 28, 4, 2, 28, Blocks.STONE_BRICKS);
+        fill(level, base, 3, 3, 28, 4, 4, 28, Blocks.GREEN_WOOL);
+        fill(level, base, 3, 1, 28, 4, 1, 28, Blocks.GREEN_CONCRETE);
+        // Class B pedestal — yellow (flammable liquids) at X=9-10, Z=28
+        fill(level, base, 9, 2, 28, 10, 2, 28, Blocks.STONE_BRICKS);
+        fill(level, base, 9, 3, 28, 10, 4, 28, Blocks.YELLOW_WOOL);
+        fill(level, base, 9, 1, 28, 10, 1, 28, Blocks.YELLOW_CONCRETE);
+        // Class C pedestal — blue (electrical) at X=15-16, Z=28
+        fill(level, base, 15, 2, 28, 16, 2, 28, Blocks.STONE_BRICKS);
+        fill(level, base, 15, 3, 28, 16, 4, 28, Blocks.BLUE_WOOL);
+        fill(level, base, 15, 1, 28, 16, 1, 28, Blocks.BLUE_CONCRETE);
 
-        // ── SECTION 4: Earthquake Drill Zone (Z=20-27) ─────────────────────
-        fill(level, base, 1, 1, 20, 14, 1, 26, Blocks.GRAY_CONCRETE);
-        // Cracked tiles — simulates earthquake damage
-        set(level, base,  3, 1, 21, Blocks.CRACKED_STONE_BRICKS);
-        set(level, base,  9, 1, 23, Blocks.CRACKED_STONE_BRICKS);
-        set(level, base, 13, 1, 25, Blocks.CRACKED_STONE_BRICKS);
-        // Stone overhang for COVER — players must crouch under it (Y=4 slab, Y=3 pillars)
-        fill(level, base, 3, 4, 22, 10, 4, 25, Blocks.STONE_BRICKS);
-        set(level, base,  3, 3, 22, Blocks.STONE_BRICK_WALL);
-        set(level, base, 10, 3, 22, Blocks.STONE_BRICK_WALL);
-        set(level, base,  3, 3, 25, Blocks.STONE_BRICK_WALL);
-        set(level, base, 10, 3, 25, Blocks.STONE_BRICK_WALL);
+        // ── SECTION 4: Earthquake Drill Zone (Z=32-39) ─────────────────────
+        fill(level, base, 1, 1, 32, 18, 1, 38, Blocks.GRAY_CONCRETE);
+        // Cracked tiles scattered around
+        for (int[] ct : new int[][]{{4,33},{10,35},{16,37},{7,36},{14,34}})
+            set(level, base, ct[0], 1, ct[1], Blocks.CRACKED_STONE_BRICKS);
+        // Large stone table/overhang for DROP-COVER-HOLD-ON drill
+        fill(level, base, 5, 4, 34, 16, 4, 38, Blocks.STONE_BRICKS);
+        // Corner and mid pillars holding the overhang
+        for (int px : new int[]{5, 10, 16}) {
+            set(level, base, px, 3, 34, Blocks.STONE_BRICK_WALL);
+            set(level, base, px, 3, 38, Blocks.STONE_BRICK_WALL);
+        }
         // Debris props
-        set(level, base, 12, 2, 22, Blocks.COBBLESTONE);
-        set(level, base, 13, 2, 24, Blocks.COBBLESTONE);
-        set(level, base, 12, 2, 25, Blocks.STONE);
-        // Safety officer desk — kept to X=1-4 so it never blocks the passage at X=5-6
-        fill(level, base, 1, 2, 20, 4, 2, 20, Blocks.OAK_PLANKS);
+        set(level, base, 17, 2, 34, Blocks.COBBLESTONE);
+        set(level, base, 18, 2, 36, Blocks.COBBLESTONE);
+        set(level, base, 17, 2, 37, Blocks.STONE);
+        set(level, base,  2, 2, 36, Blocks.COBBLESTONE);
+        set(level, base,  3, 2, 37, Blocks.STONE);
+        // Safety officer desk (Capt. Santos at X=4,Z=35)
+        fill(level, base, 1, 2, 32, 6, 2, 32, Blocks.OAK_PLANKS);
+        fill(level, base, 1, 3, 32, 6, 3, 32, Blocks.OAK_PLANKS);
         // BFP badge on back wall
-        fill(level, base, 6, 2, 27, 9, 3, 27, Blocks.YELLOW_CONCRETE);
-        set(level, base, 7, 2, 27, Blocks.RED_CONCRETE); set(level, base, 8, 2, 27, Blocks.RED_CONCRETE);
-        set(level, base, 7, 3, 27, Blocks.RED_CONCRETE); set(level, base, 8, 3, 27, Blocks.RED_CONCRETE);
+        fill(level, base, 7, 2, 39, 12, 4, 39, Blocks.YELLOW_CONCRETE);
+        fill(level, base, 9, 2, 39, 10, 4, 39, Blocks.RED_CONCRETE);
     }
 
-    /** Places a section-divider wall at the given Z with a 2-block passage at X=5-6, Y=2-3. */
+    /** Places a section-divider wall at the given Z with a 3-block passage at X=9-11, Y=2-3. */
     private static void sectionDivider(ServerLevel level, BlockPos base, int z) {
-        for (int x = 1; x <= 14; x++) {
-            for (int y = 2; y <= 4; y++) {
-                if ((x == 5 || x == 6) && (y == 2 || y == 3)) continue; // passage
+        for (int x = 1; x <= 18; x++) {
+            for (int y = 2; y <= 5; y++) {
+                if ((x >= 9 && x <= 11) && (y == 2 || y == 3)) continue; // passage
                 level.setBlock(base.offset(x, y, z), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
             }
         }
