@@ -17,7 +17,9 @@ import net.minecraft.server.level.ServerPlayer;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.session.SessionManager;
@@ -31,6 +33,18 @@ import net.necookie.disastersim.world.building.CCSBuildingConstructor;
  * Handles the registration and execution of custom commands for BerongSMP.
  */
 public class ModCommands {
+
+    /** UUIDs of players who have authenticated with the BFP admin PIN this session. */
+    private static final Set<UUID> bfpAuthorized = ConcurrentHashMap.newKeySet();
+
+    /** Clears all PIN authorizations (call on server stop/start). */
+    public static void clearAuthorizations() { bfpAuthorized.clear(); }
+
+    private static boolean isBfpAuthorized(CommandSourceStack source) {
+        if (!source.isPlayer()) return true; // console always allowed
+        return bfpAuthorized.contains(source.getPlayer().getUUID())
+                || Commands.LEVEL_GAMEMASTERS.check(source.permissions());
+    }
 
     /**
      * Registers all custom commands to the command dispatcher.
@@ -108,9 +122,36 @@ public class ModCommands {
                             return 1;
                         })));
 
-        // /bfp — Admin commands for BFP student session management (OP level 2+).
+        // /bfp — Admin commands for BFP student session management.
+        // Access requires either OP level 2+ OR a successful /bfp login <pin>.
         dispatcher.register(Commands.literal("bfp")
-                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .requires(ModCommands::isBfpAuthorized)
+
+                // /bfp login <pin>  — authenticate with the admin PIN
+                .then(Commands.literal("login")
+                        .then(Commands.argument("pin", StringArgumentType.word())
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    ServerPlayer player = ctx.getSource().getPlayer();
+                                    String entered = StringArgumentType.getString(ctx, "pin");
+                                    String correct = Config.BFP_ADMIN_PIN.get();
+                                    if (entered.equals(correct)) {
+                                        bfpAuthorized.add(player.getUUID());
+                                        ctx.getSource().sendSuccess(() -> Component.literal("§a✓ BFP admin access granted."), false);
+                                    } else {
+                                        ctx.getSource().sendFailure(Component.literal("§cIncorrect PIN."));
+                                    }
+                                    return 1;
+                                })))
+
+                // /bfp logout  — revoke PIN-based access
+                .then(Commands.literal("logout")
+                        .executes(ctx -> {
+                            if (!ctx.getSource().isPlayer()) return 0;
+                            bfpAuthorized.remove(ctx.getSource().getPlayer().getUUID());
+                            ctx.getSource().sendSuccess(() -> Component.literal("§7BFP admin access revoked."), false);
+                            return 1;
+                        }))
 
                 // /bfp checkin <student_name>  — check in the command source player
                 // /bfp checkin <player> <student_name>  — check in a specific player

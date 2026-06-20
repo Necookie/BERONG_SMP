@@ -206,6 +206,7 @@ public class BerongSMP {
         LobbyManager.createLobby(level);
         TutorialLobbyManager.createTutorialLobby(level);
         net.necookie.disastersim.session.SessionManager.init(server);
+        net.necookie.disastersim.command.ModCommands.clearAuthorizations();
 
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.

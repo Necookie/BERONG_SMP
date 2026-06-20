@@ -138,7 +138,27 @@ Changes the **magnitude of your currently active earthquake session live**, taki
 
 ## BFP Admin Commands
 
-All `/bfp` sub-commands require **Op level 2+**. They manage the student session system — tracking individual students across shared station accounts and persisting results to the Turso cloud database.
+These commands manage the student session system — tracking individual students across shared station accounts and persisting results to the Turso cloud database.
+
+**Access:** Either **Op level 2+** OR authenticate with `/bfp login <pin>` (PIN set in `bfpAdminPin` config, default `1234`). OPs always bypass the PIN check.
+
+---
+
+### `/bfp login <pin>`
+
+**Syntax:** `/bfp login <pin>`
+
+Authenticates you as a BFP admin for this session using the PIN set in `bfpAdminPin`. Once logged in, all `/bfp` sub-commands become available to you until you log out or the server restarts.
+
+**Example:** `/bfp login 1234`
+
+---
+
+### `/bfp logout`
+
+**Syntax:** `/bfp logout`
+
+Revokes your PIN-based BFP admin access. Use this when stepping away from the station so others can't run admin commands on your account.
 
 ---
 
@@ -266,14 +286,16 @@ Spawns the **LSPU CCS Building** at your current position using the `CCSBuilding
 | `/sim_magnitude <value>` | Op (level 2+) | Live-adjust running earthquake magnitude |
 | `/get_extinguisher` | Any player | Gives fire extinguisher item |
 | `/spawn_lspu` | Op (level 2+) | Permanent world change — places CCS building |
-| `/bfp checkin <student_name>` | Op (level 2+) | Start session for caller; wipes tutorial state |
-| `/bfp checkin <player> <student_name>` | Op (level 2+) | Start session for target player |
-| `/bfp checkout` | Op (level 2+) | Finalise and save current session to DB |
-| `/bfp reset [player]` | Op (level 2+) | Wipe tutorial + delete DB row, no record kept |
-| `/bfp session info` | Op (level 2+) | Print current session details to chat |
-| `/bfp sessions list [page]` | Op (level 2+) | List 10 most recent sessions from DB |
-| `/bfp sessions export` | Op (level 2+) | Export all sessions to `run/bfp_sessions_export.csv` |
-| `/bfp student <name>` | Op (level 2+) | Look up last 10 sessions for a student name |
+| `/bfp login <pin>` | Any player | Authenticate as BFP admin using the config PIN |
+| `/bfp logout` | Any player | Revoke PIN-based BFP admin access |
+| `/bfp checkin <student_name>` | Op or PIN | Start session for caller; wipes tutorial state |
+| `/bfp checkin <player> <student_name>` | Op or PIN | Start session for target player |
+| `/bfp checkout` | Op or PIN | Finalise and save current session to DB |
+| `/bfp reset [player]` | Op or PIN | Wipe tutorial + delete DB row, no record kept |
+| `/bfp session info` | Op or PIN | Print current session details to chat |
+| `/bfp sessions list [page]` | Op or PIN | List 10 most recent sessions from DB |
+| `/bfp sessions export` | Op or PIN | Export all sessions to `run/bfp_sessions_export.csv` |
+| `/bfp student <name>` | Op or PIN | Look up last 10 sessions for a student name |
 
 *`/sim_stop` accepts console input but the stop targets the calling player — from console it resolves to no player UUID, so use it in-game.
 
@@ -297,3 +319,4 @@ These values live in `run/config/berongsmp-common.toml` and are hot-reloadable (
 | `tursoUrl` | `""` | Turso HTTPS database URL for session tracking |
 | `tursoToken` | `""` | Turso Bearer auth token |
 | `passThresholdFire` | 5 | Fires extinguished required to mark a session as passed |
+| `bfpAdminPin` | `"1234"` | PIN for `/bfp login` — change this before going live |

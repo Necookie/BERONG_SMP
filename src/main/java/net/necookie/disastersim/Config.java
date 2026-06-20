@@ -139,6 +139,11 @@ public class Config {
     // Student session / scoring
     // -----------------------------------------------------------------------
 
+    /** PIN required to use /bfp admin commands (via /bfp login <pin>). OPs bypass this check. */
+    public static final ModConfigSpec.ConfigValue<String> BFP_ADMIN_PIN = BUILDER
+            .comment("PIN required to use /bfp admin commands via '/bfp login <pin>'. OPs bypass this.")
+            .define("bfpAdminPin", "1234");
+
     /** Turso database HTTPS URL (e.g. https://mydb-org.turso.io). Leave blank to disable session tracking. */
     public static final ModConfigSpec.ConfigValue<String> TURSO_URL = BUILDER
             .comment("Turso database URL for student session tracking. Leave blank to disable.")
