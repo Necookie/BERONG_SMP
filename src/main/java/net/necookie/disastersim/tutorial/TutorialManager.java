@@ -86,6 +86,11 @@ public class TutorialManager {
         sendPrompt(player, line.text(), 0f);
         if (line.soundKey() != null) playNpcSound(player, line.soundKey());
 
+        // Re-spawn practice fires if they burned out while player is still in the spray stage
+        if (role == NpcRole.TRAINER && stage == TutorialStage.PASS_SPRAY) {
+            spawnPracticeFires((ServerLevel) player.level());
+        }
+
         int nextStep = step + 1;
         if (nextStep >= lines.size()) {
             dialogueSteps.remove(player.getUUID());
@@ -134,9 +139,9 @@ public class TutorialManager {
         if (getStage(player) != TutorialStage.PASS_SPRAY) return;
 
         int count = extinguishCounts.merge(player.getUUID(), 1, Integer::sum);
-        sendPrompt(player, "§eSweep! Extinguish practice fires. (" + count + "/3)", 0f);
+        sendPrompt(player, "§eSweep! Extinguish the practice fires!", 0f);
 
-        if (count >= 3) {
+        if (count >= 1) {
             extinguishCounts.remove(player.getUUID());
             removePracticeFires((ServerLevel) player.level());
             player.sendSystemMessage(Component.literal(
