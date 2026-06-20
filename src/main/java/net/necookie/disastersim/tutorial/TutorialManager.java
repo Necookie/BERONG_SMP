@@ -4,8 +4,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -79,6 +83,7 @@ public class TutorialManager {
 
         NpcDialogue.DialogueLine line = lines.get(step);
         sendPrompt(player, line.text(), 0f);
+        if (line.soundKey() != null) playNpcSound(player, line.soundKey());
 
         int nextStep = step + 1;
         if (nextStep >= lines.size()) {
@@ -245,6 +250,19 @@ public class TutorialManager {
 
     private static void sendPrompt(ServerPlayer player, String text, float intensity) {
         PacketDistributor.sendToPlayer(player, new TutorialStatusPayload(text, intensity));
+    }
+
+    /** Plays an NPC voice line for a single player only (no broadcast to others). */
+    private static void playNpcSound(ServerPlayer player, String soundKey) {
+        Identifier rl = Identifier.fromNamespaceAndPath(BerongSMP.MODID, soundKey);
+        SoundEvent event = SoundEvent.createVariableRangeEvent(rl);
+        player.connection.send(new ClientboundSoundPacket(
+            net.minecraft.core.Holder.direct(event),
+            SoundSource.VOICE,
+            player.getX(), player.getY(), player.getZ(),
+            1.0f, 1.0f,
+            player.level().getRandom().nextLong()
+        ));
     }
 
     private static void removePracticeFires(ServerLevel level) {
