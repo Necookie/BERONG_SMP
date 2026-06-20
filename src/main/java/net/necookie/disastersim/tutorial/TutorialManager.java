@@ -139,9 +139,9 @@ public class TutorialManager {
         if (getStage(player) != TutorialStage.PASS_SPRAY) return;
 
         int count = extinguishCounts.merge(player.getUUID(), 1, Integer::sum);
-        sendPrompt(player, "§eSweep! Extinguish the practice fires!", 0f);
+        sendPrompt(player, "§eSweep! Extinguish practice fires. (" + count + "/3)", 0f);
 
-        if (count >= 1) {
+        if (count >= 3) {
             extinguishCounts.remove(player.getUUID());
             removePracticeFires((ServerLevel) player.level());
             player.sendSystemMessage(Component.literal(
@@ -228,12 +228,10 @@ public class TutorialManager {
         return TutorialSavedData.get(server.overworld()).getStage(uuid) == TutorialStage.COMPLETED;
     }
 
-    /** Spawns 5 practice fire blocks (cross pattern) in the tutorial lobby, burning on oak planks. */
+    /** Spawns 5 practice campfires (cross pattern) in the tutorial lobby. Campfires don't spread or burn out. */
     public static void spawnPracticeFires(ServerLevel level) {
         for (BlockPos firePos : PRACTICE_FIRE_POSITIONS) {
-            // Place an oak plank beneath each fire so it visually burns on wood
-            level.setBlock(firePos.below(), Blocks.OAK_PLANKS.defaultBlockState(), 3);
-            level.setBlock(firePos, Blocks.FIRE.defaultBlockState(), 3);
+            level.setBlock(firePos, Blocks.CAMPFIRE.defaultBlockState(), 3);
         }
     }
 
@@ -275,13 +273,8 @@ public class TutorialManager {
     private static void removePracticeFires(ServerLevel level) {
         for (BlockPos firePos : PRACTICE_FIRE_POSITIONS) {
             BlockState state = level.getBlockState(firePos);
-            if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+            if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE) || state.is(Blocks.CAMPFIRE)) {
                 level.removeBlock(firePos, false);
-            }
-            // Remove the oak plank base placed beneath each practice fire
-            BlockState below = level.getBlockState(firePos.below());
-            if (below.is(Blocks.OAK_PLANKS)) {
-                level.removeBlock(firePos.below(), false);
             }
         }
     }

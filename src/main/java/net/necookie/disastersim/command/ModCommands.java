@@ -25,8 +25,12 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
+import net.necookie.disastersim.tutorial.TutorialManager;
+import net.necookie.disastersim.tutorial.TutorialSavedData;
+import net.necookie.disastersim.world.LobbyManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.world.TutorialLobbyManager;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
 
 /**
@@ -201,6 +205,18 @@ public class ModCommands {
                                     return 1;
                                 })))
 
+                // /bfp tutorial [player]  — reset tutorial + teleport to tutorial lobby (no quit needed)
+                .then(Commands.literal("tutorial")
+                        .executes(ctx -> {
+                            if (!ctx.getSource().isPlayer()) return 0;
+                            return tutorialReset(ctx, ctx.getSource().getPlayer());
+                        })
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> {
+                                    ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+                                    return tutorialReset(ctx, target);
+                                })))
+
                 // /bfp session info  — print current session details
                 .then(Commands.literal("session")
                         .then(Commands.literal("info")
@@ -299,6 +315,22 @@ public class ModCommands {
             source.sendFailure(Component.literal("This command can only be run by a player."));
             return 0;
         }
+    }
+
+    private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
+        // Reset session and tutorial progress
+        SessionManager.reset(target.getUUID());
+        // Teleport directly to the tutorial lobby spawn — no reconnect needed
+        net.minecraft.server.level.ServerLevel level =
+                ctx.getSource().getServer().overworld();
+        target.teleportTo(level,
+                TutorialLobbyManager.TSPAWN_X,
+                TutorialLobbyManager.TSPAWN_Y,
+                TutorialLobbyManager.TSPAWN_Z,
+                java.util.Collections.emptySet(), 0f, 0f, true);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§eTutorial reset and §f" + target.getName().getString() + "§e teleported to tutorial lobby."), true);
+        return 1;
     }
 
     private static int listSessions(CommandContext<CommandSourceStack> ctx, int page) {
