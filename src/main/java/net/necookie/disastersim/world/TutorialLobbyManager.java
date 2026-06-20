@@ -200,8 +200,8 @@ public class TutorialLobbyManager {
         fill(level, base,  2, 1, 12, 17, 1, 19, Blocks.ORANGE_CONCRETE);
         // Extinguisher rack on east wall
         fill(level, base, 18, 2, 13, 18, 5, 18, Blocks.RED_CONCRETE);
-        // Warning chevrons on divider Z=10 (south-facing)
-        for (int cx = 9; cx <= 18; cx++)
+        // Warning chevrons on divider Z=10 — start at X=12 to keep the passage (X=9-11) clear
+        for (int cx = 12; cx <= 18; cx++)
             set(level, base, cx, 2, 10, cx % 2 == 0 ? Blocks.YELLOW_CONCRETE : Blocks.RED_CONCRETE);
 
         // ── SECTION 3: Extinguisher Types Room (Z=22-30) ───────────────────
