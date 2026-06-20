@@ -230,14 +230,13 @@ public class SimulationManager {
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
 
-            // Send PASS score report for FIRE simulations.
+            // Send adaptive feedback for each simulation type.
             if (session.getState() == SimulationState.FIRE) {
-                int fires = session.getFiresExtinguished();
-                int score = finalScore;
-                player.sendSystemMessage(Component.literal("§6--- Fire Drill Results ---"));
-                player.sendSystemMessage(Component.literal("§eFires extinguished: " + fires));
-                player.sendSystemMessage(Component.literal("§aScore: " + score + " / 100"));
-                player.sendSystemMessage(Component.literal("§7Tip: Remember PASS — Pull, Aim at the base, Squeeze, Sweep side to side."));
+                player.sendSystemMessage(Component.literal(
+                    "§eFires extinguished: " + session.getFiresExtinguished()));
+                SimulationFeedback.sendFire(player, session.logger, finalScore);
+            } else if (session.getState() == SimulationState.EARTHQUAKE) {
+                SimulationFeedback.sendQuake(player, finalScore);
             }
 
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
