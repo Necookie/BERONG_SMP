@@ -318,11 +318,9 @@ public class ModCommands {
     }
 
     private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
-        // Reset session and tutorial progress
+        net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
         SessionManager.reset(target.getUUID());
-        // Teleport directly to the tutorial lobby spawn — no reconnect needed
-        net.minecraft.server.level.ServerLevel level =
-                ctx.getSource().getServer().overworld();
+        TutorialLobbyManager.initNpcs(level); // also fixes any duplicate NPCs
         target.teleportTo(level,
                 TutorialLobbyManager.TSPAWN_X,
                 TutorialLobbyManager.TSPAWN_Y,
