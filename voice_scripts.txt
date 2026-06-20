@@ -1,0 +1,274 @@
+================================================================
+BERONGSMP — FULL CHARACTER SCRIPTS FOR TTS GENERATION
+================================================================
+Instructions:
+  1. Go to elevenlabs.io
+  2. Pick a voice for each character (use the same voice for ALL
+     lines of that character)
+  3. Paste the ENTIRE script block for one character at once
+  4. Generate → download as one MP3
+  5. Open in Audacity — cut at each [pause] gap
+  6. Export each chunk as OGG with the filename shown above each line
+  7. Place all OGG files in:
+     src/main/resources/assets/berongsmp/sounds/npc/
+
+Suggested ElevenLabs voices:
+  Sgt. Reyes   — deep, authoritative male (e.g. "Daniel" or "Antoni")
+  Officer Cruz — warm, friendly female (e.g. "Rachel" or "Bella")
+  Capt. Santos — strong, commanding female (e.g. "Elli" or "Charlotte")
+================================================================
+
+
+================================================================
+CHARACTER 1 — SGT. REYES
+Voice: deep, authoritative male
+Total lines: 17
+================================================================
+
+--- sgt_reyes_0.ogg ---
+Hi there! Welcome to the BFP Fire Training Center! My name is Sergeant Reyes, and I am going to teach you how to stay safe!
+
+[pause]
+
+--- sgt_reyes_1.ogg ---
+Did you know that fire can spread really, really fast — even faster than you can run? That is why we need to know what to do BEFORE a fire happens!
+
+[pause]
+
+--- sgt_reyes_2.ogg ---
+Today we are going to learn how to use a fire extinguisher! It is a special tool that sprays something to put fires out.
+
+[pause]
+
+--- sgt_reyes_3.ogg ---
+We follow 4 easy steps called P-A-S-S! P is for PULL the pin — like pulling a ring. A is for AIM — always point it LOW at the bottom of the fire, not the top!
+
+[pause]
+
+--- sgt_reyes_4.ogg ---
+S is for SQUEEZE the handles together — that makes it spray! And the last S is for SWEEP — move it slowly side to side, like you are wagging a dog's tail!
+
+[pause]
+
+--- sgt_reyes_5.ogg ---
+I am going to give you a real extinguisher now! Go to the practice area and put out all 3 fires using PASS. You can do it — I believe in you!
+
+[pause]
+
+--- sgt_reyes_refresher_0.ogg ---
+Hey, welcome back! Quick reminder — we use P-A-S-S to fight fire!
+
+[pause]
+
+--- sgt_reyes_refresher_1.ogg ---
+PULL the pin, AIM low at the base of the fire, SQUEEZE the handles, and SWEEP side to side. Easy peasy!
+
+[pause]
+
+--- sgt_reyes_refresher_2.ogg ---
+Here is your extinguisher! Go put out those practice fires — you have got this!
+
+[pause]
+
+--- sgt_reyes_spray_0.ogg ---
+You are doing great! Remember — aim LOW at the bottom of the fire, not at the flames on top. Keep sweeping left and right!
+
+[pause]
+
+--- sgt_reyes_redirect_a.ogg ---
+Great work on the fires! Go talk to Officer Cruz — she will teach you about the different types of fire extinguishers!
+
+[pause]
+
+--- sgt_reyes_redirect_b.ogg ---
+Keep going! Officer Cruz has more important things to teach you — go talk to her!
+
+[pause]
+
+--- sgt_reyes_redirect_c.ogg ---
+Almost done with the fire lessons! Go finish up with Officer Cruz for the last class.
+
+[pause]
+
+--- sgt_reyes_redirect_quake.ogg ---
+Now head over to Captain Santos in the earthquake zone — she will teach you what to do when the ground shakes!
+
+[pause]
+
+--- sgt_reyes_redirect_cover.ogg ---
+Stay in the drill! Get under something solid and keep crouching!
+
+[pause]
+
+--- sgt_reyes_redirect_holdon.ogg ---
+Hold tight! Stay crouched under that cover until the shaking stops!
+
+[pause]
+
+--- sgt_reyes_done.ogg ---
+You finished all the training! Go to the main lobby to start the real disaster simulation. I am so proud of you!
+
+
+================================================================
+CHARACTER 2 — OFFICER CRUZ
+Voice: warm, friendly female
+Total lines: 18
+================================================================
+
+--- cruz_a_0.ogg ---
+Amazing job putting out those fires! I am Officer Cruz, and I will teach you about the three types of fires and which extinguisher to use for each one!
+
+[pause]
+
+--- cruz_a_1.ogg ---
+Here is a very important secret — not all fires are the same! Using the WRONG extinguisher can actually make the fire BIGGER and more dangerous. So listen carefully!
+
+[pause]
+
+--- cruz_a_2.ogg ---
+Class A — Ordinary Things That Burn! Class A fires happen when everyday things catch fire — like paper, wood, cloth, cardboard, and plastic.
+
+[pause]
+
+--- cruz_a_3.ogg ---
+Think about it — if your notebook, a wooden chair, or your school bag caught fire, that would be a Class A fire! It is the most common type of fire in homes and schools.
+
+[pause]
+
+--- cruz_a_4.ogg ---
+For Class A fires, you can use a water extinguisher, a foam extinguisher, or a special one called the ABC extinguisher. The ABC one is the big red one you usually see hanging on walls!
+
+[pause]
+
+--- cruz_a_5.ogg ---
+The ABC extinguisher is like the superhero of extinguishers — it can fight Class A, B, AND C fires all by itself! Do you understand Class A now?
+
+[pause]
+
+--- cruz_b_0.ogg ---
+Class B — Fires From Liquids and Gases! Class B fires happen when liquids or gases that can burn catch fire — like gasoline, cooking oil, diesel, or gas from a tank.
+
+[pause]
+
+--- cruz_b_1.ogg ---
+Think about the fuel in a car, or the cooking oil your parents use in the kitchen — if those caught fire, that would be a Class B fire! These fires spread very, very fast!
+
+[pause]
+
+--- cruz_b_2.ogg ---
+VERY IMPORTANT: NEVER use water on a Class B fire! If you throw water on burning oil, it will EXPLODE and the fire will jump and spread everywhere — making it much worse!
+
+[pause]
+
+--- cruz_b_3.ogg ---
+Instead, use a CO2 extinguisher or a dry chemical ABC extinguisher. These work by removing the oxygen that the fire needs to keep burning — like putting a blanket over it!
+
+[pause]
+
+--- cruz_b_4.ogg ---
+Aim at the near edge of the fire closest to you and sweep slowly towards the far side. Always keep a safe distance! Remember — NO water on Class B fires. Got it?
+
+[pause]
+
+--- cruz_c_0.ogg ---
+Class C — Electrical Fires! Class C fires happen when electricity is involved — like a broken wire, an overloaded plug, a computer, a TV, or an electrical board.
+
+[pause]
+
+--- cruz_c_1.ogg ---
+Think about the wires inside your walls, your phone charger, or the electric panel in your house — if any of those sparked and caught fire, that is a Class C fire!
+
+[pause]
+
+--- cruz_c_2.ogg ---
+THIS IS THE MOST DANGEROUS CLASS! NEVER EVER use water on a Class C fire! Water carries electricity — if you pour water on an electrical fire, the electricity can travel through the water and give you a deadly electric shock!
+
+[pause]
+
+--- cruz_c_3.ogg ---
+Even a tiny bit of water near an electrical fire can seriously hurt you or someone nearby. So this is the most important rule — NO WATER on Class C fires. EVER. No exceptions!
+
+[pause]
+
+--- cruz_c_4.ogg ---
+Only use a CO2 extinguisher or a dry chemical extinguisher on Class C fires. These are completely safe because they do not carry electricity at all!
+
+[pause]
+
+--- cruz_c_5.ogg ---
+Here is one more tip — if it is safe to do so, try to turn off the electricity first by flipping the switch or unplugging the device. That makes the fire much easier to fight!
+
+[pause]
+
+--- cruz_c_6.ogg ---
+You are a star! You learned all three classes — Class A for ordinary things, Class B for liquids, Class C for electricity. Now go see Captain Santos for the earthquake drill — you are almost done!
+
+
+================================================================
+CHARACTER 3 — CAPT. SANTOS
+Voice: strong, commanding female
+Total lines: 9
+================================================================
+
+--- santos_0.ogg ---
+Great work on all the fire training! I am Captain Santos, and I am here to teach you what to do when the ground starts shaking — an earthquake!
+
+[pause]
+
+--- santos_1.ogg ---
+The Philippines is located in a very special — but also very dangerous — place on Earth where big pieces of the ground called tectonic plates push against each other and cause the ground to shake!
+
+[pause]
+
+--- santos_2.ogg ---
+Every year, the Philippines has more than 2,000 earthquakes! Most are too small to feel, but some are very strong and can knock down buildings, break furniture, and hurt people.
+
+[pause]
+
+--- santos_3.ogg ---
+The most important thing to remember during an earthquake is three words: DROP — COVER — HOLD ON! First you DROP low to the ground so you do not fall over. Then you get COVER under something strong like a table.
+
+[pause]
+
+--- santos_4.ogg ---
+I am starting the drill right now! When you feel the shaking — SHIFT to crouch and DROP immediately! Then move under a solid block for COVER and HOLD ON until it stops. Ready? Here we go!
+
+[pause]
+
+--- santos_done_0.ogg ---
+Wow! Outstanding work, trainee! You are amazing!
+
+[pause]
+
+--- santos_done_1.ogg ---
+Today you learned how to use a fire extinguisher the right way, you learned which extinguisher to use for Class A, B, and C fires, AND you practiced DROP, COVER, HOLD ON for earthquakes!
+
+[pause]
+
+--- santos_done_2.ogg ---
+Always remember — in a real emergency, do NOT panic. Take a deep breath, think about what you practiced today, and do your steps. Even kids like you can save lives!
+
+[pause]
+
+--- santos_done_3.ogg ---
+The BFP is very, very proud of you! You are now a certified BFP Junior Trainee! Head back to the main lobby and show everyone what you have learned. Stay safe out there — dismissed!
+
+
+================================================================
+AUDACITY CUTTING GUIDE
+================================================================
+1. Open the MP3 in Audacity
+2. Zoom in on the waveform — silence gaps between lines are easy to see
+3. Click at the START of a silence gap → Edit → Clip Boundaries → Split
+4. Click at the END of the same silence gap → Split again
+5. Click the silent chunk → Delete
+6. Select the line you want → File → Export → Export Selected Audio
+7. Choose OGG Vorbis format, name it exactly as shown (e.g. sgt_reyes_0)
+8. Repeat for every line
+
+TIP: Use Audacity's label track to mark all cut points first,
+     then export in bulk using File → Export → Export Multiple.
+
+ffmpeg one-liner to convert a whole folder of MP3s to OGG:
+  for f in *.mp3; do ffmpeg -i "$f" -c:a libvorbis "${f%.mp3}.ogg"; done
+================================================================
