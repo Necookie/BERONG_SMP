@@ -102,7 +102,7 @@ public final class NpcDialogue {
             new DialogueLine("§c[Capt. Santos] §f§lWow! Outstanding work, trainee! You are amazing!", false, "npc.sgt_santos.santos_done_0"),
             new DialogueLine("§c[Capt. Santos] §fToday you learned how to use a fire extinguisher the right way, you learned which extinguisher to use for Class A, B, and C fires, AND you practiced DROP, COVER, HOLD ON for earthquakes!", false, "npc.sgt_santos.santos_done_1"),
             new DialogueLine("§c[Capt. Santos] §fAlways remember — in a real emergency, do NOT panic. Take a deep breath, think about what you practiced today, and do your steps. Even kids like you can save lives!", false, "npc.sgt_santos.santos_done_2"),
-            new DialogueLine("§c[Capt. Santos] §fThe BFP is very, very proud of you! You are now a certified BFP Junior Trainee! Head back to the main lobby and show everyone what you have learned. Stay safe out there — dismissed!", false, "npc.sgt_santos.santos_done_3")
+            new DialogueLine("§c[Capt. Santos] §fThe BFP is very, very proud of you! You are now a certified BFP Junior Trainee! Head back to the main lobby and show everyone what you have learned. Stay safe out there — dismissed!", true, "npc.sgt_santos.santos_done_3")
         )
     );
 

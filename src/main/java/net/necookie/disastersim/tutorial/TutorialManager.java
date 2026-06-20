@@ -127,6 +127,7 @@ public class TutorialManager {
                 advanceTo(player, TutorialStage.QUAKE_DROP);
                 sendPrompt(player, "§c⚠ EARTHQUAKE! Press [SHIFT] to DROP!", 1.5f);
             }
+            case COMPLETED -> finishAndTeleport(player);
             default -> {}
         }
     }
@@ -286,16 +287,26 @@ public class TutorialManager {
     private static void completeTutorial(ServerPlayer player, ServerLevel level) {
         net.necookie.disastersim.session.SessionManager.onTutorialComplete(player);
         advanceTo(player, TutorialStage.COMPLETED);
+        sendPrompt(player, "§eDrill complete! Talk to §c[Capt. Santos]§e to finish.", 0f);
+        level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
+                player.getX(), player.getY() + 1.5, player.getZ(),
+                30, 0.5, 0.5, 0.5, 0.3);
+        BerongSMP.LOGGER.info("Player {} completed the safety tutorial drill.", player.getName().getString());
+    }
+
+    /** Called after the player clicks through Santos's final COMPLETED dialogue line. */
+    static void finishAndTeleport(ServerPlayer player) {
         sendPrompt(player, "", 0f);
         player.sendSystemMessage(Component.literal(
                 "§a✓ §lSafety Tutorial Complete!\n"
                 + "§7You've mastered fire safety and earthquake drills.\n"
                 + "§eTeleporting you to the main lobby..."));
+        ServerLevel level = (ServerLevel) player.level();
         level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
                 player.getX(), player.getY() + 1.5, player.getZ(),
-                30, 0.5, 0.5, 0.5, 0.3);
+                20, 0.5, 0.5, 0.5, 0.3);
         player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                 Collections.emptySet(), 0f, 0f, true);
-        BerongSMP.LOGGER.info("Player {} completed the safety tutorial.", player.getName().getString());
+        BerongSMP.LOGGER.info("Player {} left the tutorial lobby.", player.getName().getString());
     }
 }
