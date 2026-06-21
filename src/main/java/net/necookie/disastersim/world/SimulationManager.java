@@ -196,6 +196,11 @@ public class SimulationManager {
         if (session == null) return;
 
         ServerPlayer player = session.getPlayer();
+        // Capture the DB row ID before onSimulationEnd removes the StudentSession.
+        net.necookie.disastersim.session.StudentSession studentSession =
+            net.necookie.disastersim.session.SessionManager.getActiveSession(uuid);
+        long studentDbRowId = (studentSession != null) ? studentSession.getDbRowId() : -1L;
+
         if (player != null) {
             net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
         }
@@ -218,11 +223,8 @@ public class SimulationManager {
             "score", finalScore,
             "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
         ));
-        // Flush event log asynchronously — use SessionManager's tracked row ID
-        net.necookie.disastersim.session.StudentSession studentSession =
-            net.necookie.disastersim.session.SessionManager.getActiveSession(uuid);
-        if (studentSession != null && studentSession.getDbRowId() > 0) {
-            TursoClient.updateEventLog(studentSession.getDbRowId(), session.logger.toJson());
+        if (studentDbRowId > 0) {
+            TursoClient.updateEventLog(studentDbRowId, session.logger.toJson());
         }
 
         if (player.isAlive()) {
