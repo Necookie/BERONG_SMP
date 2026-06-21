@@ -229,6 +229,12 @@ public class SimulationManager {
             "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
         ));
         if (studentDbRowId > 0) {
+            String simType = session.getState() == SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
+            boolean passed = session.getState() == SimulationState.FIRE
+                    && finalScore >= Config.PASS_THRESHOLD_FIRE.get();
+            TursoClient.executeAsync(
+                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=?",
+                    simType, finalScore, passed, java.time.Instant.now().toString(), studentDbRowId);
             TursoClient.updateEventLog(studentDbRowId, session.logger.toJson());
         }
 

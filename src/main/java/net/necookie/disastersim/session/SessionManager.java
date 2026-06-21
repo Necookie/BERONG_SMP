@@ -126,7 +126,15 @@ public class SessionManager {
     /** Called by TutorialManager when the player completes the tutorial. */
     public static void onTutorialComplete(ServerPlayer player) {
         StudentSession session = activeSessions.get(player.getUUID());
-        if (session == null) return;
+        if (session == null) {
+            // No in-memory session — fall back to marking the most recent active row completed.
+            if (TursoClient.isReady()) {
+                TursoClient.executeAsync(
+                        "UPDATE sessions SET tutorial_completed=1 WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active' ORDER BY id DESC LIMIT 1)",
+                        player.getStringUUID());
+            }
+            return;
+        }
         session.setTutorialEndTime(Instant.now());
         if (session.getDbRowId() > 0) {
             TursoClient.executeAsync(
@@ -135,7 +143,12 @@ public class SessionManager {
         }
     }
 
-    /** Called by SimulationManager when the simulation ends. */
+    /**
+     * Called by SimulationManager when the simulation ends.
+     * Only updates in-memory StudentSession state and removes from the map.
+     * All Turso writes (simulation_type, score, event_log, status) are handled
+     * directly by SimulationManager.endSimulation using the row ID it already holds.
+     */
     public static void onSimulationEnd(ServerPlayer player, SimulationSession sim) {
         String type = sim.getState() == SimulationManager.SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
         int score = sim.getState() == SimulationManager.SimulationState.FIRE
@@ -146,27 +159,11 @@ public class SessionManager {
                 : false;
 
         StudentSession session = activeSessions.get(player.getUUID());
-        if (session == null) {
-            // No in-memory session — server may have restarted since /bfp checkin.
-            // Fall back to updating the most recent active row for this account_uuid.
-            if (TursoClient.isReady()) {
-                TursoClient.executeAsync(
-                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active' ORDER BY id DESC LIMIT 1)",
-                        type, score, passed, Instant.now().toString(), player.getStringUUID());
-            }
-            BerongSMP.LOGGER.warn("[SessionManager] onSimulationEnd: no in-memory session for {} — used DB fallback", player.getScoreboardName());
-            return;
-        }
+        if (session == null) return;
 
         session.setSimulationType(type);
         session.setSimulationScore(score);
         session.setPassed(passed);
-
-        if (session.getDbRowId() > 0) {
-            TursoClient.executeAsync(
-                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=?",
-                    type, score, passed, Instant.now().toString(), session.getDbRowId());
-        }
         activeSessions.remove(player.getUUID());
     }
 
