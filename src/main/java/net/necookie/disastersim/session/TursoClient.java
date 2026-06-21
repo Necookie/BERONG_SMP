@@ -277,13 +277,13 @@ public class TursoClient {
                     argObj.add("value", com.google.gson.JsonNull.INSTANCE);
                 } else if (arg instanceof Long l) {
                     argObj.addProperty("type", "integer");
-                    argObj.addProperty("value", l);
+                    argObj.addProperty("value", l.toString());
                 } else if (arg instanceof Integer i) {
                     argObj.addProperty("type", "integer");
-                    argObj.addProperty("value", i.longValue());
+                    argObj.addProperty("value", Integer.toString(i));
                 } else if (arg instanceof Boolean b) {
                     argObj.addProperty("type", "integer");
-                    argObj.addProperty("value", b ? 1 : 0);
+                    argObj.addProperty("value", b ? "1" : "0");
                 } else {
                     argObj.addProperty("type", "text");
                     argObj.addProperty("value", arg.toString());
