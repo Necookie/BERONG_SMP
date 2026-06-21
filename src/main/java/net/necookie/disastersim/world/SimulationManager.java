@@ -195,29 +195,6 @@ public class SimulationManager {
         SimulationSession session = activeSessions.remove(uuid);
         if (session == null) return;
 
-        ServerPlayer player = session.getPlayer();
-        // Capture the DB row ID before onSimulationEnd removes the StudentSession.
-        net.necookie.disastersim.session.StudentSession studentSession =
-            net.necookie.disastersim.session.SessionManager.getActiveSession(uuid);
-        long studentDbRowId = (studentSession != null) ? studentSession.getDbRowId() : -1L;
-        // Fallback: if no in-memory session (e.g. server restarted since checkin),
-        // query the DB directly so event_log still gets written to the correct row.
-        if (studentDbRowId <= 0) {
-            studentDbRowId = net.necookie.disastersim.session.SessionManager.findActiveSessionRowId(uuid);
-        }
-
-        if (player != null) {
-            net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
-        }
-        // player should always be non-null because sessions hold a direct reference,
-        // but guard anyway to avoid NPEs during edge-case shutdown sequences.
-        if (player == null) return;
-
-        // Restore all buildings so the arena is clean for the next player.
-        ServerLevel level = (ServerLevel) player.level();
-        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
-
-        // Compute score, log SIM_END, flush event log to Turso
         int finalScore = 0;
         if (session.getState() == SimulationState.FIRE) {
             finalScore = Math.min(100, session.getFiresExtinguished() * 2);
@@ -228,28 +205,42 @@ public class SimulationManager {
             "score", finalScore,
             "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
         ));
-        net.necookie.disastersim.BerongSMP.LOGGER.info(
-                "[SimulationManager] endSimulation: uuid={} studentDbRowId={} state={} score={}",
-                uuid, studentDbRowId, session.getState(), finalScore);
-        if (studentDbRowId > 0) {
+
+        // Single UUID-based subquery UPDATE — no rowId lookup required.
+        // Runs before the player-null guard so death/logout never cause missing saves.
+        // Merges simulation data + event_log into one HTTP call.
+        if (TursoClient.isReady()) {
             String simType = session.getState() == SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
             boolean passed = session.getState() == SimulationState.FIRE
-                    && finalScore >= Config.PASS_THRESHOLD_FIRE.get();
+                    && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
+            net.necookie.disastersim.BerongSMP.LOGGER.info(
+                    "[SimulationManager] endSimulation uuid={} simType={} score={}", uuid, simType, finalScore);
             TursoClient.executeAsync(
-                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=?",
-                    simType, finalScore, passed, java.time.Instant.now().toString(), studentDbRowId);
-            TursoClient.updateEventLog(studentDbRowId, session.logger.toJson());
+                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
+                    " end_time=?, status='completed', event_log=?" +
+                    " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                    " ORDER BY id DESC LIMIT 1)",
+                    simType, finalScore, passed,
+                    java.time.Instant.now().toString(),
+                    session.logger.toJson(),
+                    uuid.toString());
         } else {
             net.necookie.disastersim.BerongSMP.LOGGER.warn(
-                    "[SimulationManager] endSimulation: no DB row found for uuid={} — session data NOT saved", uuid);
+                    "[SimulationManager] TursoClient not ready — session data NOT saved for {}", uuid);
         }
 
+        ServerPlayer player = session.getPlayer();
+        if (player != null) {
+            net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
+        }
+        if (player == null) return;
+
+        ServerLevel level = (ServerLevel) player.level();
+        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+
         if (player.isAlive()) {
-            // --- Normal end (timer expired or /sim_stop) ---
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-
-            // Send adaptive feedback for each simulation type.
             if (session.getState() == SimulationState.FIRE) {
                 player.sendSystemMessage(Component.literal(
                     "§eFires extinguished: " + session.getFiresExtinguished()));
@@ -257,14 +248,9 @@ public class SimulationManager {
             } else if (session.getState() == SimulationState.EARTHQUAKE) {
                 SimulationFeedback.sendQuake(player, finalScore);
             }
-
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                     Collections.emptySet(), 0.0f, 0.0f, true);
         } else {
-            // --- Death end ---
-            // The player is in the death screen right now; teleportTo would be ignored.
-            // Mark this UUID so that onPlayerRespawn can intercept the next respawn
-            // event and redirect them to the lobby instead of the world spawn.
             pendingLobbyRespawn.add(uuid);
         }
     }

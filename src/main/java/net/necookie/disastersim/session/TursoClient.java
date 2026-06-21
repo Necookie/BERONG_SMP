@@ -77,7 +77,9 @@ public class TursoClient {
                 HttpRequest req = buildRequest(body);
                 HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                 if (resp.statusCode() >= 400) {
-                    BerongSMP.LOGGER.warn("[TursoClient] Write failed ({}): {}", resp.statusCode(), resp.body());
+                    BerongSMP.LOGGER.warn("[TursoClient] Write failed HTTP {}: {}", resp.statusCode(), resp.body());
+                } else if (resp.body().contains("\"type\":\"error\"")) {
+                    BerongSMP.LOGGER.warn("[TursoClient] Turso SQL error: {}", resp.body());
                 }
             } catch (Exception e) {
                 BerongSMP.LOGGER.warn("[TursoClient] Write error: {}", e.getMessage());
