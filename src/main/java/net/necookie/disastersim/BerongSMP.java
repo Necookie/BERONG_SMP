@@ -225,6 +225,7 @@ public class BerongSMP {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("=== BerongSMP session build: UUID-subquery writes (2026-06-21-v4) ===");
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
 
         net.minecraft.server.MinecraftServer server = event.getServer();
