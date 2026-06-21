@@ -137,16 +137,26 @@ public class SessionManager {
 
     /** Called by SimulationManager when the simulation ends. */
     public static void onSimulationEnd(ServerPlayer player, SimulationSession sim) {
-        StudentSession session = activeSessions.get(player.getUUID());
-        if (session == null) return;
-
         String type = sim.getState() == SimulationManager.SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
         int score = sim.getState() == SimulationManager.SimulationState.FIRE
                 ? Math.min(100, sim.getFiresExtinguished() * 2)
-                : 0; // earthquake score TBD
+                : 0;
         boolean passed = sim.getState() == SimulationManager.SimulationState.FIRE
                 ? sim.getFiresExtinguished() >= Config.PASS_THRESHOLD_FIRE.get()
                 : false;
+
+        StudentSession session = activeSessions.get(player.getUUID());
+        if (session == null) {
+            // No in-memory session — server may have restarted since /bfp checkin.
+            // Fall back to updating the most recent active row for this account_uuid.
+            if (TursoClient.isReady()) {
+                TursoClient.executeAsync(
+                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active' ORDER BY id DESC LIMIT 1)",
+                        type, score, passed, Instant.now().toString(), player.getStringUUID());
+            }
+            BerongSMP.LOGGER.warn("[SessionManager] onSimulationEnd: no in-memory session for {} — used DB fallback", player.getScoreboardName());
+            return;
+        }
 
         session.setSimulationType(type);
         session.setSimulationScore(score);
@@ -158,6 +168,23 @@ public class SessionManager {
                     type, score, passed, Instant.now().toString(), session.getDbRowId());
         }
         activeSessions.remove(player.getUUID());
+    }
+
+    /**
+     * Synchronously queries the DB for the row ID of the most recent active session
+     * for the given account UUID. Returns -1 when not found or DB is unavailable.
+     * Used as a fallback in endSimulation when no in-memory StudentSession exists.
+     */
+    public static long findActiveSessionRowId(UUID accountUuid) {
+        if (!TursoClient.isReady()) return -1L;
+        String json = TursoClient.query(
+                "SELECT id FROM sessions WHERE account_uuid=? AND status='active' ORDER BY id DESC LIMIT 1",
+                accountUuid.toString());
+        if (json == null) return -1L;
+        com.google.gson.JsonArray rows = TursoClient.parseRows(json);
+        if (rows.isEmpty()) return -1L;
+        com.google.gson.JsonElement idEl = rows.get(0).getAsJsonObject().get("id");
+        return (idEl != null && !idEl.isJsonNull()) ? idEl.getAsLong() : -1L;
     }
 
     // -----------------------------------------------------------------------

@@ -200,6 +200,11 @@ public class SimulationManager {
         net.necookie.disastersim.session.StudentSession studentSession =
             net.necookie.disastersim.session.SessionManager.getActiveSession(uuid);
         long studentDbRowId = (studentSession != null) ? studentSession.getDbRowId() : -1L;
+        // Fallback: if no in-memory session (e.g. server restarted since checkin),
+        // query the DB directly so event_log still gets written to the correct row.
+        if (studentDbRowId <= 0) {
+            studentDbRowId = net.necookie.disastersim.session.SessionManager.findActiveSessionRowId(uuid);
+        }
 
         if (player != null) {
             net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
