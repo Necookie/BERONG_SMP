@@ -141,20 +141,18 @@ public class SessionManager {
     /** Called by TutorialManager when the player completes the tutorial. */
     public static void onTutorialComplete(ServerPlayer player) {
         StudentSession session = activeSessions.get(player.getUUID());
-        if (session == null) {
-            // No in-memory session — fall back to marking the most recent active row completed.
-            if (TursoClient.isReady()) {
-                TursoClient.executeAsync(
-                        "UPDATE sessions SET tutorial_completed=1 WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active' ORDER BY id DESC LIMIT 1)",
-                        player.getStringUUID());
-            }
-            return;
+        if (session != null) {
+            session.setTutorialEndTime(Instant.now());
         }
-        session.setTutorialEndTime(Instant.now());
-        if (session.getDbRowId() > 0) {
+        // Always write by UUID subquery — no rowId dependency.
+        if (TursoClient.isReady()) {
+            long duration = (session != null) ? session.getTutorialDurationSeconds() : -1L;
             TursoClient.executeAsync(
-                    "UPDATE sessions SET tutorial_completed=1, tutorial_duration_s=? WHERE id=?",
-                    session.getTutorialDurationSeconds(), session.getDbRowId());
+                    "UPDATE sessions SET tutorial_completed=1, tutorial_duration_s=?" +
+                    " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                    " ORDER BY id DESC LIMIT 1)",
+                    duration > 0 ? duration : null,
+                    player.getStringUUID());
         }
     }
 
