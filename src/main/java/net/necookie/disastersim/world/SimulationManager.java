@@ -228,6 +228,9 @@ public class SimulationManager {
             "score", finalScore,
             "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
         ));
+        net.necookie.disastersim.BerongSMP.LOGGER.info(
+                "[SimulationManager] endSimulation: uuid={} studentDbRowId={} state={} score={}",
+                uuid, studentDbRowId, session.getState(), finalScore);
         if (studentDbRowId > 0) {
             String simType = session.getState() == SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
             boolean passed = session.getState() == SimulationState.FIRE
@@ -236,6 +239,9 @@ public class SimulationManager {
                     "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, end_time=?, status='completed' WHERE id=?",
                     simType, finalScore, passed, java.time.Instant.now().toString(), studentDbRowId);
             TursoClient.updateEventLog(studentDbRowId, session.logger.toJson());
+        } else {
+            net.necookie.disastersim.BerongSMP.LOGGER.warn(
+                    "[SimulationManager] endSimulation: no DB row found for uuid={} — session data NOT saved", uuid);
         }
 
         if (player.isAlive()) {

@@ -119,6 +119,21 @@ public class SessionManager {
         }
     }
 
+    /**
+     * Resets ONLY the in-game tutorial progress for this account, without touching
+     * the active StudentSession or the DB row. Used by {@code /bfp tutorial} so that
+     * a student can redo the tutorial without losing their session.
+     */
+    public static void resetTutorialOnly(UUID accountUuid) {
+        if (server != null) {
+            TutorialSavedData.get(server.overworld()).reset(accountUuid);
+        }
+        StudentSession session = activeSessions.get(accountUuid);
+        if (session != null) {
+            session.setTutorialEndTime(null);
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Integration hooks
     // -----------------------------------------------------------------------

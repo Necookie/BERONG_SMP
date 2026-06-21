@@ -345,7 +345,7 @@ public class ModCommands {
 
     private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
-        SessionManager.reset(target.getUUID());
+        SessionManager.resetTutorialOnly(target.getUUID());
         TutorialLobbyManager.initNpcs(level); // also fixes any duplicate NPCs
         target.teleportTo(level,
                 TutorialLobbyManager.TSPAWN_X,
