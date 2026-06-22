@@ -256,7 +256,7 @@ public class BerongSMP {
         TutorialLobbyManager.buildLobby(level); // structure only — NPCs need entity storage loaded first
         net.necookie.disastersim.session.SessionManager.init(server);
         net.necookie.disastersim.command.ModCommands.clearAuthorizations();
-        net.necookie.disastersim.world.TelemetryCsvWriter.init(server.getServerDirectory().toPath());
+        net.necookie.disastersim.world.TelemetryCsvWriter.init(server.getServerDirectory());
 
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.
