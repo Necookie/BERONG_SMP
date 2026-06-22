@@ -197,18 +197,42 @@ All values are read at call time via `.get()` — changes take effect without re
 
 Shared station accounts (e.g. `station1`) rotate through multiple students. `SessionManager` tracks a `StudentSession` per account UUID, persisted to the **Turso** cloud database via HTTP (no JDBC driver — uses Java's built-in `HttpClient` + Gson). All writes are fire-and-forget (`CompletableFuture.runAsync`). `TursoClient` creates the schema on first `init()` call.
 
-**`/bfp` admin commands** (OP level 2):
+**`/bfp` admin commands** (OP level 2 or `/bfp login <pin>`):
 
 | Command | Effect |
 |---|---|
+| `/bfp login <pin>` | Authenticate with config PIN; grants all /bfp access |
+| `/bfp logout` | Revoke PIN-based access |
 | `/bfp checkin <student_name>` | Start session for caller; resets tutorial state |
 | `/bfp checkin <player> <student_name>` | Start session for target player |
 | `/bfp checkout` | Finalise and save the caller's session |
 | `/bfp reset [player]` | Wipe tutorial + delete DB row (no record kept) |
+| `/bfp tutorial [player]` | Reset tutorial + teleport to lobby + re-init NPCs |
+| `/bfp note <text>` | Append instructor observation to active session (bfp_notes column) |
+| `/bfp confidence <1-5>` | Set instructor confidence rating 1.0–5.0 (confidence column) |
+| `/bfp prep_level <none|low|moderate|high>` | Set prep-level assessment (prep_level column) |
+| `/bfp score <0-100> [player]` | Manually override simulation score |
+| `/bfp pass [player]` | Mark session as passed (passed=1) |
+| `/bfp fail [player]` | Mark session as failed (passed=0) |
 | `/bfp session info` | Print current session details to chat |
 | `/bfp sessions list [page]` | List 10 most recent sessions from DB |
+| `/bfp sessions today` | List all sessions started today |
+| `/bfp sessions stats` | Aggregate stats: total, pass rate, avg score, fire vs quake breakdown |
+| `/bfp sessions search <query>` | Search sessions by student name or station account (partial match) |
 | `/bfp sessions export` | Write all sessions to `run/bfp_sessions_export.csv` |
-| `/bfp student <name>` | Look up all sessions for a student name |
+| `/bfp student <name>` | Look up last 10 sessions for a student name |
+
+**Simulation management commands** (OP level 2):
+
+| Command | Effect |
+|---|---|
+| `/sim_status [player]` | Live snapshot: type, phase, time remaining, fires extinguished |
+| `/sim_list` | List all active simulations across all players |
+| `/sim_freeze [player]` | Pause simulation timer (effects continue) |
+| `/sim_unfreeze [player]` | Resume a frozen timer |
+| `/sim_time set <seconds>` | Set remaining simulation time |
+| `/sim_time add <seconds>` | Add/subtract seconds from remaining time |
+| `/get_co2_extinguisher` | Give CO2 extinguisher for Class C fires (any player) |
 
 **Auto-hooks**: `TutorialManager.completeTutorial` → `SessionManager.onTutorialComplete` (records tutorial duration); `SimulationManager.endSimulation` → `SessionManager.onSimulationEnd` (records type/score/passed, closes row).
 

@@ -24,6 +24,8 @@ public class SimulationSession {
     private final ServerPlayer player;
     /** Remaining simulation time in server ticks. Decremented once per tick via {@link #tick()}. */
     private int timerTicks;
+    /** When true, the timer does not count down. Set/cleared by /sim_freeze and /sim_unfreeze. */
+    private boolean frozen = false;
     /** Total fire/soul-fire blocks extinguished by the player during this session. */
     private int firesExtinguished;
     /** Total fire blocks spread/placed by the simulation during this session. */
@@ -68,10 +70,17 @@ public class SimulationSession {
      * Advances the simulation clock by one server tick.
      * Called once per tick by {@link SimulationManager#onServerTick}.
      * Must only be called from the server thread to avoid race conditions.
+     * No-ops when frozen.
      */
     public void tick() {
-        timerTicks--;
+        if (!frozen) timerTicks--;
     }
+
+    public boolean isFrozen() { return frozen; }
+    public void setFrozen(boolean frozen) { this.frozen = frozen; }
+
+    /** Directly sets remaining ticks. Clamps to [0, 72000]. */
+    public void setTimerTicks(int ticks) { this.timerTicks = Math.max(0, Math.min(72000, ticks)); }
 
     /**
      * Returns {@code true} when the simulation timer has counted down to zero or below.

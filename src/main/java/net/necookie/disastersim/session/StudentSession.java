@@ -15,6 +15,9 @@ public class StudentSession {
     private String simulationType;
     private int simulationScore;
     private boolean passed;
+    private String bfpNotes;
+    private Double confidence;
+    private String prepLevel;
 
     /** Row ID returned by Turso on INSERT — used for subsequent UPDATE calls. */
     private long dbRowId = -1;
@@ -39,6 +42,9 @@ public class StudentSession {
     public int    getSimulationScore(){ return simulationScore; }
     public boolean isPassed()         { return passed; }
     public long   getDbRowId()        { return dbRowId; }
+    public String getBfpNotes()       { return bfpNotes; }
+    public Double getConfidence()     { return confidence; }
+    public String getPrepLevel()      { return prepLevel; }
 
     // --- Setters ---
 
@@ -47,6 +53,9 @@ public class StudentSession {
     public void setSimulationType(String type)   { this.simulationType = type; }
     public void setSimulationScore(int score)    { this.simulationScore = score; }
     public void setPassed(boolean passed)        { this.passed = passed; }
+    public void setBfpNotes(String notes)        { this.bfpNotes = notes; }
+    public void setConfidence(Double confidence) { this.confidence = confidence; }
+    public void setPrepLevel(String prepLevel)   { this.prepLevel = prepLevel; }
 
     /** Seconds elapsed from tutorial start to completion, or -1 if not completed. */
     public long getTutorialDurationSeconds() {

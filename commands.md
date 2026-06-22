@@ -104,6 +104,83 @@ Ends your active simulation early. Behaves identically to the timer expiring nat
 
 ---
 
+### `/sim_status [player]`
+
+**Permission:** Any player (self); Op level 2+ for targeting another player  
+**Syntax:** `/sim_status` or `/sim_status <player>`
+
+Prints a live snapshot of the specified player's active simulation.
+
+**Output includes:**
+- Simulation type (FIRE / EARTHQUAKE)
+- Current earthquake phase (RUMBLE / PEAK / AFTERSHOCK / END)
+- Time remaining (formatted as M:SS)
+- Fires extinguished so far (FIRE sessions)
+- Whether the timer is frozen
+
+**Example:**
+```
+/sim_status               ← check yourself
+/sim_status station2      ← instructor checks a student (op only)
+```
+
+---
+
+### `/sim_list`
+
+**Permission:** Op level 2+  
+**Syntax:** `/sim_list`
+
+Lists **all currently running simulations** across all players on the server. Shows player name, simulation type, time remaining, and whether any timer is frozen.
+
+**When to use:**
+- Instructor monitoring multiple stations simultaneously
+- Checking whether any orphaned sessions need to be stopped
+
+---
+
+### `/sim_freeze [player]`
+
+**Permission:** Op level 2+  
+**Syntax:** `/sim_freeze` or `/sim_freeze <player>`
+
+Pauses the simulation timer for the specified player. The disaster effects (fire spread, earthquake block destruction, camera shake) continue, but the countdown stops. The frozen player is notified.
+
+**When to use:**
+- Giving a student a moment to recover without ending the session
+- Pausing for an instructor demonstration mid-simulation
+- Buying time for a technical issue without losing score data
+
+---
+
+### `/sim_unfreeze [player]`
+
+**Permission:** Op level 2+  
+**Syntax:** `/sim_unfreeze` or `/sim_unfreeze <player>`
+
+Resumes a previously frozen simulation timer.
+
+---
+
+### `/sim_time set <seconds>` / `/sim_time add <seconds>`
+
+**Permission:** Op level 2+  
+**Syntax:** `/sim_time set <seconds>` or `/sim_time add <seconds>`
+
+| Sub-command | Argument | Range | Effect |
+|---|---|---|---|
+| `set` | seconds | 0 – 3600 | Replace remaining time with this value |
+| `add` | seconds | −3600 – 3600 | Add/subtract seconds from remaining time (negative values reduce time) |
+
+**Examples:**
+```
+/sim_time set 120        ← set exactly 2 minutes remaining
+/sim_time add 30         ← extend by 30 seconds
+/sim_time add -60        ← cut a minute off the clock
+```
+
+---
+
 ## Earthquake Tuning Commands
 
 ### `/sim_magnitude <value>`
@@ -216,6 +293,89 @@ Resets a player's tutorial state and immediately teleports them to the tutorial 
 
 ---
 
+### `/bfp note <text>`
+
+**Syntax:** `/bfp note <text>`
+
+Appends an instructor observation to the current student's active session. Notes are pipe-delimited and stored in the `bfp_notes` column in Turso. Multiple calls append with a ` | ` separator.
+
+**When to use:**
+- Recording a student's behaviour during the drill ("panicked at smoke", "tried to exit early")
+- Flagging accessibility needs or special circumstances
+- Logging anything relevant that the score alone doesn't capture
+
+**Example:**
+```
+/bfp note student hesitated before pulling the pin
+/bfp note forgot to sweep — aimed at flames directly
+```
+
+---
+
+### `/bfp confidence <1-5>`
+
+**Syntax:** `/bfp confidence <rating>`
+
+Sets an instructor confidence rating (1.0–5.0) for the student's performance this session. Stored in the `confidence` column.
+
+| Rating | Meaning |
+|---|---|
+| 1.0 | Very poor — student appeared lost/paralysed |
+| 2.0 | Below average — major hesitation or wrong actions |
+| 3.0 | Average — followed steps with minor errors |
+| 4.0 | Good — competent with only small mistakes |
+| 5.0 | Excellent — calm, methodical, fully correct |
+
+**Example:** `/bfp confidence 3.5`
+
+---
+
+### `/bfp prep_level <level>`
+
+**Syntax:** `/bfp prep_level <none|low|moderate|high>`
+
+Sets the instructor's assessment of how prepared the student appeared before the simulation. Stored in `prep_level`.
+
+| Level | Meaning |
+|---|---|
+| `none` | No apparent prior knowledge |
+| `low` | Some awareness, significant gaps |
+| `moderate` | Adequate preparation, minor gaps |
+| `high` | Well-prepared, recalled steps unprompted |
+
+**Example:** `/bfp prep_level moderate`
+
+---
+
+### `/bfp score <0-100> [player]`
+
+**Syntax:** `/bfp score <value>` or `/bfp score <value> <player>`
+
+Manually overrides the simulation score for the active session. Useful when an instructor wants to award partial credit or correct an automatic scoring error.
+
+**Notes:**
+- Clamped to 0–100
+- For FIRE sessions the automatic score is `firesExtinguished × 2` (capped at 100). This command overrides that.
+- Changes are written to Turso immediately
+
+---
+
+### `/bfp pass [player]`
+
+**Syntax:** `/bfp pass` or `/bfp pass <player>`
+
+Marks the active session as **passed** regardless of the automatic score. Use when a student met the practical standard even if the numeric score doesn't reflect it.
+
+---
+
+### `/bfp fail [player]`
+
+**Syntax:** `/bfp fail` or `/bfp fail <player>`
+
+Marks the active session as **failed**. Use when a student did not meet the standard even if the score is technically high (e.g., they used the wrong extinguisher type).
+
+---
+
 ### `/bfp session info`
 
 **Syntax:** `/bfp session info`
@@ -233,6 +393,44 @@ Prints the current session details to chat:
 **Syntax:** `/bfp sessions list` or `/bfp sessions list <page>`
 
 Lists the 10 most recent sessions from Turso in chat, paginated. Each entry shows student name, account, simulation type, score, pass status, and session status.
+
+---
+
+### `/bfp sessions today`
+
+**Syntax:** `/bfp sessions today`
+
+Lists **all sessions started today** (based on server date). Useful for a quick end-of-day review at the end of a lab session.
+
+---
+
+### `/bfp sessions stats`
+
+**Syntax:** `/bfp sessions stats`
+
+Queries **aggregate statistics** from Turso for all completed sessions:
+- Total sessions completed
+- Number and percentage passed
+- Average score
+- Fire vs. earthquake session breakdown
+
+**When to use:**
+- Quick overview during or after a lab day
+- Pre-analysis before exporting the CSV
+
+---
+
+### `/bfp sessions search <query>`
+
+**Syntax:** `/bfp sessions search <query>`
+
+Searches for sessions where the student name **or** station account contains the query string (case-insensitive, partial match). Returns up to 15 matches ordered by most recent.
+
+**Example:**
+```
+/bfp sessions search Juan
+/bfp sessions search station3
+```
 
 ---
 
@@ -274,6 +472,24 @@ Gives you a **Fire Extinguisher** item directly into your inventory (not pinned 
 **Notes:**
 - The extinguisher given by `/sim_fire` starts with the pin NOT pulled. This one is also unpulled — right-click once to pull the pin (the "P" in PASS), then right-click again to spray
 - Can be used at any time, simulation or not
+
+---
+
+### `/get_co2_extinguisher`
+
+**Permission:** Any player  
+**Syntax:** `/get_co2_extinguisher`
+
+Gives you a **CO2 Extinguisher** (Class C) directly into your inventory. Used for putting out burning computer blocks.
+
+**When to use:**
+- Testing the CO2 extinguisher mechanics on computer blocks outside of a simulation
+- Replacement during an electrical fire scenario
+- Instructor demonstrating Class C fire response
+
+**Notes:**
+- Right-click on a `BURNING` computer block to extinguish it — the computer will be marked `BROKEN` (cannot be re-used)
+- Also suppresses regular fire and soul fire, but the primary use case is electrical fires
 
 ---
 
@@ -323,8 +539,15 @@ All BerongSMP items and blocks are obtainable via the vanilla `/give` command us
 | `/sim_fire` | Any player | Start fire simulation, bypasses lobby button |
 | `/sim_earthquake [magnitude]` | Any player | Start earthquake simulation, optional magnitude 0.1–10.0 |
 | `/sim_stop` | Any player | End active simulation early |
+| `/sim_status [player]` | Any player / Op for others | Live snapshot: type, phase, time, fires extinguished |
+| `/sim_list` | Op (level 2+) | List all currently active simulations on the server |
+| `/sim_freeze [player]` | Op (level 2+) | Pause simulation timer without ending the session |
+| `/sim_unfreeze [player]` | Op (level 2+) | Resume a frozen simulation timer |
+| `/sim_time set <seconds>` | Op (level 2+) | Set remaining simulation time |
+| `/sim_time add <seconds>` | Op (level 2+) | Add/subtract seconds from remaining time |
 | `/sim_magnitude <value>` | Op (level 2+) | Live-adjust running earthquake magnitude |
 | `/get_extinguisher` | Any player | Gives fire extinguisher item |
+| `/get_co2_extinguisher` | Any player | Gives CO2 extinguisher for Class C electrical fires |
 | `/spawn_lspu` | Op (level 2+) | Permanent world change — places CCS building |
 | `/bfp login <pin>` | Any player | Authenticate as BFP admin using the config PIN |
 | `/bfp logout` | Any player | Revoke PIN-based BFP admin access |
@@ -333,8 +556,17 @@ All BerongSMP items and blocks are obtainable via the vanilla `/give` command us
 | `/bfp checkout` | Op or PIN | Finalise and save current session to DB |
 | `/bfp reset [player]` | Op or PIN | Wipe tutorial + delete DB row, no record kept |
 | `/bfp tutorial [player]` | Op or PIN | Reset tutorial + teleport to tutorial lobby, re-init NPCs |
+| `/bfp note <text>` | Op or PIN | Append instructor observation to active session |
+| `/bfp confidence <1-5>` | Op or PIN | Set instructor confidence rating (1.0–5.0) |
+| `/bfp prep_level <level>` | Op or PIN | Set prep assessment: none / low / moderate / high |
+| `/bfp score <0-100> [player]` | Op or PIN | Manually override simulation score |
+| `/bfp pass [player]` | Op or PIN | Mark session as passed |
+| `/bfp fail [player]` | Op or PIN | Mark session as failed |
 | `/bfp session info` | Op or PIN | Print current session details to chat |
 | `/bfp sessions list [page]` | Op or PIN | List 10 most recent sessions from DB |
+| `/bfp sessions today` | Op or PIN | List all sessions started today |
+| `/bfp sessions stats` | Op or PIN | Aggregate stats: total, pass rate, avg score, fire vs quake |
+| `/bfp sessions search <query>` | Op or PIN | Search sessions by student name or station account |
 | `/bfp sessions export` | Op or PIN | Export all sessions to `run/bfp_sessions_export.csv` |
 | `/bfp student <name>` | Op or PIN | Look up last 10 sessions for a student name |
 

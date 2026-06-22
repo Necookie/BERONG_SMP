@@ -204,4 +204,62 @@ public class SessionManager {
     public static StudentSession getActiveSession(UUID uuid) {
         return activeSessions.get(uuid);
     }
+
+    /** Appends a note to the in-memory session and persists it asynchronously. */
+    public static boolean addNote(UUID uuid, String note) {
+        StudentSession session = activeSessions.get(uuid);
+        if (session == null) return false;
+        String existing = session.getBfpNotes();
+        String updated = (existing == null || existing.isBlank()) ? note : existing + " | " + note;
+        session.setBfpNotes(updated);
+        if (TursoClient.isReady() && session.getDbRowId() > 0) {
+            TursoClient.executeAsync("UPDATE sessions SET bfp_notes=? WHERE id=?", updated, session.getDbRowId());
+        }
+        return true;
+    }
+
+    /** Sets the instructor confidence rating (1.0–5.0) for the active session. */
+    public static boolean setConfidence(UUID uuid, double confidence) {
+        StudentSession session = activeSessions.get(uuid);
+        if (session == null) return false;
+        session.setConfidence(confidence);
+        if (TursoClient.isReady() && session.getDbRowId() > 0) {
+            TursoClient.executeAsync("UPDATE sessions SET confidence=? WHERE id=?", confidence, session.getDbRowId());
+        }
+        return true;
+    }
+
+    /** Sets the prep_level field for the active session. */
+    public static boolean setPrepLevel(UUID uuid, String level) {
+        StudentSession session = activeSessions.get(uuid);
+        if (session == null) return false;
+        session.setPrepLevel(level);
+        if (TursoClient.isReady() && session.getDbRowId() > 0) {
+            TursoClient.executeAsync("UPDATE sessions SET prep_level=? WHERE id=?", level, session.getDbRowId());
+        }
+        return true;
+    }
+
+    /** Overrides the simulation score for the active session. */
+    public static boolean setScore(UUID uuid, int score) {
+        StudentSession session = activeSessions.get(uuid);
+        if (session == null) return false;
+        session.setSimulationScore(Math.max(0, Math.min(100, score)));
+        if (TursoClient.isReady() && session.getDbRowId() > 0) {
+            TursoClient.executeAsync("UPDATE sessions SET simulation_score=? WHERE id=?",
+                    session.getSimulationScore(), session.getDbRowId());
+        }
+        return true;
+    }
+
+    /** Overrides the passed flag for the active session. */
+    public static boolean setPassedOverride(UUID uuid, boolean passed) {
+        StudentSession session = activeSessions.get(uuid);
+        if (session == null) return false;
+        session.setPassed(passed);
+        if (TursoClient.isReady() && session.getDbRowId() > 0) {
+            TursoClient.executeAsync("UPDATE sessions SET passed=? WHERE id=?", passed, session.getDbRowId());
+        }
+        return true;
+    }
 }

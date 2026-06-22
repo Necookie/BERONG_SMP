@@ -269,6 +269,11 @@ public class SimulationManager {
         return activeSessions.get(uuid);
     }
 
+    /** Returns an unmodifiable view of all active sessions (UUID → session). */
+    public static Map<UUID, SimulationSession> getActiveSessions() {
+        return java.util.Collections.unmodifiableMap(activeSessions);
+    }
+
     // -----------------------------------------------------------------------
     // Event handlers
     // -----------------------------------------------------------------------

@@ -17,6 +17,8 @@ import net.minecraft.server.level.ServerPlayer;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -312,12 +314,230 @@ public class ModCommands {
                     if (context.getSource().isPlayer()) {
                         UUID uuid = context.getSource().getPlayer().getUUID();
                         SimulationManager.endSimulation(uuid);
-                        // Note: sendSuccess is called outside the isPlayer check so
-                        // the console also gets feedback when it runs this command.
                     }
                     context.getSource().sendSuccess(() -> Component.literal("Simulation stopped."), true);
                     return 1;
                 }));
+
+        // /sim_status [player] — show live status of self or (op-only) another player's session.
+        dispatcher.register(Commands.literal("sim_status")
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return simStatus(ctx, ctx.getSource().getPlayer());
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                        .executes(ctx -> simStatus(ctx, EntityArgument.getPlayer(ctx, "player")))));
+
+        // /sim_list — op command to list all currently running simulations.
+        dispatcher.register(Commands.literal("sim_list")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .executes(ctx -> {
+                    Map<UUID, SimulationSession> sessions = SimulationManager.getActiveSessions();
+                    if (sessions.isEmpty()) {
+                        ctx.getSource().sendSuccess(() -> Component.literal("§7No active simulations."), false);
+                        return 1;
+                    }
+                    StringBuilder sb = new StringBuilder("§6Active simulations (").append(sessions.size()).append("):\n");
+                    for (SimulationSession s : sessions.values()) {
+                        int secs = (s.getTimerTicks() + 19) / 20;
+                        sb.append("§f").append(s.getPlayer().getName().getString())
+                          .append(" §7— §e").append(s.getState().name())
+                          .append(" §7| ⏱ ").append(formatTime(secs))
+                          .append(s.isFrozen() ? " §b[FROZEN]" : "")
+                          .append("\n");
+                    }
+                    String msg = sb.toString();
+                    ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                    return 1;
+                }));
+
+        // /sim_freeze [player] — pause the simulation timer for self or another player (op).
+        dispatcher.register(Commands.literal("sim_freeze")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return simFreeze(ctx, ctx.getSource().getPlayer(), true);
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> simFreeze(ctx, EntityArgument.getPlayer(ctx, "player"), true))));
+
+        // /sim_unfreeze [player] — resume a previously frozen timer.
+        dispatcher.register(Commands.literal("sim_unfreeze")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return simFreeze(ctx, ctx.getSource().getPlayer(), false);
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> simFreeze(ctx, EntityArgument.getPlayer(ctx, "player"), false))));
+
+        // /sim_time set <seconds> — set remaining time; add <seconds> — add/subtract seconds.
+        dispatcher.register(Commands.literal("sim_time")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .then(Commands.literal("set")
+                        .then(Commands.argument("seconds", IntegerArgumentType.integer(0, 3600))
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    ServerPlayer player = ctx.getSource().getPlayer();
+                                    SimulationSession session = SimulationManager.getSession(player.getUUID());
+                                    if (session == null) {
+                                        ctx.getSource().sendFailure(Component.literal("No active simulation."));
+                                        return 0;
+                                    }
+                                    int secs = IntegerArgumentType.getInteger(ctx, "seconds");
+                                    session.setTimerTicks(secs * 20);
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            "§eTimer set to §f" + formatTime(secs) + "§e."), true);
+                                    return 1;
+                                })))
+                .then(Commands.literal("add")
+                        .then(Commands.argument("seconds", IntegerArgumentType.integer(-3600, 3600))
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    ServerPlayer player = ctx.getSource().getPlayer();
+                                    SimulationSession session = SimulationManager.getSession(player.getUUID());
+                                    if (session == null) {
+                                        ctx.getSource().sendFailure(Component.literal("No active simulation."));
+                                        return 0;
+                                    }
+                                    int delta = IntegerArgumentType.getInteger(ctx, "seconds");
+                                    int newTicks = Math.max(0, session.getTimerTicks() + delta * 20);
+                                    session.setTimerTicks(newTicks);
+                                    int newSecs = (newTicks + 19) / 20;
+                                    String sign = delta >= 0 ? "+" : "";
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            "§eTimer adjusted by §f" + sign + delta + "s §e→ §f" + formatTime(newSecs)), true);
+                                    return 1;
+                                }))));
+
+        // /get_co2_extinguisher — gives the CO2 extinguisher for Class C electrical fires.
+        dispatcher.register(Commands.literal("get_co2_extinguisher")
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) {
+                        ctx.getSource().sendFailure(Component.literal("This command can only be run by a player."));
+                        return 0;
+                    }
+                    ServerPlayer player = ctx.getSource().getPlayer();
+                    player.getInventory().add(BerongSMP.CO2_EXTINGUISHER.get().getDefaultInstance());
+                    ctx.getSource().sendSuccess(() -> Component.literal("§aCO2 Extinguisher added to your inventory! Use it on burning computer blocks."), true);
+                    return 1;
+                }));
+
+        // /bfp note, /bfp confidence, /bfp prep_level, /bfp score, /bfp pass, /bfp fail,
+        // /bfp sessions stats, /bfp sessions today, /bfp sessions search are added as
+        // additional sub-commands by re-registering branches onto the existing /bfp tree.
+        // NeoForge/Brigadier merges literal nodes with the same name on the same dispatcher.
+        dispatcher.register(Commands.literal("bfp")
+                .requires(ModCommands::isBfpAuthorized)
+
+                // /bfp note <text> — append instructor observation to active session
+                .then(Commands.literal("note")
+                        .then(Commands.argument("text", StringArgumentType.greedyString())
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    ServerPlayer player = ctx.getSource().getPlayer();
+                                    String note = StringArgumentType.getString(ctx, "text");
+                                    boolean ok = SessionManager.addNote(player.getUUID(), note);
+                                    if (!ok) {
+                                        ctx.getSource().sendFailure(Component.literal("No active session for this account."));
+                                        return 0;
+                                    }
+                                    ctx.getSource().sendSuccess(() -> Component.literal("§aNoted: §f" + note), false);
+                                    return 1;
+                                })))
+
+                // /bfp confidence <1-5> — instructor confidence rating
+                .then(Commands.literal("confidence")
+                        .then(Commands.argument("rating", DoubleArgumentType.doubleArg(1.0, 5.0))
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    ServerPlayer player = ctx.getSource().getPlayer();
+                                    double rating = DoubleArgumentType.getDouble(ctx, "rating");
+                                    boolean ok = SessionManager.setConfidence(player.getUUID(), rating);
+                                    if (!ok) {
+                                        ctx.getSource().sendFailure(Component.literal("No active session for this account."));
+                                        return 0;
+                                    }
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            String.format("§aConfidence rating set to §f%.1f/5.0", rating)), false);
+                                    return 1;
+                                })))
+
+                // /bfp prep_level <none|low|moderate|high> — instructor prep assessment
+                .then(Commands.literal("prep_level")
+                        .then(Commands.literal("none").executes(ctx -> setPrepLevel(ctx, "none")))
+                        .then(Commands.literal("low").executes(ctx -> setPrepLevel(ctx, "low")))
+                        .then(Commands.literal("moderate").executes(ctx -> setPrepLevel(ctx, "moderate")))
+                        .then(Commands.literal("high").executes(ctx -> setPrepLevel(ctx, "high"))))
+
+                // /bfp score <0-100> [player] — manually override simulation score
+                .then(Commands.literal("score")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0, 100))
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    return bfpScore(ctx, ctx.getSource().getPlayer(),
+                                            IntegerArgumentType.getInteger(ctx, "value"));
+                                })
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> bfpScore(ctx,
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                IntegerArgumentType.getInteger(ctx, "value"))))))
+
+                // /bfp pass [player] — mark session as passed
+                .then(Commands.literal("pass")
+                        .executes(ctx -> {
+                            if (!ctx.getSource().isPlayer()) return 0;
+                            return bfpSetPassed(ctx, ctx.getSource().getPlayer(), true);
+                        })
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> bfpSetPassed(ctx, EntityArgument.getPlayer(ctx, "player"), true))))
+
+                // /bfp fail [player] — mark session as failed
+                .then(Commands.literal("fail")
+                        .executes(ctx -> {
+                            if (!ctx.getSource().isPlayer()) return 0;
+                            return bfpSetPassed(ctx, ctx.getSource().getPlayer(), false);
+                        })
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(ctx -> bfpSetPassed(ctx, EntityArgument.getPlayer(ctx, "player"), false))))
+
+                // /bfp sessions stats — aggregate stats from Turso
+                .then(Commands.literal("sessions")
+                        .then(Commands.literal("stats")
+                                .executes(ModCommands::bfpSessionsStats))
+                        // /bfp sessions today — list sessions started today
+                        .then(Commands.literal("today")
+                                .executes(ModCommands::bfpSessionsToday))
+                        // /bfp sessions search <query> — search by student name or account
+                        .then(Commands.literal("search")
+                                .then(Commands.argument("query", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            String q = "%" + StringArgumentType.getString(ctx, "query") + "%";
+                                            String json = TursoClient.query(
+                                                    "SELECT id, student_name, station_account, simulation_type, simulation_score, passed, status " +
+                                                    "FROM sessions WHERE student_name LIKE ? OR station_account LIKE ? ORDER BY start_time DESC LIMIT 15",
+                                                    q, q);
+                                            JsonArray rows = TursoClient.parseRows(json);
+                                            if (rows.isEmpty()) {
+                                                ctx.getSource().sendFailure(Component.literal("No sessions matched."));
+                                                return 0;
+                                            }
+                                            StringBuilder sb = new StringBuilder("§6Search results (").append(rows.size()).append("):\n");
+                                            for (JsonElement el : rows) {
+                                                JsonObject r = el.getAsJsonObject();
+                                                sb.append("§7#").append(str(r,"id"))
+                                                  .append(" §f").append(str(r,"student_name"))
+                                                  .append("§7@").append(str(r,"station_account"))
+                                                  .append(" §e").append(str(r,"simulation_type"))
+                                                  .append(" §ascore=").append(str(r,"simulation_score"))
+                                                  .append(" pass=").append(str(r,"passed"))
+                                                  .append(" [").append(str(r,"status")).append("]\n");
+                                            }
+                                            String msg = sb.toString();
+                                            ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                            return 1;
+                                        })))));
     }
 
     /**
@@ -420,6 +640,147 @@ public class ModCommands {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;
+    }
+
+    /** Formats ticks into M:SS display string. */
+    private static String formatTime(int seconds) {
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
+    }
+
+    private static int simStatus(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
+        SimulationSession session = SimulationManager.getSession(target.getUUID());
+        if (session == null) {
+            ctx.getSource().sendSuccess(() -> Component.literal("§7" + target.getName().getString() + " has no active simulation."), false);
+            return 1;
+        }
+        int secs = (session.getTimerTicks() + 19) / 20;
+        String state = session.getState().name();
+        String phase = session.getState() == SimulationManager.SimulationState.EARTHQUAKE && session.getQuakePhase() != null
+                ? " §7(Phase: §e" + session.getQuakePhase().name() + "§7)" : "";
+        String fireInfo = session.getState() == SimulationManager.SimulationState.FIRE
+                ? "\n§eFires extinguished: §f" + session.getFiresExtinguished() : "";
+        String frozen = session.isFrozen() ? " §b[FROZEN]" : "";
+        String msg = "§6--- Simulation Status: " + target.getName().getString() + " ---\n" +
+                "§eType: §f" + state + phase + frozen + "\n" +
+                "§eTime remaining: §f" + formatTime(secs) + fireInfo;
+        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+        return 1;
+    }
+
+    private static int simFreeze(CommandContext<CommandSourceStack> ctx, ServerPlayer target, boolean freeze) {
+        SimulationSession session = SimulationManager.getSession(target.getUUID());
+        if (session == null) {
+            ctx.getSource().sendFailure(Component.literal(target.getName().getString() + " has no active simulation."));
+            return 0;
+        }
+        session.setFrozen(freeze);
+        String action = freeze ? "§bFROZEN" : "§aRESUMED";
+        target.sendSystemMessage(Component.literal("§7Your simulation timer has been " + action + "§7."));
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                action + " §7timer for §f" + target.getName().getString()), true);
+        return 1;
+    }
+
+    private static int setPrepLevel(CommandContext<CommandSourceStack> ctx, String level) {
+        if (!ctx.getSource().isPlayer()) return 0;
+        ServerPlayer player = ctx.getSource().getPlayer();
+        boolean ok = SessionManager.setPrepLevel(player.getUUID(), level);
+        if (!ok) {
+            ctx.getSource().sendFailure(Component.literal("No active session for this account."));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("§aPrep level set to §f" + level), false);
+        return 1;
+    }
+
+    private static int bfpScore(CommandContext<CommandSourceStack> ctx, ServerPlayer target, int score) {
+        boolean ok = SessionManager.setScore(target.getUUID(), score);
+        if (!ok) {
+            ctx.getSource().sendFailure(Component.literal("No active session for " + target.getName().getString()));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§aScore for §f" + target.getName().getString() + " §aset to §f" + score + "/100"), true);
+        return 1;
+    }
+
+    private static int bfpSetPassed(CommandContext<CommandSourceStack> ctx, ServerPlayer target, boolean passed) {
+        boolean ok = SessionManager.setPassedOverride(target.getUUID(), passed);
+        if (!ok) {
+            ctx.getSource().sendFailure(Component.literal("No active session for " + target.getName().getString()));
+            return 0;
+        }
+        String label = passed ? "§aPASSED" : "§cFAILED";
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§f" + target.getName().getString() + " §7marked as " + label), true);
+        return 1;
+    }
+
+    private static int bfpSessionsStats(CommandContext<CommandSourceStack> ctx) {
+        if (!TursoClient.isReady()) {
+            ctx.getSource().sendFailure(Component.literal("Turso not configured — stats unavailable."));
+            return 0;
+        }
+        String json = TursoClient.query(
+                "SELECT COUNT(*) as total, " +
+                "SUM(CASE WHEN passed=1 THEN 1 ELSE 0 END) as passed_count, " +
+                "AVG(simulation_score) as avg_score, " +
+                "SUM(CASE WHEN simulation_type='FIRE' THEN 1 ELSE 0 END) as fire_count, " +
+                "SUM(CASE WHEN simulation_type='EARTHQUAKE' THEN 1 ELSE 0 END) as quake_count " +
+                "FROM sessions WHERE status='completed'");
+        JsonArray rows = TursoClient.parseRows(json);
+        if (rows.isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal("No completed sessions found."));
+            return 0;
+        }
+        JsonObject r = rows.get(0).getAsJsonObject();
+        String total = str(r, "total");
+        String passed = str(r, "passed_count");
+        String avgScore = str(r, "avg_score");
+        String fire = str(r, "fire_count");
+        String quake = str(r, "quake_count");
+        int totalInt = total.isEmpty() ? 0 : (int) Double.parseDouble(total);
+        int passedInt = passed.isEmpty() ? 0 : (int) Double.parseDouble(passed);
+        double passRate = totalInt > 0 ? (passedInt * 100.0 / totalInt) : 0;
+        double avgScoreD = avgScore.isEmpty() ? 0 : Double.parseDouble(avgScore);
+        String msg = "§6--- Session Stats (completed) ---\n" +
+                "§eTotal sessions: §f" + totalInt + "\n" +
+                "§ePassed: §f" + passedInt + " §7(" + String.format("%.1f%%", passRate) + ")\n" +
+                "§eAvg score: §f" + String.format("%.1f", avgScoreD) + "\n" +
+                "§eFire drills: §f" + fire + " §7| §eQuake drills: §f" + quake;
+        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+        return 1;
+    }
+
+    private static int bfpSessionsToday(CommandContext<CommandSourceStack> ctx) {
+        if (!TursoClient.isReady()) {
+            ctx.getSource().sendFailure(Component.literal("Turso not configured — data unavailable."));
+            return 0;
+        }
+        String today = LocalDate.now().toString(); // e.g. "2026-06-22"
+        String json = TursoClient.query(
+                "SELECT id, student_name, station_account, simulation_type, simulation_score, passed, status " +
+                "FROM sessions WHERE start_time LIKE ? ORDER BY start_time DESC",
+                today + "%");
+        JsonArray rows = TursoClient.parseRows(json);
+        if (rows.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.literal("§7No sessions today."), false);
+            return 1;
+        }
+        StringBuilder sb = new StringBuilder("§6Today's sessions (").append(rows.size()).append("):\n");
+        for (JsonElement el : rows) {
+            JsonObject r = el.getAsJsonObject();
+            sb.append("§7#").append(str(r,"id"))
+              .append(" §f").append(str(r,"student_name"))
+              .append("§7@").append(str(r,"station_account"))
+              .append(" §e").append(str(r,"simulation_type"))
+              .append(" §ascore=").append(str(r,"simulation_score"))
+              .append(" pass=").append(str(r,"passed"))
+              .append(" [").append(str(r,"status")).append("]\n");
+        }
+        String msg = sb.toString();
+        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+        return 1;
     }
 
     /**
