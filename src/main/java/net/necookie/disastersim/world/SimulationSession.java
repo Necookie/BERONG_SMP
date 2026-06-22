@@ -224,4 +224,25 @@ public class SimulationSession {
 
     /** Updates the per-session magnitude live; takes effect on the next tick. */
     public void setSessionMagnitude(double magnitude) { this.sessionMagnitude = magnitude; }
+
+    // --- Telemetry zone flags (Phase 5) ---
+
+    /** True once the player has entered the assembly zone during this session. */
+    private boolean assemblyReached = false;
+    public boolean hasReachedAssembly() { return assemblyReached; }
+    public void markAssemblyReached()   { assemblyReached = true; }
+
+    /** True once the player has passed through any designated emergency exit zone. */
+    private boolean passedExit = false;
+    public boolean hasPassedExit() { return passedExit; }
+    public void markPassedExit()   { passedExit = true; }
+
+    /** True once the extinguisher_use contract event has been emitted for the current spray gesture. */
+    private boolean extinguishEventPending = true;
+    public boolean consumeExtinguishEventPending() {
+        if (!extinguishEventPending) return false;
+        extinguishEventPending = false;
+        return true;
+    }
+    public void resetExtinguishEventPending() { extinguishEventPending = true; }
 }

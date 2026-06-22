@@ -387,6 +387,24 @@ public class SimulationManager {
                 EFFECTS.cleanupFireOutsideBounds(level);
             }
 
+            // --- Assembly zone force-field border particles (every 5 ticks) ---
+            if (ticks % 5 == 0) {
+                AssemblyZone.spawnBorderParticles(level);
+            }
+
+            // --- Assembly zone arrival check ---
+            if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position())) {
+                session.markAssemblyReached();
+                double hazDist = (session.getState() == SimulationState.FIRE)
+                        ? nearestFireDistance(level, player.blockPosition())
+                        : (session.getEpicenter() != null
+                                ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                                : 99.0);
+                AssemblyZone.onPlayerArrived(player, session, level, hazDist);
+                endSimulation(uuid);
+                continue;
+            }
+
             // Send an updated HUD packet at HUD_SYNC_INTERVAL_TICKS (every 10 ticks = 0.5s).
             // Ceiling division converts ticks to whole seconds so the HUD timer
             // shows "1" on the last tick rather than jumping straight to "0".

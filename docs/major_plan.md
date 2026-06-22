@@ -152,7 +152,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 
 **Key deliverables:**
 - [x] `FireAlarmBlock` — wall-mounted red alarm switch; activates during FIRE sim; logs `fire_alarm_activate`
-- [ ] `AssemblyZone` — green particle force-field border outside library; detects player arrival → `assembly_area_reached`
+- [x] `AssemblyZone` — green particle force-field border outside library; detects player arrival → `assembly_area_reached`
 - [ ] `TelemetryCsvWriter` — writes `run/telemetry/gameplay_logs_<date>.csv` + `sessions_<date>.csv` + `map_metadata.json`
 - [ ] `session_start` / `session_end` contract events with `end_reason` (`assembly_reached` / `injured` / `timeout`)
 - [ ] Per-tick `move` sampler (10 Hz) with `hazard_distance` (nearest fire block or epicenter distance)
