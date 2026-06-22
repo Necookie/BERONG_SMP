@@ -2,6 +2,7 @@
   "itemGroup.berongsmp": "Example Mod Tab",
   "block.berongsmp.example_block": "Example Block",
   "block.berongsmp.computer_block": "Computer",
+  "block.berongsmp.fire_alarm": "Fire Alarm",
   "item.berongsmp.example_item": "Example Item",
   "item.berongsmp.fire_extinguisher": "Fire Extinguisher",
   "item.berongsmp.co2_extinguisher": "CO2 Extinguisher",

@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "panel":    "berongsmp:block/fire_alarm_on",
+    "side":     "berongsmp:block/fire_alarm_on",
+    "particle": "berongsmp:block/fire_alarm_on"
+  },
+  "elements": [
+    {
+      "name": "alarm_panel",
+      "from": [5, 4, 13],
+      "to":   [11, 12, 16],
+      "faces": {
+        "north": { "texture": "#panel", "uv": [0, 0, 6, 8] },
+        "south": { "texture": "#side",  "uv": [0, 0, 6, 8] },
+        "east":  { "texture": "#side",  "uv": [0, 0, 3, 8] },
+        "west":  { "texture": "#side",  "uv": [0, 0, 3, 8] },
+        "up":    { "texture": "#side",  "uv": [0, 0, 6, 3] },
+        "down":  { "texture": "#side",  "uv": [0, 0, 6, 3] }
+      }
+    },
+    {
+      "name": "pull_handle",
+      "from": [6, 5, 10],
+      "to":   [10, 11, 13],
+      "faces": {
+        "north": { "texture": "#panel", "uv": [2, 1, 10, 13] },
+        "east":  { "texture": "#side",  "uv": [0, 0, 3, 6]  },
+        "west":  { "texture": "#side",  "uv": [0, 0, 3, 6]  },
+        "up":    { "texture": "#side",  "uv": [0, 0, 4, 3]  },
+        "down":  { "texture": "#side",  "uv": [0, 0, 4, 3]  }
+      }
+    }
+  ]
+}

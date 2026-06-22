@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.block.FireAlarmBlock;
 import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;
@@ -79,6 +80,20 @@ public class BerongSMP {
     /** Computer block item. */
     public static final DeferredItem<BlockItem> COMPUTER_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("computer_block", COMPUTER_BLOCK);
 
+    /** Wall-mounted fire alarm pull station — activates during FIRE simulations, logs fire_alarm_activate telemetry. */
+    public static final DeferredBlock<FireAlarmBlock> FIRE_ALARM_BLOCK = BLOCKS.registerBlock(
+            "fire_alarm",
+            FireAlarmBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+                    .strength(0.5f, 4.0f)
+                    .sound(net.minecraft.world.level.block.SoundType.METAL)
+                    .lightLevel(s -> s.getValue(FireAlarmBlock.ACTIVATED) ? 7 : 0));
+
+    /** Fire alarm block item. */
+    public static final DeferredItem<BlockItem> FIRE_ALARM_ITEM =
+            ITEMS.registerSimpleBlockItem("fire_alarm", FIRE_ALARM_BLOCK);
+
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
@@ -101,6 +116,7 @@ public class BerongSMP {
                 output.accept(FIRE_EXTINGUISHER.get());
                 output.accept(CO2_EXTINGUISHER.get());
                 output.accept(COMPUTER_BLOCK_ITEM.get());
+                output.accept(FIRE_ALARM_ITEM.get());
             }).build());
 
     /**

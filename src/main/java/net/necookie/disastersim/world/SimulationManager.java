@@ -428,7 +428,7 @@ public class SimulationManager {
     }
 
     /** Returns the distance to the nearest fire block within 10 blocks of origin, or 99 if none. */
-    static double nearestFireDistance(ServerLevel level, BlockPos origin) {
+    public static double nearestFireDistance(ServerLevel level, BlockPos origin) {
         double minSq = Double.MAX_VALUE;
         for (BlockPos check : BlockPos.betweenClosed(origin.offset(-10, -5, -10), origin.offset(10, 5, 10))) {
             net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);

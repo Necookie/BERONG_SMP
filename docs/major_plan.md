@@ -151,7 +151,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 **Goal:** Emit the full per-tick + event stream required by `telemetry_contract.md` v1.1 so the MiDRR-Classifier can compute its 6 features and train the preparedness model.
 
 **Key deliverables:**
-- [ ] `FireAlarmBlock` — wall-mounted red alarm switch; activates during FIRE sim; logs `fire_alarm_activate`
+- [x] `FireAlarmBlock` — wall-mounted red alarm switch; activates during FIRE sim; logs `fire_alarm_activate`
 - [ ] `AssemblyZone` — green particle force-field border outside library; detects player arrival → `assembly_area_reached`
 - [ ] `TelemetryCsvWriter` — writes `run/telemetry/gameplay_logs_<date>.csv` + `sessions_<date>.csv` + `map_metadata.json`
 - [ ] `session_start` / `session_end` contract events with `end_reason` (`assembly_reached` / `injured` / `timeout`)
