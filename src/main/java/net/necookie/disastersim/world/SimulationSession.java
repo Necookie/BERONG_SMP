@@ -5,7 +5,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.Config;
 
+import java.time.Instant;
 import java.util.ArrayDeque;
+import java.util.UUID;
 
 /**
  * Holds the mutable runtime state for a single player's active simulation run.
@@ -32,6 +34,11 @@ public class SimulationSession {
     private int fireSpreadCount;
     /** Buffers behavioral events; serialized to JSON and flushed to Turso on session end. */
     public final SimulationEventLogger logger = new SimulationEventLogger();
+
+    /** Unique identifier for this run — used as the CSV join key. */
+    private final String sessionId = UUID.randomUUID().toString().substring(0, 8);
+    /** Wall-clock instant when this session was created (used in CSV §5 metadata). */
+    private final Instant startedAt = Instant.now();
 
     // --- Earthquake state ---
     /** Random epicenter within the simulation arena; null when not an EARTHQUAKE session. */
@@ -207,6 +214,12 @@ public class SimulationSession {
         return magnitude * Math.exp(-decayRate * distance) * phaseScale;
     }
 
+    /** Returns the unique session identifier used as the CSV join key. */
+    public String getSessionId() { return sessionId; }
+
+    /** Returns the wall-clock instant when this session was created. */
+    public Instant getStartedAt() { return startedAt; }
+
     /** Returns the random epicenter chosen at session start; {@code null} for non-EARTHQUAKE sessions. */
     public BlockPos getEpicenter() { return epicenter; }
 
@@ -218,6 +231,9 @@ public class SimulationSession {
 
     /** Returns the per-session magnitude used for intensity and radius calculations. */
     public double getSessionMagnitude() { return sessionMagnitude; }
+
+    /** Returns the total aftershock wave count initialised for this session (2–4). */
+    public int getAftershockCount() { return aftershockCount; }
 
     /** Returns the magnitude scale for the current aftershock phase (relative to sessionMagnitude). */
     public double getAftershockMagnitudeScale() { return aftershockMagnitudeScale; }

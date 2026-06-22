@@ -177,6 +177,19 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal(
                     String.format("§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!", magnitude)));
         }
+
+        // --- Telemetry: session_start (t=0 anchor) ---
+        double startHazDist = (state == SimulationState.FIRE)
+                ? 99.0
+                : (session.getEpicenter() != null
+                        ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                        : 99.0);
+        TelemetryCsvWriter.openSession(session.getSessionId());
+        TelemetryCsvWriter.writeRow(
+                session.getSessionId(), uuid.toString(), state.name().toLowerCase(),
+                0.0, "session_start",
+                player.getX(), player.getY(), player.getZ(),
+                startHazDist, null, null);
     }
 
     /**
@@ -190,6 +203,10 @@ public class SimulationManager {
      * @param uuid The UUID of the player whose session should be terminated.
      */
     public static synchronized void endSimulation(UUID uuid) {
+        endSimulation(uuid, "timeout");
+    }
+
+    public static synchronized void endSimulation(UUID uuid, String endReason) {
         // Remove the session atomically.  If no session existed (e.g., called twice),
         // bail out immediately — nothing to clean up.
         SimulationSession session = activeSessions.remove(uuid);
@@ -199,12 +216,43 @@ public class SimulationManager {
         if (session.getState() == SimulationState.FIRE) {
             finalScore = Math.min(100, session.getFiresExtinguished() * 2);
         }
+        double elapsedT = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
         session.logger.log("SIM_END", java.util.Map.of(
             "fires_extinguished", session.getFiresExtinguished(),
             "fire_spread_count", session.getFireSpreadCount(),
             "score", finalScore,
-            "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get()
+            "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get(),
+            "end_reason", endReason
         ));
+
+        // --- Telemetry: session_end row + sessions CSV ---
+        ServerPlayer playerForCsv = session.getPlayer();
+        if (playerForCsv != null) {
+            TelemetryCsvWriter.writeRow(
+                    session.getSessionId(), uuid.toString(),
+                    session.getState().name().toLowerCase(),
+                    Math.round(elapsedT * 100.0) / 100.0, "session_end",
+                    playerForCsv.getX(), playerForCsv.getY(), playerForCsv.getZ(),
+                    99.0, null, null);
+        }
+        java.util.Map<String, Object> meta = new java.util.HashMap<>();
+        meta.put("player_id",                    uuid.toString());
+        meta.put("scenario_type",                session.getState().name().toLowerCase());
+        meta.put("started_at",                   session.getStartedAt().toString());
+        meta.put("ended_at",                     java.time.Instant.now().toString());
+        meta.put("duration_ticks",               Config.SIM_DURATION_TICKS.get() - session.getTimerTicks());
+        meta.put("end_reason",                   endReason);
+        meta.put("fires_extinguished_count",     session.getFiresExtinguished());
+        meta.put("magnitude",                    session.getState() == SimulationState.EARTHQUAKE
+                                                     ? session.getSessionMagnitude() : "");
+        meta.put("aftershock_count",             session.getState() == SimulationState.EARTHQUAKE
+                                                     ? session.getAftershockCount() : "");
+        meta.put("aftershock_magnitude_scale",   session.getState() == SimulationState.EARTHQUAKE
+                                                     ? session.getAftershockMagnitudeScale() : "");
+        meta.put("final_earthquake_phase",       session.getQuakePhase() != null
+                                                     ? session.getQuakePhase().name() : "");
+        TelemetryCsvWriter.closeSession(session.getSessionId(), meta);
+        TelemetryCsvWriter.flush();
 
         // Single UUID-based subquery UPDATE — no rowId lookup required.
         // Runs before the player-null guard so death/logout never cause missing saves.
@@ -315,7 +363,7 @@ public class SimulationManager {
             // a ghost session.  The dead-player case also triggers pendingLobbyRespawn
             // inside endSimulation so the respawn redirect still works.
             if (player == null || !player.isAlive()) {
-                endSimulation(uuid);
+                endSimulation(uuid, "injured");
                 continue;
             }
 
@@ -401,7 +449,7 @@ public class SimulationManager {
                                 ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                                 : 99.0);
                 AssemblyZone.onPlayerArrived(player, session, level, hazDist);
-                endSimulation(uuid);
+                endSimulation(uuid, "assembly_reached");
                 continue;
             }
 
