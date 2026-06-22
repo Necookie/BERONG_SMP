@@ -21,9 +21,9 @@ import net.necookie.disastersim.Config;
  */
 public class AssemblyZone {
 
-    // PLACEHOLDER — open area in front of the library (Z side facing SIM_POS.z = 83).
+    // PLACEHOLDER — open area in front of the library main entrance (Z+ face, beyond Z≈95).
     // Adjust min/max after walking in-game with F3.
-    private static final AABB ZONE = new AABB(25, -35, 65, 55, -28, 82);
+    private static final AABB ZONE = new AABB(30, -35, 96, 76, -28, 115);
 
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;

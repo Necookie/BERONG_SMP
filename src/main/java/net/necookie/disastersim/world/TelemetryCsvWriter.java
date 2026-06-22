@@ -231,9 +231,9 @@ public class TelemetryCsvWriter {
             "        {\"label\": \"main_exit\", \"x\": 0, \"y\": 0, \"z\": 0, \"note\": \"PLACEHOLDER — tune with F3 in-game\"}\n" +
             "      ],\n" +
             "      \"assembly_area\": {\n" +
-            "        \"min\": {\"x\": 25, \"y\": -35, \"z\": 65},\n" +
-            "        \"max\": {\"x\": 55, \"y\": -28, \"z\": 82},\n" +
-            "        \"note\": \"PLACEHOLDER — matches AssemblyZone.ZONE, tune after runServer\"\n" +
+            "        \"min\": {\"x\": 30, \"y\": -35, \"z\": 96},\n" +
+            "        \"max\": {\"x\": 76, \"y\": -28, \"z\": 115},\n" +
+            "        \"note\": \"PLACEHOLDER — matches AssemblyZone.ZONE (front/Z+ face), tune after runServer\"\n" +
             "      },\n" +
             "      \"fire_alarm_positions\": [\n" +
             "        {\"x\": 0, \"y\": 0, \"z\": 0, \"note\": \"PLACEHOLDER — set after placing FireAlarmBlock in-game\"}\n" +
@@ -250,9 +250,9 @@ public class TelemetryCsvWriter {
             "    \"earthquake\": {\n" +
             "      \"exits\": [],\n" +
             "      \"assembly_area\": {\n" +
-            "        \"min\": {\"x\": 25, \"y\": -35, \"z\": 65},\n" +
-            "        \"max\": {\"x\": 55, \"y\": -28, \"z\": 82},\n" +
-            "        \"note\": \"PLACEHOLDER\"\n" +
+            "        \"min\": {\"x\": 30, \"y\": -35, \"z\": 96},\n" +
+            "        \"max\": {\"x\": 76, \"y\": -28, \"z\": 115},\n" +
+            "        \"note\": \"PLACEHOLDER — front/Z+ face, tune after runServer\"\n" +
             "      },\n" +
             "      \"hazard_spawn_zone\": {\n" +
             "        \"note\": \"Epicenter varies per session — see sessions CSV magnitude column\"\n" +
