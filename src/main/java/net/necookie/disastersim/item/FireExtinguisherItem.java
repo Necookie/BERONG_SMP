@@ -28,6 +28,9 @@ import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 
+import net.necookie.disastersim.world.TelemetryCsvWriter;
+import net.necookie.disastersim.Config;
+
 import java.util.function.Consumer;
 
 public class FireExtinguisherItem extends Item {
@@ -167,6 +170,23 @@ public class FireExtinguisherItem extends Item {
             }
         }
 
+        // --- Telemetry: extinguisher_use (once per spray burst via pending flag) ---
+        if (anyHit && user instanceof ServerPlayer sp) {
+            SimulationSession session = SimulationManager.getSession(sp.getUUID());
+            if (session != null && session.consumeExtinguishEventPending()) {
+                double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+                double hazDist = nearestFireDist(level, sp.blockPosition());
+                int nearbyPlayers = countNearbyPlayers(level, sp, 5.0);
+                TelemetryCsvWriter.writeRow(
+                        session.getSessionId(), sp.getUUID().toString(),
+                        session.getState().name().toLowerCase(),
+                        Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
+                        sp.getX(), sp.getY(), sp.getZ(),
+                        Math.round(hazDist * 100.0) / 100.0,
+                        "fire_block", nearbyPlayers);
+            }
+        }
+
         spawnSprayParticlesServer(level, origin, lookDirection, sideways, upwards, sputtering);
 
         if (playSound) {
@@ -232,6 +252,14 @@ public class FireExtinguisherItem extends Item {
             TutorialManager.onExtinguish(serverPlayer);
         }
         return extinguished;
+    }
+
+    private static int countNearbyPlayers(ServerLevel level, ServerPlayer self, double radius) {
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(
+                self.getX() - radius, self.getY() - radius, self.getZ() - radius,
+                self.getX() + radius, self.getY() + radius, self.getZ() + radius);
+        return (int) level.getEntitiesOfClass(Player.class, box,
+                p -> !p.getUUID().equals(self.getUUID())).size();
     }
 
     private static double nearestFireDist(ServerLevel level, BlockPos origin) {

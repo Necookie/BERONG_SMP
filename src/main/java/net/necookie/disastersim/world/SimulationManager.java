@@ -453,6 +453,8 @@ public class SimulationManager {
             // any fire that escaped the structure's bounding box.
             if (session.getState() == SimulationState.FIRE && ticks % 40 == 0) {
                 EFFECTS.cleanupFireOutsideBounds(level);
+                // Reset extinguisher_use pending so next spray burst emits a new event
+                session.resetExtinguishEventPending();
             }
 
             // --- Assembly zone force-field border particles (every 5 ticks) ---
