@@ -382,6 +382,26 @@ public class SimulationManager {
                 ));
             }
 
+            // --- Telemetry: move sampler (10 Hz = every 2 ticks) ---
+            if (ticks % 2 == 0) {
+                double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+                double hazDist;
+                if (session.getState() == SimulationState.FIRE) {
+                    hazDist = nearestFireDistance(level, player.blockPosition());
+                } else {
+                    hazDist = session.getEpicenter() != null
+                            ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                            : 99.0;
+                }
+                TelemetryCsvWriter.writeRow(
+                        session.getSessionId(), uuid.toString(),
+                        session.getState().name().toLowerCase(),
+                        Math.round(elapsedS * 100.0) / 100.0, "move",
+                        player.getX(), player.getY(), player.getZ(),
+                        Math.round(hazDist * 100.0) / 100.0,
+                        null, null);
+            }
+
             // Dispatch the correct disaster effect at its configured interval.
             if (session.getState() == SimulationState.FIRE) {
                 if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
