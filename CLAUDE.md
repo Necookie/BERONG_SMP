@@ -11,6 +11,16 @@ Phase instruction briefs (self-contained Claude prompts):
 - `docs/instructions/phase-2-dashboard-live-data.md` — Turso → Astro dashboard
 - `docs/instructions/phase-3-synthetic-data.md` — Python script for RF training data
 - `docs/instructions/phase-4-thesis-extras.md` — adaptive feedback, cohort view, BFP notes
+- `docs/instructions/phase-5-telemetry-ml.md` — ML telemetry contract (CSV logs, fire alarm, assembly zone)
+
+## Development Workflow
+
+**After completing any feature or phase goal:**
+1. Update `CLAUDE.md` — add/update the Key Classes table and architecture notes to reflect what changed.
+2. Update `docs/major_plan.md` — mark the completed deliverable `[x]`.
+3. Commit the changes with a descriptive message and push to `main`.
+
+This keeps the project documentation in sync with the code at all times.
 
 ---
 
@@ -155,6 +165,9 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `StudentSession` | POJO holding per-student data: name, account UUID, start/end times, tutorial timing, simulation type/score/passed, Turso row ID |
 | `TursoClient` | HTTP wrapper for the Turso libSQL REST API (`/v2/pipeline`); fire-and-forget async writes via `CompletableFuture`, synchronous reads for commands; creates schema on first init |
 | `SessionManager` | Manages `Map<UUID, StudentSession>` for shared station accounts; hooks into tutorial completion and simulation end to persist scores; exposes `/bfp` admin flow |
+| `FireAlarmBlock` | Wall-mounted block in `block/` package; states `FACING` + `ACTIVATED`. Right-click during an active FIRE simulation sets `ACTIVATED=true`, plays bell sound, logs `fire_alarm_activate` telemetry event. Auto-resets when simulation structure is restored. |
+| `AssemblyZone` | Static utility in `world/`; defines the safe-zone AABB outside the LSPU Library. Spawns green `HAPPY_VILLAGER`+`SCRAPE` particle force-field border every 5 ticks during simulations. Detects player entry → fires `assembly_area_reached` event + ends simulation with `end_reason=assembly_reached`. Coordinates are PLACEHOLDER — tune with F3 in-game. |
+| `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. |
 
 ### World Coordinates
 
