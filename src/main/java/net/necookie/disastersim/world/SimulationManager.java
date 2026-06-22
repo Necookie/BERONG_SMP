@@ -493,6 +493,27 @@ public class SimulationManager {
                 session.resetExtinguishEventPending();
             }
 
+            // --- Emergency exit zone check (once per crossing, any active simulation) ---
+            if (!session.hasPassedExit()) {
+                ExitZones.ExitZone exit = ExitZones.find(player.position());
+                if (exit != null) {
+                    session.markPassedExit();
+                    double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+                    double hazDist = (session.getState() == SimulationState.FIRE)
+                            ? nearestFireDistance(level, player.blockPosition())
+                            : (session.getEpicenter() != null
+                                    ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                                    : 99.0);
+                    TelemetryCsvWriter.writeRow(
+                            session.getSessionId(), uuid.toString(),
+                            session.getState().name().toLowerCase(),
+                            Math.round(elapsedS * 100.0) / 100.0, "emergency_exit",
+                            player.getX(), player.getY(), player.getZ(),
+                            Math.round(hazDist * 100.0) / 100.0,
+                            exit.label(), null);
+                }
+            }
+
             // --- Assembly zone force-field border particles (every 5 ticks) ---
             if (ticks % 5 == 0) {
                 AssemblyZone.spawnBorderParticles(level);
