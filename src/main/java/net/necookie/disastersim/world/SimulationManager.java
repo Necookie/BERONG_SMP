@@ -193,6 +193,42 @@ public class SimulationManager {
     }
 
     /**
+     * Logs door_open telemetry when a player interacts with a door or trapdoor during a simulation.
+     */
+    @SubscribeEvent
+    public static void onPlayerInteract(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        SimulationSession session = activeSessions.get(player.getUUID());
+        if (session == null) return;
+
+        net.minecraft.world.level.block.state.BlockState state =
+                event.getLevel().getBlockState(event.getPos());
+        net.minecraft.world.level.block.Block block = state.getBlock();
+        boolean isDoor = block instanceof net.minecraft.world.level.block.DoorBlock
+                || block instanceof net.minecraft.world.level.block.TrapDoorBlock
+                || block instanceof net.minecraft.world.level.block.FenceGateBlock;
+        if (!isDoor) return;
+
+        String targetName = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath();
+        double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        double hazDist;
+        if (session.getState() == SimulationState.FIRE && event.getLevel() instanceof ServerLevel sl) {
+            hazDist = nearestFireDistance(sl, player.blockPosition());
+        } else {
+            hazDist = session.getEpicenter() != null
+                    ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                    : 99.0;
+        }
+        TelemetryCsvWriter.writeRow(
+                session.getSessionId(), player.getUUID().toString(),
+                session.getState().name().toLowerCase(),
+                Math.round(elapsedS * 100.0) / 100.0, "door_open",
+                player.getX(), player.getY(), player.getZ(),
+                Math.round(hazDist * 100.0) / 100.0,
+                targetName, null);
+    }
+
+    /**
      * Ends and removes the active session for the given player UUID.
      * Always restores the simulation arena structure. Teleports and notifies the
      * player only if they are still alive on the server.

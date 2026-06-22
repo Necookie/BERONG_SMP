@@ -157,7 +157,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 - [x] `session_start` / `session_end` contract events with `end_reason` (`assembly_reached` / `injured` / `timeout`)
 - [x] Per-tick `move` sampler (10 Hz) with `hazard_distance` (nearest fire block or epicenter distance)
 - [x] `extinguisher_use` event with `nearby_player_count` (5-block radius scan)
-- [ ] `door_open` event via `PlayerInteractEvent.RightClickBlock`
+- [x] `door_open` event via `PlayerInteractEvent.RightClickBlock`
 - [ ] `emergency_exit` zone check (AABB near library doors, placeholder → tune in-game)
 - [ ] `map_metadata.json` (one-time static file, placeholder coords → tune after runServer)
 
