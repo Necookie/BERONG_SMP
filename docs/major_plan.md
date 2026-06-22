@@ -44,7 +44,7 @@
 | 2 | Dashboard Live Data | `[x] done` |
 | 3 | Synthetic Data Generator | `[x] done` |
 | 4 | Thesis Extras | `[x] done` |
-| 5 | ML Telemetry Contract | `[ ] not started` |
+| 5 | ML Telemetry Contract | `[x] done` |
 
 Update status to `[~] in progress` or `[x] done` as work progresses.
 
@@ -159,7 +159,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 - [x] `extinguisher_use` event with `nearby_player_count` (5-block radius scan)
 - [x] `door_open` event via `PlayerInteractEvent.RightClickBlock`
 - [x] `emergency_exit` zone check (AABB near library doors, placeholder → tune in-game)
-- [ ] `map_metadata.json` (one-time static file, placeholder coords → tune after runServer)
+- [x] `map_metadata.json` (one-time static file written on first init by TelemetryCsvWriter, placeholder coords → tune after runServer)
 
 **Contract reference:** `telemetry_contract.md` (v1.1) in repo root.
 **See full brief:** `docs/instructions/phase-5-telemetry-ml.md`

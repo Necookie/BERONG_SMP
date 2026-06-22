@@ -168,6 +168,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `FireAlarmBlock` | Wall-mounted block in `block/` package; states `FACING` + `ACTIVATED`. Right-click during an active FIRE simulation sets `ACTIVATED=true`, plays bell sound, logs `fire_alarm_activate` telemetry event. Auto-resets when simulation structure is restored. |
 | `AssemblyZone` | Static utility in `world/`; defines the safe-zone AABB outside the LSPU Library. Spawns green `HAPPY_VILLAGER`+`SCRAPE` particle force-field border every 5 ticks during simulations. Detects player entry → fires `assembly_area_reached` event + ends simulation with `end_reason=assembly_reached`. Coordinates are PLACEHOLDER — tune with F3 in-game. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. |
+| `ExitZones` | Static record list in `world/`; defines three named AABB emergency-exit zones (`main_exit`, `side_exit`, `rear_exit`) near the LSPU Library doors. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. All coordinates are PLACEHOLDER — tune with F3 in-game. |
 
 ### World Coordinates
 
