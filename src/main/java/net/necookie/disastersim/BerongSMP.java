@@ -237,6 +237,7 @@ public class BerongSMP {
     @SubscribeEvent
     public void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         net.necookie.disastersim.session.SessionManager.shutdown();
+        net.necookie.disastersim.world.TelemetryCsvWriter.shutdown();
     }
 
     @SubscribeEvent
@@ -255,6 +256,7 @@ public class BerongSMP {
         TutorialLobbyManager.buildLobby(level); // structure only — NPCs need entity storage loaded first
         net.necookie.disastersim.session.SessionManager.init(server);
         net.necookie.disastersim.command.ModCommands.clearAuthorizations();
+        net.necookie.disastersim.world.TelemetryCsvWriter.init(server.getServerDirectory().toPath());
 
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.
