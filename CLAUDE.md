@@ -199,6 +199,7 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakeRumbleDuration` | 200 | Ticks in RUMBLE phase (10 s) |
 | `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
 | `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
+| `bfpAdminPin` | `""` | PIN for `/bfp login`. Empty = PIN login disabled (OP-only access). A WARN is logged at startup if left blank. |
 
 ### Student Session System (`session/` package)
 
@@ -256,3 +257,20 @@ Custom block subclasses **must** use `BLOCKS.registerBlock(name, Constructor::ne
 ### Client–Server Split
 
 `BerongSMPClient` is annotated `@Mod(dist = CLIENT)` and only loads on the physical client. `SimulationHud` and `KeyMappings` are client-only classes registered through the mod event bus, keeping the server JAR free of rendering dependencies.
+
+---
+
+## Health-Check Remediation Log
+
+Tracks fixes applied from the 2026-06-23 health check report.
+
+| # | Severity | Item | Status | Commit |
+|---|---|---|---|---|
+| C-1a | 🔴 | Assembly zone force-field on wrong face (Z+ instead of Z-) | ✅ Done | `cf57f50` |
+| C-1b | 🔴 | AssemblyZone/ExitZones placeholder coordinates | ⏳ Pending in-game F3 tuning | — |
+| C-2  | 🔴 | Default BFP PIN was hardcoded `"1234"` | ✅ Done | (this commit) |
+| W-1  | 🟡 | ModCommands.java monolith (807 lines) | ⏳ Pending | — |
+| W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ⏳ Pending | — |
+| W-3  | 🟡 | Silent `catch (Exception ignored)` in TursoClient | ⏳ Pending | — |
+| W-4  | 🟡 | Zero unit test coverage | ⏳ Pending | — |
+| L-1–4 | 🟢 | Low-risk items (metadata coupling, station offsets, PIN rate-limit, Turso warn) | ⏳ Pending | — |

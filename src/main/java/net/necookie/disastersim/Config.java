@@ -75,8 +75,9 @@ public class Config {
             .defineInRange("quakeAftershockDuration", 300, 20, 2400);
 
     public static final ModConfigSpec.ConfigValue<String> BFP_ADMIN_PIN = BUILDER
-            .comment("PIN required to use /bfp admin commands via '/bfp login <pin>'. OPs bypass this.")
-            .define("bfpAdminPin", "1234");
+            .comment("PIN required to use /bfp admin commands via '/bfp login <pin>'. OPs bypass this. "
+                   + "Leave blank to disable PIN-based login (OP access still works).")
+            .define("bfpAdminPin", "");
 
     public static final ModConfigSpec.ConfigValue<String> TURSO_URL = BUILDER
             .comment("Turso database URL for student session tracking. Leave blank to disable.")

@@ -167,7 +167,10 @@ public class ModCommands {
                                     ServerPlayer player = ctx.getSource().getPlayer();
                                     String entered = StringArgumentType.getString(ctx, "pin");
                                     String correct = Config.BFP_ADMIN_PIN.get();
-                                    if (entered.equals(correct)) {
+                                    if (correct.isBlank()) {
+                                        ctx.getSource().sendFailure(Component.literal(
+                                                "§cBFP PIN is not configured. Set 'bfpAdminPin' in berongsmp-common.toml."));
+                                    } else if (entered.equals(correct)) {
                                         bfpAuthorized.add(player.getUUID());
                                         ctx.getSource().sendSuccess(() -> Component.literal("§a✓ BFP admin access granted."), false);
                                     } else {

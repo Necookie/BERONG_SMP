@@ -258,6 +258,11 @@ public class BerongSMP {
         net.necookie.disastersim.command.ModCommands.clearAuthorizations();
         net.necookie.disastersim.world.TelemetryCsvWriter.init(server.getServerDirectory());
 
+        String bfpPin = Config.BFP_ADMIN_PIN.get();
+        if (bfpPin.isBlank()) {
+            LOGGER.warn("[BerongSMP] BFP admin PIN is not set. '/bfp login' is disabled until 'bfpAdminPin' is configured in berongsmp-common.toml.");
+        }
+
         // setRespawnData pins the global world spawn.  This is the fallback respawn
         // position used when a player has no bed or individual respawn anchor.
         // BlockPos(8, -31, 8) is the centre of the lobby floor at lobby elevation.
