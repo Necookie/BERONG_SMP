@@ -276,5 +276,5 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | W-1  | 🟡 | ModCommands.java monolith (807 lines) | ✅ Done | (this commit) |
 | W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ✅ Done | (this commit) |
 | W-3  | 🟡 | Silent `catch (Exception ignored)` in TursoClient | ✅ Done | (this commit) |
-| W-4  | 🟡 | Zero unit test coverage | ⏳ Pending | — |
+| W-4  | 🟡 | Zero unit test coverage | ✅ Done | (this commit) |
 | L-1–4 | 🟢 | Low-risk items (metadata coupling, station offsets, PIN rate-limit, Turso warn) | ⏳ Pending | — |
