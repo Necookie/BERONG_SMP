@@ -28,9 +28,8 @@ public class ExitZones {
      * SIM_POS = (30, -34, 83); main front door faces Z-negative (south-facing structure).
      */
     public static final List<ExitZone> ZONES = List.of(
-        new ExitZone("main_exit",  new AABB(38, -34, 81, 46, -31, 83)),
-        new ExitZone("side_exit",  new AABB(28, -34, 86, 32, -31, 90)),
-        new ExitZone("rear_exit",  new AABB(40, -34, 107, 48, -31, 109))
+        new ExitZone("main_exit", new AABB(50, -34, 93, 54, -30, 96))
+        // side_exit and rear_exit — add when additional building exits are tuned in-game
     );
 
     /**
