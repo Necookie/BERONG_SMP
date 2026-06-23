@@ -273,7 +273,7 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | # | Severity | Item | Status | Commit |
 |---|---|---|---|---|
 | C-1a | 🔴 | Assembly zone force-field on wrong face (Z+ instead of Z-) | ✅ Done | `cf57f50` |
-| C-1b | 🔴 | AssemblyZone/ExitZones placeholder coordinates | ⏳ Pending in-game F3 tuning | — |
+| C-1b | 🔴 | AssemblyZone/ExitZones placeholder coordinates | ✅ Done | AssemblyZone AABB confirmed correct (same AABB drives force-field + detection); main_exit tuned from F3 (`defebb0`); side/rear exits deferred until additional buildings added |
 | C-2  | 🔴 | Default BFP PIN was hardcoded `"1234"` | ✅ Done | (this commit) |
 | W-1  | 🟡 | ModCommands.java monolith (807 lines) | ✅ Done | (this commit) |
 | W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ✅ Done | (this commit) |
@@ -296,8 +296,8 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 | T-2 | 🔴 Critical | `assembly_area_reached` not written to CSV | ✅ Done | Added `TelemetryCsvWriter.writeRow()` in `AssemblyZone.onPlayerArrived()` alongside existing `session.logger.log()` |
 | T-3 | 🟠 High | `session_end` hazard_distance hardcoded to `99.0` | ✅ Done | Replaced with `hazardDistance(session, level, playerForCsv)` in `SimulationManager.endSimulation()` |
 | T-4 | 🟠 High | CO2ExtinguisherItem emits no telemetry | ✅ Done | Added `extinguisher_use` row with `nearby_player_count` in `CO2ExtinguisherItem.sprayServer()`; `extinguishAt` now returns `boolean`; added `countNearbyPlayers` helper |
-| T-5 | 🟡 Medium | AssemblyZone coordinates are placeholder | ⏳ Pending F3 tuning | Current AABB `(30,-35,64)→(76,-28,82)` is placeholder — tune after `./gradlew runServer` |
-| T-6 | 🟡 Medium | ExitZones coordinates are placeholder | ⏳ Pending F3 tuning | All three exit AABBs are placeholder — tune after `./gradlew runServer` |
+| T-5 | 🟡 Medium | AssemblyZone coordinates are placeholder | ✅ Done | AABB `(30,-35,64)→(76,-28,82)` confirmed correct — same AABB drives green force-field particles and `isInside()` detection; force-field visually verified in-game |
+| T-6 | 🟡 Medium | ExitZones coordinates are placeholder | ✅ Done | `main_exit` tuned from F3 (51.4–52.5/−32/94) → `AABB(50,-34,93,54,-30,96)`; side/rear exits removed until additional buildings are added |
 | T-7 | 🟡 Medium | `fire_alarm_positions` in map_metadata.json was empty `[]` | ✅ Done | Added `TelemetryCsvWriter.scanAndRegisterFireAlarms()` which scans the arena for `FireAlarmBlock` after first structure placement; rewrites `map_metadata.json` with discovered positions |
 | T-8 | 🟢 Low | `mod_version` missing from sessions CSV | ✅ Done | Added `mod_version` column to `sessions_*.csv` header and rows; resolved via `ModList.get()` + cached in `TelemetryCsvWriter` |
 | T-9 | 🟢 Low | `extinguisher_use` throttled to one per 40 ticks | ✅ Done | Decoupled `resetExtinguishEventPending()` from `cleanupFireOutsideBounds()`; now resets every 20 ticks (1 s window) for better temporal resolution |
