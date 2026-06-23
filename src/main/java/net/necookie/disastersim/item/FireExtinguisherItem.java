@@ -146,7 +146,8 @@ public class FireExtinguisherItem extends Item {
                 boolean finalAnyHit = anyHit;
                 session.logger.log("EXT_SPRAY", java.util.Map.of(
                     "hit_fire", finalAnyHit,
-                    "distance_to_fire", Math.round(nearestFire * 10.0) / 10.0
+                    "distance_to_fire", Math.round(nearestFire * 10.0) / 10.0,
+                    "nearby_player_count", countNearbyPlayers(level, sp, 5.0)
                 ));
             }
         }
