@@ -146,13 +146,17 @@ public class SimulationManager {
                     ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                     : 99.0;
         }
+        double tRounded   = Math.round(elapsedS * 100.0) / 100.0;
+        double hazRounded = Math.round(hazDist  * 100.0) / 100.0;
+        session.logger.log("door_open", java.util.Map.of(
+                "t", tRounded, "x", player.getX(), "y", player.getY(), "z", player.getZ(),
+                "target", targetName, "hazard_distance", hazRounded));
         TelemetryCsvWriter.writeRow(
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),
-                Math.round(elapsedS * 100.0) / 100.0, "door_open",
+                tRounded, "door_open",
                 player.getX(), player.getY(), player.getZ(),
-                Math.round(hazDist * 100.0) / 100.0,
-                targetName, null);
+                hazRounded, targetName, null);
     }
 
     public static synchronized void endSimulation(UUID uuid) {
@@ -378,14 +382,19 @@ public class SimulationManager {
         ExitZones.ExitZone exit = ExitZones.find(player.position());
         if (exit == null) return;
         session.markPassedExit();
-        double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
-        double hazDist = hazardDistance(session, level, player);
+        double elapsedS   = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+        double hazDist    = hazardDistance(session, level, player);
+        double tRounded   = Math.round(elapsedS * 100.0) / 100.0;
+        double hazRounded = Math.round(hazDist  * 100.0) / 100.0;
+        session.logger.log("emergency_exit", java.util.Map.of(
+                "t", tRounded, "x", player.getX(), "y", player.getY(), "z", player.getZ(),
+                "exit", exit.label(), "hazard_distance", hazRounded));
         TelemetryCsvWriter.writeRow(
                 session.getSessionId(), uuid.toString(),
                 session.getState().name().toLowerCase(),
-                Math.round(elapsedS * 100.0) / 100.0, "emergency_exit",
+                tRounded, "emergency_exit",
                 player.getX(), player.getY(), player.getZ(),
-                Math.round(hazDist * 100.0) / 100.0, exit.label(), null);
+                hazRounded, exit.label(), null);
     }
 
     /** Returns true if simulation ended (caller should continue outer loop). */
