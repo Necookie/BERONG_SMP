@@ -213,6 +213,8 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 
 | Command | Effect |
 |---|---|
+| `/bfp bypass on [player]` | Skip lobby gates (registration, session, tutorial) for quick testing. Resets on server restart. |
+| `/bfp bypass off [player]` | Re-enable lobby gates for the player. |
 | `/bfp login <pin>` | Authenticate with config PIN; grants all /bfp access |
 | `/bfp logout` | Revoke PIN-based access |
 | `/bfp checkin <student_name>` | Start session for caller; resets tutorial state |

@@ -174,48 +174,54 @@ public class LobbyManager {
 
         BlockPos pos = event.getPos();
 
+        boolean testBypass = net.necookie.disastersim.command.BfpAdminCommands.isTestBypass(player.getUUID());
+
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
-            if (!RegistrationManager.isRegistered(player)) {
-                player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
-            }
-            if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
-                player.sendSystemMessage(Component.literal(
-                    "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
-            }
-            if (!TutorialManager.isComplete(player.getUUID())) {
-                player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
+            if (!testBypass) {
+                if (!RegistrationManager.isRegistered(player)) {
+                    player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
+                if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
+                    player.sendSystemMessage(Component.literal(
+                        "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
+                if (!TutorialManager.isComplete(player.getUUID())) {
+                    player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
             }
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.FIRE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
-            if (!RegistrationManager.isRegistered(player)) {
-                player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
-            }
-            if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
-                player.sendSystemMessage(Component.literal(
-                    "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
-            }
-            if (!TutorialManager.isComplete(player.getUUID())) {
-                player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
-                event.setCancellationResult(InteractionResult.FAIL);
-                event.setCanceled(true);
-                return;
+            if (!testBypass) {
+                if (!RegistrationManager.isRegistered(player)) {
+                    player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
+                if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
+                    player.sendSystemMessage(Component.literal(
+                        "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
+                if (!TutorialManager.isComplete(player.getUUID())) {
+                    player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
+                    event.setCancellationResult(InteractionResult.FAIL);
+                    event.setCanceled(true);
+                    return;
+                }
             }
             // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
             double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;

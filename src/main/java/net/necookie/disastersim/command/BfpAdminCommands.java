@@ -32,14 +32,22 @@ public class BfpAdminCommands {
 
     private static final Set<UUID> bfpAuthorized = ConcurrentHashMap.newKeySet();
 
+    // Players with tutorial/registration/session gate bypassed for admin testing
+    private static final Set<UUID> testBypassActive = ConcurrentHashMap.newKeySet();
+
     // Rate-limiting: long[0] = consecutive failure count, long[1] = first-failure epoch-ms
     private static final Map<UUID, long[]> pinFailures = new ConcurrentHashMap<>();
     private static final int MAX_PIN_ATTEMPTS = 5;
     private static final long LOCKOUT_MS = 5L * 60 * 1000; // 5 minutes
 
+    public static boolean isTestBypass(UUID uuid) {
+        return testBypassActive.contains(uuid);
+    }
+
     public static void clearAuthorizations() {
         bfpAuthorized.clear();
         pinFailures.clear();
+        testBypassActive.clear();
     }
 
     static boolean isBfpAuthorized(CommandSourceStack source) {
@@ -315,7 +323,43 @@ public class BfpAdminCommands {
                             return bfpSetPassed(ctx, ctx.getSource().getPlayer(), false);
                         })
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> bfpSetPassed(ctx, EntityArgument.getPlayer(ctx, "player"), false)))));
+                                .executes(ctx -> bfpSetPassed(ctx, EntityArgument.getPlayer(ctx, "player"), false))))
+
+                .then(Commands.literal("bypass")
+                        .then(Commands.literal("on")
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    UUID uuid = ctx.getSource().getPlayer().getUUID();
+                                    testBypassActive.add(uuid);
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            "§a[Test Bypass] ON — lobby gates (registration, session, tutorial) skipped for you."), false);
+                                    return 1;
+                                })
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+                                            testBypassActive.add(target.getUUID());
+                                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                                    "§a[Test Bypass] ON for §f" + target.getName().getString()), true);
+                                            return 1;
+                                        })))
+                        .then(Commands.literal("off")
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    UUID uuid = ctx.getSource().getPlayer().getUUID();
+                                    testBypassActive.remove(uuid);
+                                    ctx.getSource().sendSuccess(() -> Component.literal(
+                                            "§7[Test Bypass] OFF — lobby gates restored."), false);
+                                    return 1;
+                                })
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> {
+                                            ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+                                            testBypassActive.remove(target.getUUID());
+                                            ctx.getSource().sendSuccess(() -> Component.literal(
+                                                    "§7[Test Bypass] OFF for §f" + target.getName().getString()), true);
+                                            return 1;
+                                        })))));
     }
 
     private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
