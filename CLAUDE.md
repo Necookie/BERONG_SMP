@@ -146,7 +146,11 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `SimulationHud` | Client-side HUD renderer; drives multi-layer camera shake (1 Hz + 3 Hz oscillations + jitter + roll) via `ViewportEvent.ComputeCameraAngles` using `intensity` |
 | `Config` | `ModConfigSpec` entries for all simulation tuning knobs |
-| `ModCommands` | Brigadier commands: `/sim_fire`, `/sim_earthquake [magnitude]`, `/sim_magnitude <value>` (op), `/sim_stop`, `/spawn_lspu`, `/get_extinguisher`; `/bfp` admin tree (see below) |
+| `ModCommands` | Thin registration shell — delegates to `RegistrationCommands`, `ItemCommands`, `SimulationCommands`, `BfpAdminCommands`; also forwards `clearAuthorizations()` |
+| `RegistrationCommands` | `/register <student_id> <section> <full_name>` |
+| `ItemCommands` | `/spawn_lspu`, `/get_extinguisher`, `/get_co2_extinguisher` |
+| `SimulationCommands` | `/sim_fire`, `/sim_earthquake`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
+| `BfpAdminCommands` | All `/bfp` admin commands; owns `bfpAuthorized` Set and `isBfpAuthorized()` predicate |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
 | `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires. Same pin-pull → hold-spray flow as `FireExtinguisherItem`. Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
 | `ComputerBlock` | Custom block in `block/` package; has `FACING` (horizontal), `LIT`, `BURNING`, and `BROKEN` states. State machine: OFF↔ON (right-click), ANY→BURNING (flint & steel — immediately places fire on all adjacent air), BURNING→BROKEN (CO2 extinguisher). `BURNING=true`: scans 2-block radius every `randomTick` for `ignitedByLava()` blocks and seeds vanilla fire next to them (enabling chain-spread into wood/wool/leaves); `animateTick` emits FLAME from top + all 4 sides, SOUL_FIRE_FLAME (cyan electrical signature), wild ELECTRIC_SPARK arcs, LARGE_SMOKE columns, LAVA ember drips; light level 15. `BROKEN=true`: cracked screen + scorched case texture, all interactions blocked, emits occasional SMOKE wisps. Only CO2 extinguisher ends the fire (and causes BROKEN). Registered via `BLOCKS.registerBlock(name, Constructor::new, () -> Props)` pattern required by NeoForge 26.x. |
@@ -269,7 +273,7 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | C-1a | 🔴 | Assembly zone force-field on wrong face (Z+ instead of Z-) | ✅ Done | `cf57f50` |
 | C-1b | 🔴 | AssemblyZone/ExitZones placeholder coordinates | ⏳ Pending in-game F3 tuning | — |
 | C-2  | 🔴 | Default BFP PIN was hardcoded `"1234"` | ✅ Done | (this commit) |
-| W-1  | 🟡 | ModCommands.java monolith (807 lines) | ⏳ Pending | — |
+| W-1  | 🟡 | ModCommands.java monolith (807 lines) | ✅ Done | (this commit) |
 | W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ⏳ Pending | — |
 | W-3  | 🟡 | Silent `catch (Exception ignored)` in TursoClient | ⏳ Pending | — |
 | W-4  | 🟡 | Zero unit test coverage | ⏳ Pending | — |
