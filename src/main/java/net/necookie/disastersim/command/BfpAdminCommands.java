@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,15 @@ public class BfpAdminCommands {
 
     private static final Set<UUID> bfpAuthorized = ConcurrentHashMap.newKeySet();
 
-    public static void clearAuthorizations() { bfpAuthorized.clear(); }
+    // Rate-limiting: long[0] = consecutive failure count, long[1] = first-failure epoch-ms
+    private static final Map<UUID, long[]> pinFailures = new ConcurrentHashMap<>();
+    private static final int MAX_PIN_ATTEMPTS = 5;
+    private static final long LOCKOUT_MS = 5L * 60 * 1000; // 5 minutes
+
+    public static void clearAuthorizations() {
+        bfpAuthorized.clear();
+        pinFailures.clear();
+    }
 
     static boolean isBfpAuthorized(CommandSourceStack source) {
         if (!source.isPlayer()) return true;
@@ -48,16 +57,36 @@ public class BfpAdminCommands {
                                 .executes(ctx -> {
                                     if (!ctx.getSource().isPlayer()) return 0;
                                     ServerPlayer player = ctx.getSource().getPlayer();
+                                    UUID uuid = player.getUUID();
                                     String entered = StringArgumentType.getString(ctx, "pin");
                                     String correct = Config.BFP_ADMIN_PIN.get();
                                     if (correct.isBlank()) {
                                         ctx.getSource().sendFailure(Component.literal(
                                                 "§cBFP PIN is not configured. Set 'bfpAdminPin' in berongsmp-common.toml."));
-                                    } else if (entered.equals(correct)) {
-                                        bfpAuthorized.add(player.getUUID());
+                                        return 1;
+                                    }
+                                    long[] rec = pinFailures.computeIfAbsent(uuid, k -> new long[]{0, 0});
+                                    long now = System.currentTimeMillis();
+                                    if (rec[0] >= MAX_PIN_ATTEMPTS) {
+                                        long remaining = (rec[1] + LOCKOUT_MS - now) / 1000;
+                                        if (remaining > 0) {
+                                            ctx.getSource().sendFailure(Component.literal(
+                                                    "§cToo many incorrect attempts. Try again in " + remaining + "s."));
+                                            return 1;
+                                        }
+                                        // lockout expired — reset
+                                        rec[0] = 0;
+                                    }
+                                    if (entered.equals(correct)) {
+                                        pinFailures.remove(uuid);
+                                        bfpAuthorized.add(uuid);
                                         ctx.getSource().sendSuccess(() -> Component.literal("§a✓ BFP admin access granted."), false);
                                     } else {
-                                        ctx.getSource().sendFailure(Component.literal("§cIncorrect PIN."));
+                                        if (rec[0] == 0) rec[1] = now; // start lockout window
+                                        rec[0]++;
+                                        long left = MAX_PIN_ATTEMPTS - rec[0];
+                                        ctx.getSource().sendFailure(Component.literal(
+                                                "§cIncorrect PIN." + (left > 0 ? " §7(" + left + " attempt(s) remaining)" : " §cLocked out for 5 minutes.")));
                                     }
                                     return 1;
                                 })))

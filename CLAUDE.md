@@ -277,4 +277,7 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ✅ Done | (this commit) |
 | W-3  | 🟡 | Silent `catch (Exception ignored)` in TursoClient | ✅ Done | (this commit) |
 | W-4  | 🟡 | Zero unit test coverage | ✅ Done | (this commit) |
-| L-1–4 | 🟢 | Low-risk items (metadata coupling, station offsets, PIN rate-limit, Turso warn) | ⏳ Pending | — |
+| L-1  | 🟢 | Telemetry metadata hardcoded; coords out of sync with code | ✅ Done | (this commit) |
+| L-2  | 🟢 | Tutorial station offsets placeholder | ⏳ Blocked (needs in-game F3 tuning) | — |
+| L-3  | 🟢 | No rate-limit on /bfp login PIN | ✅ Done | (this commit) |
+| L-4  | 🟢 | Turso URL-set/token-missing warning | ✅ Done | W-3 commit |

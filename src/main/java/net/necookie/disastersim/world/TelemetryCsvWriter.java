@@ -179,45 +179,41 @@ public class TelemetryCsvWriter {
     private static double round3(double v) { return Math.round(v * 1000.0) / 1000.0; }
 
     private static void writeMapMetadata(Path file) throws IOException {
+        net.minecraft.world.phys.AABB az = AssemblyZone.getZone();
+        StringBuilder exits = new StringBuilder();
+        for (ExitZones.ExitZone z : ExitZones.ZONES) {
+            net.minecraft.world.phys.AABB b = z.bounds();
+            if (exits.length() > 0) exits.append(",\n        ");
+            exits.append(String.format(
+                "{\"label\":\"%s\",\"min\":{\"x\":%d,\"y\":%d,\"z\":%d},\"max\":{\"x\":%d,\"y\":%d,\"z\":%d}}",
+                z.label(),
+                (int) b.minX, (int) b.minY, (int) b.minZ,
+                (int) b.maxX, (int) b.maxY, (int) b.maxZ));
+        }
+        String assemblyJson = String.format(
+            "{\"min\":{\"x\":%d,\"y\":%d,\"z\":%d},\"max\":{\"x\":%d,\"y\":%d,\"z\":%d}}",
+            (int) az.minX, (int) az.minY, (int) az.minZ,
+            (int) az.maxX, (int) az.maxY, (int) az.maxZ);
+        net.minecraft.core.BlockPos sp = SimulationManager.SIM_POS;
         String json = "{\n" +
             "  \"contract_version\": \"" + CONTRACT_VERSION + "\",\n" +
-            "  \"sim_pos\": {\"x\": 30, \"y\": -34, \"z\": 83},\n" +
+            "  \"sim_pos\": {\"x\": " + sp.getX() + ", \"y\": " + sp.getY() + ", \"z\": " + sp.getZ() + "},\n" +
             "  \"scenarios\": {\n" +
             "    \"fire\": {\n" +
-            "      \"exits\": [\n" +
-            "        {\"label\": \"main_exit\", \"x\": 0, \"y\": 0, \"z\": 0, \"note\": \"PLACEHOLDER — tune with F3 in-game\"}\n" +
-            "      ],\n" +
-            "      \"assembly_area\": {\n" +
-            "        \"min\": {\"x\": 30, \"y\": -35, \"z\": 96},\n" +
-            "        \"max\": {\"x\": 76, \"y\": -28, \"z\": 115},\n" +
-            "        \"note\": \"PLACEHOLDER — matches AssemblyZone.ZONE (front/Z+ face), tune after runServer\"\n" +
-            "      },\n" +
-            "      \"fire_alarm_positions\": [\n" +
-            "        {\"x\": 0, \"y\": 0, \"z\": 0, \"note\": \"PLACEHOLDER — set after placing FireAlarmBlock in-game\"}\n" +
-            "      ],\n" +
-            "      \"extinguisher_positions\": [\n" +
-            "        {\"x\": 0, \"y\": 0, \"z\": 0, \"note\": \"PLACEHOLDER\"}\n" +
-            "      ],\n" +
-            "      \"hazard_spawn_zone\": {\n" +
-            "        \"min\": {\"x\": 30, \"y\": -34, \"z\": 83},\n" +
-            "        \"max\": {\"x\": 76, \"y\": -24, \"z\": 95},\n" +
-            "        \"note\": \"Approximate library footprint — PLACEHOLDER\"\n" +
-            "      }\n" +
+            "      \"exits\": [\n        " + exits + "\n      ],\n" +
+            "      \"assembly_area\": " + assemblyJson + ",\n" +
+            "      \"fire_alarm_positions\": [],\n" +
+            "      \"extinguisher_positions\": [],\n" +
+            "      \"hazard_spawn_zone\": {\"note\": \"Approximate library interior — see sim_pos\"}\n" +
             "    },\n" +
             "    \"earthquake\": {\n" +
             "      \"exits\": [],\n" +
-            "      \"assembly_area\": {\n" +
-            "        \"min\": {\"x\": 30, \"y\": -35, \"z\": 96},\n" +
-            "        \"max\": {\"x\": 76, \"y\": -28, \"z\": 115},\n" +
-            "        \"note\": \"PLACEHOLDER — front/Z+ face, tune after runServer\"\n" +
-            "      },\n" +
-            "      \"hazard_spawn_zone\": {\n" +
-            "        \"note\": \"Epicenter varies per session — see sessions CSV magnitude column\"\n" +
-            "      }\n" +
+            "      \"assembly_area\": " + assemblyJson + ",\n" +
+            "      \"hazard_spawn_zone\": {\"note\": \"Epicenter varies per session — see sessions CSV magnitude column\"}\n" +
             "    }\n" +
             "  }\n" +
             "}\n";
         Files.writeString(file, json, StandardCharsets.UTF_8);
-        BerongSMP.LOGGER.info("[TelemetryCsvWriter] Wrote map_metadata.json");
+        BerongSMP.LOGGER.info("[TelemetryCsvWriter] Wrote map_metadata.json (derived from AssemblyZone + ExitZones)");
     }
 }
