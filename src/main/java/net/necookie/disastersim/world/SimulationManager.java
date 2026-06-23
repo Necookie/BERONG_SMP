@@ -89,6 +89,7 @@ public class SimulationManager {
 
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+        TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
 
         BlockPos spawnPos = findRandomSpawnInLibrary(level);
         player.teleportTo(level,
@@ -180,12 +181,13 @@ public class SimulationManager {
         // --- Telemetry: session_end row + sessions CSV ---
         ServerPlayer playerForCsv = session.getPlayer();
         if (playerForCsv != null) {
+            double endHazDist = hazardDistance(session, (ServerLevel) playerForCsv.level(), playerForCsv);
             TelemetryCsvWriter.writeRow(
                     session.getSessionId(), uuid.toString(),
                     session.getState().name().toLowerCase(),
                     Math.round(elapsedT * 100.0) / 100.0, "session_end",
                     playerForCsv.getX(), playerForCsv.getY(), playerForCsv.getZ(),
-                    99.0, null, null);
+                    Math.round(endHazDist * 100.0) / 100.0, null, null);
         }
         java.util.Map<String, Object> meta = new java.util.HashMap<>();
         meta.put("player_id",                    uuid.toString());
@@ -332,6 +334,8 @@ public class SimulationManager {
         }
         if (ticks % 40 == 0) {
             EFFECTS.cleanupFireOutsideBounds(level);
+        }
+        if (ticks % 20 == 0) {
             session.resetExtinguishEventPending();
         }
     }

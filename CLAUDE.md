@@ -283,3 +283,21 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | L-2  | 🟢 | Tutorial station offsets placeholder | ⏳ Blocked (needs in-game F3 tuning) | — |
 | L-3  | 🟢 | No rate-limit on /bfp login PIN | ✅ Done | (this commit) |
 | L-4  | 🟢 | Turso URL-set/token-missing warning | ✅ Done | W-3 commit |
+
+---
+
+## Telemetry Gap Remediation Log
+
+Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical → Low).
+
+| # | Priority | Item | Status | Notes |
+|---|---|---|---|---|
+| T-1 | 🔴 Critical | `fire_alarm_activate` not written to CSV | ✅ Done | Added `TelemetryCsvWriter.writeRow()` in `FireAlarmBlock.useWithoutItem()` alongside existing `session.logger.log()` |
+| T-2 | 🔴 Critical | `assembly_area_reached` not written to CSV | ✅ Done | Added `TelemetryCsvWriter.writeRow()` in `AssemblyZone.onPlayerArrived()` alongside existing `session.logger.log()` |
+| T-3 | 🟠 High | `session_end` hazard_distance hardcoded to `99.0` | ✅ Done | Replaced with `hazardDistance(session, level, playerForCsv)` in `SimulationManager.endSimulation()` |
+| T-4 | 🟠 High | CO2ExtinguisherItem emits no telemetry | ✅ Done | Added `extinguisher_use` row with `nearby_player_count` in `CO2ExtinguisherItem.sprayServer()`; `extinguishAt` now returns `boolean`; added `countNearbyPlayers` helper |
+| T-5 | 🟡 Medium | AssemblyZone coordinates are placeholder | ⏳ Pending F3 tuning | Current AABB `(30,-35,64)→(76,-28,82)` is placeholder — tune after `./gradlew runServer` |
+| T-6 | 🟡 Medium | ExitZones coordinates are placeholder | ⏳ Pending F3 tuning | All three exit AABBs are placeholder — tune after `./gradlew runServer` |
+| T-7 | 🟡 Medium | `fire_alarm_positions` in map_metadata.json was empty `[]` | ✅ Done | Added `TelemetryCsvWriter.scanAndRegisterFireAlarms()` which scans the arena for `FireAlarmBlock` after first structure placement; rewrites `map_metadata.json` with discovered positions |
+| T-8 | 🟢 Low | `mod_version` missing from sessions CSV | ✅ Done | Added `mod_version` column to `sessions_*.csv` header and rows; resolved via `ModList.get()` + cached in `TelemetryCsvWriter` |
+| T-9 | 🟢 Low | `extinguisher_use` throttled to one per 40 ticks | ✅ Done | Decoupled `resetExtinguishEventPending()` from `cleanupFireOutsideBounds()`; now resets every 20 ticks (1 s window) for better temporal resolution |

@@ -1,12 +1,17 @@
 package net.necookie.disastersim.world;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.block.FireAlarmBlock;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +39,9 @@ public class TelemetryCsvWriter {
     private static boolean sessionHeaderWritten = false;
 
     private static final ConcurrentHashMap<String, Boolean> openSessions = new ConcurrentHashMap<>();
+    private static final List<BlockPos> fireAlarmPositions = new ArrayList<>();
+    private static boolean fireAlarmsScanDone = false;
+    private static String cachedModVersion = null;
 
     public static void init(Path runDir) {
         try {
@@ -78,6 +86,7 @@ public class TelemetryCsvWriter {
             sb.append(',').append(metadata.getOrDefault("aftershock_magnitude_scale", ""));
             sb.append(',').append(csv(metadata.getOrDefault("final_earthquake_phase", "")));
             sb.append(',').append(CONTRACT_VERSION);
+            sb.append(',').append(csv(getModVersion()));
             sessionWriter.write(sb.toString());
             sessionWriter.newLine();
             sessionWriter.flush();
@@ -121,6 +130,31 @@ public class TelemetryCsvWriter {
         }
     }
 
+    /**
+     * Scans the simulation area for FireAlarmBlock instances and rewrites map_metadata.json
+     * with their positions. Called once after the first structure placement.
+     */
+    public static void scanAndRegisterFireAlarms(ServerLevel level, BlockPos simPos) {
+        if (fireAlarmsScanDone) return;
+        fireAlarmPositions.clear();
+        for (BlockPos check : BlockPos.betweenClosed(
+                simPos.offset(-5, -5, -5),
+                simPos.offset(55, 25, 55))) {
+            if (level.getBlockState(check).getBlock() instanceof FireAlarmBlock) {
+                fireAlarmPositions.add(check.immutable());
+            }
+        }
+        fireAlarmsScanDone = true;
+        if (telemetryDir != null) {
+            try {
+                writeMapMetadata(telemetryDir.resolve("map_metadata.json"));
+            } catch (IOException e) {
+                BerongSMP.LOGGER.error("[TelemetryCsvWriter] Failed to rewrite map_metadata.json: {}", e.getMessage());
+            }
+        }
+        BerongSMP.LOGGER.info("[TelemetryCsvWriter] FireAlarmBlock scan: found {} alarm(s) in simulation area", fireAlarmPositions.size());
+    }
+
     public static void shutdown() {
         try {
             if (eventWriter != null)   { eventWriter.flush();   eventWriter.close(); }
@@ -152,7 +186,7 @@ public class TelemetryCsvWriter {
             sessionWriter.write("session_id,player_id,scenario_type,started_at,ended_at," +
                     "duration_ticks,end_reason,fires_extinguished_count,magnitude," +
                     "aftershock_count,aftershock_magnitude_scale,final_earthquake_phase," +
-                    "contract_version");
+                    "contract_version,mod_version");
             sessionWriter.newLine();
             sessionHeaderWritten = true;
         }
@@ -164,6 +198,27 @@ public class TelemetryCsvWriter {
 
     private static void ensureSessionWriter() throws IOException {
         if (sessionWriter == null) openSessionWriter();
+    }
+
+    private static String getModVersion() {
+        if (cachedModVersion == null) {
+            cachedModVersion = net.neoforged.fml.ModList.get()
+                    .getModContainerById(BerongSMP.MODID)
+                    .map(c -> c.getModInfo().getVersion().toString())
+                    .orElse("unknown");
+        }
+        return cachedModVersion;
+    }
+
+    private static String buildAlarmJson() {
+        if (fireAlarmPositions.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fireAlarmPositions.size(); i++) {
+            if (i > 0) sb.append(",");
+            BlockPos p = fireAlarmPositions.get(i);
+            sb.append(String.format("{\"x\":%d,\"y\":%d,\"z\":%d}", p.getX(), p.getY(), p.getZ()));
+        }
+        return sb.toString();
     }
 
     private static String csv(Object v) {
@@ -202,7 +257,7 @@ public class TelemetryCsvWriter {
             "    \"fire\": {\n" +
             "      \"exits\": [\n        " + exits + "\n      ],\n" +
             "      \"assembly_area\": " + assemblyJson + ",\n" +
-            "      \"fire_alarm_positions\": [],\n" +
+            "      \"fire_alarm_positions\": [" + buildAlarmJson() + "],\n" +
             "      \"extinguisher_positions\": [],\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"Approximate library interior — see sim_pos\"}\n" +
             "    },\n" +

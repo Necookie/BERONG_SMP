@@ -23,7 +23,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.world.SimulationManager;
+import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.world.TelemetryCsvWriter;
 
 import java.util.function.Consumer;
 
@@ -104,14 +108,31 @@ public class CO2ExtinguisherItem extends Item {
         else side = side.normalize();
         Vec3 up = side.cross(look).normalize();
 
+        boolean anyHit = false;
         for (int i = 1; i <= 7; i++) {
             double d = i * (SPRAY_RANGE / 7.0);
             Vec3 c = origin.add(look.scale(d));
-            extinguishAt(level, BlockPos.containing(c), user);
-            extinguishAt(level, BlockPos.containing(c.add(side.scale( 0.35))), user);
-            extinguishAt(level, BlockPos.containing(c.add(side.scale(-0.35))), user);
-            extinguishAt(level, BlockPos.containing(c.add(up.scale( 0.25))), user);
-            extinguishAt(level, BlockPos.containing(c.add(up.scale(-0.20))), user);
+            anyHit |= extinguishAt(level, BlockPos.containing(c), user);
+            anyHit |= extinguishAt(level, BlockPos.containing(c.add(side.scale( 0.35))), user);
+            anyHit |= extinguishAt(level, BlockPos.containing(c.add(side.scale(-0.35))), user);
+            anyHit |= extinguishAt(level, BlockPos.containing(c.add(up.scale( 0.25))), user);
+            anyHit |= extinguishAt(level, BlockPos.containing(c.add(up.scale(-0.20))), user);
+        }
+
+        if (anyHit && user instanceof ServerPlayer sp) {
+            SimulationSession session = SimulationManager.getSession(sp.getUUID());
+            if (session != null && session.consumeExtinguishEventPending()) {
+                double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+                double hazDist = SimulationManager.nearestFireDistance(level, sp.blockPosition());
+                int nearbyPlayers = countNearbyPlayers(level, sp, 5.0);
+                TelemetryCsvWriter.writeRow(
+                        session.getSessionId(), sp.getUUID().toString(),
+                        session.getState().name().toLowerCase(),
+                        Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
+                        sp.getX(), sp.getY(), sp.getZ(),
+                        Math.round(hazDist * 100.0) / 100.0,
+                        "co2_extinguisher", nearbyPlayers);
+            }
         }
 
         spawnParticlesServer(level, origin, look, side, up, sputtering);
@@ -146,7 +167,7 @@ public class CO2ExtinguisherItem extends Item {
         }
     }
 
-    private void extinguishAt(ServerLevel level, BlockPos pos, Player user) {
+    private boolean extinguishAt(ServerLevel level, BlockPos pos, Player user) {
         BlockState state = level.getBlockState(pos);
         boolean extinguished = false;
 
@@ -172,6 +193,15 @@ public class CO2ExtinguisherItem extends Item {
         if (extinguished) {
             BerongSMP.LOGGER.debug("CO2 extinguisher suppressed block at {}", pos);
         }
+        return extinguished;
+    }
+
+    private static int countNearbyPlayers(ServerLevel level, ServerPlayer self, double radius) {
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(
+                self.getX() - radius, self.getY() - radius, self.getZ() - radius,
+                self.getX() + radius, self.getY() + radius, self.getZ() + radius);
+        return (int) level.getEntitiesOfClass(Player.class, box,
+                p -> !p.getUUID().equals(self.getUUID())).size();
     }
 
     private void spawnParticlesServer(ServerLevel level, Vec3 origin, Vec3 look,

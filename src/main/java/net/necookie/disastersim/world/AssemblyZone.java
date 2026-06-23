@@ -73,13 +73,21 @@ public class AssemblyZone {
                 "§a✓ You reached the ASSEMBLY AREA — you are safe!"));
 
         double t = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        double tRounded = Math.round(t * 100.0) / 100.0;
+        double hazRounded = Math.round(hazardDist * 100.0) / 100.0;
         session.logger.log("assembly_area_reached", java.util.Map.of(
-                "t",               Math.round(t * 100.0) / 100.0,
+                "t",               tRounded,
                 "x",               player.getX(),
                 "y",               player.getY(),
                 "z",               player.getZ(),
-                "hazard_distance", Math.round(hazardDist * 100.0) / 100.0
+                "hazard_distance", hazRounded
         ));
+        TelemetryCsvWriter.writeRow(
+                session.getSessionId(), player.getUUID().toString(),
+                session.getState().name().toLowerCase(),
+                tRounded, "assembly_area_reached",
+                player.getX(), player.getY(), player.getZ(),
+                hazRounded, null, null);
 
         Vec3 pos = player.position();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER,
