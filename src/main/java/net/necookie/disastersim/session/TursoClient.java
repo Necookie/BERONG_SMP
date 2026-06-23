@@ -36,8 +36,13 @@ public class TursoClient {
 
     /** Initialises the client. Must be called before any other method. */
     public static void init(String dbUrl, String token) {
-        if (dbUrl == null || dbUrl.isBlank() || token == null || token.isBlank()) {
-            BerongSMP.LOGGER.warn("[TursoClient] TURSO_URL or TURSO_TOKEN is empty — session DB disabled.");
+        if (dbUrl == null || dbUrl.isBlank()) {
+            BerongSMP.LOGGER.info("[TursoClient] tursoUrl not configured — session DB disabled.");
+            ready = false;
+            return;
+        }
+        if (token == null || token.isBlank()) {
+            BerongSMP.LOGGER.warn("[TursoClient] tursoUrl is set but tursoToken is missing — all requests will fail with 401. Configure tursoToken in berongsmp-common.toml.");
             ready = false;
             return;
         }
@@ -249,8 +254,11 @@ public class TursoClient {
             try {
                 HttpRequest req = buildRequest(body);
                 httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                // Intentionally ignore status — Turso returns error if column exists, which is fine
-            } catch (Exception ignored) {}
+                // Status is intentionally ignored — Turso returns an error if the column already
+                // exists, which is the expected case on all subsequent server starts.
+            } catch (Exception e) {
+                BerongSMP.LOGGER.debug("[TursoClient] silentAlter skipped (column may already exist): {}", e.getMessage());
+            }
         });
     }
 
