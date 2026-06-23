@@ -27,12 +27,6 @@ import net.necookie.disastersim.block.ComputerBlock;
 
 import java.util.function.Consumer;
 
-/**
- * CO2 fire extinguisher — for Class C (electrical) fires.
- * Right-click pulls the safety pin; hold right-click to discharge.
- * Extinguishes lit ComputerBlocks and regular fire/soul fire.
- * Emits cold white CO2 cloud particles instead of the red extinguisher's grey cloud.
- */
 public class CO2ExtinguisherItem extends Item {
 
     private static final double SPRAY_RANGE = 5.5D;
@@ -42,10 +36,6 @@ public class CO2ExtinguisherItem extends Item {
     public CO2ExtinguisherItem(Properties properties) {
         super(properties);
     }
-
-    // -----------------------------------------------------------------------
-    // Pin helpers — identical pattern to FireExtinguisherItem
-    // -----------------------------------------------------------------------
 
     public static boolean isPinPulled(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
@@ -58,10 +48,6 @@ public class CO2ExtinguisherItem extends Item {
         tag.putBoolean(TAG_PIN_PULLED, true);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
-
-    // -----------------------------------------------------------------------
-    // Use flow
-    // -----------------------------------------------------------------------
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
@@ -108,10 +94,6 @@ public class CO2ExtinguisherItem extends Item {
         return ItemUseAnimation.NONE;
     }
 
-    // -----------------------------------------------------------------------
-    // Server spray
-    // -----------------------------------------------------------------------
-
     private void sprayServer(ServerLevel level, Player user, ItemStack stack,
                              boolean playSound, boolean sputtering) {
         Vec3 look = user.getViewVector(1.0F).normalize();
@@ -135,7 +117,6 @@ public class CO2ExtinguisherItem extends Item {
         spawnParticlesServer(level, origin, look, side, up, sputtering);
 
         if (playSound) {
-            // Slightly higher-pitched hiss than the red extinguisher — CO2 sounds crisper
             float pitch = sputtering
                     ? 1.4F + level.getRandom().nextFloat() * 0.3F
                     : 1.1F + level.getRandom().nextFloat() * 0.2F;
@@ -151,10 +132,6 @@ public class CO2ExtinguisherItem extends Item {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Client spray
-    // -----------------------------------------------------------------------
-
     private void sprayClient(Level level, Player user, boolean playSound, boolean sputtering) {
         Vec3 look = user.getViewVector(1.0F).normalize();
         Vec3 origin = user.getEyePosition().add(look.scale(0.75D));
@@ -168,10 +145,6 @@ public class CO2ExtinguisherItem extends Item {
                     SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, pitch, false);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Extinguish logic — targets ComputerBlock (LIT) and fire/soul fire
-    // -----------------------------------------------------------------------
 
     private void extinguishAt(ServerLevel level, BlockPos pos, Player user) {
         BlockState state = level.getBlockState(pos);
@@ -200,10 +173,6 @@ public class CO2ExtinguisherItem extends Item {
             BerongSMP.LOGGER.debug("CO2 extinguisher suppressed block at {}", pos);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Particles — bright white/snowflake to distinguish from red extinguisher
-    // -----------------------------------------------------------------------
 
     private void spawnParticlesServer(ServerLevel level, Vec3 origin, Vec3 look,
                                       Vec3 side, Vec3 up, boolean sputtering) {
@@ -248,10 +217,6 @@ public class CO2ExtinguisherItem extends Item {
                     look.x * 0.15, look.y * 0.15, look.z * 0.15);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Tooltip
-    // -----------------------------------------------------------------------
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,

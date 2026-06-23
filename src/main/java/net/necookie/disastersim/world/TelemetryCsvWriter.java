@@ -33,12 +33,7 @@ public class TelemetryCsvWriter {
     private static boolean eventHeaderWritten = false;
     private static boolean sessionHeaderWritten = false;
 
-    // Track which sessions are currently open (sessionId → true)
     private static final ConcurrentHashMap<String, Boolean> openSessions = new ConcurrentHashMap<>();
-
-    // -----------------------------------------------------------------------
-    // Init (called once from BerongSMP.onServerStarting)
-    // -----------------------------------------------------------------------
 
     public static void init(Path runDir) {
         try {
@@ -59,23 +54,11 @@ public class TelemetryCsvWriter {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Session lifecycle
-    // -----------------------------------------------------------------------
-
-    /** Called at simulation start (t=0). No-op if init() was not called. */
     public static void openSession(String sessionId) {
         if (telemetryDir == null) return;
         openSessions.put(sessionId, true);
     }
 
-    /**
-     * Called at simulation end. Appends one row to sessions_<date>.csv and flushes.
-     * metadata keys from telemetry_contract.md §5:
-     *   player_id, scenario_type, started_at, ended_at, duration_ticks, end_reason,
-     *   fires_extinguished_count, magnitude, aftershock_count, aftershock_magnitude_scale,
-     *   final_earthquake_phase, mod_version, contract_version
-     */
     public static void closeSession(String sessionId, Map<String, Object> metadata) {
         if (telemetryDir == null) return;
         openSessions.remove(sessionId);
@@ -103,25 +86,6 @@ public class TelemetryCsvWriter {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Row writing (contract §3 schema)
-    // -----------------------------------------------------------------------
-
-    /**
-     * Writes one event/move row.
-     *
-     * @param sessionId         Unique per-run identifier
-     * @param playerId          Stable player UUID string
-     * @param scenarioType      "fire" or "earthquake"
-     * @param timestamp         Seconds since trigger (t=0 at disaster start)
-     * @param eventType         See contract §4 vocabulary
-     * @param x                 Player X (or event X)
-     * @param y                 Player Y
-     * @param z                 Player Z
-     * @param hazardDistance    Distance to nearest hazard (blocks)
-     * @param interactionTarget Optional: what was interacted with (null → blank)
-     * @param nearbyPlayerCount Required on extinguisher_use; null → blank for others
-     */
     public static void writeRow(String sessionId, String playerId, String scenarioType,
                                 double timestamp, String eventType,
                                 double x, double y, double z,
@@ -149,7 +113,6 @@ public class TelemetryCsvWriter {
         }
     }
 
-    /** Flush pending rows to disk. Call periodically or at session end. */
     public static void flush() {
         try {
             if (eventWriter != null) eventWriter.flush();
@@ -158,17 +121,12 @@ public class TelemetryCsvWriter {
         }
     }
 
-    /** Close writers on server stop. */
     public static void shutdown() {
         try {
             if (eventWriter != null)   { eventWriter.flush();   eventWriter.close(); }
             if (sessionWriter != null) { sessionWriter.flush(); sessionWriter.close(); }
         } catch (IOException ignored) {}
     }
-
-    // -----------------------------------------------------------------------
-    // Internal helpers
-    // -----------------------------------------------------------------------
 
     private static void openEventWriter() throws IOException {
         String date = LocalDate.now().format(DATE_FMT);
@@ -208,7 +166,6 @@ public class TelemetryCsvWriter {
         if (sessionWriter == null) openSessionWriter();
     }
 
-    /** Escape a value for CSV (wraps in quotes, escapes internal quotes). */
     private static String csv(Object v) {
         if (v == null) return "";
         String s = v.toString();

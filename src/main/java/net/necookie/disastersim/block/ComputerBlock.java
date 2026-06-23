@@ -28,29 +28,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/**
- * Computer/monitor block with FACING, LIT, BURNING, and BROKEN states.
- *
- * State machine:
- *   OFF  → right-click       → ON
- *   ON   → right-click       → OFF
- *   ANY  → flint & steel     → BURNING (LIT=true, BURNING=true)
- *   BURNING → CO2 extinguisher → BROKEN (LIT=false, BURNING=false, BROKEN=true)
- *   BROKEN  → any interaction → "damaged" warning; cannot be used
- *
- * BURNING behaviour:
- *   - Immediately places vanilla fire on all adjacent air on ignition.
- *   - randomTick scans a 2-block radius for ignitedByLava() blocks and seeds fire
- *     next to them, letting vanilla fire spread handle the chain reaction.
- *   - animateTick emits intense fire from the TOP + all SIDES, heavy smoke columns,
- *     electric arcs, soul-fire flame (cyan electrical look), and molten ember drips.
- *
- * BROKEN behaviour:
- *   - Shows a cracked/scorched screen texture.
- *   - Emits occasional wisps of smoke.
- *   - All interactions blocked with a "damaged" message.
- *   - Only the CO2 extinguisher causes this state.
- */
 public class ComputerBlock extends Block {
 
     public static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
@@ -96,10 +73,6 @@ public class ComputerBlock extends Block {
         };
     }
 
-    // -----------------------------------------------------------------------
-    // Ignition via flint & steel
-    // -----------------------------------------------------------------------
-
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
                                           BlockPos pos, Player player, InteractionHand hand,
@@ -120,11 +93,9 @@ public class ComputerBlock extends Block {
             return InteractionResult.SUCCESS;
         }
 
-        // Ignite — works whether the computer is on or off
         if (!level.isClientSide()) {
             level.setBlock(pos, state.setValue(LIT, true).setValue(BURNING, true), 3);
 
-            // Immediately place fire on ALL adjacent air for instant realistic burn look
             for (Direction dir : Direction.values()) {
                 BlockPos adj = pos.relative(dir);
                 if (level.getBlockState(adj).isAir()) {
@@ -144,10 +115,6 @@ public class ComputerBlock extends Block {
         level.playSound(player, pos, SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.0f, 1.0f);
         return InteractionResult.SUCCESS;
     }
-
-    // -----------------------------------------------------------------------
-    // Screen toggle — blocked while burning or broken
-    // -----------------------------------------------------------------------
 
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
@@ -186,10 +153,6 @@ public class ComputerBlock extends Block {
         return InteractionResult.SUCCESS;
     }
 
-    // -----------------------------------------------------------------------
-    // Fire spread — randomTick fires whenever BURNING=true
-    // -----------------------------------------------------------------------
-
     @Override
     public boolean isRandomlyTicking(BlockState state) {
         return state.getValue(BURNING);
@@ -199,7 +162,6 @@ public class ComputerBlock extends Block {
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.getValue(BURNING)) return;
 
-        // Always attempt to refill adjacent air with fire (keeps the block visually burning)
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
             if (level.getBlockState(adj).isAir()) {
@@ -207,8 +169,7 @@ public class ComputerBlock extends Block {
             }
         }
 
-        // Scan 2-block radius for flammable material and seed fire next to it.
-        // Vanilla fire takes over from there and burns the material naturally.
+        // Seed fire next to flammable blocks; vanilla fire propagates from there.
         for (int dx = -2; dx <= 2; dx++) {
             for (int dy = -1; dy <= 3; dy++) {
                 for (int dz = -2; dz <= 2; dz++) {
@@ -216,7 +177,6 @@ public class ComputerBlock extends Block {
                     BlockPos checkPos = pos.offset(dx, dy, dz);
                     BlockState checkState = level.getBlockState(checkPos);
 
-                    // If the block itself is flammable, put fire above it
                     if (checkState.ignitedByLava() && random.nextInt(5) == 0) {
                         BlockPos above = checkPos.above();
                         if (level.getBlockState(above).isAir()) {
@@ -224,7 +184,6 @@ public class ComputerBlock extends Block {
                         }
                     }
 
-                    // If it's an air gap bordering something flammable, ignite it
                     if (checkState.isAir() && random.nextInt(8) == 0) {
                         for (Direction checkDir : Direction.values()) {
                             if (level.getBlockState(checkPos.relative(checkDir)).ignitedByLava()) {
@@ -238,14 +197,9 @@ public class ComputerBlock extends Block {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Visual effects
-    // -----------------------------------------------------------------------
-
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
         if (state.getValue(BURNING)) {
-            // === FIRE FROM THE TOP — primary heat source (fire rises) ===
             for (int i = 0; i < 5; i++) {
                 level.addParticle(ParticleTypes.FLAME,
                         pos.getX() + 0.1 + rand.nextDouble() * 0.8,
@@ -256,7 +210,6 @@ public class ComputerBlock extends Block {
                         (rand.nextDouble() - 0.5) * 0.04);
             }
 
-            // === FIRE LICKING OUT FROM ALL FOUR SIDES ===
             for (Direction sideDir : new Direction[]{
                     Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST}) {
                 if (rand.nextInt(3) == 0) {
@@ -268,7 +221,6 @@ public class ComputerBlock extends Block {
                 }
             }
 
-            // === CYAN SOUL-FIRE FLAMES — unmistakable electrical fire signature ===
             if (rand.nextInt(3) == 0) {
                 level.addParticle(ParticleTypes.SOUL_FIRE_FLAME,
                         pos.getX() + 0.2 + rand.nextDouble() * 0.6,
@@ -277,7 +229,6 @@ public class ComputerBlock extends Block {
                         (rand.nextDouble() - 0.5) * 0.03, 0.04, (rand.nextDouble() - 0.5) * 0.03);
             }
 
-            // === ELECTRIC ARCS — wild, multi-directional ===
             if (rand.nextInt(2) == 0) {
                 level.addParticle(ParticleTypes.ELECTRIC_SPARK,
                         pos.getX() + 0.1 + rand.nextDouble() * 0.8,
@@ -287,7 +238,6 @@ public class ComputerBlock extends Block {
                         (rand.nextDouble() - 0.5) * 0.20);
             }
 
-            // === HEAVY SMOKE COLUMNS rising from all over the top ===
             for (int i = 0; i < 2; i++) {
                 level.addParticle(ParticleTypes.LARGE_SMOKE,
                         pos.getX() + 0.1 + rand.nextDouble() * 0.8,
@@ -298,7 +248,6 @@ public class ComputerBlock extends Block {
                         (rand.nextDouble() - 0.5) * 0.01);
             }
 
-            // === MOLTEN EMBER DRIPS — hot metal melting ===
             if (rand.nextInt(4) == 0) {
                 level.addParticle(ParticleTypes.LAVA,
                         pos.getX() + 0.2 + rand.nextDouble() * 0.6,
@@ -308,8 +257,7 @@ public class ComputerBlock extends Block {
             }
 
         } else if (state.getValue(BROKEN)) {
-            // Occasional wisp of smoke — the computer still smoulders after being
-            // doused with CO2
+            // Still smoulders after being doused with CO2.
             if (rand.nextInt(15) == 0) {
                 level.addParticle(ParticleTypes.SMOKE,
                         pos.getX() + 0.25 + rand.nextDouble() * 0.5,
@@ -319,7 +267,6 @@ public class ComputerBlock extends Block {
             }
 
         } else if (state.getValue(LIT)) {
-            // Normal ambient sparks while the computer is on and not burning
             if (rand.nextInt(8) != 0) return;
             double ox = (rand.nextDouble() - 0.5) * 0.4;
             double oy = rand.nextDouble() * 0.4 + 0.7;

@@ -43,10 +43,6 @@ public class FireExtinguisherItem extends Item {
         super(properties);
     }
 
-    // -----------------------------------------------------------------------
-    // Pin helpers — stored via DataComponents.CUSTOM_DATA (1.21 NBT API)
-    // -----------------------------------------------------------------------
-
     public static boolean isPinPulled(ItemStack stack) {
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return false;
@@ -59,22 +55,16 @@ public class FireExtinguisherItem extends Item {
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
     }
 
-    // -----------------------------------------------------------------------
-    // Use flow — gates on pin state
-    // -----------------------------------------------------------------------
-
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
 
         if (!isPinPulled(stack)) {
-            // Pull step — first right-click removes the safety pin.
             if (!(level instanceof ServerLevel)) return InteractionResult.SUCCESS;
             pullPin(stack);
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.8F, 1.4F);
             player.sendSystemMessage(Component.literal("§ePIN PULLED — ready to spray! Hold right-click to discharge."));
-            // Log pin pull event for behavioral telemetry
             if (player instanceof ServerPlayer sp) {
                 SimulationSession session = SimulationManager.getSession(sp.getUUID());
                 if (session != null) {
@@ -84,7 +74,6 @@ public class FireExtinguisherItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        // Squeeze step — begin continuous spray.
         player.startUsingItem(hand);
         return InteractionResult.CONSUME;
     }
@@ -92,8 +81,6 @@ public class FireExtinguisherItem extends Item {
     @Override
     public void onUseTick(Level level, LivingEntity user, ItemStack stack, int remainingUseTicks) {
         if (!(user instanceof Player player)) return;
-
-        // Safety net: abort if pin was somehow never pulled.
         if (!isPinPulled(stack)) {
             user.stopUsingItem();
             return;
@@ -101,7 +88,6 @@ public class FireExtinguisherItem extends Item {
 
         boolean sputtering = stack.getDamageValue() >= stack.getMaxDamage() - 60;
 
-        // During sputtering, skip every other tick to simulate dying pressure.
         if (sputtering && remainingUseTicks % 2 != 0) return;
 
         boolean playSound = remainingUseTicks % 6 == 0;
@@ -128,10 +114,6 @@ public class FireExtinguisherItem extends Item {
         return ItemUseAnimation.NONE;
     }
 
-    // -----------------------------------------------------------------------
-    // Server spray
-    // -----------------------------------------------------------------------
-
     private void sprayServer(ServerLevel level, Player user, ItemStack stack,
                              boolean playSound, boolean sputtering) {
         Vec3 lookDirection = user.getViewVector(1.0F).normalize();
@@ -157,7 +139,6 @@ public class FireExtinguisherItem extends Item {
             if (extinguishAt(level, BlockPos.containing(centerPoint.add(upwards.scale(-0.2D))), user)) anyHit = true;
         }
 
-        // Log EXT_SPRAY once per second (every 20 ticks) to keep the event log manageable
         if (user instanceof ServerPlayer sp) {
             SimulationSession session = SimulationManager.getSession(sp.getUUID());
             if (session != null && stack.getDamageValue() % 20 == 0) {
@@ -170,7 +151,6 @@ public class FireExtinguisherItem extends Item {
             }
         }
 
-        // --- Telemetry: extinguisher_use (once per spray burst via pending flag) ---
         if (anyHit && user instanceof ServerPlayer sp) {
             SimulationSession session = SimulationManager.getSession(sp.getUUID());
             if (session != null && session.consumeExtinguishEventPending()) {
@@ -197,7 +177,6 @@ public class FireExtinguisherItem extends Item {
                     SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, pitch);
         }
 
-        // Drain one charge per active tick. Item breaks naturally at max damage.
         int newDamage = stack.getDamageValue() + 1;
         if (newDamage >= stack.getMaxDamage()) {
             stack.shrink(1);
@@ -205,10 +184,6 @@ public class FireExtinguisherItem extends Item {
             stack.setDamageValue(newDamage);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Client spray
-    // -----------------------------------------------------------------------
 
     private void sprayClient(Level level, Player user, boolean playSound, boolean sputtering) {
         Vec3 lookDirection = user.getViewVector(1.0F).normalize();
@@ -224,10 +199,6 @@ public class FireExtinguisherItem extends Item {
                     SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.9F, pitch, false);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Extinguish logic — records to simulation session if active
-    // -----------------------------------------------------------------------
 
     private boolean extinguishAt(ServerLevel level, BlockPos pos, Player user) {
         BlockState state = level.getBlockState(pos);
@@ -248,7 +219,6 @@ public class FireExtinguisherItem extends Item {
             if (session != null && session.getState() == SimulationManager.SimulationState.FIRE) {
                 session.recordExtinguish(1);
             }
-            // Tutorial PASS_SPRAY stage: count extinguishes regardless of active simulation
             TutorialManager.onExtinguish(serverPlayer);
         }
         return extinguished;
@@ -272,10 +242,6 @@ public class FireExtinguisherItem extends Item {
         }
         return minDist == Double.MAX_VALUE ? 99.0 : Math.sqrt(minDist);
     }
-
-    // -----------------------------------------------------------------------
-    // Particles
-    // -----------------------------------------------------------------------
 
     private void spawnSprayParticlesServer(ServerLevel level, Vec3 origin, Vec3 direction,
                                            Vec3 sideways, Vec3 upwards, boolean sputtering) {
@@ -315,10 +281,6 @@ public class FireExtinguisherItem extends Item {
                     direction.z * 0.2 + (level.getRandom().nextDouble() - 0.5) * 0.05);
         }
     }
-
-    // -----------------------------------------------------------------------
-    // Tooltip
-    // -----------------------------------------------------------------------
 
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context,

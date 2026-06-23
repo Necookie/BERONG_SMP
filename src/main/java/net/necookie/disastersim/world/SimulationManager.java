@@ -27,74 +27,26 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Central coordinator for the disaster simulation system.
- *
- * <p>Responsibilities:
- * <ul>
- *   <li>Maintains the per-player session registry ({@link SimulationSession}).</li>
- *   <li>Drives the simulation clock via {@link #onServerTick}.</li>
- *   <li>Dispatches disaster effects each tick to {@link SimulationEffects}.</li>
- *   <li>Delegates structure load/restore to {@link SimulationStructureLoader}.</li>
- *   <li>Sends HUD sync packets to the client via {@link SimulationStatusPayload}.</li>
- * </ul>
- *
- * <p>Thread safety: {@code activeSessions} is a {@link ConcurrentHashMap} for
- * safe iteration and atomic key operations. {@code startSimulation} and
- * {@code endSimulation} are {@code synchronized} to prevent a race between a
- * button press and a concurrent logout event. All tick-driven mutations (e.g.,
- * {@link SimulationSession#tick()}) are confined to the server thread via
- * {@code ServerTickEvent.Post} and require no additional locking.
- */
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class SimulationManager {
 
-    // -----------------------------------------------------------------------
-    // Constants
-    // -----------------------------------------------------------------------
-
-    /** World origin of the simulation arena (bottom-northwest corner of the LSPU Library). */
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
 
-    /** World origin of the SSC building placed alongside the simulation arena. */
     private static final BlockPos SSC_POS = new BlockPos(11, -33, 90);
 
-    /**
-     * How often the HUD sync packet is sent to the client (in ticks).
-     * Kept separate from {@link Config#QUAKE_INTERVAL} so tuning the earthquake
-     * rate does not silently change the HUD update frequency.
-     */
+    // Separate from QUAKE_INTERVAL so tuning earthquake rate doesn't silently change HUD update frequency.
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
 
-    /** Divisor for converting server ticks to whole seconds. */
     private static final int TICKS_PER_SECOND = 20;
 
-    /**
-     * Player entry offsets relative to {@link #SIM_POS}, placing the player
-     * just inside the structure's front door at ground level.
-     */
     private static final double SIM_ENTRY_OFFSET_X = 5.5;
     private static final double SIM_ENTRY_OFFSET_Y = 2.0;
     private static final double SIM_ENTRY_OFFSET_Z = 5.5;
 
-    // -----------------------------------------------------------------------
-    // Collaborators and state
-    // -----------------------------------------------------------------------
-
-    /** One active session per player UUID; allows multiple players to run concurrently. */
     private static final Map<UUID, SimulationSession> activeSessions = new ConcurrentHashMap<>();
 
-    /**
-     * Players who died during a simulation and still need to be sent to the lobby
-     * on their next respawn. Populated by {@link #endSimulation} when the player
-     * is dead; consumed and cleared by {@link #onPlayerRespawn}.
-     */
     private static final Set<UUID> pendingLobbyRespawn = ConcurrentHashMap.newKeySet();
 
-    /**
-     * All buildings that are placed/restored together each simulation session.
-     * Each entry pairs a loader with the world position it targets.
-     */
     private static final List<Map.Entry<StructurePlacer, BlockPos>> BUILDINGS = List.of(
             Map.entry(new SimulationStructureLoader(
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain")), SIM_POS),
@@ -102,41 +54,18 @@ public class SimulationManager {
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS)
     );
 
-    /** Applies per-tick fire and earthquake world effects. */
     private static final SimulationEffects EFFECTS = new SimulationEffects();
 
-    // -----------------------------------------------------------------------
-    // Simulation state enum
-    // -----------------------------------------------------------------------
-
-    /** The type of disaster a {@link SimulationSession} is running. */
     public enum SimulationState {
         IDLE,
         FIRE,
         EARTHQUAKE
     }
 
-    // -----------------------------------------------------------------------
-    // Session lifecycle
-    // -----------------------------------------------------------------------
-
-    /**
-     * Convenience overload that starts a simulation using the config-default magnitude.
-     * Use the two-argument overload to pass an explicit magnitude (e.g., from button or command).
-     */
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
         startSimulation(player, state, Config.QUAKE_MAGNITUDE.get());
     }
 
-    /**
-     * Starts a new simulation for the given player with an explicit earthquake magnitude.
-     * For FIRE sessions the magnitude parameter is ignored.
-     * If the player already has an active session, a message is sent and no new session is created.
-     *
-     * @param player    The player triggering the simulation.
-     * @param state     The type of disaster to simulate.
-     * @param magnitude Earthquake magnitude (0.1–10.0); only used for EARTHQUAKE sessions.
-     */
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state, double magnitude) {
         UUID uuid = player.getUUID();
 
@@ -192,9 +121,6 @@ public class SimulationManager {
                 startHazDist, null, null);
     }
 
-    /**
-     * Logs door_open telemetry when a player interacts with a door or trapdoor during a simulation.
-     */
     @SubscribeEvent
     public static void onPlayerInteract(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
@@ -228,16 +154,6 @@ public class SimulationManager {
                 targetName, null);
     }
 
-    /**
-     * Ends and removes the active session for the given player UUID.
-     * Always restores the simulation arena structure. Teleports and notifies the
-     * player only if they are still alive on the server.
-     *
-     * <p>Thread safety: {@code synchronized} to guard against concurrent calls
-     * from the tick event and logout events.
-     *
-     * @param uuid The UUID of the player whose session should be terminated.
-     */
     public static synchronized void endSimulation(UUID uuid) {
         endSimulation(uuid, "timeout");
     }
@@ -290,9 +206,6 @@ public class SimulationManager {
         TelemetryCsvWriter.closeSession(session.getSessionId(), meta);
         TelemetryCsvWriter.flush();
 
-        // Single UUID-based subquery UPDATE — no rowId lookup required.
-        // Runs before the player-null guard so death/logout never cause missing saves.
-        // Merges simulation data + event_log into one HTTP call.
         if (TursoClient.isReady()) {
             String simType = session.getState() == SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
             boolean passed = session.getState() == SimulationState.FIRE
@@ -339,65 +252,35 @@ public class SimulationManager {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Session query
-    // -----------------------------------------------------------------------
-
-    /**
-     * Returns the active {@link SimulationSession} for the given player UUID, or
-     * {@code null} if no session is currently running for that player.
-     * Used by {@code FireExtinguisherItem} to record extinguishes without coupling
-     * to session internals directly.
-     */
     public static SimulationSession getSession(java.util.UUID uuid) {
         return activeSessions.get(uuid);
     }
 
-    /** Returns an unmodifiable view of all active sessions (UUID → session). */
     public static Map<UUID, SimulationSession> getActiveSessions() {
         return java.util.Collections.unmodifiableMap(activeSessions);
     }
 
-    // -----------------------------------------------------------------------
-    // Event handlers
-    // -----------------------------------------------------------------------
-
-    /**
-     * Advances all active simulation sessions once per server tick.
-     * Runs on the server thread; no additional locking is required for
-     * per-session mutations inside this method.
-     */
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
-        // Advance tutorial state machines for all online players
         net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
             TutorialManager.tick(server.overworld());
         }
 
-        // Snapshot the key set before iterating so that endSimulation (which removes
-        // entries from activeSessions) does not cause a ConcurrentModificationException.
+        // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.
         for (UUID uuid : new ArrayList<>(activeSessions.keySet())) {
             SimulationSession session = activeSessions.get(uuid);
-            // The session may have been removed by a concurrent endSimulation call
-            // (e.g., a logout event) between the snapshot and this iteration step.
+            // Session may have been removed by a concurrent endSimulation (e.g., logout) since snapshot.
             if (session == null) continue;
 
-            // Decrement the session's internal tick counter by 1.
             session.tick();
 
-            // If the timer hit zero, the simulation has run its full duration.
-            // End it and move on to the next session.
             if (session.isExpired()) {
                 endSimulation(uuid);
                 continue;
             }
 
             ServerPlayer player = session.getPlayer();
-            // Safety guard: if the player reference is gone or they are dead (the death
-            // event hasn't fired yet), end the session now so we don't waste ticks on
-            // a ghost session.  The dead-player case also triggers pendingLobbyRespawn
-            // inside endSimulation so the respawn redirect still works.
             if (player == null || !player.isAlive()) {
                 endSimulation(uuid, "injured");
                 continue;
@@ -406,7 +289,6 @@ public class SimulationManager {
             ServerLevel level = (ServerLevel) player.level();
             int ticks = session.getTimerTicks();
 
-            // Log player position + nearest fire distance once per second
             if (ticks % 20 == 0) {
                 BlockPos pos = player.blockPosition();
                 SimRoom room = SimRoom.fromPos(pos, SIM_POS);
@@ -418,7 +300,6 @@ public class SimulationManager {
                 ));
             }
 
-            // --- Telemetry: move sampler (10 Hz = every 2 ticks) ---
             if (ticks % 2 == 0) {
                 double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
                 double hazDist;
@@ -438,17 +319,14 @@ public class SimulationManager {
                         null, null);
             }
 
-            // Dispatch the correct disaster effect at its configured interval.
             if (session.getState() == SimulationState.FIRE) {
                 if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
                     EFFECTS.simulateFire(level, session);
                 }
-                // Smoke suffocation and proximity damage once per second
                 if (ticks % 20 == 0) {
                     EFFECTS.applyFireProximityEffects(level, player);
                 }
             } else if (session.getState() == SimulationState.EARTHQUAKE) {
-                // Advance the phase state machine every tick and notify on transitions.
                 SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
                 session.tickQuakePhase(level.getRandom());
                 SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
@@ -461,7 +339,6 @@ public class SimulationManager {
                         player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
                     }
                 }
-                // Nausea/dizziness from seismic vibrations — stronger during PEAK
                 if (ticks % 60 == 0 && session.getQuakePhase() != SimulationSession.EarthquakePhase.END) {
                     int nauseaAmp = switch (session.getQuakePhase()) {
                         case PEAK       -> (int) Math.min(3, session.getSessionMagnitude() / 2.5);
@@ -471,29 +348,21 @@ public class SimulationManager {
                     };
                     player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
                 }
-                // Periodic effect (fills cascade queue or breaks blocks directly).
                 if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
                     EFFECTS.simulateEarthquake(level, session);
                 }
-                // Drain cascade queue every tick for gradual PEAK-phase collapse.
                 EFFECTS.drainEarthquakePending(level, session);
-                // Suppress vanilla fire spreading triggered by block destruction.
                 if (ticks % 20 == 0) {
                     EFFECTS.clearFireInArena(level);
                 }
             }
 
-            // Vanilla fire spreading (FireBlock#tick) can move fire outside the
-            // simulation arena without triggering any hookable NeoForge event.
-            // Every 40 ticks (2 seconds) we scan the border region and remove
-            // any fire that escaped the structure's bounding box.
             if (session.getState() == SimulationState.FIRE && ticks % 40 == 0) {
                 EFFECTS.cleanupFireOutsideBounds(level);
                 // Reset extinguisher_use pending so next spray burst emits a new event
                 session.resetExtinguishEventPending();
             }
 
-            // --- Emergency exit zone check (once per crossing, any active simulation) ---
             if (!session.hasPassedExit()) {
                 ExitZones.ExitZone exit = ExitZones.find(player.position());
                 if (exit != null) {
@@ -514,12 +383,10 @@ public class SimulationManager {
                 }
             }
 
-            // --- Assembly zone force-field border particles (every 5 ticks) ---
             if (ticks % 5 == 0) {
                 AssemblyZone.spawnBorderParticles(level);
             }
 
-            // --- Assembly zone arrival check ---
             if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position())) {
                 session.markAssemblyReached();
                 double hazDist = (session.getState() == SimulationState.FIRE)
@@ -532,9 +399,7 @@ public class SimulationManager {
                 continue;
             }
 
-            // Send an updated HUD packet at HUD_SYNC_INTERVAL_TICKS (every 10 ticks = 0.5s).
-            // Ceiling division converts ticks to whole seconds so the HUD timer
-            // shows "1" on the last tick rather than jumping straight to "0".
+            // Ceiling division so the HUD shows "1" on the last tick rather than jumping to "0".
             if (ticks % HUD_SYNC_INTERVAL_TICKS == 0) {
                 int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
                 float intensity = (session.getState() == SimulationState.EARTHQUAKE)
@@ -546,33 +411,18 @@ public class SimulationManager {
         }
     }
 
-    /**
-     * Sends players who died mid-simulation to the lobby when they respawn.
-     */
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        // Filter: we only care about server-side players.
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-
-        // pendingLobbyRespawn.remove returns true only if the UUID was present.
-        // If this player didn't die during a simulation, the set won't contain their
-        // UUID and we fall through without interfering with a normal respawn.
         if (!pendingLobbyRespawn.remove(player.getUUID())) return;
 
-        // At this point the player has clicked "Respawn" and is alive again.
-        // Redirect them to the lobby instead of the world spawn.
         ServerLevel level = (ServerLevel) player.level();
-
-        // Clear the HUD (empty status, 0 seconds) so the simulation overlay disappears.
         PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
         player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-
-        // Teleport to the lobby spawn point.
         player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
                 Collections.emptySet(), 0.0f, 0.0f, true);
     }
 
-    /** Returns the distance to the nearest fire block within 10 blocks of origin, or 99 if none. */
     public static double nearestFireDistance(ServerLevel level, BlockPos origin) {
         double minSq = Double.MAX_VALUE;
         for (BlockPos check : BlockPos.betweenClosed(origin.offset(-10, -5, -10), origin.offset(10, 5, 10))) {
@@ -586,12 +436,6 @@ public class SimulationManager {
         return minSq == Double.MAX_VALUE ? 99.0 : Math.sqrt(minSq);
     }
 
-    /**
-     * Scans the simulation arena for valid player spawn positions on any floor and
-     * returns one at random. A position is valid when the block below is solid,
-     * the block at foot level is air, and the block at head level is air.
-     * Falls back to the original front-door entry if no candidates are found.
-     */
     private static BlockPos findRandomSpawnInLibrary(ServerLevel level) {
         int areaSize   = Config.SIM_AREA_SIZE.get();
         int areaHeight = Config.SIM_AREA_HEIGHT.get();
@@ -617,21 +461,13 @@ public class SimulationManager {
         return candidates.get(level.getRandom().nextInt(candidates.size()));
     }
 
-    /**
-     * Ends a player's active simulation when they disconnect.
-     * Also clears any pending respawn redirect so it does not fire on next login.
-     */
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID uuid = event.getEntity().getUUID();
 
-        // Remove from the pending-respawn set first.  If we called endSimulation first
-        // and the player was dead, endSimulation would add them to pendingLobbyRespawn —
-        // and then this remove would still work, but ordering is cleaner this way.
+        // Remove from pending-respawn before calling endSimulation: if the player was dead,
+        // endSimulation would add them back to pendingLobbyRespawn, defeating this remove.
         pendingLobbyRespawn.remove(uuid);
-
-        // End (and clean up) the session if one exists.  Safe to call even if the
-        // player had no active session — endSimulation is a no-op in that case.
         endSimulation(uuid);
     }
 }
