@@ -274,7 +274,7 @@ Tracks fixes applied from the 2026-06-23 health check report.
 | C-1b | 🔴 | AssemblyZone/ExitZones placeholder coordinates | ⏳ Pending in-game F3 tuning | — |
 | C-2  | 🔴 | Default BFP PIN was hardcoded `"1234"` | ✅ Done | (this commit) |
 | W-1  | 🟡 | ModCommands.java monolith (807 lines) | ✅ Done | (this commit) |
-| W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ⏳ Pending | — |
+| W-2  | 🟡 | onServerTick() mixes fire/quake/telemetry/HUD | ✅ Done | (this commit) |
 | W-3  | 🟡 | Silent `catch (Exception ignored)` in TursoClient | ⏳ Pending | — |
 | W-4  | 🟡 | Zero unit test coverage | ⏳ Pending | — |
 | L-1–4 | 🟢 | Low-risk items (metadata coupling, station offsets, PIN rate-limit, Turso warn) | ⏳ Pending | — |

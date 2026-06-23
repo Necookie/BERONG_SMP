@@ -270,145 +270,154 @@ public class SimulationManager {
         // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.
         for (UUID uuid : new ArrayList<>(activeSessions.keySet())) {
             SimulationSession session = activeSessions.get(uuid);
-            // Session may have been removed by a concurrent endSimulation (e.g., logout) since snapshot.
             if (session == null) continue;
 
             session.tick();
 
-            if (session.isExpired()) {
-                endSimulation(uuid);
-                continue;
-            }
+            if (session.isExpired()) { endSimulation(uuid); continue; }
 
             ServerPlayer player = session.getPlayer();
-            if (player == null || !player.isAlive()) {
-                endSimulation(uuid, "injured");
-                continue;
-            }
+            if (player == null || !player.isAlive()) { endSimulation(uuid, "injured"); continue; }
 
             ServerLevel level = (ServerLevel) player.level();
             int ticks = session.getTimerTicks();
 
-            if (ticks % 20 == 0) {
-                BlockPos pos = player.blockPosition();
-                SimRoom room = SimRoom.fromPos(pos, SIM_POS);
-                double nearestFire = nearestFireDistance(level, pos);
-                session.logger.log("PLAYER_TICK", java.util.Map.of(
-                    "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
-                    "room", room.name(),
-                    "nearest_fire_dist", Math.round(nearestFire * 10.0) / 10.0
-                ));
-            }
-
-            if (ticks % 2 == 0) {
-                double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
-                double hazDist;
-                if (session.getState() == SimulationState.FIRE) {
-                    hazDist = nearestFireDistance(level, player.blockPosition());
-                } else {
-                    hazDist = session.getEpicenter() != null
-                            ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
-                            : 99.0;
-                }
-                TelemetryCsvWriter.writeRow(
-                        session.getSessionId(), uuid.toString(),
-                        session.getState().name().toLowerCase(),
-                        Math.round(elapsedS * 100.0) / 100.0, "move",
-                        player.getX(), player.getY(), player.getZ(),
-                        Math.round(hazDist * 100.0) / 100.0,
-                        null, null);
-            }
+            tickTelemetry(session, uuid, level, player, ticks);
 
             if (session.getState() == SimulationState.FIRE) {
-                if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-                    EFFECTS.simulateFire(level, session);
-                }
-                if (ticks % 20 == 0) {
-                    EFFECTS.applyFireProximityEffects(level, player);
-                }
+                tickFireSession(session, level, player, ticks);
             } else if (session.getState() == SimulationState.EARTHQUAKE) {
-                SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
-                session.tickQuakePhase(level.getRandom());
-                SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
-                if (phaseBefore != phaseAfter) {
-                    if (phaseAfter == SimulationSession.EarthquakePhase.PEAK) {
-                        player.sendSystemMessage(Component.literal("§c⚠ Earthquake is intensifying!"));
-                    } else if (phaseAfter == SimulationSession.EarthquakePhase.AFTERSHOCK) {
-                        player.sendSystemMessage(Component.literal("§e⚠ Aftershock!"));
-                    } else if (phaseAfter == SimulationSession.EarthquakePhase.END) {
-                        player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
-                    }
-                }
-                if (ticks % 60 == 0 && session.getQuakePhase() != SimulationSession.EarthquakePhase.END) {
-                    int nauseaAmp = switch (session.getQuakePhase()) {
-                        case PEAK       -> (int) Math.min(3, session.getSessionMagnitude() / 2.5);
-                        case AFTERSHOCK -> (int) Math.min(2,
-                                session.getSessionMagnitude() * session.getAftershockMagnitudeScale() / 3.0);
-                        default         -> 0;
-                    };
-                    player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
-                }
-                if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
-                    EFFECTS.simulateEarthquake(level, session);
-                }
-                EFFECTS.drainEarthquakePending(level, session);
-                if (ticks % 20 == 0) {
-                    EFFECTS.clearFireInArena(level);
-                }
+                tickEarthquakeSession(session, level, player, ticks);
             }
 
-            if (session.getState() == SimulationState.FIRE && ticks % 40 == 0) {
-                EFFECTS.cleanupFireOutsideBounds(level);
-                // Reset extinguisher_use pending so next spray burst emits a new event
-                session.resetExtinguishEventPending();
-            }
+            tickExitZone(session, uuid, level, player, ticks);
 
-            if (!session.hasPassedExit()) {
-                ExitZones.ExitZone exit = ExitZones.find(player.position());
-                if (exit != null) {
-                    session.markPassedExit();
-                    double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
-                    double hazDist = (session.getState() == SimulationState.FIRE)
-                            ? nearestFireDistance(level, player.blockPosition())
-                            : (session.getEpicenter() != null
-                                    ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
-                                    : 99.0);
-                    TelemetryCsvWriter.writeRow(
-                            session.getSessionId(), uuid.toString(),
-                            session.getState().name().toLowerCase(),
-                            Math.round(elapsedS * 100.0) / 100.0, "emergency_exit",
-                            player.getX(), player.getY(), player.getZ(),
-                            Math.round(hazDist * 100.0) / 100.0,
-                            exit.label(), null);
-                }
-            }
+            if (tickAssemblyZone(session, uuid, level, player, ticks)) continue;
 
-            if (ticks % 5 == 0) {
-                AssemblyZone.spawnBorderParticles(level);
-            }
+            tickHudSync(session, player, ticks);
+        }
+    }
 
-            if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position())) {
-                session.markAssemblyReached();
-                double hazDist = (session.getState() == SimulationState.FIRE)
-                        ? nearestFireDistance(level, player.blockPosition())
-                        : (session.getEpicenter() != null
-                                ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
-                                : 99.0);
-                AssemblyZone.onPlayerArrived(player, session, level, hazDist);
-                endSimulation(uuid, "assembly_reached");
-                continue;
-            }
+    private static void tickTelemetry(SimulationSession session, UUID uuid,
+                                      ServerLevel level, ServerPlayer player, int ticks) {
+        if (ticks % 20 == 0) {
+            BlockPos pos = player.blockPosition();
+            SimRoom room = SimRoom.fromPos(pos, SIM_POS);
+            double nearestFire = nearestFireDistance(level, pos);
+            session.logger.log("PLAYER_TICK", java.util.Map.of(
+                "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                "room", room.name(),
+                "nearest_fire_dist", Math.round(nearestFire * 10.0) / 10.0
+            ));
+        }
+        if (ticks % 2 == 0) {
+            double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+            double hazDist = hazardDistance(session, level, player);
+            TelemetryCsvWriter.writeRow(
+                    session.getSessionId(), uuid.toString(),
+                    session.getState().name().toLowerCase(),
+                    Math.round(elapsedS * 100.0) / 100.0, "move",
+                    player.getX(), player.getY(), player.getZ(),
+                    Math.round(hazDist * 100.0) / 100.0, null, null);
+        }
+    }
 
-            // Ceiling division so the HUD shows "1" on the last tick rather than jumping to "0".
-            if (ticks % HUD_SYNC_INTERVAL_TICKS == 0) {
-                int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
-                float intensity = (session.getState() == SimulationState.EARTHQUAKE)
-                        ? (float) session.computeIntensityAt(player.blockPosition())
-                        : 0f;
-                PacketDistributor.sendToPlayer(player,
-                        new SimulationStatusPayload(session.getState().name(), secondsLeft, intensity));
+    private static void tickFireSession(SimulationSession session, ServerLevel level,
+                                        ServerPlayer player, int ticks) {
+        if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
+            EFFECTS.simulateFire(level, session);
+        }
+        if (ticks % 20 == 0) {
+            EFFECTS.applyFireProximityEffects(level, player);
+        }
+        if (ticks % 40 == 0) {
+            EFFECTS.cleanupFireOutsideBounds(level);
+            session.resetExtinguishEventPending();
+        }
+    }
+
+    private static void tickEarthquakeSession(SimulationSession session, ServerLevel level,
+                                              ServerPlayer player, int ticks) {
+        SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
+        session.tickQuakePhase(level.getRandom());
+        SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
+        if (phaseBefore != phaseAfter) {
+            if (phaseAfter == SimulationSession.EarthquakePhase.PEAK) {
+                player.sendSystemMessage(Component.literal("§c⚠ Earthquake is intensifying!"));
+            } else if (phaseAfter == SimulationSession.EarthquakePhase.AFTERSHOCK) {
+                player.sendSystemMessage(Component.literal("§e⚠ Aftershock!"));
+            } else if (phaseAfter == SimulationSession.EarthquakePhase.END) {
+                player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
             }
         }
+        if (ticks % 60 == 0 && session.getQuakePhase() != SimulationSession.EarthquakePhase.END) {
+            int nauseaAmp = switch (session.getQuakePhase()) {
+                case PEAK       -> (int) Math.min(3, session.getSessionMagnitude() / 2.5);
+                case AFTERSHOCK -> (int) Math.min(2,
+                        session.getSessionMagnitude() * session.getAftershockMagnitudeScale() / 3.0);
+                default         -> 0;
+            };
+            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
+        }
+        if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
+            EFFECTS.simulateEarthquake(level, session);
+        }
+        EFFECTS.drainEarthquakePending(level, session);
+        if (ticks % 20 == 0) {
+            EFFECTS.clearFireInArena(level);
+        }
+    }
+
+    private static void tickExitZone(SimulationSession session, UUID uuid,
+                                     ServerLevel level, ServerPlayer player, int ticks) {
+        if (session.hasPassedExit()) return;
+        ExitZones.ExitZone exit = ExitZones.find(player.position());
+        if (exit == null) return;
+        session.markPassedExit();
+        double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+        double hazDist = hazardDistance(session, level, player);
+        TelemetryCsvWriter.writeRow(
+                session.getSessionId(), uuid.toString(),
+                session.getState().name().toLowerCase(),
+                Math.round(elapsedS * 100.0) / 100.0, "emergency_exit",
+                player.getX(), player.getY(), player.getZ(),
+                Math.round(hazDist * 100.0) / 100.0, exit.label(), null);
+    }
+
+    /** Returns true if simulation ended (caller should continue outer loop). */
+    private static boolean tickAssemblyZone(SimulationSession session, UUID uuid,
+                                            ServerLevel level, ServerPlayer player, int ticks) {
+        if (ticks % 5 == 0) {
+            AssemblyZone.spawnBorderParticles(level);
+        }
+        if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position())) {
+            session.markAssemblyReached();
+            double hazDist = hazardDistance(session, level, player);
+            AssemblyZone.onPlayerArrived(player, session, level, hazDist);
+            endSimulation(uuid, "assembly_reached");
+            return true;
+        }
+        return false;
+    }
+
+    private static void tickHudSync(SimulationSession session, ServerPlayer player, int ticks) {
+        if (ticks % HUD_SYNC_INTERVAL_TICKS != 0) return;
+        // Ceiling division so the HUD shows "1" on the last tick rather than jumping to "0".
+        int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
+        float intensity = (session.getState() == SimulationState.EARTHQUAKE)
+                ? (float) session.computeIntensityAt(player.blockPosition())
+                : 0f;
+        PacketDistributor.sendToPlayer(player,
+                new SimulationStatusPayload(session.getState().name(), secondsLeft, intensity));
+    }
+
+    private static double hazardDistance(SimulationSession session, ServerLevel level, ServerPlayer player) {
+        if (session.getState() == SimulationState.FIRE) {
+            return nearestFireDistance(level, player.blockPosition());
+        }
+        return session.getEpicenter() != null
+                ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
+                : 99.0;
     }
 
     @SubscribeEvent
