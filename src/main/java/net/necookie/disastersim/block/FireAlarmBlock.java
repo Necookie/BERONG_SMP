@@ -69,6 +69,11 @@ public class FireAlarmBlock extends Block {
     }
 
     @Override
+    public BlockState rotate(BlockState state, net.minecraft.world.level.block.Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
     public VoxelShape getShape(BlockState s, BlockGetter l, BlockPos p, CollisionContext c) {
         return switch (s.getValue(FACING)) {
             case SOUTH -> SHAPE_SOUTH;
