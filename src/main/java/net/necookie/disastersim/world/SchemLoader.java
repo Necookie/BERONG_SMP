@@ -250,12 +250,36 @@ public class SchemLoader implements StructurePlacer {
             BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({}, {}, {})",
                     entityId, (int) worldX, (int) worldY, (int) worldZ);
 
-            // Item frames: bypass NBT deserialization entirely.
-            // MC 26.x no longer reads TileX/Y/Z from entity NBT the same way, causing
-            // BlockAttachedEntity.checkValidPosition to fail with a null block position.
-            // Instead, construct ItemFrame directly from the computed world position + facing.
+            // Item frames: Sponge v3 stores top-level Pos as the RELATIVE BLOCK POSITION
+            // (integer) of the attachment block — not a float entity position. Facing is
+            // inside the Data sub-compound. MC 26.x BlockAttachedEntity no longer reads
+            // TileX/Y/Z from NBT, so we bypass EntityType.create entirely.
             if (entityId.equals("minecraft:item_frame") || entityId.equals("minecraft:glow_item_frame")) {
-                if (spawnItemFrame(level, entityTag, entityId, worldX, worldY, worldZ, rotatedFacing)) {
+                // Apply block-grid rotation (L-1-z) instead of the entity float rotation.
+                int blkX = (int) relX, blkY = (int) relY, blkZ = (int) relZ;
+                int rotBX, rotBZ;
+                switch (ccwRotations) {
+                    case 1  -> { rotBX = blkZ;                    rotBZ = schemWidth  - 1 - blkX; }
+                    case 2  -> { rotBX = schemWidth  - 1 - blkX; rotBZ = schemLength - 1 - blkZ; }
+                    case 3  -> { rotBX = schemLength - 1 - blkZ; rotBZ = blkX; }
+                    default -> { rotBX = blkX;                    rotBZ = blkZ; }
+                }
+                BlockPos wallBlock = new BlockPos(
+                        origin.getX() + rotBX, origin.getY() + blkY, origin.getZ() + rotBZ);
+
+                // Facing lives inside the Data sub-compound (not at the entity root in Sponge v3).
+                byte rawFacing = 2; // default NORTH
+                var dataOptFrame = entityTag.getCompound("Data");
+                if (dataOptFrame.isPresent()) {
+                    Tag ft = dataOptFrame.get().get("Facing");
+                    if (ft instanceof net.minecraft.nbt.NumericTag fn) rawFacing = (byte) fn.intValue();
+                }
+                byte frameFacing = rotateFacingByte(rawFacing, ccwRotations);
+
+                BerongSMP.LOGGER.info("[SchemLoader] ItemFrame wallBlock={} block={} facing raw={} rotated={}",
+                        wallBlock, level.getBlockState(wallBlock).getBlock(), rawFacing, frameFacing);
+
+                if (spawnItemFrame(level, entityTag, entityId, wallBlock, frameFacing)) {
                     spawned++;
                 }
                 continue;
@@ -277,73 +301,48 @@ public class SchemLoader implements StructurePlacer {
     }
 
     /**
-     * Creates an ItemFrame or GlowItemFrame directly using the MC constructor, bypassing
-     * NBT-based HangingEntity deserialization (which broke in MC 26.x due to field renames).
+     * Creates an ItemFrame or GlowItemFrame directly, bypassing NBT deserialization.
+     *
+     * In Sponge v3, the entity's top-level Pos is the ATTACHMENT BLOCK position (integer)
+     * and Facing is the INWARD direction (from entity toward wall). The ItemFrame constructor
+     * takes the OUTWARD direction (opposite), so we flip it here.
+     *
+     * Item NBT lives inside the Data sub-compound, not at the entity root.
      */
     private boolean spawnItemFrame(ServerLevel level, CompoundTag entityTag, String entityId,
-                                    double worldX, double worldY, double worldZ, byte rotatedFacing) {
-        Direction dir = Direction.from3DDataValue(rotatedFacing & 0xFF);
-        if (dir == null) {
-            BerongSMP.LOGGER.warn("[SchemLoader] Invalid facing byte {} for item frame", rotatedFacing);
+                                   BlockPos wallBlock, byte inwardFacing) {
+        Direction inward = Direction.from3DDataValue(inwardFacing & 0xFF);
+        if (inward == null) {
+            BerongSMP.LOGGER.warn("[SchemLoader] Invalid facing byte {} for item frame", inwardFacing);
+            return false;
+        }
+        // ItemFrame(level, pos, dir): dir = outward (from wall toward viewer).
+        Direction outward = inward.getOpposite();
+
+        if (level.getBlockState(wallBlock).isAir()) {
+            BerongSMP.LOGGER.warn("[SchemLoader] Attach block {} is air — skipped", wallBlock);
             return false;
         }
 
-        // Attachment block is one step behind the entity in the facing direction.
-        BlockPos attachBlock = new BlockPos(
-                (int) Math.floor(worldX - dir.getStepX() * 0.46875),
-                (int) Math.floor(worldY - dir.getStepY() * 0.46875),
-                (int) Math.floor(worldZ - dir.getStepZ() * 0.46875));
-
-        // Use isFaceSturdy (MC's own hanging-entity check) — more permissive than isSolid(),
-        // correctly returns true for glass blocks, concrete, etc. that frames can mount on.
-        boolean canHold = canSupportFrame(level, attachBlock, dir);
-        BerongSMP.LOGGER.info("[SchemLoader] ItemFrame facing={} attachBlock={} canHold={} block={}",
-                dir, attachBlock, canHold, level.getBlockState(attachBlock).getBlock());
-
-        if (!canHold) {
-            // WorldEdit may save entity Pos as integer tile coords. After rotation the computed
-            // attach block can be off by 1 in any horizontal axis. Search a 3-wide band.
-            BlockPos found = null;
-            outer:
-            for (int dx : new int[]{-1, 1, 0}) {
-                for (int dz : new int[]{-1, 1, 0}) {
-                    if (dx == 0 && dz == 0) continue;
-                    BlockPos candidate = attachBlock.offset(dx, 0, dz);
-                    if (canSupportFrame(level, candidate, dir)) { found = candidate; break outer; }
-                }
-            }
-            if (found == null) {
-                BerongSMP.LOGGER.warn("[SchemLoader] No attachable block near {} for {} frame — skipped", attachBlock, dir);
-                return false;
-            }
-            BerongSMP.LOGGER.info("[SchemLoader] Corrected attach block: {} → {} ({})",
-                    attachBlock, found, level.getBlockState(found).getBlock());
-            attachBlock = found;
-        }
-
         ItemFrame frame = entityId.equals("minecraft:glow_item_frame")
-                ? new GlowItemFrame(level, attachBlock, dir)
-                : new ItemFrame(level, attachBlock, dir);
+                ? new GlowItemFrame(level, wallBlock, outward)
+                : new ItemFrame(level, wallBlock, outward);
 
-        entityTag.getCompound("Item").ifPresent(itemTag -> {
-            var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
-            ItemStack.OPTIONAL_CODEC.parse(ops, itemTag).result().ifPresent(stack -> {
-                if (!stack.isEmpty()) {
-                    frame.setItem(stack, false);
-                    BerongSMP.LOGGER.info("[SchemLoader] Frame item: {}", stack.getItem());
-                }
-            });
-        });
+        // Item NBT is nested under Data in Sponge v3.
+        entityTag.getCompound("Data").ifPresent(data ->
+            data.getCompound("Item").ifPresent(itemTag -> {
+                var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+                ItemStack.OPTIONAL_CODEC.parse(ops, itemTag).result().ifPresent(stack -> {
+                    if (!stack.isEmpty()) {
+                        frame.setItem(stack, false);
+                        BerongSMP.LOGGER.info("[SchemLoader] Frame item: {}", stack.getItem());
+                    }
+                });
+            })
+        );
 
         level.addFreshEntity(frame);
         return true;
-    }
-
-    /** Returns true if the block at pos can hold an item frame on its face toward `facing`. */
-    private static boolean canSupportFrame(ServerLevel level, BlockPos pos, Direction facing) {
-        BlockState state = level.getBlockState(pos);
-        if (state.isAir()) return false;
-        return state.isFaceSturdy(level, pos, facing);
     }
 
     /** Converts a Facing byte to an (x,y,z) step vector. */
