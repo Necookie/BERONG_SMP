@@ -174,9 +174,7 @@ public class SchemLoader implements StructurePlacer {
         AABB bounds = new AABB(
                 origin.getX(), origin.getY() - 1, origin.getZ(),
                 origin.getX() + placedW, origin.getY() + schemHeight + 1, origin.getZ() + placedL);
-        level.getEntitiesOfClass(Entity.class, bounds,
-                e -> e instanceof net.minecraft.world.entity.decoration.ItemFrame
-                  || e instanceof net.minecraft.world.entity.decoration.Painting)
+        level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ItemFrame.class, bounds, e -> true)
              .forEach(Entity::discard);
 
         int spawned = 0;
@@ -240,7 +238,7 @@ public class SchemLoader implements StructurePlacer {
 
             try (ProblemReporter.ScopedCollector reporter =
                          new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
-                TagValueInput input = TagValueInput.create(reporter, level.registryAccess(), spawnNbt);
+                var input = TagValueInput.create(reporter, level.registryAccess(), spawnNbt);
                 EntityType.create(input, level, EntitySpawnReason.LOAD)
                           .ifPresent(level::addFreshEntity);
             }
@@ -252,14 +250,10 @@ public class SchemLoader implements StructurePlacer {
         }
     }
 
-    /** Safely reads a numeric Tag as a double (handles DoubleTag, FloatTag, IntTag). */
+    /** Safely reads a numeric Tag as a double via the NumericTag interface. */
     private static double tagToDouble(Tag tag) {
-        return switch (tag) {
-            case DoubleTag dt -> dt.getAsDouble();
-            case net.minecraft.nbt.FloatTag ft -> ft.getAsFloat();
-            case net.minecraft.nbt.IntTag it -> it.getAsInt();
-            default -> 0.0;
-        };
+        if (tag instanceof net.minecraft.nbt.NumericTag nt) return nt.getAsDouble();
+        return 0.0;
     }
 
     /**
