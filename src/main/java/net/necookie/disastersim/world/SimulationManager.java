@@ -33,7 +33,7 @@ public class SimulationManager {
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
 
     private static final BlockPos SSC_POS = new BlockPos(11,  -33, 90);
-    private static final BlockPos CCS_POS = new BlockPos(131, -34, 4);
+    private static final BlockPos CCS_POS = new BlockPos(76, -34, 4);
 
     // Separate from QUAKE_INTERVAL so tuning earthquake rate doesn't silently change HUD update frequency.
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
