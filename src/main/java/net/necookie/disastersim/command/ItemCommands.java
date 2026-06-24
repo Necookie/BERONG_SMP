@@ -8,6 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.BerongSMP;
+import net.minecraft.server.level.ServerLevel;
+import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
 
 public class ItemCommands {
@@ -19,6 +21,16 @@ public class ItemCommands {
 
         dispatcher.register(Commands.literal("get_extinguisher")
                 .executes(ItemCommands::getExtinguisher));
+
+        dispatcher.register(Commands.literal("place_buildings")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .executes(ctx -> {
+                    ServerLevel level = ctx.getSource().getLevel();
+                    SimulationManager.placeAllBuildings(level);
+                    ctx.getSource().sendSuccess(() -> Component.literal(
+                            "§aAll buildings placed — check logs for entity output."), true);
+                    return 1;
+                }));
 
         dispatcher.register(Commands.literal("get_co2_extinguisher")
                 .executes(ctx -> {

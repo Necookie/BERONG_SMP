@@ -261,6 +261,10 @@ public class SimulationManager {
         }
     }
 
+    public static void placeAllBuildings(ServerLevel level) {
+        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+    }
+
     public static SimulationSession getSession(java.util.UUID uuid) {
         return activeSessions.get(uuid);
     }
