@@ -164,13 +164,21 @@ public class SchemLoader implements StructurePlacer {
                                 int schemWidth, int schemHeight, int schemLength) {
         // Entities list is at the root nbt level in both Sponge v2 and v3.
         Tag entitiesRaw = nbt.get("Entities");
-        if (!(entitiesRaw instanceof ListTag entityList) || entityList.isEmpty()) return;
+        if (!(entitiesRaw instanceof ListTag entityList)) {
+            BerongSMP.LOGGER.info("[SchemLoader] No Entities tag in {}", resourcePath);
+            return;
+        }
+        if (entityList.isEmpty()) {
+            BerongSMP.LOGGER.info("[SchemLoader] Entities tag is empty in {}", resourcePath);
+            return;
+        }
+        BerongSMP.LOGGER.info("[SchemLoader] Found {} entities in {}", entityList.size(), resourcePath);
 
         // Footprint of the placed schematic after rotation (dimensions swap on 90°/270°).
         int placedW = (ccwRotations % 2 == 0) ? schemWidth  : schemLength;
         int placedL = (ccwRotations % 2 == 0) ? schemLength : schemWidth;
 
-        // Remove existing decoration entities in the footprint to prevent duplicates on re-place.
+        // Remove existing item frames in the footprint to prevent duplicates on re-place.
         AABB bounds = new AABB(
                 origin.getX(), origin.getY() - 1, origin.getZ(),
                 origin.getX() + placedW, origin.getY() + schemHeight + 1, origin.getZ() + placedL);
@@ -182,14 +190,19 @@ public class SchemLoader implements StructurePlacer {
             if (!(entityList.get(i) instanceof CompoundTag entityTag)) continue;
 
             // Sponge uses "Id" (capital I); MC entity NBT uses "id" (lowercase).
-            // Use raw Tag access to avoid Optional vs String ambiguity across MC versions.
             String entityId = getStringTag(entityTag, "Id");
             if (entityId.isEmpty()) entityId = getStringTag(entityTag, "id");
-            if (entityId.isEmpty()) continue;
+            if (entityId.isEmpty()) {
+                BerongSMP.LOGGER.warn("[SchemLoader] Entity {} has no Id, skipping", i);
+                continue;
+            }
 
-            // Relative position from schematic min corner.
+            // Relative position from schematic min corner (WorldEdit stores Pos relative).
             Tag posRaw = entityTag.get("Pos");
-            if (!(posRaw instanceof ListTag posList) || posList.size() < 3) continue;
+            if (!(posRaw instanceof ListTag posList) || posList.size() < 3) {
+                BerongSMP.LOGGER.warn("[SchemLoader] Entity {} ({}) has no Pos, skipping", i, entityId);
+                continue;
+            }
 
             double relX = tagToDouble(posList.get(0));
             double relY = tagToDouble(posList.get(1));
@@ -204,52 +217,68 @@ public class SchemLoader implements StructurePlacer {
                 default -> { rotX = relX;                rotZ = relZ; }
             }
 
+            double worldX = origin.getX() + rotX;
+            double worldY = origin.getY() + relY;
+            double worldZ = origin.getZ() + rotZ;
+
             // Build spawn NBT: copy entity data, fix id casing, and write world-space Pos.
             CompoundTag spawnNbt = entityTag.copy();
             spawnNbt.putString("id", entityId);
 
             ListTag worldPos = new ListTag();
-            worldPos.add(DoubleTag.valueOf(origin.getX() + rotX));
-            worldPos.add(DoubleTag.valueOf(origin.getY() + relY));
-            worldPos.add(DoubleTag.valueOf(origin.getZ() + rotZ));
+            worldPos.add(DoubleTag.valueOf(worldX));
+            worldPos.add(DoubleTag.valueOf(worldY));
+            worldPos.add(DoubleTag.valueOf(worldZ));
             spawnNbt.put("Pos", worldPos);
 
-            // Rotate Facing byte for item frames.
-            // Byte encoding: 0=Down, 1=Up, 2=North, 3=South, 4=West, 5=East
+            // Rotate Facing byte: 0=Down,1=Up,2=North,3=South,4=West,5=East
+            byte rotatedFacing = 2; // default NORTH
             Tag facingTag = spawnNbt.get("Facing");
             if (facingTag instanceof net.minecraft.nbt.NumericTag facingNum) {
-                spawnNbt.putByte("Facing", rotateFacingByte((byte) facingNum.intValue(), ccwRotations));
+                rotatedFacing = rotateFacingByte((byte) facingNum.intValue(), ccwRotations);
+                spawnNbt.putByte("Facing", rotatedFacing);
             }
 
-            // Rotate TileX/Z for hanging entities (WorldEdit stores these relative to selection min).
-            if (spawnNbt.get("TileX") instanceof net.minecraft.nbt.NumericTag txTag) {
-                int tx = txTag.intValue();
-                int ty = spawnNbt.get("TileY") instanceof net.minecraft.nbt.NumericTag t ? t.intValue() : 0;
-                int tz = spawnNbt.get("TileZ") instanceof net.minecraft.nbt.NumericTag t ? t.intValue() : 0;
-                int rx, rz;
-                switch (ccwRotations) {
-                    case 1  -> { rx = tz;                    rz = schemWidth  - 1 - tx; }
-                    case 2  -> { rx = schemWidth  - 1 - tx;  rz = schemLength - 1 - tz; }
-                    case 3  -> { rx = schemLength - 1 - tz;  rz = tx; }
-                    default -> { rx = tx;                    rz = tz; }
-                }
-                spawnNbt.putInt("TileX", origin.getX() + rx);
-                spawnNbt.putInt("TileY", origin.getY() + ty);
-                spawnNbt.putInt("TileZ", origin.getZ() + rz);
+            // TileX/Y/Z for hanging entities (item frames).
+            // WorldEdit stores these as ABSOLUTE world coords — we cannot rotate them.
+            // Instead, derive them from the entity's final world position + rotated facing.
+            // Formula: tileCoord = floor(worldCoord - facingStep * 0.46875)
+            if (spawnNbt.get("TileX") instanceof net.minecraft.nbt.NumericTag) {
+                int[] step = facingByteToStep(rotatedFacing);
+                spawnNbt.putInt("TileX", (int) Math.floor(worldX - step[0] * 0.46875));
+                spawnNbt.putInt("TileY", (int) Math.floor(worldY - step[1] * 0.46875));
+                spawnNbt.putInt("TileZ", (int) Math.floor(worldZ - step[2] * 0.46875));
             }
+
+            BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({:.1f},{:.1f},{:.1f})",
+                    entityId, worldX, worldY, worldZ);
 
             try (ProblemReporter.ScopedCollector reporter =
                          new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
                 var input = TagValueInput.create(reporter, level.registryAccess(), spawnNbt);
-                EntityType.create(input, level, EntitySpawnReason.LOAD)
-                          .ifPresent(level::addFreshEntity);
+                boolean ok = EntityType.create(input, level, EntitySpawnReason.LOAD)
+                          .map(e -> { level.addFreshEntity(e); return true; })
+                          .orElse(false);
+                if (!ok) BerongSMP.LOGGER.warn("[SchemLoader] EntityType.create returned empty for {}", entityId);
+                else spawned++;
             }
-            spawned++;
         }
 
-        if (spawned > 0) {
-            BerongSMP.LOGGER.info("Spawned {} entities from {} at {}", spawned, resourcePath, origin);
-        }
+        BerongSMP.LOGGER.info("[SchemLoader] Spawned {}/{} entities from {} at {}",
+                spawned, entityList.size(), resourcePath, origin);
+    }
+
+    /** Converts a Facing byte to an (x,y,z) step vector. */
+    private static int[] facingByteToStep(byte facing) {
+        return switch (facing) {
+            case 0 -> new int[]{  0, -1,  0 }; // DOWN
+            case 1 -> new int[]{  0,  1,  0 }; // UP
+            case 2 -> new int[]{  0,  0, -1 }; // NORTH
+            case 3 -> new int[]{  0,  0,  1 }; // SOUTH
+            case 4 -> new int[]{ -1,  0,  0 }; // WEST
+            case 5 -> new int[]{  1,  0,  0 }; // EAST
+            default -> new int[]{  0,  0,  0 };
+        };
     }
 
     /** Reads a string value from a CompoundTag key using raw Tag access (avoids Optional vs String API ambiguity). */
