@@ -4,13 +4,22 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.phys.AABB;
 import net.necookie.disastersim.BerongSMP;
 
 import java.io.InputStream;
@@ -19,6 +28,7 @@ import java.io.InputStream;
  * Places a Sponge Schematic v2/v3 (.schem) file into the world at a given origin.
  * Supports 0–3 counter-clockwise 90° rotations; directional block states are
  * also rotated so stairs, doors, etc. face the correct direction.
+ * Entities (item frames, paintings) are also spawned from the Entities tag.
  */
 public class SchemLoader implements StructurePlacer {
 
@@ -138,11 +148,131 @@ public class SchemLoader implements StructurePlacer {
 
             BerongSMP.LOGGER.info("Placed schematic {} v{} ({}x{}x{}) rot={}CCW at {}",
                     resourcePath, version, width, height, length, ccwRotations * 90, origin);
+
+            // Spawn entities (item frames, paintings, etc.) from the Entities tag.
+            placeEntities(level, origin, nbt, width, height, length);
+
             return true;
 
         } catch (Exception e) {
             BerongSMP.LOGGER.error("Failed to load schematic {}: {}", resourcePath, e.getMessage());
             return false;
         }
+    }
+
+    private void placeEntities(ServerLevel level, BlockPos origin, CompoundTag nbt,
+                                int schemWidth, int schemHeight, int schemLength) {
+        // Entities list is at the root nbt level in both Sponge v2 and v3.
+        Tag entitiesRaw = nbt.get("Entities");
+        if (!(entitiesRaw instanceof ListTag entityList) || entityList.isEmpty()) return;
+
+        // Footprint of the placed schematic after rotation (dimensions swap on 90°/270°).
+        int placedW = (ccwRotations % 2 == 0) ? schemWidth  : schemLength;
+        int placedL = (ccwRotations % 2 == 0) ? schemLength : schemWidth;
+
+        // Remove existing decoration entities in the footprint to prevent duplicates on re-place.
+        AABB bounds = new AABB(
+                origin.getX(), origin.getY() - 1, origin.getZ(),
+                origin.getX() + placedW, origin.getY() + schemHeight + 1, origin.getZ() + placedL);
+        level.getEntitiesOfClass(Entity.class, bounds,
+                e -> e instanceof net.minecraft.world.entity.decoration.ItemFrame
+                  || e instanceof net.minecraft.world.entity.decoration.Painting)
+             .forEach(Entity::discard);
+
+        int spawned = 0;
+        for (int i = 0; i < entityList.size(); i++) {
+            if (!(entityList.get(i) instanceof CompoundTag entityTag)) continue;
+
+            // Sponge uses "Id" (capital I); prepare a copy with lowercase "id" for EntityType.create.
+            String entityId = entityTag.getString("Id")
+                    .or(() -> entityTag.getString("id"))
+                    .orElse("");
+            if (entityId.isEmpty()) continue;
+
+            // Relative position from schematic min corner.
+            Tag posRaw = entityTag.get("Pos");
+            if (!(posRaw instanceof ListTag posList) || posList.size() < 3) continue;
+
+            double relX = tagToDouble(posList.get(0));
+            double relY = tagToDouble(posList.get(1));
+            double relZ = tagToDouble(posList.get(2));
+
+            // Rotate continuous position offset (no -1 correction — floating-point, not block grid).
+            double rotX, rotZ;
+            switch (ccwRotations) {
+                case 1  -> { rotX = relZ;               rotZ = schemWidth  - relX; }
+                case 2  -> { rotX = schemWidth  - relX;  rotZ = schemLength - relZ; }
+                case 3  -> { rotX = schemLength - relZ;  rotZ = relX; }
+                default -> { rotX = relX;                rotZ = relZ; }
+            }
+
+            // Build spawn NBT: copy entity data, fix id casing, and write world-space Pos.
+            CompoundTag spawnNbt = entityTag.copy();
+            spawnNbt.putString("id", entityId);
+
+            ListTag worldPos = new ListTag();
+            worldPos.add(DoubleTag.valueOf(origin.getX() + rotX));
+            worldPos.add(DoubleTag.valueOf(origin.getY() + relY));
+            worldPos.add(DoubleTag.valueOf(origin.getZ() + rotZ));
+            spawnNbt.put("Pos", worldPos);
+
+            // Rotate Facing byte for item frames and paintings.
+            // Byte encoding: 0=Down, 1=Up, 2=North, 3=South, 4=West, 5=East
+            spawnNbt.getByte("Facing").ifPresent(f ->
+                    spawnNbt.putByte("Facing", rotateFacingByte(f, ccwRotations)));
+
+            // Rotate TileX/Z for hanging entities (WorldEdit stores these relative to selection min).
+            if (spawnNbt.getInt("TileX").isPresent()) {
+                int tx = spawnNbt.getInt("TileX").orElse(0);
+                int ty = spawnNbt.getInt("TileY").orElse(0);
+                int tz = spawnNbt.getInt("TileZ").orElse(0);
+                int rx, rz;
+                switch (ccwRotations) {
+                    case 1  -> { rx = tz;                    rz = schemWidth  - 1 - tx; }
+                    case 2  -> { rx = schemWidth  - 1 - tx;  rz = schemLength - 1 - tz; }
+                    case 3  -> { rx = schemLength - 1 - tz;  rz = tx; }
+                    default -> { rx = tx;                    rz = tz; }
+                }
+                spawnNbt.putInt("TileX", origin.getX() + rx);
+                spawnNbt.putInt("TileY", origin.getY() + ty);
+                spawnNbt.putInt("TileZ", origin.getZ() + rz);
+            }
+
+            try (ProblemReporter.ScopedCollector reporter =
+                         new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
+                TagValueInput input = TagValueInput.create(reporter, level.registryAccess(), spawnNbt);
+                EntityType.create(input, level, EntitySpawnReason.LOAD)
+                          .ifPresent(level::addFreshEntity);
+            }
+            spawned++;
+        }
+
+        if (spawned > 0) {
+            BerongSMP.LOGGER.info("Spawned {} entities from {} at {}", spawned, resourcePath, origin);
+        }
+    }
+
+    /** Safely reads a numeric Tag as a double (handles DoubleTag, FloatTag, IntTag). */
+    private static double tagToDouble(Tag tag) {
+        return switch (tag) {
+            case DoubleTag dt -> dt.getAsDouble();
+            case net.minecraft.nbt.FloatTag ft -> ft.getAsFloat();
+            case net.minecraft.nbt.IntTag it -> it.getAsInt();
+            default -> 0.0;
+        };
+    }
+
+    /**
+     * Rotates a Minecraft facing byte by the given number of CCW 90° steps.
+     * Cycle per CCW step: North(2) → West(4) → South(3) → East(5) → North(2).
+     * Up(1) and Down(0) are invariant.
+     */
+    private static byte rotateFacingByte(byte facing, int ccwRotations) {
+        if (facing < 2) return facing;
+        int[] cycle = {2, 4, 3, 5}; // N, W, S, E
+        for (int i = 0; i < cycle.length; i++) {
+            if (cycle[i] == facing) return (byte) cycle[(i + ccwRotations) % 4];
+        }
+        return facing;
     }
 }
