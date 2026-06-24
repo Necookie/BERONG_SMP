@@ -293,9 +293,26 @@ public class SchemLoader implements StructurePlacer {
         boolean solid = level.getBlockState(attachBlock).isSolid();
         BerongSMP.LOGGER.info("[SchemLoader] ItemFrame facing={} attachBlock={} solid={}", dir, attachBlock, solid);
 
+        // WorldEdit sometimes saves entity Pos as integer tile coords (not the actual float position).
+        // After rotation this shifts the computed attach block by 1 in a perpendicular axis.
+        // Search ±1 in each perpendicular axis to recover the real wall block.
         if (!solid) {
-            BerongSMP.LOGGER.warn("[SchemLoader] No solid block at {} — item frame skipped", attachBlock);
-            return false;
+            BlockPos found = null;
+            int[] perp = switch (dir.getAxis()) {
+                case Z -> new int[]{1, 0, 0};   // N/S facing — search X axis
+                case X -> new int[]{0, 0, 1};   // E/W facing — search Z axis
+                default -> new int[]{1, 0, 0};  // U/D facing — search X axis
+            };
+            for (int sign : new int[]{-1, 1}) {
+                BlockPos candidate = attachBlock.offset(perp[0] * sign, perp[1] * sign, perp[2] * sign);
+                if (level.getBlockState(candidate).isSolid()) { found = candidate; break; }
+            }
+            if (found == null) {
+                BerongSMP.LOGGER.warn("[SchemLoader] No solid block near {} for {} frame — skipped", attachBlock, dir);
+                return false;
+            }
+            BerongSMP.LOGGER.info("[SchemLoader] Corrected attach block: {} → {}", attachBlock, found);
+            attachBlock = found;
         }
 
         ItemFrame frame = entityId.equals("minecraft:glow_item_frame")
