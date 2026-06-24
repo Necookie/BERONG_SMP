@@ -3,6 +3,7 @@ package net.necookie.disastersim.world;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.ListTag;
@@ -15,6 +16,9 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.decoration.GlowItemFrame;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -239,19 +243,19 @@ public class SchemLoader implements StructurePlacer {
                 spawnNbt.putByte("Facing", rotatedFacing);
             }
 
-            // TileX/Y/Z for hanging entities (item frames).
-            // WorldEdit stores these as ABSOLUTE world coords — we cannot rotate them.
-            // Instead, derive them from the entity's final world position + rotated facing.
-            // Formula: tileCoord = floor(worldCoord - facingStep * 0.46875)
-            if (spawnNbt.get("TileX") instanceof net.minecraft.nbt.NumericTag) {
-                int[] step = facingByteToStep(rotatedFacing);
-                spawnNbt.putInt("TileX", (int) Math.floor(worldX - step[0] * 0.46875));
-                spawnNbt.putInt("TileY", (int) Math.floor(worldY - step[1] * 0.46875));
-                spawnNbt.putInt("TileZ", (int) Math.floor(worldZ - step[2] * 0.46875));
-            }
+            BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({}, {}, {})",
+                    entityId, (int) worldX, (int) worldY, (int) worldZ);
 
-            BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({:.1f},{:.1f},{:.1f})",
-                    entityId, worldX, worldY, worldZ);
+            // Item frames: bypass NBT deserialization entirely.
+            // MC 26.x no longer reads TileX/Y/Z from entity NBT the same way, causing
+            // BlockAttachedEntity.checkValidPosition to fail with a null block position.
+            // Instead, construct ItemFrame directly from the computed world position + facing.
+            if (entityId.equals("minecraft:item_frame") || entityId.equals("minecraft:glow_item_frame")) {
+                if (spawnItemFrame(level, entityTag, entityId, worldX, worldY, worldZ, rotatedFacing)) {
+                    spawned++;
+                }
+                continue;
+            }
 
             try (ProblemReporter.ScopedCollector reporter =
                          new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
@@ -266,6 +270,50 @@ public class SchemLoader implements StructurePlacer {
 
         BerongSMP.LOGGER.info("[SchemLoader] Spawned {}/{} entities from {} at {}",
                 spawned, entityList.size(), resourcePath, origin);
+    }
+
+    /**
+     * Creates an ItemFrame or GlowItemFrame directly using the MC constructor, bypassing
+     * NBT-based HangingEntity deserialization (which broke in MC 26.x due to field renames).
+     */
+    private boolean spawnItemFrame(ServerLevel level, CompoundTag entityTag, String entityId,
+                                    double worldX, double worldY, double worldZ, byte rotatedFacing) {
+        Direction dir = Direction.from3DDataValue(rotatedFacing & 0xFF);
+        if (dir == null) {
+            BerongSMP.LOGGER.warn("[SchemLoader] Invalid facing byte {} for item frame", rotatedFacing);
+            return false;
+        }
+
+        // Attachment block is one step behind the entity in the facing direction.
+        BlockPos attachBlock = new BlockPos(
+                (int) Math.floor(worldX - dir.getStepX() * 0.46875),
+                (int) Math.floor(worldY - dir.getStepY() * 0.46875),
+                (int) Math.floor(worldZ - dir.getStepZ() * 0.46875));
+
+        boolean solid = level.getBlockState(attachBlock).isSolid();
+        BerongSMP.LOGGER.info("[SchemLoader] ItemFrame facing={} attachBlock={} solid={}", dir, attachBlock, solid);
+
+        if (!solid) {
+            BerongSMP.LOGGER.warn("[SchemLoader] No solid block at {} — item frame skipped", attachBlock);
+            return false;
+        }
+
+        ItemFrame frame = entityId.equals("minecraft:glow_item_frame")
+                ? new GlowItemFrame(level, attachBlock, dir)
+                : new ItemFrame(level, attachBlock, dir);
+
+        entityTag.getCompound("Item").ifPresent(itemTag -> {
+            var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+            ItemStack.OPTIONAL_CODEC.parse(ops, itemTag).result().ifPresent(stack -> {
+                if (!stack.isEmpty()) {
+                    frame.setItem(stack, false);
+                    BerongSMP.LOGGER.info("[SchemLoader] Frame item: {}", stack.getItem());
+                }
+            });
+        });
+
+        level.addFreshEntity(frame);
+        return true;
     }
 
     /** Converts a Facing byte to an (x,y,z) step vector. */
