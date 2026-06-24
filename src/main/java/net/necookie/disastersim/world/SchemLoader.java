@@ -181,10 +181,10 @@ public class SchemLoader implements StructurePlacer {
         for (int i = 0; i < entityList.size(); i++) {
             if (!(entityList.get(i) instanceof CompoundTag entityTag)) continue;
 
-            // Sponge uses "Id" (capital I); prepare a copy with lowercase "id" for EntityType.create.
-            String entityId = entityTag.getString("Id")
-                    .or(() -> entityTag.getString("id"))
-                    .orElse("");
+            // Sponge uses "Id" (capital I); MC entity NBT uses "id" (lowercase).
+            // Use raw Tag access to avoid Optional vs String ambiguity across MC versions.
+            String entityId = getStringTag(entityTag, "Id");
+            if (entityId.isEmpty()) entityId = getStringTag(entityTag, "id");
             if (entityId.isEmpty()) continue;
 
             // Relative position from schematic min corner.
@@ -214,16 +214,18 @@ public class SchemLoader implements StructurePlacer {
             worldPos.add(DoubleTag.valueOf(origin.getZ() + rotZ));
             spawnNbt.put("Pos", worldPos);
 
-            // Rotate Facing byte for item frames and paintings.
+            // Rotate Facing byte for item frames.
             // Byte encoding: 0=Down, 1=Up, 2=North, 3=South, 4=West, 5=East
-            spawnNbt.getByte("Facing").ifPresent(f ->
-                    spawnNbt.putByte("Facing", rotateFacingByte(f, ccwRotations)));
+            Tag facingTag = spawnNbt.get("Facing");
+            if (facingTag instanceof net.minecraft.nbt.NumericTag facingNum) {
+                spawnNbt.putByte("Facing", rotateFacingByte((byte) facingNum.getAsInt(), ccwRotations));
+            }
 
             // Rotate TileX/Z for hanging entities (WorldEdit stores these relative to selection min).
-            if (spawnNbt.getInt("TileX").isPresent()) {
-                int tx = spawnNbt.getInt("TileX").orElse(0);
-                int ty = spawnNbt.getInt("TileY").orElse(0);
-                int tz = spawnNbt.getInt("TileZ").orElse(0);
+            if (spawnNbt.get("TileX") instanceof net.minecraft.nbt.NumericTag txTag) {
+                int tx = txTag.getAsInt();
+                int ty = spawnNbt.get("TileY") instanceof net.minecraft.nbt.NumericTag t ? t.getAsInt() : 0;
+                int tz = spawnNbt.get("TileZ") instanceof net.minecraft.nbt.NumericTag t ? t.getAsInt() : 0;
                 int rx, rz;
                 switch (ccwRotations) {
                     case 1  -> { rx = tz;                    rz = schemWidth  - 1 - tx; }
@@ -248,6 +250,13 @@ public class SchemLoader implements StructurePlacer {
         if (spawned > 0) {
             BerongSMP.LOGGER.info("Spawned {} entities from {} at {}", spawned, resourcePath, origin);
         }
+    }
+
+    /** Reads a string value from a CompoundTag key using raw Tag access (avoids Optional vs String API ambiguity). */
+    private static String getStringTag(CompoundTag tag, String key) {
+        Tag t = tag.get(key);
+        if (t instanceof net.minecraft.nbt.StringTag st) return st.getAsString();
+        return "";
     }
 
     /** Safely reads a numeric Tag as a double via the NumericTag interface. */

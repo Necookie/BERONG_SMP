@@ -64,6 +64,11 @@ public class ComputerBlock extends Block {
     }
 
     @Override
+    public BlockState rotate(BlockState state, net.minecraft.world.level.block.Rotation rotation) {
+        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+    }
+
+    @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
         return switch (state.getValue(FACING)) {
             case SOUTH -> SHAPE_SOUTH;
