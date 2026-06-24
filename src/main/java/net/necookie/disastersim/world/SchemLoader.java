@@ -177,6 +177,10 @@ public class SchemLoader implements StructurePlacer {
             return;
         }
         BerongSMP.LOGGER.info("[SchemLoader] Found {} entities in {}", entityList.size(), resourcePath);
+        // Debug: dump first entity's full NBT so we can see exact field names and values.
+        if (!entityList.isEmpty() && entityList.get(0) instanceof CompoundTag first) {
+            BerongSMP.LOGGER.info("[SchemLoader] First entity NBT: {}", first);
+        }
 
         // Footprint of the placed schematic after rotation (dimensions swap on 90°/270°).
         int placedW = (ccwRotations % 2 == 0) ? schemWidth  : schemLength;
@@ -290,28 +294,30 @@ public class SchemLoader implements StructurePlacer {
                 (int) Math.floor(worldY - dir.getStepY() * 0.46875),
                 (int) Math.floor(worldZ - dir.getStepZ() * 0.46875));
 
-        boolean solid = level.getBlockState(attachBlock).isSolid();
-        BerongSMP.LOGGER.info("[SchemLoader] ItemFrame facing={} attachBlock={} solid={}", dir, attachBlock, solid);
+        // Use isFaceSturdy (MC's own hanging-entity check) — more permissive than isSolid(),
+        // correctly returns true for glass blocks, concrete, etc. that frames can mount on.
+        boolean canHold = canSupportFrame(level, attachBlock, dir);
+        BerongSMP.LOGGER.info("[SchemLoader] ItemFrame facing={} attachBlock={} canHold={} block={}",
+                dir, attachBlock, canHold, level.getBlockState(attachBlock).getBlock());
 
-        // WorldEdit sometimes saves entity Pos as integer tile coords (not the actual float position).
-        // After rotation this shifts the computed attach block by 1 in a perpendicular axis.
-        // Search ±1 in each perpendicular axis to recover the real wall block.
-        if (!solid) {
+        if (!canHold) {
+            // WorldEdit may save entity Pos as integer tile coords. After rotation the computed
+            // attach block can be off by 1 in any horizontal axis. Search a 3-wide band.
             BlockPos found = null;
-            int[] perp = switch (dir.getAxis()) {
-                case Z -> new int[]{1, 0, 0};   // N/S facing — search X axis
-                case X -> new int[]{0, 0, 1};   // E/W facing — search Z axis
-                default -> new int[]{1, 0, 0};  // U/D facing — search X axis
-            };
-            for (int sign : new int[]{-1, 1}) {
-                BlockPos candidate = attachBlock.offset(perp[0] * sign, perp[1] * sign, perp[2] * sign);
-                if (level.getBlockState(candidate).isSolid()) { found = candidate; break; }
+            outer:
+            for (int dx : new int[]{-1, 1, 0}) {
+                for (int dz : new int[]{-1, 1, 0}) {
+                    if (dx == 0 && dz == 0) continue;
+                    BlockPos candidate = attachBlock.offset(dx, 0, dz);
+                    if (canSupportFrame(level, candidate, dir)) { found = candidate; break outer; }
+                }
             }
             if (found == null) {
-                BerongSMP.LOGGER.warn("[SchemLoader] No solid block near {} for {} frame — skipped", attachBlock, dir);
+                BerongSMP.LOGGER.warn("[SchemLoader] No attachable block near {} for {} frame — skipped", attachBlock, dir);
                 return false;
             }
-            BerongSMP.LOGGER.info("[SchemLoader] Corrected attach block: {} → {}", attachBlock, found);
+            BerongSMP.LOGGER.info("[SchemLoader] Corrected attach block: {} → {} ({})",
+                    attachBlock, found, level.getBlockState(found).getBlock());
             attachBlock = found;
         }
 
@@ -331,6 +337,13 @@ public class SchemLoader implements StructurePlacer {
 
         level.addFreshEntity(frame);
         return true;
+    }
+
+    /** Returns true if the block at pos can hold an item frame on its face toward `facing`. */
+    private static boolean canSupportFrame(ServerLevel level, BlockPos pos, Direction facing) {
+        BlockState state = level.getBlockState(pos);
+        if (state.isAir()) return false;
+        return state.isFaceSturdy(level, pos, facing);
     }
 
     /** Converts a Facing byte to an (x,y,z) step vector. */
