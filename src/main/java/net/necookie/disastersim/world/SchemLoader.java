@@ -218,14 +218,14 @@ public class SchemLoader implements StructurePlacer {
             // Byte encoding: 0=Down, 1=Up, 2=North, 3=South, 4=West, 5=East
             Tag facingTag = spawnNbt.get("Facing");
             if (facingTag instanceof net.minecraft.nbt.NumericTag facingNum) {
-                spawnNbt.putByte("Facing", rotateFacingByte((byte) facingNum.getAsInt(), ccwRotations));
+                spawnNbt.putByte("Facing", rotateFacingByte((byte) facingNum.intValue(), ccwRotations));
             }
 
             // Rotate TileX/Z for hanging entities (WorldEdit stores these relative to selection min).
             if (spawnNbt.get("TileX") instanceof net.minecraft.nbt.NumericTag txTag) {
-                int tx = txTag.getAsInt();
-                int ty = spawnNbt.get("TileY") instanceof net.minecraft.nbt.NumericTag t ? t.getAsInt() : 0;
-                int tz = spawnNbt.get("TileZ") instanceof net.minecraft.nbt.NumericTag t ? t.getAsInt() : 0;
+                int tx = txTag.intValue();
+                int ty = spawnNbt.get("TileY") instanceof net.minecraft.nbt.NumericTag t ? t.intValue() : 0;
+                int tz = spawnNbt.get("TileZ") instanceof net.minecraft.nbt.NumericTag t ? t.intValue() : 0;
                 int rx, rz;
                 switch (ccwRotations) {
                     case 1  -> { rx = tz;                    rz = schemWidth  - 1 - tx; }
@@ -255,13 +255,13 @@ public class SchemLoader implements StructurePlacer {
     /** Reads a string value from a CompoundTag key using raw Tag access (avoids Optional vs String API ambiguity). */
     private static String getStringTag(CompoundTag tag, String key) {
         Tag t = tag.get(key);
-        if (t instanceof net.minecraft.nbt.StringTag st) return st.getAsString();
+        if (t instanceof net.minecraft.nbt.StringTag st) return st.value();
         return "";
     }
 
     /** Safely reads a numeric Tag as a double via the NumericTag interface. */
     private static double tagToDouble(Tag tag) {
-        if (tag instanceof net.minecraft.nbt.NumericTag nt) return nt.getAsDouble();
+        if (tag instanceof net.minecraft.nbt.NumericTag nt) return nt.doubleValue();
         return 0.0;
     }
 
