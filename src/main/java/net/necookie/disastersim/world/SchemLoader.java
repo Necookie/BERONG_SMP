@@ -250,12 +250,11 @@ public class SchemLoader implements StructurePlacer {
             BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({}, {}, {})",
                     entityId, (int) worldX, (int) worldY, (int) worldZ);
 
-            // Item frames: Sponge v3 stores top-level Pos as the RELATIVE BLOCK POSITION
-            // (integer) of the attachment block — not a float entity position. Facing is
-            // inside the Data sub-compound. MC 26.x BlockAttachedEntity no longer reads
-            // TileX/Y/Z from NBT, so we bypass EntityType.create entirely.
+            // Item frames: Sponge v3 top-level Pos = entity's OWN block (the air block where the
+            // frame floats, NOT the wall block). Data.Facing = OUTWARD direction (frame face toward
+            // viewer). Wall = entityBlock.relative(outward.getOpposite()).
+            // MC 26.x ItemFrame(level, pos, direction): pos = entity block, direction = outward.
             if (entityId.equals("minecraft:item_frame") || entityId.equals("minecraft:glow_item_frame")) {
-                // Apply block-grid rotation (L-1-z) instead of the entity float rotation.
                 int blkX = (int) relX, blkY = (int) relY, blkZ = (int) relZ;
                 int rotBX, rotBZ;
                 switch (ccwRotations) {
@@ -264,22 +263,27 @@ public class SchemLoader implements StructurePlacer {
                     case 3  -> { rotBX = schemLength - 1 - blkZ; rotBZ = blkX; }
                     default -> { rotBX = blkX;                    rotBZ = blkZ; }
                 }
-                BlockPos wallBlock = new BlockPos(
-                        origin.getX() + rotBX, origin.getY() + blkY, origin.getZ() + rotBZ);
 
-                // Facing lives inside the Data sub-compound (not at the entity root in Sponge v3).
-                byte rawFacing = 2; // default NORTH
+                // Data.Facing = OUTWARD (frame face direction toward viewer) — rotate it directly.
+                byte rawFacing = 2;
                 var dataOptFrame = entityTag.getCompound("Data");
                 if (dataOptFrame.isPresent()) {
                     Tag ft = dataOptFrame.get().get("Facing");
                     if (ft instanceof net.minecraft.nbt.NumericTag fn) rawFacing = (byte) fn.intValue();
                 }
-                byte frameFacing = rotateFacingByte(rawFacing, ccwRotations);
+                byte rotatedFacingByte = rotateFacingByte(rawFacing, ccwRotations);
+                Direction outward = Direction.from3DDataValue(rotatedFacingByte & 0xFF);
+                if (outward == null) outward = Direction.SOUTH;
 
-                BerongSMP.LOGGER.info("[SchemLoader] ItemFrame wallBlock={} block={} facing raw={} rotated={}",
-                        wallBlock, level.getBlockState(wallBlock).getBlock(), rawFacing, frameFacing);
+                // entityBlock = the air block where the frame entity floats (= rotated Pos).
+                BlockPos entityBlock = new BlockPos(
+                        origin.getX() + rotBX, origin.getY() + blkY, origin.getZ() + rotBZ);
+                BlockPos wallBlock = entityBlock.relative(outward.getOpposite());
 
-                if (spawnItemFrame(level, entityTag, entityId, wallBlock, frameFacing)) {
+                BerongSMP.LOGGER.info("[SchemLoader] ItemFrame entityBlock={} wallBlock={} wallBlockState={} rawFacing={} outward={}",
+                        entityBlock, wallBlock, level.getBlockState(wallBlock).getBlock(), rawFacing, outward);
+
+                if (spawnItemFrame(level, entityTag, entityId, entityBlock, outward)) {
                     spawned++;
                 }
                 continue;
@@ -302,31 +306,21 @@ public class SchemLoader implements StructurePlacer {
 
     /**
      * Creates an ItemFrame or GlowItemFrame directly, bypassing NBT deserialization.
-     *
-     * In Sponge v3, the entity's top-level Pos is the ATTACHMENT BLOCK position (integer)
-     * and Facing is the INWARD direction (from entity toward wall). The ItemFrame constructor
-     * takes the OUTWARD direction (opposite), so we flip it here.
-     *
-     * Item NBT lives inside the Data sub-compound, not at the entity root.
+     * entityBlock = the air block the frame entity occupies (Sponge v3 top-level Pos).
+     * outward     = direction FROM wall TOWARD viewer (Data.Facing, already rotated).
+     * In MC 26.x ItemFrame(level, pos, direction): pos is the entity's own block, not the wall.
      */
     private boolean spawnItemFrame(ServerLevel level, CompoundTag entityTag, String entityId,
-                                   BlockPos wallBlock, byte inwardFacing) {
-        Direction inward = Direction.from3DDataValue(inwardFacing & 0xFF);
-        if (inward == null) {
-            BerongSMP.LOGGER.warn("[SchemLoader] Invalid facing byte {} for item frame", inwardFacing);
-            return false;
-        }
-        // ItemFrame(level, pos, dir): dir = outward (from wall toward viewer).
-        Direction outward = inward.getOpposite();
-
+                                   BlockPos entityBlock, Direction outward) {
+        BlockPos wallBlock = entityBlock.relative(outward.getOpposite());
         if (level.getBlockState(wallBlock).isAir()) {
-            BerongSMP.LOGGER.warn("[SchemLoader] Attach block {} is air — skipped", wallBlock);
+            BerongSMP.LOGGER.warn("[SchemLoader] Wall block {} behind frame is air — skipped", wallBlock);
             return false;
         }
 
         ItemFrame frame = entityId.equals("minecraft:glow_item_frame")
-                ? new GlowItemFrame(level, wallBlock, outward)
-                : new ItemFrame(level, wallBlock, outward);
+                ? new GlowItemFrame(level, entityBlock, outward)
+                : new ItemFrame(level, entityBlock, outward);
 
         // Item NBT is nested under Data in Sponge v3.
         entityTag.getCompound("Data").ifPresent(data ->
@@ -341,8 +335,7 @@ public class SchemLoader implements StructurePlacer {
             })
         );
 
-        level.addFreshEntity(frame);
-        return true;
+        return level.addFreshEntity(frame);
     }
 
     /** Converts a Facing byte to an (x,y,z) step vector. */
