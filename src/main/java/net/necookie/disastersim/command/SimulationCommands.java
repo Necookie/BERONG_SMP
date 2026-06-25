@@ -19,12 +19,18 @@ public class SimulationCommands {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("sim_fire")
                 .executes(context -> {
-                    if (!context.getSource().isPlayer()) return 0;
-                    SimulationManager.startSimulation(
-                            context.getSource().getPlayer(),
-                            SimulationManager.SimulationState.FIRE);
-                    return 1;
+                    context.getSource().sendFailure(Component.literal(
+                            "§cUsage: /sim_fire <library|ccs>"));
+                    return 0;
                 })
+                .then(Commands.literal("library")
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            SimulationManager.startSimulation(
+                                    context.getSource().getPlayer(),
+                                    SimulationManager.SimulationState.FIRE);
+                            return 1;
+                        }))
                 .then(Commands.literal("ccs")
                         .executes(context -> {
                             if (!context.getSource().isPlayer()) return 0;
@@ -36,22 +42,28 @@ public class SimulationCommands {
 
         dispatcher.register(Commands.literal("sim_earthquake")
                 .executes(context -> {
-                    if (!context.getSource().isPlayer()) return 0;
-                    SimulationManager.startSimulation(
-                            context.getSource().getPlayer(),
-                            SimulationManager.SimulationState.EARTHQUAKE);
-                    return 1;
+                    context.getSource().sendFailure(Component.literal(
+                            "§cUsage: /sim_earthquake <library|ccs> [magnitude]"));
+                    return 0;
                 })
-                .then(Commands.argument("magnitude", DoubleArgumentType.doubleArg(0.1, 10.0))
+                .then(Commands.literal("library")
                         .executes(context -> {
                             if (!context.getSource().isPlayer()) return 0;
-                            double mag = DoubleArgumentType.getDouble(context, "magnitude");
                             SimulationManager.startSimulation(
                                     context.getSource().getPlayer(),
-                                    SimulationManager.SimulationState.EARTHQUAKE,
-                                    mag);
+                                    SimulationManager.SimulationState.EARTHQUAKE);
                             return 1;
-                        }))
+                        })
+                        .then(Commands.argument("magnitude", DoubleArgumentType.doubleArg(0.1, 10.0))
+                                .executes(context -> {
+                                    if (!context.getSource().isPlayer()) return 0;
+                                    double mag = DoubleArgumentType.getDouble(context, "magnitude");
+                                    SimulationManager.startSimulation(
+                                            context.getSource().getPlayer(),
+                                            SimulationManager.SimulationState.EARTHQUAKE,
+                                            mag);
+                                    return 1;
+                                })))
                 .then(Commands.literal("ccs")
                         .executes(context -> {
                             if (!context.getSource().isPlayer()) return 0;

@@ -149,7 +149,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `ModCommands` | Thin registration shell — delegates to `RegistrationCommands`, `ItemCommands`, `SimulationCommands`, `BfpAdminCommands`; also forwards `clearAuthorizations()` |
 | `RegistrationCommands` | `/register <student_id> <section> <full_name>` |
 | `ItemCommands` | `/spawn_lspu`, `/get_extinguisher`, `/get_co2_extinguisher` |
-| `SimulationCommands` | `/sim_fire [ccs]`, `/sim_earthquake [ccs] [magnitude]`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
+| `SimulationCommands` | `/sim_fire <library\|ccs>`, `/sim_earthquake <library\|ccs> [magnitude]`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
 | `BfpAdminCommands` | All `/bfp` admin commands; owns `bfpAuthorized` Set and `isBfpAuthorized()` predicate |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
 | `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires. Same pin-pull → hold-spray flow as `FireExtinguisherItem`. Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
@@ -242,9 +242,9 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 
 | Command | Effect |
 |---|---|
-| `/sim_fire` | Start FIRE simulation in the LSPU Library (gives ABC extinguisher) |
+| `/sim_fire library` | Start FIRE simulation in the LSPU Library (gives ABC extinguisher) |
 | `/sim_fire ccs` | Start FIRE simulation in the CCS Admin Building (gives CO2 extinguisher) |
-| `/sim_earthquake [magnitude]` | Start EARTHQUAKE simulation in the LSPU Library |
+| `/sim_earthquake library [magnitude]` | Start EARTHQUAKE simulation in the LSPU Library |
 | `/sim_earthquake ccs [magnitude]` | Start EARTHQUAKE simulation in the CCS Admin Building |
 | `/sim_status [player]` | Live snapshot: type, phase, time remaining, fires extinguished |
 | `/sim_list` | List all active simulations across all players |
