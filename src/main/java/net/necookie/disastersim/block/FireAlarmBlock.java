@@ -100,7 +100,7 @@ public class FireAlarmBlock extends Block {
         }
 
         SimulationSession session = SimulationManager.getSession(player.getUUID());
-        if (session == null || session.getState() != SimulationManager.SimulationState.FIRE) {
+        if (session == null || !session.getState().isFire()) {
             player.sendSystemMessage(Component.literal("§7[ALARM] No active fire — alarm not triggered."));
             return InteractionResult.SUCCESS;
         }

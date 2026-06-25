@@ -163,13 +163,12 @@ public class SessionManager {
      * directly by SimulationManager.endSimulation using the row ID it already holds.
      */
     public static void onSimulationEnd(ServerPlayer player, SimulationSession sim) {
-        String type = sim.getState() == SimulationManager.SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
-        int score = sim.getState() == SimulationManager.SimulationState.FIRE
+        String type = sim.getState().isFire() ? "FIRE" : "EARTHQUAKE";
+        int score = sim.getState().isFire()
                 ? Math.min(100, sim.getFiresExtinguished() * 2)
                 : 0;
-        boolean passed = sim.getState() == SimulationManager.SimulationState.FIRE
-                ? sim.getFiresExtinguished() >= Config.PASS_THRESHOLD_FIRE.get()
-                : false;
+        boolean passed = sim.getState().isFire()
+                && sim.getFiresExtinguished() >= Config.PASS_THRESHOLD_FIRE.get();
 
         StudentSession session = activeSessions.get(player.getUUID());
         if (session == null) return;

@@ -24,7 +24,15 @@ public class SimulationCommands {
                             context.getSource().getPlayer(),
                             SimulationManager.SimulationState.FIRE);
                     return 1;
-                }));
+                })
+                .then(Commands.literal("ccs")
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            SimulationManager.startSimulation(
+                                    context.getSource().getPlayer(),
+                                    SimulationManager.SimulationState.CCS_FIRE);
+                            return 1;
+                        })));
 
         dispatcher.register(Commands.literal("sim_earthquake")
                 .executes(context -> {
@@ -43,7 +51,27 @@ public class SimulationCommands {
                                     SimulationManager.SimulationState.EARTHQUAKE,
                                     mag);
                             return 1;
-                        })));
+                        }))
+                .then(Commands.literal("ccs")
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            double mag = 6.0 + context.getSource().getLevel().getRandom().nextDouble() * 3.5;
+                            SimulationManager.startSimulation(
+                                    context.getSource().getPlayer(),
+                                    SimulationManager.SimulationState.CCS_EARTHQUAKE,
+                                    mag);
+                            return 1;
+                        })
+                        .then(Commands.argument("magnitude", DoubleArgumentType.doubleArg(0.1, 10.0))
+                                .executes(context -> {
+                                    if (!context.getSource().isPlayer()) return 0;
+                                    double mag = DoubleArgumentType.getDouble(context, "magnitude");
+                                    SimulationManager.startSimulation(
+                                            context.getSource().getPlayer(),
+                                            SimulationManager.SimulationState.CCS_EARTHQUAKE,
+                                            mag);
+                                    return 1;
+                                }))));
 
         dispatcher.register(Commands.literal("sim_magnitude")
                 .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
@@ -52,8 +80,7 @@ public class SimulationCommands {
                             if (!context.getSource().isPlayer()) return 0;
                             ServerPlayer player = context.getSource().getPlayer();
                             SimulationSession session = SimulationManager.getSession(player.getUUID());
-                            if (session == null
-                                    || session.getState() != SimulationManager.SimulationState.EARTHQUAKE) {
+                            if (session == null || !session.getState().isQuake()) {
                                 context.getSource().sendFailure(
                                         Component.literal("No active earthquake simulation to adjust."));
                                 return 0;
@@ -174,10 +201,9 @@ public class SimulationCommands {
         }
         int secs = (session.getTimerTicks() + 19) / 20;
         String state = session.getState().name();
-        String phase = session.getState() == SimulationManager.SimulationState.EARTHQUAKE
-                && session.getQuakePhase() != null
+        String phase = session.getState().isQuake() && session.getQuakePhase() != null
                 ? " §7(Phase: §e" + session.getQuakePhase().name() + "§7)" : "";
-        String fireInfo = session.getState() == SimulationManager.SimulationState.FIRE
+        String fireInfo = session.getState().isFire()
                 ? "\n§eFires extinguished: §f" + session.getFiresExtinguished() : "";
         String frozen = session.isFrozen() ? " §b[FROZEN]" : "";
         String msg = "§6--- Simulation Status: " + target.getName().getString() + " ---\n" +

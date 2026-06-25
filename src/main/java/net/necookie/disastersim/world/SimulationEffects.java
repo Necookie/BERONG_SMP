@@ -35,14 +35,16 @@ public class SimulationEffects {
 
     public void simulateFire(ServerLevel level, SimulationSession session) {
         int count      = Config.FIRE_SPAWN_COUNT.get();
-        int areaSize   = Config.SIM_AREA_SIZE.get();
-        int areaHeight = Config.SIM_AREA_HEIGHT.get();
+        BlockPos base  = session.getArenaOrigin();
+        int spanX      = session.getArenaSpanX();
+        int spanZ      = session.getArenaSpanZ();
+        int areaHeight = session.getArenaHeight();
 
         for (int i = 0; i < count; i++) {
-            BlockPos firePos = SimulationManager.SIM_POS.offset(
-                    level.getRandom().nextInt(areaSize),
+            BlockPos firePos = base.offset(
+                    level.getRandom().nextInt(spanX),
                     level.getRandom().nextInt(areaHeight),
-                    level.getRandom().nextInt(areaSize));
+                    level.getRandom().nextInt(spanZ));
 
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
@@ -65,19 +67,21 @@ public class SimulationEffects {
         }
     }
 
-    public void cleanupFireOutsideBounds(ServerLevel level) {
-        int size   = Config.SIM_AREA_SIZE.get();
-        int height = Config.SIM_AREA_HEIGHT.get();
+    public void cleanupFireOutsideBounds(ServerLevel level, SimulationSession session) {
+        BlockPos base  = session.getArenaOrigin();
+        int sizeX  = session.getArenaSpanX();
+        int sizeZ  = session.getArenaSpanZ();
+        int height = session.getArenaHeight();
         int margin = 3;
 
-        for (int dx = -margin; dx < size + margin; dx++) {
+        for (int dx = -margin; dx < sizeX + margin; dx++) {
             for (int dy = -margin; dy < height + margin; dy++) {
-                for (int dz = -margin; dz < size + margin; dz++) {
-                    if (dx >= 0 && dx < size && dy >= 0 && dy < height && dz >= 0 && dz < size) {
+                for (int dz = -margin; dz < sizeZ + margin; dz++) {
+                    if (dx >= 0 && dx < sizeX && dy >= 0 && dy < height && dz >= 0 && dz < sizeZ) {
                         continue;
                     }
 
-                    BlockPos pos = SimulationManager.SIM_POS.offset(dx, dy, dz);
+                    BlockPos pos = base.offset(dx, dy, dz);
                     if (level.getBlockState(pos).getBlock() == Blocks.FIRE) {
                         level.removeBlock(pos, false);
                     }
@@ -208,14 +212,16 @@ public class SimulationEffects {
         player.setAirSupply(Math.max(-20, player.getAirSupply() - airDrain));
     }
 
-    public void clearFireInArena(ServerLevel level) {
-        int size   = Config.SIM_AREA_SIZE.get();
-        int height = Config.SIM_AREA_HEIGHT.get();
+    public void clearFireInArena(ServerLevel level, SimulationSession session) {
+        BlockPos base  = session.getArenaOrigin();
+        int sizeX  = session.getArenaSpanX();
+        int sizeZ  = session.getArenaSpanZ();
+        int height = session.getArenaHeight();
         int margin = 3;
-        for (int dx = -margin; dx < size + margin; dx++) {
+        for (int dx = -margin; dx < sizeX + margin; dx++) {
             for (int dy = -margin; dy < height + margin; dy++) {
-                for (int dz = -margin; dz < size + margin; dz++) {
-                    BlockPos pos = SimulationManager.SIM_POS.offset(dx, dy, dz);
+                for (int dz = -margin; dz < sizeZ + margin; dz++) {
+                    BlockPos pos = base.offset(dx, dy, dz);
                     if (level.getBlockState(pos).getBlock() == Blocks.FIRE) {
                         level.removeBlock(pos, false);
                     }

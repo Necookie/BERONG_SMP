@@ -24,6 +24,12 @@ public class SimulationSession {
     private final String sessionId = UUID.randomUUID().toString().substring(0, 8);
     private final Instant startedAt = Instant.now();
 
+    // --- Arena bounds (set by SimulationManager before first tick) ---
+    private BlockPos arenaOrigin;
+    private int arenaSpanX;
+    private int arenaSpanZ;
+    private int arenaHeight;
+
     // --- Earthquake state ---
     private BlockPos epicenter;
     private EarthquakePhase quakePhase;
@@ -41,6 +47,19 @@ public class SimulationSession {
         // the next session will use the new value without restarting the JVM.
         this.timerTicks = Config.SIM_DURATION_TICKS.get();
     }
+
+    /** Called by SimulationManager right after construction to bind the arena. */
+    public void setArena(BlockPos origin, int spanX, int spanZ, int height) {
+        this.arenaOrigin = origin;
+        this.arenaSpanX  = spanX;
+        this.arenaSpanZ  = spanZ;
+        this.arenaHeight = height;
+    }
+
+    public BlockPos getArenaOrigin() { return arenaOrigin != null ? arenaOrigin : SimulationManager.SIM_POS; }
+    public int getArenaSpanX()  { return arenaSpanX  > 0 ? arenaSpanX  : Config.SIM_AREA_SIZE.get(); }
+    public int getArenaSpanZ()  { return arenaSpanZ  > 0 ? arenaSpanZ  : Config.SIM_AREA_SIZE.get(); }
+    public int getArenaHeight() { return arenaHeight > 0 ? arenaHeight : Config.SIM_AREA_HEIGHT.get(); }
 
     public void tick() {
         if (!frozen) timerTicks--;
@@ -74,12 +93,13 @@ public class SimulationSession {
     public int getFireSpreadCount() { return fireSpreadCount; }
 
     public void initEarthquake(RandomSource random, double magnitude) {
-        int areaHeight = Config.SIM_AREA_HEIGHT.get();
-        // Epicenter fixed inside the library interior (3–9 blocks from SIM_POS in XZ)
-        // so destruction concentrates inside the structure, not scattered across the arena.
-        this.epicenter = SimulationManager.SIM_POS.offset(
+        int effectiveHeight = getArenaHeight();
+        BlockPos base = getArenaOrigin();
+        // Epicenter 3–9 blocks inside the arena from the origin corner so destruction
+        // concentrates inside the structure rather than on its perimeter.
+        this.epicenter = base.offset(
                 3 + random.nextInt(7),
-                random.nextInt(Math.max(1, areaHeight / 3)),
+                random.nextInt(Math.max(1, effectiveHeight / 3)),
                 3 + random.nextInt(7));
         this.sessionMagnitude        = magnitude;
         this.aftershockCount         = 2 + random.nextInt(3); // 2–4 aftershocks

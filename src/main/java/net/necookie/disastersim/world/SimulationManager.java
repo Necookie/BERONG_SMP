@@ -60,10 +60,22 @@ public class SimulationManager {
     private static final SimulationEffects EFFECTS = new SimulationEffects();
 
     public enum SimulationState {
-        IDLE,
-        FIRE,
-        EARTHQUAKE
+        IDLE, FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE;
+
+        /** True for any fire-type simulation (library or CCS building). */
+        public boolean isFire()  { return this == FIRE || this == CCS_FIRE; }
+        /** True for any earthquake-type simulation (library or CCS building). */
+        public boolean isQuake() { return this == EARTHQUAKE || this == CCS_EARTHQUAKE; }
+        /** True when the simulation is set inside the CCS admin building. */
+        public boolean isCCS()   { return this == CCS_FIRE || this == CCS_EARTHQUAKE; }
     }
+
+    // CCS building fire spawn area (world space after 3-CCW placement at CCS_POS).
+    // Spans the building interior; X: 80–135, Z: 6–69, Y covers both floors.
+    private static final BlockPos CCS_FIRE_BASE  = new BlockPos(80, -32, 6);
+    private static final int CCS_AREA_SPAN_X = 55;
+    private static final int CCS_AREA_SPAN_Z = 63;
+    private static final int CCS_AREA_HEIGHT = 12;
 
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
         startSimulation(player, state, Config.QUAKE_MAGNITUDE.get());
@@ -80,21 +92,28 @@ public class SimulationManager {
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
 
+        // Bind arena bounds so effects and epicenter calculations target the right building.
+        if (state.isCCS()) {
+            session.setArena(CCS_FIRE_BASE, CCS_AREA_SPAN_X, CCS_AREA_SPAN_Z, CCS_AREA_HEIGHT);
+        } else {
+            session.setArena(SIM_POS, Config.SIM_AREA_SIZE.get(), Config.SIM_AREA_SIZE.get(), Config.SIM_AREA_HEIGHT.get());
+        }
+
         ServerLevel level = (ServerLevel) player.level();
-        if (state == SimulationState.EARTHQUAKE) {
+        if (state.isQuake()) {
             session.initEarthquake(level.getRandom(), magnitude);
         }
 
         session.logger.log("SIM_START", java.util.Map.of(
             "sim_type", state.name(),
-            "magnitude", state == SimulationState.EARTHQUAKE ? magnitude : 0.0
+            "magnitude", state.isQuake() ? magnitude : 0.0
         ));
 
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
 
-        BlockPos spawnPos = findRandomSpawnInLibrary(level);
+        BlockPos spawnPos = state.isCCS() ? findRandomSpawnInCCS(level) : findRandomSpawnInLibrary(level);
         player.teleportTo(level,
                 spawnPos.getX() + 0.5,
                 spawnPos.getY(),
@@ -106,9 +125,15 @@ public class SimulationManager {
             player.getInventory().setItem(0, extinguisher);
             player.sendSystemMessage(Component.literal("§eYou have been given a Fire Extinguisher in slot 1. Remember: Pull the pin first before spraying! (PASS)"));
             player.sendSystemMessage(Component.literal("§6Starting FIRE Simulation!"));
-        } else if (state == SimulationState.EARTHQUAKE) {
-            player.sendSystemMessage(Component.literal(
-                    String.format("§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!", magnitude)));
+        } else if (state == SimulationState.CCS_FIRE) {
+            ItemStack extinguisher = new ItemStack(BerongSMP.CO2_EXTINGUISHER.get());
+            player.getInventory().setItem(0, extinguisher);
+            player.sendSystemMessage(Component.literal("§eYou have been given a CO2 Extinguisher for Class C (electrical) fires! Remember: Pull, Aim, Sweep."));
+            player.sendSystemMessage(Component.literal("§6Starting CCS FIRE Simulation!"));
+        } else if (state.isQuake()) {
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!%s",
+                    magnitude, state.isCCS() ? " (CCS Building)" : "")));
         }
 
         // --- Telemetry: session_start (t=0 anchor) ---
@@ -142,7 +167,7 @@ public class SimulationManager {
         String targetName = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath();
         double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
         double hazDist;
-        if (session.getState() == SimulationState.FIRE && event.getLevel() instanceof ServerLevel sl) {
+        if (session.getState().isFire() && event.getLevel() instanceof ServerLevel sl) {
             hazDist = nearestFireDistance(sl, player.blockPosition());
         } else {
             hazDist = session.getEpicenter() != null
@@ -173,7 +198,7 @@ public class SimulationManager {
         if (session == null) return;
 
         int finalScore = 0;
-        if (session.getState() == SimulationState.FIRE) {
+        if (session.getState().isFire()) {
             finalScore = Math.min(100, session.getFiresExtinguished() * 2);
         }
         double elapsedT = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
@@ -204,11 +229,11 @@ public class SimulationManager {
         meta.put("duration_ticks",               Config.SIM_DURATION_TICKS.get() - session.getTimerTicks());
         meta.put("end_reason",                   endReason);
         meta.put("fires_extinguished_count",     session.getFiresExtinguished());
-        meta.put("magnitude",                    session.getState() == SimulationState.EARTHQUAKE
+        meta.put("magnitude",                    session.getState().isQuake()
                                                      ? session.getSessionMagnitude() : "");
-        meta.put("aftershock_count",             session.getState() == SimulationState.EARTHQUAKE
+        meta.put("aftershock_count",             session.getState().isQuake()
                                                      ? session.getAftershockCount() : "");
-        meta.put("aftershock_magnitude_scale",   session.getState() == SimulationState.EARTHQUAKE
+        meta.put("aftershock_magnitude_scale",   session.getState().isQuake()
                                                      ? session.getAftershockMagnitudeScale() : "");
         meta.put("final_earthquake_phase",       session.getQuakePhase() != null
                                                      ? session.getQuakePhase().name() : "");
@@ -216,8 +241,8 @@ public class SimulationManager {
         TelemetryCsvWriter.flush();
 
         if (TursoClient.isReady()) {
-            String simType = session.getState() == SimulationState.FIRE ? "FIRE" : "EARTHQUAKE";
-            boolean passed = session.getState() == SimulationState.FIRE
+            String simType = session.getState().isFire() ? "FIRE" : "EARTHQUAKE";
+            boolean passed = session.getState().isFire()
                     && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
             net.necookie.disastersim.BerongSMP.LOGGER.info(
                     "[SimulationManager] endSimulation uuid={} simType={} score={}", uuid, simType, finalScore);
@@ -247,11 +272,11 @@ public class SimulationManager {
         if (player.isAlive()) {
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-            if (session.getState() == SimulationState.FIRE) {
+            if (session.getState().isFire()) {
                 player.sendSystemMessage(Component.literal(
                     "§eFires extinguished: " + session.getFiresExtinguished()));
                 SimulationFeedback.sendFire(player, session.logger, finalScore);
-            } else if (session.getState() == SimulationState.EARTHQUAKE) {
+            } else if (session.getState().isQuake()) {
                 SimulationFeedback.sendQuake(player, finalScore);
             }
             player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
@@ -297,9 +322,9 @@ public class SimulationManager {
 
             tickTelemetry(session, uuid, level, player, ticks);
 
-            if (session.getState() == SimulationState.FIRE) {
+            if (session.getState().isFire()) {
                 tickFireSession(session, level, player, ticks);
-            } else if (session.getState() == SimulationState.EARTHQUAKE) {
+            } else if (session.getState().isQuake()) {
                 tickEarthquakeSession(session, level, player, ticks);
             }
 
@@ -344,7 +369,7 @@ public class SimulationManager {
             EFFECTS.applyFireProximityEffects(level, player);
         }
         if (ticks % 40 == 0) {
-            EFFECTS.cleanupFireOutsideBounds(level);
+            EFFECTS.cleanupFireOutsideBounds(level, session);
         }
         if (ticks % 20 == 0) {
             session.resetExtinguishEventPending();
@@ -379,7 +404,7 @@ public class SimulationManager {
         }
         EFFECTS.drainEarthquakePending(level, session);
         if (ticks % 20 == 0) {
-            EFFECTS.clearFireInArena(level);
+            EFFECTS.clearFireInArena(level, session);
         }
     }
 
@@ -424,7 +449,7 @@ public class SimulationManager {
         if (ticks % HUD_SYNC_INTERVAL_TICKS != 0) return;
         // Ceiling division so the HUD shows "1" on the last tick rather than jumping to "0".
         int secondsLeft = (ticks + TICKS_PER_SECOND - 1) / TICKS_PER_SECOND;
-        float intensity = (session.getState() == SimulationState.EARTHQUAKE)
+        float intensity = session.getState().isQuake()
                 ? (float) session.computeIntensityAt(player.blockPosition())
                 : 0f;
         PacketDistributor.sendToPlayer(player,
@@ -432,7 +457,7 @@ public class SimulationManager {
     }
 
     private static double hazardDistance(SimulationSession session, ServerLevel level, ServerPlayer player) {
-        if (session.getState() == SimulationState.FIRE) {
+        if (session.getState().isFire()) {
             return nearestFireDistance(level, player.blockPosition());
         }
         return session.getEpicenter() != null
@@ -486,6 +511,27 @@ public class SimulationManager {
         }
         if (candidates.isEmpty()) {
             return SIM_POS.offset((int) SIM_ENTRY_OFFSET_X, (int) SIM_ENTRY_OFFSET_Y, (int) SIM_ENTRY_OFFSET_Z);
+        }
+        return candidates.get(level.getRandom().nextInt(candidates.size()));
+    }
+
+    private static BlockPos findRandomSpawnInCCS(ServerLevel level) {
+        List<BlockPos> candidates = new ArrayList<>();
+        for (int dx = 2; dx < CCS_AREA_SPAN_X - 2; dx++) {
+            for (int dz = 2; dz < CCS_AREA_SPAN_Z - 2; dz++) {
+                for (int dy = 1; dy < CCS_AREA_HEIGHT - 2; dy++) {
+                    BlockPos pos = CCS_FIRE_BASE.offset(dx, dy, dz);
+                    if (!level.getBlockState(pos.below()).isAir()
+                            && level.getBlockState(pos).isAir()
+                            && level.getBlockState(pos.above()).isAir()) {
+                        candidates.add(pos);
+                    }
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            // Fallback: centre of the building interior at ground-floor height
+            return CCS_POS.offset(31, 3, 33);
         }
         return candidates.get(level.getRandom().nextInt(candidates.size()));
     }

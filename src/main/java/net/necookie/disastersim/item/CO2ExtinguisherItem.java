@@ -121,17 +121,23 @@ public class CO2ExtinguisherItem extends Item {
 
         if (anyHit && user instanceof ServerPlayer sp) {
             SimulationSession session = SimulationManager.getSession(sp.getUUID());
-            if (session != null && session.consumeExtinguishEventPending()) {
-                double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
-                double hazDist = SimulationManager.nearestFireDistance(level, sp.blockPosition());
-                int nearbyPlayers = countNearbyPlayers(level, sp, 5.0);
-                TelemetryCsvWriter.writeRow(
-                        session.getSessionId(), sp.getUUID().toString(),
-                        session.getState().name().toLowerCase(),
-                        Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
-                        sp.getX(), sp.getY(), sp.getZ(),
-                        Math.round(hazDist * 100.0) / 100.0,
-                        "co2_extinguisher", nearbyPlayers);
+            if (session != null) {
+                // Track extinguish count for CCS fire scoring (same counter as regular FIRE)
+                if (session.getState() == SimulationManager.SimulationState.CCS_FIRE) {
+                    session.recordExtinguish(1);
+                }
+                if (session.consumeExtinguishEventPending()) {
+                    double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+                    double hazDist = SimulationManager.nearestFireDistance(level, sp.blockPosition());
+                    int nearbyPlayers = countNearbyPlayers(level, sp, 5.0);
+                    TelemetryCsvWriter.writeRow(
+                            session.getSessionId(), sp.getUUID().toString(),
+                            session.getState().name().toLowerCase(),
+                            Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
+                            sp.getX(), sp.getY(), sp.getZ(),
+                            Math.round(hazDist * 100.0) / 100.0,
+                            "co2_extinguisher", nearbyPlayers);
+                }
             }
         }
 

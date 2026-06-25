@@ -19,7 +19,7 @@ This keeps the project documentation in sync with the code at all times.
 
 ## Project Overview
 
-BerongSMP is a NeoForge mod for Minecraft 26.1.2 (NeoForge 26.1.2.36-beta) that implements a disaster simulation minigame. Players enter a lobby, press buttons to trigger fire or earthquake simulations inside an LSPU Library NBT structure, and are scored on their response. The mod is built with Java 25.
+BerongSMP is a NeoForge mod for Minecraft 26.1.2 (NeoForge 26.1.2.36-beta) that implements a disaster simulation minigame. Players enter a lobby, press buttons to trigger fire or earthquake simulations inside an LSPU Library NBT structure, or use commands (`/sim_fire ccs`, `/sim_earthquake ccs`) to run simulations inside the CCS Admin Building. Players are scored on their response. The mod is built with Java 25.
 
 ## Build & Run Commands
 
@@ -88,7 +88,7 @@ Station constants in `TutorialManager` (offsets from `LobbyManager.LOBBY_POS = (
 Player logs in → LobbyManager.onPlayerLogin → teleport to lobby
 Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.startSimulation
   → places all buildings (LSPU Library + SSC Building + CCS Admin Building) via BUILDINGS list
-  → teleports player to a random valid position inside the library (any floor); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to front-door entry if none found
+  → teleports player to a random valid position inside the target building (library for FIRE/EARTHQUAKE, CCS for CCS_FIRE/CCS_EARTHQUAKE); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to building centre if none found
   → (FIRE only) gives fire extinguisher in hotbar slot 0
   → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
       → epicenter fixed 3–9 blocks from SIM_POS in XZ so destruction concentrates inside the structure
@@ -136,7 +136,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 |---|---|
 | `BerongSMP` | Mod entry point, item/block registration, server startup init |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
-| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale |
+| `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale; `arenaOrigin/spanX/spanZ/height` set by SimulationManager to target the correct building |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
 | `SimulationEffects` | World mutation: fire placement + smoke particles (14×, wide plume) + proximity nausea/air-drain; phase-aware earthquake (RUMBLE/PEAK/AFTERSHOCK helpers + cascade drain + `breakOrDebris` for falling debris with 8× damage multiplier) |
 | `LobbyManager` | Lobby NBT placement, button discovery (sorted by Z: lower Z = fire, higher Z = quake), login/button-click handlers |
@@ -149,7 +149,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `ModCommands` | Thin registration shell — delegates to `RegistrationCommands`, `ItemCommands`, `SimulationCommands`, `BfpAdminCommands`; also forwards `clearAuthorizations()` |
 | `RegistrationCommands` | `/register <student_id> <section> <full_name>` |
 | `ItemCommands` | `/spawn_lspu`, `/get_extinguisher`, `/get_co2_extinguisher` |
-| `SimulationCommands` | `/sim_fire`, `/sim_earthquake`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
+| `SimulationCommands` | `/sim_fire [ccs]`, `/sim_earthquake [ccs] [magnitude]`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
 | `BfpAdminCommands` | All `/bfp` admin commands; owns `bfpAuthorized` Set and `isBfpAuthorized()` predicate |
 | `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
 | `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires. Same pin-pull → hold-spray flow as `FireExtinguisherItem`. Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
@@ -242,6 +242,10 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 
 | Command | Effect |
 |---|---|
+| `/sim_fire` | Start FIRE simulation in the LSPU Library (gives ABC extinguisher) |
+| `/sim_fire ccs` | Start FIRE simulation in the CCS Admin Building (gives CO2 extinguisher) |
+| `/sim_earthquake [magnitude]` | Start EARTHQUAKE simulation in the LSPU Library |
+| `/sim_earthquake ccs [magnitude]` | Start EARTHQUAKE simulation in the CCS Admin Building |
 | `/sim_status [player]` | Live snapshot: type, phase, time remaining, fires extinguished |
 | `/sim_list` | List all active simulations across all players |
 | `/sim_freeze [player]` | Pause simulation timer (effects continue) |
