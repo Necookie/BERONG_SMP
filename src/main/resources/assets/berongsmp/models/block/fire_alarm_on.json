@@ -1,34 +1,59 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "panel":    "berongsmp:block/fire_alarm_on",
-    "side":     "berongsmp:block/fire_alarm_on",
-    "particle": "berongsmp:block/fire_alarm_on"
+    "housing": "berongsmp:block/fire_alarm_on",
+    "handle":  "berongsmp:block/fire_alarm_handle",
+    "bell":    "berongsmp:block/fire_alarm_bell",
+    "side":    "berongsmp:block/fire_alarm_side",
+    "particle":"berongsmp:block/fire_alarm_on"
   },
   "elements": [
     {
-      "name": "alarm_panel",
-      "from": [5, 4, 13],
-      "to":   [11, 12, 16],
+      "name": "housing",
+      "from": [4, 3, 13],
+      "to":   [12, 14, 16],
       "faces": {
-        "north": { "texture": "#panel", "uv": [0, 0, 6, 8] },
-        "south": { "texture": "#side",  "uv": [0, 0, 6, 8] },
-        "east":  { "texture": "#side",  "uv": [0, 0, 3, 8] },
-        "west":  { "texture": "#side",  "uv": [0, 0, 3, 8] },
-        "up":    { "texture": "#side",  "uv": [0, 0, 6, 3] },
-        "down":  { "texture": "#side",  "uv": [0, 0, 6, 3] }
+        "north": { "texture": "#housing", "uv": [0, 0, 16, 16] },
+        "south": { "texture": "#side",    "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#side",    "uv": [0, 0, 16, 16] },
+        "west":  { "texture": "#side",    "uv": [0, 0, 16, 16] },
+        "up":    { "texture": "#side",    "uv": [0, 0, 16, 16] },
+        "down":  { "texture": "#side",    "uv": [0, 0, 16, 16] }
       }
     },
     {
-      "name": "pull_handle",
-      "from": [6, 5, 10],
-      "to":   [10, 11, 13],
+      "name": "bell_dome",
+      "from": [5, 14, 13],
+      "to":   [11, 16, 15],
       "faces": {
-        "north": { "texture": "#panel", "uv": [2, 1, 10, 13] },
-        "east":  { "texture": "#side",  "uv": [0, 0, 3, 6]  },
-        "west":  { "texture": "#side",  "uv": [0, 0, 3, 6]  },
-        "up":    { "texture": "#side",  "uv": [0, 0, 4, 3]  },
-        "down":  { "texture": "#side",  "uv": [0, 0, 4, 3]  }
+        "north": { "texture": "#bell", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#side", "uv": [0, 0, 16, 16] },
+        "west":  { "texture": "#side", "uv": [0, 0, 16, 16] },
+        "up":    { "texture": "#bell", "uv": [0, 0, 16, 16] }
+      }
+    },
+    {
+      "name": "handle_arm",
+      "from": [6, 3, 11],
+      "to":   [10, 8, 13],
+      "faces": {
+        "north": { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "west":  { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "down":  { "texture": "#handle", "uv": [0, 0, 16, 16] }
+      }
+    },
+    {
+      "name": "handle_grip",
+      "from": [4, 3, 9],
+      "to":   [12, 5, 11],
+      "faces": {
+        "north": { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "south": { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "west":  { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "up":    { "texture": "#handle", "uv": [0, 0, 16, 16] },
+        "down":  { "texture": "#handle", "uv": [0, 0, 16, 16] }
       }
     }
   ]

@@ -6,7 +6,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
@@ -35,19 +35,23 @@ import net.necookie.disastersim.world.TelemetryCsvWriter;
  *   ACTIVATED=false → right-click during active FIRE sim → ACTIVATED=true
  *   ACTIVATED=true  → already activated (shows message, no re-trigger)
  *
- * Resets automatically when simulation ends because endSimulation restores
- * the full LSPU library structure, which replaces all blocks including this one.
+ * The alarm rings continuously via scheduled block ticks while ACTIVATED=true.
+ * The chain self-terminates when the structure is restored (block replaced →
+ * pending ScheduledTick for FireAlarmBlock is discarded by the level).
  */
 public class FireAlarmBlock extends Block {
 
     public static final Property<Direction> FACING    = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty     ACTIVATED = BooleanProperty.create("activated");
 
-    // Wall-panel shape (6×8 px face, 3 px deep) pressed against the back wall for each facing.
-    private static final VoxelShape SHAPE_NORTH = Block.box(5, 4, 13, 11, 12, 16);
-    private static final VoxelShape SHAPE_SOUTH = Block.box(5, 4,  0, 11, 12,  3);
-    private static final VoxelShape SHAPE_WEST  = Block.box(13, 4, 5, 16, 12, 11);
-    private static final VoxelShape SHAPE_EAST  = Block.box( 0, 4, 5,  3, 12, 11);
+    /** Interval between alarm beeps (25 ticks = 1.25 s). */
+    private static final int BEEP_INTERVAL = 25;
+
+    // Housing body 8×11×3 px + bell dome on top + handle grip protrudes to Z=9
+    private static final VoxelShape SHAPE_NORTH = Block.box(4, 3,  9, 12, 16, 16);
+    private static final VoxelShape SHAPE_SOUTH = Block.box(4, 3,  0, 12, 16,  7);
+    private static final VoxelShape SHAPE_WEST  = Block.box(9, 3,  4, 16, 16, 12);
+    private static final VoxelShape SHAPE_EAST  = Block.box(0, 3,  4,  7, 16, 12);
 
     public FireAlarmBlock(Properties props) {
         super(props);
@@ -83,6 +87,8 @@ public class FireAlarmBlock extends Block {
         };
     }
 
+    // ── Interaction ──────────────────────────────────────────────────────────
+
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                             Player player, BlockHitResult hit) {
@@ -100,8 +106,11 @@ public class FireAlarmBlock extends Block {
         }
 
         level.setBlock(pos, state.setValue(ACTIVATED, true), 3);
-        level.playSound(null, pos, SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 1.0f, 1.0f);
         player.sendSystemMessage(Component.literal("§c🔔 FIRE ALARM ACTIVATED — Evacuate immediately!"));
+
+        // Play the alarm immediately, then start the repeating tick chain.
+        level.playSound(null, pos, BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
+        ((ServerLevel) level).scheduleTick(pos, this, BEEP_INTERVAL);
 
         double t = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
         double hazardDist = SimulationManager.nearestFireDistance(
@@ -124,14 +133,51 @@ public class FireAlarmBlock extends Block {
         return InteractionResult.SUCCESS;
     }
 
+    // ── Scheduled tick — keeps the alarm ringing ──────────────────────────────
+
+    @Override
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (!state.getValue(ACTIVATED)) return;
+        // Vary pitch slightly each ring for a more realistic clapper-bell feel.
+        float pitch = 1.7f + random.nextFloat() * 0.2f;
+        level.playSound(null, pos, BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, pitch);
+        level.scheduleTick(pos, this, BEEP_INTERVAL);
+    }
+
+    // ── Client-side effects (strobe particles) ────────────────────────────────
+
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
         if (!state.getValue(ACTIVATED)) return;
-        if (rand.nextInt(3) == 0) {
-            level.addParticle(ParticleTypes.FLAME,
-                    pos.getX() + 0.5 + (rand.nextDouble() - 0.5) * 0.3,
-                    pos.getY() + 0.8,
-                    pos.getZ() + 0.5 + (rand.nextDouble() - 0.5) * 0.3,
+
+        Direction facing = state.getValue(FACING);
+        // Position particles at the bell dome (top of housing, above block centre).
+        double bx = pos.getX() + 0.5 + facing.getStepX() * 0.15;
+        double bz = pos.getZ() + 0.5 + facing.getStepZ() * 0.15;
+        double byTop = pos.getY() + 1.05; // bell dome height
+
+        // Orange electric-spark strobe from the bell dome
+        if (rand.nextInt(2) == 0) {
+            level.addParticle(ParticleTypes.ELECTRIC_SPARK,
+                    bx + (rand.nextDouble() - 0.5) * 0.25,
+                    byTop,
+                    bz + (rand.nextDouble() - 0.5) * 0.25,
+                    0, 0.06, 0);
+        }
+
+        // Occasional larger lava-ember for a vivid strobe flash
+        if (rand.nextInt(5) == 0) {
+            level.addParticle(ParticleTypes.LAVA,
+                    bx + (rand.nextDouble() - 0.5) * 0.1,
+                    byTop - 0.05,
+                    bz + (rand.nextDouble() - 0.5) * 0.1,
+                    0, 0.04, 0);
+        }
+
+        // Smoke rising from bell to give the alarm a smoky "it's bad out here" feel
+        if (rand.nextInt(8) == 0) {
+            level.addParticle(ParticleTypes.SMOKE,
+                    bx, byTop + 0.1, bz,
                     0, 0.02, 0);
         }
     }

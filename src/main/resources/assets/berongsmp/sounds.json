@@ -44,5 +44,12 @@
   "npc.sgt_santos.santos_done_0": { "sounds": ["berongsmp:sgt_santos/santos_done_0"] },
   "npc.sgt_santos.santos_done_1": { "sounds": ["berongsmp:sgt_santos/santos_done_1"] },
   "npc.sgt_santos.santos_done_2": { "sounds": ["berongsmp:sgt_santos/santos_done_2"] },
-  "npc.sgt_santos.santos_done_3": { "sounds": ["berongsmp:sgt_santos/santos_done_3"] }
+  "npc.sgt_santos.santos_done_3": { "sounds": ["berongsmp:sgt_santos/santos_done_3"] },
+
+  "block.fire_alarm.ring": {
+    "subtitle": "Fire Alarm",
+    "sounds": [
+      { "name": "minecraft:block.bell.use", "type": "event" }
+    ]
+  }
 }

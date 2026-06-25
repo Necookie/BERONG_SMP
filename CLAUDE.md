@@ -87,7 +87,7 @@ Station constants in `TutorialManager` (offsets from `LobbyManager.LOBBY_POS = (
 ```
 Player logs in → LobbyManager.onPlayerLogin → teleport to lobby
 Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.startSimulation
-  → places all buildings (LSPU Library + SSC Building) via BUILDINGS list
+  → places all buildings (LSPU Library + SSC Building + CCS Admin Building) via BUILDINGS list
   → teleports player to a random valid position inside the library (any floor); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to front-door entry if none found
   → (FIRE only) gives fire extinguisher in hotbar slot 0
   → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
@@ -172,6 +172,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 - **Lobby**: origin `BlockPos(0, -33, 0)`, player spawn at `(8.8, -31, 8)`
 - **Simulation arena**: `SIM_POS = BlockPos(30, -34, 83)`, player entry offset `+5.5, +2, +5.5`
 - **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
+- **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 3 CCW rotations (`ccs_admin_building2.3.schem`)
 
 ### Structures
 
@@ -179,6 +180,7 @@ Stored under `src/main/resources/data/berongsmp/structure/`:
 - `lobby_structure.nbt` — lobby building with two buttons (NBT, placed once at server start)
 - `lspulibrarymain.nbt` — simulation arena (NBT, placed/restored each session)
 - `ssc_building.schem` — SSC building adjacent to the arena (Sponge Schematic v3, placed/restored each session with 1 CCW rotation)
+- `ccs_admin_building2.3.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 3 CCW rotations)
 
 `SimulationManager.BUILDINGS` holds the full list of `StructurePlacer`+`BlockPos` pairs iterated on session start and end.
 

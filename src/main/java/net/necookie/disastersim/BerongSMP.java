@@ -5,6 +5,8 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -57,6 +59,15 @@ public class BerongSMP {
     
     /** Deferred Register for Creative Mode Tabs. */
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+
+    /** Deferred Register for Sound Events. */
+    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
+
+    /** Fire alarm ringing sound — loops via scheduled block ticks while ACTIVATED=true. */
+    public static final DeferredHolder<SoundEvent, SoundEvent> FIRE_ALARM_RING =
+            SOUND_EVENTS.register("block.fire_alarm.ring",
+                    () -> SoundEvent.createVariableRangeEvent(
+                            Identifier.fromNamespaceAndPath(MODID, "block.fire_alarm.ring")));
 
     /** Example block registration. */
     public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
@@ -143,6 +154,7 @@ public class BerongSMP {
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        SOUND_EVENTS.register(modEventBus);
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
         // on the mod bus — it must be registered here so NeoForge picks it up.
