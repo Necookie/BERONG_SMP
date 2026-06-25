@@ -240,6 +240,43 @@ public class BerongSMP {
      *
      * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
      */
+    /**
+     * Item frames always return their item to the player's inventory, regardless of the
+     * doEntityDrops gamerule.  Vanilla ItemFrame.hurt() skips the drop when doEntityDrops=false,
+     * silently deleting the item.  We intercept the attack here, handle the removal ourselves
+     * with a forced inventory-add, and cancel the event so vanilla logic doesn't run.
+     *
+     * Covers both ItemFrame and GlowItemFrame (GlowItemFrame extends ItemFrame).
+     */
+    @SubscribeEvent
+    public void onAttackItemFrame(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
+        if (!(event.getTarget() instanceof net.minecraft.world.entity.decoration.ItemFrame frame)) return;
+        if (event.getEntity().level().isClientSide()) return;
+
+        net.minecraft.world.item.ItemStack frameItem = frame.getItem();
+        if (frameItem.isEmpty()) return; // frame has no item — let vanilla handle frame breaking
+
+        event.setCanceled(true);
+
+        net.minecraft.world.entity.player.Player player = event.getEntity();
+        net.minecraft.world.item.ItemStack toGive = frameItem.copy();
+
+        // Clear the frame and notify clients via entity data sync
+        frame.setItem(net.minecraft.world.item.ItemStack.EMPTY);
+        frame.level().playSound(null, frame.getX(), frame.getY(), frame.getZ(),
+                net.minecraft.sounds.SoundEvents.ITEM_FRAME_REMOVE_ITEM,
+                net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+
+        // Give item directly — bypasses doEntityDrops
+        if (!player.getInventory().add(toGive)) {
+            // Inventory full: force-spawn item entity at player position
+            net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
+                    frame.level(), player.getX(), player.getY(), player.getZ(), toGive);
+            drop.setDefaultPickUpDelay();
+            frame.level().addFreshEntity(drop);
+        }
+    }
+
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
         // Entity chunk storage is fully loaded by now — safe to find and remove old NPCs
