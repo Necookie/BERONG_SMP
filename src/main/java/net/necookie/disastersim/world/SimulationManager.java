@@ -140,8 +140,12 @@ public class SimulationManager {
         } else if (state == SimulationState.CCS_FIRE) {
             ItemStack extinguisher = new ItemStack(BerongSMP.CO2_EXTINGUISHER.get());
             player.getInventory().setItem(0, extinguisher);
-            player.sendSystemMessage(Component.literal("§eYou have been given a CO2 Extinguisher for Class C (electrical) fires! Remember: Pull, Aim, Sweep."));
-            player.sendSystemMessage(Component.literal("§6Starting CCS FIRE Simulation!"));
+            player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            player.sendSystemMessage(Component.literal("§c§l🔥  FIRE EMERGENCY — CCS Admin Building"));
+            player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            player.sendSystemMessage(Component.literal("§eA fire has started from a computer workstation!"));
+            player.sendSystemMessage(Component.literal("§fLocate the burning computer and suppress it immediately."));
+            player.sendSystemMessage(Component.literal("§7CO2 extinguisher issued — §ePull pin → Aim → Sweep"));
         } else if (state.isQuake()) {
             player.sendSystemMessage(Component.literal(String.format(
                     "§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!%s",
@@ -376,7 +380,12 @@ public class SimulationManager {
                                         ServerPlayer player, int ticks) {
         if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
             if (session.getState().isCCS()) {
+                int spreadBefore = session.getFireSpreadCount();
                 EFFECTS.spreadComputerFire(level, session);
+                int spreadAfter = session.getFireSpreadCount();
+                if (spreadAfter > spreadBefore) {
+                    sendCcsFireSpreadAlert(player, spreadBefore, spreadAfter);
+                }
             } else {
                 EFFECTS.simulateFire(level, session);
             }
@@ -389,6 +398,34 @@ public class SimulationManager {
         }
         if (ticks % 20 == 0) {
             session.resetExtinguishEventPending();
+        }
+        if (session.getState().isCCS()) {
+            tickCcsFireNarrative(player, ticks);
+        }
+    }
+
+    /** Sends a one-time alert when the total spread count crosses a dramatic threshold. */
+    private static void sendCcsFireSpreadAlert(ServerPlayer player, int before, int after) {
+        if (before == 0) {
+            player.sendSystemMessage(Component.literal("§c⚠ The electrical fire is spreading to nearby workstations!"));
+        } else if (before < 4 && after >= 4) {
+            player.sendSystemMessage(Component.literal("§4⚠ More computers are catching fire! Suppress them before it's too late!"));
+        } else if (before < 8 && after >= 8) {
+            player.sendSystemMessage(Component.literal("§4§l⚠ CRITICAL — The lab is ablaze! Use your CO2 extinguisher immediately!"));
+        }
+    }
+
+    /** Time-based narrative escalation for CCS fire, keyed to exact elapsed ticks. */
+    private static void tickCcsFireNarrative(ServerPlayer player, int ticks) {
+        int elapsed = Config.SIM_DURATION_TICKS.get() - ticks;
+        if (elapsed == 20 * 15) {
+            player.sendSystemMessage(Component.literal("§e[15s] The fire is still active — locate the burning computer!"));
+        } else if (elapsed == 20 * 30) {
+            player.sendSystemMessage(Component.literal("§c[30s] Electrical fires spread fast — check all workstations in the lab!"));
+        } else if (elapsed == 20 * 55) {
+            player.sendSystemMessage(Component.literal("§4[55s] ⚠ The fire has been burning for nearly a minute. Multiple stations may be at risk!"));
+        } else if (elapsed == 20 * 90) {
+            player.sendSystemMessage(Component.literal("§4§l[90s] DANGER — If you cannot control the fire, evacuate to the assembly area!"));
         }
     }
 

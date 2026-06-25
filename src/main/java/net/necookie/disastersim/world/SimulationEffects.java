@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -102,6 +104,15 @@ public class SimulationEffects {
                     "total_count", session.getFireSpreadCount(),
                     "type", "computer_ignition"
                 ));
+            }
+            // Electrical ignition sound + spark burst
+            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    SoundEvents.FLINTANDSTEEL_USE, SoundSource.BLOCKS, 1.5f, 0.7f);
+            for (int j = 0; j < 8; j++) {
+                double ex = pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
+                double ey = pos.getY() + 0.8 + level.getRandom().nextDouble() * 0.6;
+                double ez = pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 0.9;
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, ex, ey, ez, 1, 0.1, 0.1, 0.1, 0.05);
             }
             // Dense smoke plume above each newly ignited computer
             for (int s = 0; s < 14; s++) {
