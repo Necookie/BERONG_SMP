@@ -326,12 +326,34 @@ public class SimulationManager {
             SimulationSession session = activeSessions.get(uuid);
             if (session == null) continue;
 
+            ServerPlayer player = session.getPlayer();
+            if (player == null) continue;
+
+            // Pre-sim countdown — show 3/2/1 before effects begin
+            if (session.isInWarmup()) {
+                if (!player.isAlive()) { endSimulation(uuid, "injured"); continue; }
+                tickWarmupCountdown(session, player);
+                session.tickWarmup();
+                tickHudSync(session, player, session.getTimerTicks());
+                continue;
+            }
+
+            // Post-sim cooldown — brief pause before lobby teleport
+            if (session.isInCooldown()) {
+                session.tickCooldown();
+                if (session.isCooldownExpired()) { endSimulation(uuid); }
+                continue;
+            }
+
+            if (!player.isAlive()) { endSimulation(uuid, "injured"); continue; }
+
             session.tick();
 
-            if (session.isExpired()) { endSimulation(uuid); continue; }
-
-            ServerPlayer player = session.getPlayer();
-            if (player == null || !player.isAlive()) { endSimulation(uuid, "injured"); continue; }
+            if (session.isExpired()) {
+                player.sendSystemMessage(Component.literal("§e⏱ Time's up! Returning to lobby..."));
+                session.startCooldown();
+                continue;
+            }
 
             ServerLevel level = (ServerLevel) player.level();
             int ticks = session.getTimerTicks();
@@ -373,6 +395,19 @@ public class SimulationManager {
                     Math.round(elapsedS * 100.0) / 100.0, "move",
                     player.getX(), player.getY(), player.getZ(),
                     Math.round(hazDist * 100.0) / 100.0, null, null);
+        }
+    }
+
+    private static void tickWarmupCountdown(SimulationSession session, ServerPlayer player) {
+        int w = session.getWarmupTicks();
+        if (w == 3 * 20) {
+            player.sendSystemMessage(Component.literal("§e⏳ Simulation starts in §63..."));
+        } else if (w == 2 * 20) {
+            player.sendSystemMessage(Component.literal("§e⏳ Simulation starts in §62..."));
+        } else if (w == 1 * 20) {
+            player.sendSystemMessage(Component.literal("§c⏳ Simulation starts in §c1..."));
+        } else if (w == 1) {
+            player.sendSystemMessage(Component.literal("§a§l▶ Simulation has started!"));
         }
     }
 

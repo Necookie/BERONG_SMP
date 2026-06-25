@@ -178,6 +178,19 @@ public class SimulationSession {
     public boolean hasPassedExit() { return passedExit; }
     public void markPassedExit()   { passedExit = true; }
 
+    // --- Warmup / cooldown phases ---
+    private int warmupTicks  = 3 * 20; // countdown before effects begin (3 s)
+    private int cooldownTicks = -1;    // -1 = not triggered; 0 = signal endSimulation
+
+    public boolean isInWarmup()   { return warmupTicks > 0; }
+    public int  getWarmupTicks()  { return warmupTicks; }
+    public void tickWarmup()      { if (warmupTicks > 0) warmupTicks--; }
+
+    public void startCooldown()         { if (cooldownTicks < 0) cooldownTicks = 3 * 20; }
+    public boolean isInCooldown()       { return cooldownTicks > 0; }
+    public void tickCooldown()          { if (cooldownTicks > 0) cooldownTicks--; }
+    public boolean isCooldownExpired()  { return cooldownTicks == 0; }
+
     private boolean extinguishEventPending = true;
     public boolean consumeExtinguishEventPending() {
         if (!extinguishEventPending) return false;
