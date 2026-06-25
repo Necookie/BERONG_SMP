@@ -198,7 +198,7 @@ public class LobbyManager {
                     return;
                 }
             }
-            SimulationManager.startSimulation(player, SimulationManager.SimulationState.FIRE);
+            SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_FIRE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
@@ -225,7 +225,7 @@ public class LobbyManager {
             }
             // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
             double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;
-            SimulationManager.startSimulation(player, SimulationManager.SimulationState.EARTHQUAKE, magnitude);
+            SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_EARTHQUAKE, magnitude);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
