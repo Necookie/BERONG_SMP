@@ -7,6 +7,8 @@ import net.necookie.disastersim.Config;
 
 import java.time.Instant;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class SimulationSession {
@@ -29,6 +31,9 @@ public class SimulationSession {
     private int arenaSpanX;
     private int arenaSpanZ;
     private int arenaHeight;
+
+    // --- CCS computer positions (cached at session start for fast spread targeting) ---
+    private List<BlockPos> computerPositions = new ArrayList<>();
 
     // --- Earthquake state ---
     private BlockPos epicenter;
@@ -60,6 +65,9 @@ public class SimulationSession {
     public int getArenaSpanX()  { return arenaSpanX  > 0 ? arenaSpanX  : Config.SIM_AREA_SIZE.get(); }
     public int getArenaSpanZ()  { return arenaSpanZ  > 0 ? arenaSpanZ  : Config.SIM_AREA_SIZE.get(); }
     public int getArenaHeight() { return arenaHeight > 0 ? arenaHeight : Config.SIM_AREA_HEIGHT.get(); }
+
+    public void setComputerPositions(List<BlockPos> positions) { this.computerPositions = new ArrayList<>(positions); }
+    public List<BlockPos> getComputerPositions() { return computerPositions; }
 
     public void tick() {
         if (!frozen) timerTicks--;

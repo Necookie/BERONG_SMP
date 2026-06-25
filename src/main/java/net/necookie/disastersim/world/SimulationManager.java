@@ -11,6 +11,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.session.TursoClient;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -113,7 +114,18 @@ public class SimulationManager {
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
 
-        BlockPos spawnPos = state.isCCS() ? findRandomSpawnInCCS(level) : findRandomSpawnInLibrary(level);
+        BlockPos spawnPos;
+        if (state == SimulationState.CCS_FIRE) {
+            List<BlockPos> computers = findComputersInCCS(level);
+            session.setComputerPositions(computers);
+            // Ignite 1 random computer to start the electrical fire
+            igniteRandomComputers(level, computers, 1, level.getRandom());
+            spawnPos = findSpawnNearComputer(level, computers);
+        } else if (state.isCCS()) {
+            spawnPos = findRandomSpawnInCCS(level);
+        } else {
+            spawnPos = findRandomSpawnInLibrary(level);
+        }
         player.teleportTo(level,
                 spawnPos.getX() + 0.5,
                 spawnPos.getY(),
@@ -363,7 +375,11 @@ public class SimulationManager {
     private static void tickFireSession(SimulationSession session, ServerLevel level,
                                         ServerPlayer player, int ticks) {
         if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-            EFFECTS.simulateFire(level, session);
+            if (session.getState().isCCS()) {
+                EFFECTS.spreadComputerFire(level, session);
+            } else {
+                EFFECTS.simulateFire(level, session);
+            }
         }
         if (ticks % 20 == 0) {
             EFFECTS.applyFireProximityEffects(level, player);
@@ -530,10 +546,69 @@ public class SimulationManager {
             }
         }
         if (candidates.isEmpty()) {
-            // Fallback: centre of the building interior at ground-floor height
             return CCS_POS.offset(31, 3, 33);
         }
         return candidates.get(level.getRandom().nextInt(candidates.size()));
+    }
+
+    /** Scans the CCS arena for every computer_block and returns their positions. */
+    static List<BlockPos> findComputersInCCS(ServerLevel level) {
+        List<BlockPos> computers = new ArrayList<>();
+        for (int dx = 0; dx < CCS_AREA_SPAN_X; dx++) {
+            for (int dz = 0; dz < CCS_AREA_SPAN_Z; dz++) {
+                for (int dy = 0; dy < CCS_AREA_HEIGHT; dy++) {
+                    BlockPos pos = CCS_FIRE_BASE.offset(dx, dy, dz);
+                    if (level.getBlockState(pos).getBlock() == BerongSMP.COMPUTER_BLOCK.get()) {
+                        computers.add(pos.immutable());
+                    }
+                }
+            }
+        }
+        return computers;
+    }
+
+    /** Sets `count` randomly chosen computers to BURNING=true. */
+    private static void igniteRandomComputers(ServerLevel level,
+                                              List<BlockPos> computers, int count,
+                                              net.minecraft.util.RandomSource random) {
+        if (computers.isEmpty()) return;
+        List<BlockPos> pool = new ArrayList<>(computers);
+        for (int i = 0; i < Math.min(count, pool.size()); i++) {
+            int idx = random.nextInt(pool.size());
+            BlockPos pos = pool.remove(idx);
+            net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof ComputerBlock
+                    && !state.getValue(ComputerBlock.BURNING)
+                    && !state.getValue(ComputerBlock.BROKEN)) {
+                level.setBlock(pos, state.setValue(ComputerBlock.BURNING, true), 3);
+            }
+        }
+    }
+
+    /**
+     * Finds a safe floor position (solid below, 2 air above) within a few blocks
+     * of a randomly chosen computer from the list.  Spawning here puts the player
+     * right inside the computer lab where the fire started.
+     */
+    private static BlockPos findSpawnNearComputer(ServerLevel level, List<BlockPos> computers) {
+        if (computers.isEmpty()) return findRandomSpawnInCCS(level);
+        net.minecraft.util.RandomSource random = level.getRandom();
+        // Shuffle attempts across all computers so we don't bias toward the first one
+        List<BlockPos> shuffled = new ArrayList<>(computers);
+        Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
+        for (BlockPos comp : shuffled) {
+            for (int ddx = -3; ddx <= 3; ddx++) {
+                for (int ddz = -3; ddz <= 3; ddz++) {
+                    BlockPos candidate = comp.offset(ddx, 0, ddz);
+                    if (!level.getBlockState(candidate.below()).isAir()
+                            && level.getBlockState(candidate).isAir()
+                            && level.getBlockState(candidate.above()).isAir()) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+        return findRandomSpawnInCCS(level);
     }
 
     @SubscribeEvent

@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.block.ComputerBlock;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -63,6 +64,51 @@ public class SimulationEffects {
                     double pz = firePos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
                     level.sendParticles(ParticleTypes.LARGE_SMOKE, px, py, pz, 1, 0.0, 0.15, 0.0, 0.03);
                 }
+            }
+        }
+    }
+
+    /**
+     * CCS fire variant: spreads electrical fire to one additional un-burned computer per interval.
+     * Uses positions cached in the session so there's no per-tick arena scan.
+     */
+    public void spreadComputerFire(ServerLevel level, SimulationSession session) {
+        List<BlockPos> computers = session.getComputerPositions();
+        if (computers.isEmpty()) return;
+
+        int toSpread = Config.FIRE_SPAWN_COUNT.get();
+        // Build candidate list (non-burning, non-broken computers)
+        List<BlockPos> candidates = new ArrayList<>();
+        for (BlockPos pos : computers) {
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof ComputerBlock
+                    && !state.getValue(ComputerBlock.BURNING)
+                    && !state.getValue(ComputerBlock.BROKEN)) {
+                candidates.add(pos);
+            }
+        }
+        if (candidates.isEmpty()) return;
+
+        for (int i = 0; i < toSpread && i < candidates.size(); i++) {
+            int idx = level.getRandom().nextInt(candidates.size() - i);
+            BlockPos pos = candidates.get(idx);
+            candidates.set(idx, candidates.get(candidates.size() - 1 - i));
+            BlockState state = level.getBlockState(pos);
+            level.setBlock(pos, state.setValue(ComputerBlock.BURNING, true), 3);
+            if (session != null) {
+                session.incrementFireSpread();
+                session.logger.log("FIRE_SPREAD", java.util.Map.of(
+                    "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                    "total_count", session.getFireSpreadCount(),
+                    "type", "computer_ignition"
+                ));
+            }
+            // Dense smoke plume above each newly ignited computer
+            for (int s = 0; s < 14; s++) {
+                double px = pos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
+                double py = pos.getY() + 1.0 + level.getRandom().nextDouble() * 3.0;
+                double pz = pos.getZ() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
+                level.sendParticles(ParticleTypes.LARGE_SMOKE, px, py, pz, 1, 0.0, 0.15, 0.0, 0.03);
             }
         }
     }
