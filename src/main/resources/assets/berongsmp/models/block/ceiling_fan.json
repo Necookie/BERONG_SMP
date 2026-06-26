@@ -1,0 +1,97 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "housing": "minecraft:block/gray_concrete",
+    "rod":     "minecraft:block/iron_block",
+    "blade_t": "minecraft:block/white_concrete",
+    "blade_b": "minecraft:block/dark_oak_planks",
+    "light":   "minecraft:block/glowstone",
+    "particle": "minecraft:block/gray_concrete"
+  },
+  "elements": [
+    {
+      "name": "mounting_rod",
+      "from": [7, 15, 7], "to": [9, 16, 9],
+      "faces": {
+        "north": { "texture": "#rod", "uv": [0, 0, 2, 1] },
+        "south": { "texture": "#rod", "uv": [0, 0, 2, 1] },
+        "east":  { "texture": "#rod", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#rod", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#rod", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#rod", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "motor_housing",
+      "from": [6, 10, 6], "to": [10, 15, 10],
+      "faces": {
+        "north": { "texture": "#housing", "uv": [0, 0, 4, 5] },
+        "south": { "texture": "#housing", "uv": [0, 0, 4, 5] },
+        "east":  { "texture": "#housing", "uv": [0, 0, 4, 5] },
+        "west":  { "texture": "#housing", "uv": [0, 0, 4, 5] },
+        "up":    { "texture": "#housing", "uv": [0, 0, 4, 4] },
+        "down":  { "texture": "#housing", "uv": [0, 0, 4, 4] }
+      }
+    },
+    {
+      "name": "light_bowl",
+      "from": [6, 8, 6], "to": [10, 10, 10],
+      "faces": {
+        "north": { "texture": "#light", "uv": [0, 0, 4, 2] },
+        "south": { "texture": "#light", "uv": [0, 0, 4, 2] },
+        "east":  { "texture": "#light", "uv": [0, 0, 4, 2] },
+        "west":  { "texture": "#light", "uv": [0, 0, 4, 2] },
+        "up":    { "texture": "#housing","uv": [0, 0, 4, 4] },
+        "down":  { "texture": "#light", "uv": [0, 0, 4, 4] }
+      }
+    },
+    {
+      "name": "blade_north",
+      "from": [4, 12, 2], "to": [12, 13, 7],
+      "faces": {
+        "north": { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "south": { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "east":  { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "west":  { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "up":    { "texture": "#blade_t", "uv": [0, 0, 8, 5] },
+        "down":  { "texture": "#blade_b", "uv": [0, 0, 8, 5] }
+      }
+    },
+    {
+      "name": "blade_south",
+      "from": [4, 12, 9], "to": [12, 13, 14],
+      "faces": {
+        "north": { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "south": { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "east":  { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "west":  { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "up":    { "texture": "#blade_t", "uv": [0, 0, 8, 5] },
+        "down":  { "texture": "#blade_b", "uv": [0, 0, 8, 5] }
+      }
+    },
+    {
+      "name": "blade_east",
+      "from": [9, 12, 4], "to": [14, 13, 12],
+      "faces": {
+        "north": { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "south": { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "east":  { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "west":  { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "up":    { "texture": "#blade_t", "uv": [0, 0, 5, 8] },
+        "down":  { "texture": "#blade_b", "uv": [0, 0, 5, 8] }
+      }
+    },
+    {
+      "name": "blade_west",
+      "from": [2, 12, 4], "to": [7, 13, 12],
+      "faces": {
+        "north": { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "south": { "texture": "#blade_b", "uv": [0, 0, 5, 1] },
+        "east":  { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "west":  { "texture": "#blade_b", "uv": [0, 0, 8, 1] },
+        "up":    { "texture": "#blade_t", "uv": [0, 0, 5, 8] },
+        "down":  { "texture": "#blade_b", "uv": [0, 0, 5, 8] }
+      }
+    }
+  ]
+}
