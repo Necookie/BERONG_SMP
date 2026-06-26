@@ -1,0 +1,36 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body":   "minecraft:block/light_gray_concrete",
+    "rim":    "minecraft:block/gray_concrete",
+    "bottom": "minecraft:block/gray_concrete",
+    "inner":  "minecraft:block/black_concrete",
+    "particle": "minecraft:block/gray_concrete"
+  },
+  "elements": [
+    {
+      "name": "can_body",
+      "from": [4, 0, 4], "to": [12, 9, 12],
+      "faces": {
+        "north":  { "texture": "#body",   "uv": [0, 0, 8, 9] },
+        "south":  { "texture": "#body",   "uv": [0, 0, 8, 9] },
+        "east":   { "texture": "#body",   "uv": [0, 0, 8, 9] },
+        "west":   { "texture": "#body",   "uv": [0, 0, 8, 9] },
+        "up":     { "texture": "#inner",  "uv": [0, 0, 8, 8] },
+        "down":   { "texture": "#bottom", "uv": [0, 0, 8, 8] }
+      }
+    },
+    {
+      "name": "rim",
+      "from": [3, 9, 3], "to": [13, 11, 13],
+      "faces": {
+        "north": { "texture": "#rim", "uv": [0, 0, 10, 2] },
+        "south": { "texture": "#rim", "uv": [0, 0, 10, 2] },
+        "east":  { "texture": "#rim", "uv": [0, 0, 10, 2] },
+        "west":  { "texture": "#rim", "uv": [0, 0, 10, 2] },
+        "up":    { "texture": "#rim", "uv": [0, 0, 10, 10] },
+        "down":  { "texture": "#rim", "uv": [0, 0, 10, 10] }
+      }
+    }
+  ]
+}
