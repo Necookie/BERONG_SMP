@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -15,10 +14,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/**
- * Long computer desk table — flammable oak construction with corner legs and modesty panel.
- * Flammability is registered in BerongSMP.commonSetup via FireBlock.setFlammable.
- */
 public class ComputerTableBlock extends Block {
 
     public static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
