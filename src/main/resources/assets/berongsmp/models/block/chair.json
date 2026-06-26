@@ -1,0 +1,106 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "wood":    "minecraft:block/dark_oak_planks",
+    "cushion": "minecraft:block/gray_concrete",
+    "particle": "minecraft:block/dark_oak_planks"
+  },
+  "elements": [
+    {
+      "name": "leg_front_left",
+      "from": [2, 0, 2], "to": [4, 5, 4],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "south": { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "leg_front_right",
+      "from": [12, 0, 2], "to": [14, 5, 4],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "south": { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 5] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "leg_back_left",
+      "from": [2, 0, 10], "to": [4, 13, 12],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "south": { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "leg_back_right",
+      "from": [12, 0, 10], "to": [14, 13, 12],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "south": { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 13] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "seat",
+      "from": [2, 5, 2], "to": [14, 7, 12],
+      "faces": {
+        "north": { "texture": "#wood",    "uv": [0, 0, 12, 2] },
+        "south": { "texture": "#wood",    "uv": [0, 0, 12, 2] },
+        "east":  { "texture": "#wood",    "uv": [0, 0, 10, 2] },
+        "west":  { "texture": "#wood",    "uv": [0, 0, 10, 2] },
+        "up":    { "texture": "#cushion", "uv": [0, 0, 12, 10] },
+        "down":  { "texture": "#wood",    "uv": [0, 0, 12, 10] }
+      }
+    },
+    {
+      "name": "backrest",
+      "from": [2, 7, 10], "to": [14, 13, 12],
+      "faces": {
+        "north": { "texture": "#wood",    "uv": [0, 0, 12, 6] },
+        "south": { "texture": "#cushion", "uv": [0, 0, 12, 6] },
+        "east":  { "texture": "#wood",    "uv": [0, 0, 2, 6] },
+        "west":  { "texture": "#wood",    "uv": [0, 0, 2, 6] },
+        "up":    { "texture": "#wood",    "uv": [0, 0, 12, 2] },
+        "down":  { "texture": "#wood",    "uv": [0, 0, 12, 2] }
+      }
+    },
+    {
+      "name": "support_front",
+      "from": [4, 4, 2], "to": [12, 5, 4],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 8, 1] },
+        "south": { "texture": "#wood", "uv": [0, 0, 8, 1] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 8, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 8, 2] }
+      }
+    },
+    {
+      "name": "support_back",
+      "from": [4, 4, 10], "to": [12, 5, 12],
+      "faces": {
+        "north": { "texture": "#wood", "uv": [0, 0, 8, 1] },
+        "south": { "texture": "#wood", "uv": [0, 0, 8, 1] },
+        "east":  { "texture": "#wood", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#wood", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#wood", "uv": [0, 0, 8, 2] },
+        "down":  { "texture": "#wood", "uv": [0, 0, 8, 2] }
+      }
+    }
+  ]
+}
