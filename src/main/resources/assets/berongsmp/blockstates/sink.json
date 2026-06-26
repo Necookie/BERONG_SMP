@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/sink" },
+    "facing=south": { "model": "berongsmp:block/sink", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/sink", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/sink", "y": 270 }
+  }
+}
