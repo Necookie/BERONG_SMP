@@ -1,5 +1,6 @@
 {
-  "itemGroup.berongsmp": "Example Mod Tab",
+  "itemGroup.berongsmp.simulation": "BerongSMP — Simulation",
+  "itemGroup.berongsmp.furniture": "BerongSMP — Furniture",
   "block.berongsmp.example_block": "Example Block",
   "block.berongsmp.computer": "Computer",
   "block.berongsmp.fire_alarm": "Fire Alarm",

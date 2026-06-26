@@ -230,18 +230,24 @@ public class BerongSMP {
     public static final DeferredItem<net.necookie.disastersim.item.CO2ExtinguisherItem> CO2_EXTINGUISHER = ITEMS.registerItem("co2_extinguisher",
             props -> new net.necookie.disastersim.item.CO2ExtinguisherItem(props.durability(200)));
 
-    /** Custom Creative Mode Tab for BerongSMP items. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp"))
+    /** Creative tab: simulation tools and interactive blocks. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SIM_TAB = CREATIVE_MODE_TABS.register("sim_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.simulation"))
             .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
+            .icon(() -> FIRE_EXTINGUISHER.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get());
                 output.accept(FIRE_EXTINGUISHER.get());
                 output.accept(CO2_EXTINGUISHER.get());
                 output.accept(COMPUTER_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
-                // Furniture
+            }).build());
+
+    /** Creative tab: furniture and props for building scenarios. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_TAB = CREATIVE_MODE_TABS.register("furn_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.furniture"))
+            .withTabsBefore(SIM_TAB.getKey())
+            .icon(() -> CHAIR_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
                 output.accept(WHITEBOARD_ITEM.get());
                 output.accept(BULLETIN_BOARD_ITEM.get());
                 output.accept(COMPUTER_TABLE_ITEM.get());
