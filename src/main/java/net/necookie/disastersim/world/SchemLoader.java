@@ -6,10 +6,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
@@ -155,6 +157,8 @@ public class SchemLoader implements StructurePlacer {
 
             // Spawn entities (item frames, paintings, etc.) from the Entities tag.
             placeEntities(level, origin, nbt, width, height, length);
+            // Apply tile-entity data (sign text, chest contents, etc.) from BlockEntities tag.
+            placeBlockEntities(level, origin, nbt, width, height, length);
 
             return true;
 
@@ -302,6 +306,66 @@ public class SchemLoader implements StructurePlacer {
 
         BerongSMP.LOGGER.info("[SchemLoader] Spawned {}/{} entities from {} at {}",
                 spawned, entityList.size(), resourcePath, origin);
+    }
+
+    /**
+     * Applies tile-entity (block-entity) data from the Sponge Schematic BlockEntities list.
+     * Sponge v3 stores these under Blocks.BlockEntities; v2 uses TileEntities at root level.
+     * Each entry has Pos (Int_Array [x,y,z]) and Data (raw Minecraft tile-entity NBT).
+     * The same CCW rotation applied to blocks is applied to the position offset here.
+     */
+    private void placeBlockEntities(ServerLevel level, BlockPos origin, CompoundTag nbt,
+                                     int schemWidth, int schemHeight, int schemLength) {
+        // v3: Blocks.BlockEntities; v2 fallback: TileEntities at root
+        CompoundTag blocksTag = nbt.getCompound("Blocks").orElse(nbt);
+        Tag beRaw = blocksTag.get("BlockEntities");
+        if (!(beRaw instanceof ListTag beList)) beRaw = nbt.get("TileEntities");
+        if (!(beRaw instanceof ListTag)) return;
+        ListTag beList2 = (ListTag) beRaw;
+        if (beList2.isEmpty()) return;
+
+        int applied = 0;
+        for (int i = 0; i < beList2.size(); i++) {
+            if (!(beList2.get(i) instanceof CompoundTag beTag)) continue;
+
+            // Position: TAG_Int_Array [x, y, z] relative to schematic origin
+            Tag posRaw = beTag.get("Pos");
+            if (!(posRaw instanceof IntArrayTag posArr)) continue;
+            int[] pos = posArr.getAsIntArray();
+            if (pos.length < 3) continue;
+            int relX = pos[0], relY = pos[1], relZ = pos[2];
+
+            // Apply same CCW rotation as block placement
+            int rotX, rotZ;
+            switch (ccwRotations) {
+                case 1  -> { rotX = relZ;                    rotZ = schemWidth  - 1 - relX; }
+                case 2  -> { rotX = schemWidth  - 1 - relX; rotZ = schemLength - 1 - relZ; }
+                case 3  -> { rotX = schemLength - 1 - relZ; rotZ = relX; }
+                default -> { rotX = relX;                    rotZ = relZ; }
+            }
+            BlockPos worldPos = origin.offset(rotX, relY, rotZ);
+
+            var dataOpt = beTag.getCompound("Data");
+            if (dataOpt.isEmpty()) continue;
+            CompoundTag data = dataOpt.get();
+
+            BlockEntity be = level.getBlockEntity(worldPos);
+            if (be == null) {
+                BerongSMP.LOGGER.warn("[SchemLoader] No BlockEntity at {} (BE #{})", worldPos, i);
+                continue;
+            }
+
+            try (ProblemReporter.ScopedCollector reporter =
+                     new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
+                var input = TagValueInput.create(reporter, level.registryAccess(), data);
+                be.loadWithComponents(input);
+                be.setChanged();
+                applied++;
+            } catch (Exception e) {
+                BerongSMP.LOGGER.warn("[SchemLoader] BlockEntity at {} load failed: {}", worldPos, e.getMessage());
+            }
+        }
+        BerongSMP.LOGGER.info("[SchemLoader] Applied {}/{} BlockEntities at {}", applied, beList2.size(), origin);
     }
 
     /**
