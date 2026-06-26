@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "berongsmp:item/computer_block"
+    "model": "berongsmp:item/computer"
   }
 }

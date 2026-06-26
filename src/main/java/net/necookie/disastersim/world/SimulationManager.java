@@ -623,14 +623,14 @@ public class SimulationManager {
         return candidates.get(level.getRandom().nextInt(candidates.size()));
     }
 
-    /** Scans the CCS arena for every computer_block and returns their positions. */
+    /** Scans the CCS arena for every computer and returns their positions. */
     static List<BlockPos> findComputersInCCS(ServerLevel level) {
         List<BlockPos> computers = new ArrayList<>();
         for (int dx = 0; dx < CCS_AREA_SPAN_X; dx++) {
             for (int dz = 0; dz < CCS_AREA_SPAN_Z; dz++) {
                 for (int dy = 0; dy < CCS_AREA_HEIGHT; dy++) {
                     BlockPos pos = CCS_FIRE_BASE.offset(dx, dy, dz);
-                    if (level.getBlockState(pos).getBlock() == BerongSMP.COMPUTER_BLOCK.get()) {
+                    if (level.getBlockState(pos).getBlock() == BerongSMP.COMPUTER.get()) {
                         computers.add(pos.immutable());
                     }
                 }

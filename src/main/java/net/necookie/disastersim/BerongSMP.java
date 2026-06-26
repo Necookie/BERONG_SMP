@@ -87,7 +87,7 @@ public class BerongSMP {
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
 
     /** Computer/terminal block — can be set LIT=true for Class C electrical fire scenarios. */
-    public static final DeferredBlock<ComputerBlock> COMPUTER_BLOCK = BLOCKS.registerBlock("computer_block",
+    public static final DeferredBlock<ComputerBlock> COMPUTER = BLOCKS.registerBlock("computer",
             ComputerBlock::new,
             () -> Block.Properties.of()
                     .mapColor(MapColor.METAL)
@@ -100,7 +100,7 @@ public class BerongSMP {
                     }));
 
     /** Computer block item. */
-    public static final DeferredItem<BlockItem> COMPUTER_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("computer_block", COMPUTER_BLOCK);
+    public static final DeferredItem<BlockItem> COMPUTER_ITEM = ITEMS.registerSimpleBlockItem("computer", COMPUTER);
 
     /** Wall-mounted fire alarm pull station — activates during FIRE simulations, logs fire_alarm_activate telemetry. */
     public static final DeferredBlock<FireAlarmBlock> FIRE_ALARM_BLOCK = BLOCKS.registerBlock(
@@ -239,7 +239,7 @@ public class BerongSMP {
                 output.accept(EXAMPLE_ITEM.get());
                 output.accept(FIRE_EXTINGUISHER.get());
                 output.accept(CO2_EXTINGUISHER.get());
-                output.accept(COMPUTER_BLOCK_ITEM.get());
+                output.accept(COMPUTER_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
                 // Furniture
                 output.accept(WHITEBOARD_ITEM.get());
