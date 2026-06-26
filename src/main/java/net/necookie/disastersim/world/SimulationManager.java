@@ -392,7 +392,7 @@ public class SimulationManager {
             TelemetryCsvWriter.writeRow(
                     session.getSessionId(), uuid.toString(),
                     session.getState().name().toLowerCase(),
-                    Math.round(elapsedS * 100.0) / 100.0, "move",
+                    Math.round(elapsedS * 100.0) / 100.0, "move_tick",
                     player.getX(), player.getY(), player.getZ(),
                     Math.round(hazDist * 100.0) / 100.0, null, null);
         }
