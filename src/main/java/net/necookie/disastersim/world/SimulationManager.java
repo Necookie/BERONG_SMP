@@ -105,11 +105,6 @@ public class SimulationManager {
             session.initEarthquake(level.getRandom(), magnitude);
         }
 
-        session.logger.log("SIM_START", java.util.Map.of(
-            "sim_type", state.name(),
-            "magnitude", state.isQuake() ? magnitude : 0.0
-        ));
-
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
@@ -131,6 +126,12 @@ public class SimulationManager {
                 spawnPos.getY(),
                 spawnPos.getZ() + 0.5,
                 Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+
+        session.logger.log("SIM_START", java.util.Map.of(
+            "sim_type", state.name(),
+            "magnitude", state.isQuake() ? magnitude : 0.0,
+            "x", spawnPos.getX(), "y", spawnPos.getY(), "z", spawnPos.getZ()
+        ));
 
         if (state == SimulationState.FIRE) {
             ItemStack extinguisher = new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get());
