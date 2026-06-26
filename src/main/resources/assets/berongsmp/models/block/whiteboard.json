@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "board":    "minecraft:block/white_concrete",
+    "frame":    "minecraft:block/gray_concrete",
+    "tray":     "minecraft:block/light_gray_concrete",
+    "particle": "minecraft:block/gray_concrete"
+  },
+  "elements": [
+    {
+      "name": "board_body",
+      "from": [0, 3, 13], "to": [16, 14, 16],
+      "faces": {
+        "north": { "texture": "#board", "uv": [0, 0, 16, 11] },
+        "south": { "texture": "#frame", "uv": [0, 0, 16, 11] },
+        "east":  { "texture": "#frame", "uv": [0, 0, 3, 11] },
+        "west":  { "texture": "#frame", "uv": [0, 0, 3, 11] },
+        "up":    { "texture": "#frame", "uv": [0, 0, 16, 3] },
+        "down":  { "texture": "#frame", "uv": [0, 0, 16, 3] }
+      }
+    },
+    {
+      "name": "bottom_frame",
+      "from": [0, 2, 13], "to": [16, 3, 16],
+      "faces": {
+        "north": { "texture": "#frame", "uv": [0, 0, 16, 1] },
+        "south": { "texture": "#frame", "uv": [0, 0, 16, 1] },
+        "east":  { "texture": "#frame", "uv": [0, 0, 3, 1] },
+        "west":  { "texture": "#frame", "uv": [0, 0, 3, 1] },
+        "up":    { "texture": "#frame", "uv": [0, 0, 16, 3] },
+        "down":  { "texture": "#frame", "uv": [0, 0, 16, 3] }
+      }
+    },
+    {
+      "name": "marker_tray",
+      "from": [0, 2, 11], "to": [16, 3, 13],
+      "faces": {
+        "north": { "texture": "#tray",  "uv": [0, 0, 16, 1] },
+        "south": { "texture": "#frame", "uv": [0, 0, 16, 1] },
+        "east":  { "texture": "#frame", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#frame", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#tray",  "uv": [0, 0, 16, 2] },
+        "down":  { "texture": "#frame", "uv": [0, 0, 16, 2] }
+      }
+    }
+  ]
+}

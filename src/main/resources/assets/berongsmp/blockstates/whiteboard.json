@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/whiteboard" },
+    "facing=south": { "model": "berongsmp:block/whiteboard", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/whiteboard", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/whiteboard", "y": 270 }
+  }
+}
