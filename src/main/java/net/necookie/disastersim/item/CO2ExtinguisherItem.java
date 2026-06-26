@@ -141,6 +141,15 @@ public class CO2ExtinguisherItem extends Item {
             }
         }
 
+        if (user instanceof ServerPlayer sp) {
+            SimulationSession session = SimulationManager.getSession(sp.getUUID());
+            if (session != null && stack.getDamageValue() % 20 == 0) {
+                session.logger.log("extinguisher_use", java.util.Map.of(
+                        "hit_target", anyHit,
+                        "nearby_player_count", countNearbyPlayers(level, sp, 5.0)));
+            }
+        }
+
         spawnParticlesServer(level, origin, look, side, up, sputtering);
 
         if (playSound) {
