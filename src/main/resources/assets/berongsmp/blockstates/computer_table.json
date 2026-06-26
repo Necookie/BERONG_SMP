@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/computer_table" },
+    "facing=south": { "model": "berongsmp:block/computer_table", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/computer_table", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/computer_table", "y": 270 }
+  }
+}
