@@ -17,8 +17,19 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.material.MapColor;
+import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.CeilingFanBlock;
+import net.necookie.disastersim.block.ChairBlock;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.block.ComputerTableBlock;
+import net.necookie.disastersim.block.DrawersBlock;
+import net.necookie.disastersim.block.FilingCabinetBlock;
 import net.necookie.disastersim.block.FireAlarmBlock;
+import net.necookie.disastersim.block.LockerBlock;
+import net.necookie.disastersim.block.SinkBlock;
+import net.necookie.disastersim.block.ToiletBlock;
+import net.necookie.disastersim.block.TrashCanBlock;
+import net.necookie.disastersim.block.WhiteboardBlock;
 import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;
@@ -105,6 +116,108 @@ public class BerongSMP {
     public static final DeferredItem<BlockItem> FIRE_ALARM_ITEM =
             ITEMS.registerSimpleBlockItem("fire_alarm", FIRE_ALARM_BLOCK);
 
+    // ── Furniture blocks ─────────────────────────────────────────────────────
+
+    /** Classroom whiteboard — wall-mounted flat panel with marker tray. */
+    public static final DeferredBlock<WhiteboardBlock> WHITEBOARD = BLOCKS.registerBlock("whiteboard",
+            WhiteboardBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .strength(0.5f, 2.0f)
+                    .sound(SoundType.STONE));
+    public static final DeferredItem<BlockItem> WHITEBOARD_ITEM = ITEMS.registerSimpleBlockItem("whiteboard", WHITEBOARD);
+
+    /** Toilet block — ceramic basin+tank; right-click to flush. */
+    public static final DeferredBlock<ToiletBlock> TOILET = BLOCKS.registerBlock("toilet",
+            ToiletBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .strength(1.0f, 4.0f)
+                    .sound(SoundType.STONE));
+    public static final DeferredItem<BlockItem> TOILET_ITEM = ITEMS.registerSimpleBlockItem("toilet", TOILET);
+
+    /** Wall-mounted sink with iron faucet and handles; right-click for water sound. */
+    public static final DeferredBlock<SinkBlock> SINK = BLOCKS.registerBlock("sink",
+            SinkBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .strength(1.0f, 4.0f)
+                    .sound(SoundType.STONE));
+    public static final DeferredItem<BlockItem> SINK_ITEM = ITEMS.registerSimpleBlockItem("sink", SINK);
+
+    /** Office chest-of-drawers — dark oak body with birch drawer fronts and iron handles. */
+    public static final DeferredBlock<DrawersBlock> DRAWERS = BLOCKS.registerBlock("drawers",
+            DrawersBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .strength(1.5f, 3.0f)
+                    .sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> DRAWERS_ITEM = ITEMS.registerSimpleBlockItem("drawers", DRAWERS);
+
+    /** Flammable oak computer desk with 4 legs and a back cable-management panel. */
+    public static final DeferredBlock<ComputerTableBlock> COMPUTER_TABLE = BLOCKS.registerBlock("computer_table",
+            ComputerTableBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .strength(1.5f, 3.0f)
+                    .sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> COMPUTER_TABLE_ITEM = ITEMS.registerSimpleBlockItem("computer_table", COMPUTER_TABLE);
+
+    /** Dark oak classroom/office chair with gray cushion seat and backrest. */
+    public static final DeferredBlock<ChairBlock> CHAIR = BLOCKS.registerBlock("chair",
+            ChairBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .strength(1.0f, 2.0f)
+                    .sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> CHAIR_ITEM = ITEMS.registerSimpleBlockItem("chair", CHAIR);
+
+    /** Tall metal filing cabinet with 2 drawers, label slots, and pull handles. */
+    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.registerBlock("filing_cabinet",
+            FilingCabinetBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(2.0f, 6.0f)
+                    .sound(SoundType.METAL));
+    public static final DeferredItem<BlockItem> FILING_CABINET_ITEM = ITEMS.registerSimpleBlockItem("filing_cabinet", FILING_CABINET);
+
+    /** Tall metal school/office locker with vents, door seam, handle, and gold lock. */
+    public static final DeferredBlock<LockerBlock> LOCKER = BLOCKS.registerBlock("locker",
+            LockerBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(2.0f, 6.0f)
+                    .sound(SoundType.METAL));
+    public static final DeferredItem<BlockItem> LOCKER_ITEM = ITEMS.registerSimpleBlockItem("locker", LOCKER);
+
+    /** Small cylindrical trash can — no facing, symmetric, open-top. */
+    public static final DeferredBlock<TrashCanBlock> TRASH_CAN = BLOCKS.registerBlock("trash_can",
+            TrashCanBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(0.5f, 2.0f)
+                    .sound(SoundType.METAL));
+    public static final DeferredItem<BlockItem> TRASH_CAN_ITEM = ITEMS.registerSimpleBlockItem("trash_can", TRASH_CAN);
+
+    /** Wall-mounted cork bulletin board with pinned paper slips. */
+    public static final DeferredBlock<BulletinBoardBlock> BULLETIN_BOARD = BLOCKS.registerBlock("bulletin_board",
+            BulletinBoardBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .strength(0.5f, 2.0f)
+                    .sound(SoundType.WOOD));
+    public static final DeferredItem<BlockItem> BULLETIN_BOARD_ITEM = ITEMS.registerSimpleBlockItem("bulletin_board", BULLETIN_BOARD);
+
+    /** Ceiling fan — motor housing + 4 blades + glowstone light bowl; symmetric/no facing. */
+    public static final DeferredBlock<CeilingFanBlock> CEILING_FAN = BLOCKS.registerBlock("ceiling_fan",
+            CeilingFanBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(0.5f, 2.0f)
+                    .sound(SoundType.METAL)
+                    .lightLevel(s -> 5));
+    public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
+
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
@@ -128,6 +241,18 @@ public class BerongSMP {
                 output.accept(CO2_EXTINGUISHER.get());
                 output.accept(COMPUTER_BLOCK_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
+                // Furniture
+                output.accept(WHITEBOARD_ITEM.get());
+                output.accept(BULLETIN_BOARD_ITEM.get());
+                output.accept(COMPUTER_TABLE_ITEM.get());
+                output.accept(CHAIR_ITEM.get());
+                output.accept(DRAWERS_ITEM.get());
+                output.accept(FILING_CABINET_ITEM.get());
+                output.accept(LOCKER_ITEM.get());
+                output.accept(TOILET_ITEM.get());
+                output.accept(SINK_ITEM.get());
+                output.accept(TRASH_CAN_ITEM.get());
+                output.accept(CEILING_FAN_ITEM.get());
             }).build());
 
     /**
@@ -208,6 +333,7 @@ public class BerongSMP {
      */
     private void commonSetup(FMLCommonSetupEvent event) {
         // No cross-side setup required at this time.
+        // Wood furniture flammability is handled via IBlockExtension overrides in each block class.
     }
 
     /**
