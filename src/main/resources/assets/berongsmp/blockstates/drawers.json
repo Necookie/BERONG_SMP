@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/drawers" },
+    "facing=south": { "model": "berongsmp:block/drawers", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/drawers", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/drawers", "y": 270 }
+  }
+}
