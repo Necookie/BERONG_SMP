@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/locker" },
+    "facing=south": { "model": "berongsmp:block/locker", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/locker", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/locker", "y": 270 }
+  }
+}
