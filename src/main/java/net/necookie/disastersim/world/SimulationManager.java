@@ -55,7 +55,7 @@ public class SimulationManager {
             Map.entry(new SchemLoader(
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS),
             Map.entry(new SchemLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building2.3.schem"), 3), CCS_POS)
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building2.4.schem"), 3), CCS_POS)
     );
 
     private static final SimulationEffects EFFECTS = new SimulationEffects();
