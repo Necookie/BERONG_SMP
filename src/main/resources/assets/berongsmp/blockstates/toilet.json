@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/toilet" },
+    "facing=south": { "model": "berongsmp:block/toilet", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/toilet", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/toilet", "y": 270 }
+  }
+}

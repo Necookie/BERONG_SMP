@@ -1,0 +1,70 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "ceramic": "minecraft:block/white_concrete",
+    "tank":    "minecraft:block/light_gray_concrete",
+    "particle": "minecraft:block/white_concrete"
+  },
+  "elements": [
+    {
+      "name": "pedestal",
+      "from": [3, 0, 3], "to": [13, 4, 13],
+      "faces": {
+        "north": { "texture": "#ceramic", "uv": [0, 0, 10, 4] },
+        "south": { "texture": "#ceramic", "uv": [0, 0, 10, 4] },
+        "east":  { "texture": "#ceramic", "uv": [0, 0, 10, 4] },
+        "west":  { "texture": "#ceramic", "uv": [0, 0, 10, 4] },
+        "up":    { "texture": "#ceramic", "uv": [0, 0, 10, 10] },
+        "down":  { "texture": "#ceramic", "uv": [0, 0, 10, 10] }
+      }
+    },
+    {
+      "name": "bowl",
+      "from": [3, 4, 5], "to": [13, 9, 12],
+      "faces": {
+        "north": { "texture": "#ceramic", "uv": [0, 0, 10, 5] },
+        "south": { "texture": "#ceramic", "uv": [0, 0, 10, 5] },
+        "east":  { "texture": "#ceramic", "uv": [0, 0, 7, 5] },
+        "west":  { "texture": "#ceramic", "uv": [0, 0, 7, 5] },
+        "up":    { "texture": "#tank",    "uv": [0, 0, 10, 7] },
+        "down":  { "texture": "#ceramic", "uv": [0, 0, 10, 7] }
+      }
+    },
+    {
+      "name": "seat_lid",
+      "from": [3, 8, 5], "to": [13, 10, 12],
+      "faces": {
+        "north": { "texture": "#tank",    "uv": [0, 0, 10, 2] },
+        "south": { "texture": "#tank",    "uv": [0, 0, 10, 2] },
+        "east":  { "texture": "#tank",    "uv": [0, 0, 7, 2] },
+        "west":  { "texture": "#tank",    "uv": [0, 0, 7, 2] },
+        "up":    { "texture": "#tank",    "uv": [0, 0, 10, 7] },
+        "down":  { "texture": "#ceramic", "uv": [0, 0, 10, 7] }
+      }
+    },
+    {
+      "name": "tank",
+      "from": [4, 9, 11], "to": [12, 16, 16],
+      "faces": {
+        "north": { "texture": "#tank", "uv": [0, 0, 8, 7] },
+        "south": { "texture": "#tank", "uv": [0, 0, 8, 7] },
+        "east":  { "texture": "#tank", "uv": [0, 0, 5, 7] },
+        "west":  { "texture": "#tank", "uv": [0, 0, 5, 7] },
+        "up":    { "texture": "#tank", "uv": [0, 0, 8, 5] },
+        "down":  { "texture": "#tank", "uv": [0, 0, 8, 5] }
+      }
+    },
+    {
+      "name": "flush_button",
+      "from": [6, 15, 11], "to": [10, 16, 13],
+      "faces": {
+        "north": { "texture": "#ceramic", "uv": [0, 0, 4, 1] },
+        "south": { "texture": "#ceramic", "uv": [0, 0, 4, 1] },
+        "east":  { "texture": "#ceramic", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#ceramic", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#ceramic", "uv": [0, 0, 4, 2] },
+        "down":  { "texture": "#ceramic", "uv": [0, 0, 4, 2] }
+      }
+    }
+  ]
+}
