@@ -163,6 +163,17 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `TursoClient` | HTTP wrapper for the Turso libSQL REST API (`/v2/pipeline`); fire-and-forget async writes via `CompletableFuture`, synchronous reads for commands; creates schema on first init |
 | `SessionManager` | Manages `Map<UUID, StudentSession>` for shared station accounts; hooks into tutorial completion and simulation end to persist scores; exposes `/bfp` admin flow |
 | `FireAlarmBlock` | Wall-mounted block in `block/` package; states `FACING` + `ACTIVATED`. Right-click during an active FIRE simulation sets `ACTIVATED=true`, plays bell sound, logs `fire_alarm_activate` telemetry event. Auto-resets when simulation structure is restored. |
+| `WhiteboardBlock` | Flat wall-mounted classroom whiteboard; FACING only. Model: white-concrete board surface + gray frame + light-gray marker tray. Tile 2–3 side-by-side for a wide whiteboard. |
+| `ToiletBlock` | Ceramic toilet; FACING only. Model: pedestal base + bowl + seat lid + tank + flush button. Right-click plays water/flush sound. |
+| `SinkBlock` | Wall-mounted sink; FACING only. Model: back plate + ceramic basin + iron faucet body/neck + left/right handles. Right-click plays water-ambient sound. |
+| `DrawersBlock` | Dark-oak chest-of-drawers; FACING only. Model: 3 birch drawer fronts + iron pull handles. Flammable (`getFlammability=20, spreadSpeed=5`). |
+| `ComputerTableBlock` | Wide oak desk; FACING only. Model: tabletop + 4 corner oak-log legs + dark-oak cable panel + front cross-bar. Flammable — burns during fire simulations. |
+| `ChairBlock` | Dark-oak classroom/office chair; FACING only. Model: seat + backrest (gray cushion) + 4 legs + support bars. Flammable. |
+| `FilingCabinetBlock` | Tall metal filing cabinet; FACING only. Model: iron body + 2 light-gray drawer faces + gray handles + white label slots. Strength 2.0/6.0. |
+| `LockerBlock` | Tall school locker; FACING only. Model: iron body + light-gray door + vertical seam + top/bottom vents (black) + gray handle + gold lock + white name plate. |
+| `TrashCanBlock` | Open-top trash can; no FACING (symmetric). Model: light-gray body + gray rim + black inner top. |
+| `BulletinBoardBlock` | Cork bulletin board (note_block texture); FACING only. Model: dark-oak frame + 3 paper slips + 3 red/orange push-pins. Flammable. |
+| `CeilingFanBlock` | Ceiling fan; no FACING (symmetric). Model: iron mounting rod + gray motor housing + 4 oak/white blades (N/S/E/W) + glowstone light bowl (light level 5). |
 | `AssemblyZone` | Static utility in `world/`; defines the safe-zone AABB outside the LSPU Library. Spawns green `HAPPY_VILLAGER`+`SCRAPE` particle force-field border every 5 ticks during simulations. Detects player entry → fires `assembly_area_reached` event + ends simulation with `end_reason=assembly_reached`. Coordinates are PLACEHOLDER — tune with F3 in-game. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. |
 | `ExitZones` | Static record list in `world/`; defines three named AABB emergency-exit zones (`main_exit`, `side_exit`, `rear_exit`) near the LSPU Library doors. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. All coordinates are PLACEHOLDER — tune with F3 in-game. |
