@@ -130,13 +130,13 @@ public class CO2ExtinguisherItem extends Item {
                     double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
                     double hazDist = SimulationManager.nearestFireDistance(level, sp.blockPosition());
                     int nearbyPlayers = countNearbyPlayers(level, sp, 5.0);
-                    TelemetryCsvWriter.writeRow(
+                    session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                             session.getSessionId(), sp.getUUID().toString(),
                             session.getState().name().toLowerCase(),
                             Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
                             sp.getX(), sp.getY(), sp.getZ(),
                             Math.round(hazDist * 100.0) / 100.0,
-                            "co2_extinguisher", nearbyPlayers);
+                            "co2_extinguisher", nearbyPlayers));
                 }
             }
         }

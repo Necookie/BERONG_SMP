@@ -95,31 +95,34 @@ public class TelemetryCsvWriter {
         }
     }
 
-    public static void writeRow(String sessionId, String playerId, String scenarioType,
-                                double timestamp, String eventType,
-                                double x, double y, double z,
-                                double hazardDistance,
-                                String interactionTarget, Integer nearbyPlayerCount) {
-        if (telemetryDir == null) return;
-        try {
-            ensureEventWriter();
-            StringBuilder sb = new StringBuilder();
-            sb.append(csv(playerId)).append(',');
-            sb.append(csv(sessionId)).append(',');
-            sb.append(csv(scenarioType)).append(',');
-            sb.append(round2(timestamp)).append(',');
-            sb.append(csv(eventType)).append(',');
-            sb.append(round3(x)).append(',');
-            sb.append(round3(y)).append(',');
-            sb.append(round3(z)).append(',');
-            sb.append(round2(hazardDistance)).append(',');
-            sb.append(interactionTarget != null ? csv(interactionTarget) : "").append(',');
-            sb.append(nearbyPlayerCount != null ? nearbyPlayerCount : "");
-            eventWriter.write(sb.toString());
-            eventWriter.newLine();
-        } catch (IOException e) {
-            BerongSMP.LOGGER.error("[TelemetryCsvWriter] writeRow error: {}", e.getMessage());
+    public static String writeRow(String sessionId, String playerId, String scenarioType,
+                                  double timestamp, String eventType,
+                                  double x, double y, double z,
+                                  double hazardDistance,
+                                  String interactionTarget, Integer nearbyPlayerCount) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(csv(playerId)).append(',');
+        sb.append(csv(sessionId)).append(',');
+        sb.append(csv(scenarioType)).append(',');
+        sb.append(round2(timestamp)).append(',');
+        sb.append(csv(eventType)).append(',');
+        sb.append(round3(x)).append(',');
+        sb.append(round3(y)).append(',');
+        sb.append(round3(z)).append(',');
+        sb.append(round2(hazardDistance)).append(',');
+        sb.append(interactionTarget != null ? csv(interactionTarget) : "").append(',');
+        sb.append(nearbyPlayerCount != null ? nearbyPlayerCount : "");
+        String row = sb.toString();
+        if (telemetryDir != null) {
+            try {
+                ensureEventWriter();
+                eventWriter.write(row);
+                eventWriter.newLine();
+            } catch (IOException e) {
+                BerongSMP.LOGGER.error("[TelemetryCsvWriter] writeRow error: {}", e.getMessage());
+            }
         }
+        return row;
     }
 
     public static void flush() {

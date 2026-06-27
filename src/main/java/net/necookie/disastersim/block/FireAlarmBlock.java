@@ -122,13 +122,13 @@ public class FireAlarmBlock extends Block {
                 "z",               player.getZ(),
                 "hazard_distance", Math.round(hazardDist * 100.0) / 100.0
         ));
-        TelemetryCsvWriter.writeRow(
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),
                 Math.round(t * 100.0) / 100.0, "fire_alarm_activate",
                 player.getX(), player.getY(), player.getZ(),
                 Math.round(hazardDist * 100.0) / 100.0,
-                "fire_alarm", null);
+                "fire_alarm", null));
 
         return InteractionResult.SUCCESS;
     }

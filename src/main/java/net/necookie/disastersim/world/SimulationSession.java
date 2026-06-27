@@ -23,6 +23,13 @@ public class SimulationSession {
     private int fireSpreadCount;
     public final SimulationEventLogger logger = new SimulationEventLogger();
 
+    private static final String CSV_HEADER =
+        "player_id,session_id,scenario_type,timestamp,event_type,x,y,z,hazard_distance,interaction_target,nearby_player_count";
+    private final StringBuilder csvBuffer = new StringBuilder(CSV_HEADER).append('\n');
+
+    public void bufferCsvRow(String row) { csvBuffer.append(row).append('\n'); }
+    public String buildMoveCsv() { return csvBuffer.toString(); }
+
     private final String sessionId = UUID.randomUUID().toString().substring(0, 8);
     private final Instant startedAt = Instant.now();
 

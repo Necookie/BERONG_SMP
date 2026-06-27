@@ -82,12 +82,12 @@ public class AssemblyZone {
                 "z",               player.getZ(),
                 "hazard_distance", hazRounded
         ));
-        TelemetryCsvWriter.writeRow(
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),
                 tRounded, "assembly_area_reached",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, null, null);
+                hazRounded, null, null));
 
         Vec3 pos = player.position();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER,

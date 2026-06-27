@@ -242,6 +242,7 @@ public class TursoClient {
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN prep_level TEXT"))
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN confidence REAL"))
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN bfp_notes TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN move_log_csv TEXT"))
             .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_student ON sessions(student_name)"))
             .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_start ON sessions(start_time)"));
     }

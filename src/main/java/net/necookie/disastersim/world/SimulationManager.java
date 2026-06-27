@@ -160,11 +160,11 @@ public class SimulationManager {
                         ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                         : 99.0);
         TelemetryCsvWriter.openSession(session.getSessionId());
-        TelemetryCsvWriter.writeRow(
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), uuid.toString(), state.name().toLowerCase(),
                 0.0, "session_start",
                 player.getX(), player.getY(), player.getZ(),
-                startHazDist, null, null);
+                startHazDist, null, null));
     }
 
     @SubscribeEvent
@@ -196,12 +196,12 @@ public class SimulationManager {
         session.logger.log("door_open", java.util.Map.of(
                 "t", tRounded, "x", player.getX(), "y", player.getY(), "z", player.getZ(),
                 "target", targetName, "hazard_distance", hazRounded));
-        TelemetryCsvWriter.writeRow(
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),
                 tRounded, "door_open",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, targetName, null);
+                hazRounded, targetName, null));
     }
 
     public static synchronized void endSimulation(UUID uuid) {
@@ -231,12 +231,12 @@ public class SimulationManager {
         ServerPlayer playerForCsv = session.getPlayer();
         if (playerForCsv != null) {
             double endHazDist = hazardDistance(session, (ServerLevel) playerForCsv.level(), playerForCsv);
-            TelemetryCsvWriter.writeRow(
+            session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                     session.getSessionId(), uuid.toString(),
                     session.getState().name().toLowerCase(),
                     Math.round(elapsedT * 100.0) / 100.0, "session_end",
                     playerForCsv.getX(), playerForCsv.getY(), playerForCsv.getZ(),
-                    Math.round(endHazDist * 100.0) / 100.0, null, null);
+                    Math.round(endHazDist * 100.0) / 100.0, null, null));
         }
         java.util.Map<String, Object> meta = new java.util.HashMap<>();
         meta.put("player_id",                    uuid.toString());
@@ -265,12 +265,13 @@ public class SimulationManager {
                     "[SimulationManager] endSimulation uuid={} simType={} score={}", uuid, simType, finalScore);
             TursoClient.executeAsync(
                     "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
-                    " end_time=?, status='completed', event_log=?" +
+                    " end_time=?, status='completed', event_log=?, move_log_csv=?" +
                     " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
                     " ORDER BY id DESC LIMIT 1)",
                     simType, finalScore, passed,
                     java.time.Instant.now().toString(),
                     session.logger.toJson(),
+                    session.buildMoveCsv(),
                     uuid.toString());
         } else {
             net.necookie.disastersim.BerongSMP.LOGGER.warn(
@@ -392,12 +393,12 @@ public class SimulationManager {
         if (ticks % 2 == 0) {
             double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
             double hazDist = hazardDistance(session, level, player);
-            TelemetryCsvWriter.writeRow(
+            session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                     session.getSessionId(), uuid.toString(),
                     session.getState().name().toLowerCase(),
                     Math.round(elapsedS * 100.0) / 100.0, "move_tick",
                     player.getX(), player.getY(), player.getZ(),
-                    Math.round(hazDist * 100.0) / 100.0, null, null);
+                    Math.round(hazDist * 100.0) / 100.0, null, null));
         }
     }
 
@@ -512,12 +513,12 @@ public class SimulationManager {
         session.logger.log("emergency_exit", java.util.Map.of(
                 "t", tRounded, "x", player.getX(), "y", player.getY(), "z", player.getZ(),
                 "exit", exit.label(), "hazard_distance", hazRounded));
-        TelemetryCsvWriter.writeRow(
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), uuid.toString(),
                 session.getState().name().toLowerCase(),
                 tRounded, "emergency_exit",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, exit.label(), null);
+                hazRounded, exit.label(), null));
     }
 
     /** Returns true if simulation ended (caller should continue outer loop). */
