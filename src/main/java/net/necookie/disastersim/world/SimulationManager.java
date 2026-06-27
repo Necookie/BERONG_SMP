@@ -379,7 +379,9 @@ public class SimulationManager {
                                       ServerLevel level, ServerPlayer player, int ticks) {
         if (ticks % 20 == 0) {
             BlockPos pos = player.blockPosition();
-            SimRoom room = SimRoom.fromPos(pos, SIM_POS);
+            SimRoom room = session.getState().isCCS()
+                    ? SimRoom.fromCCSPos(pos)
+                    : SimRoom.fromPos(pos, SIM_POS);
             double nearestFire = nearestFireDistance(level, pos);
             session.logger.log("PLAYER_TICK", java.util.Map.of(
                 "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
