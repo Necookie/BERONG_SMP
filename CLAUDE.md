@@ -328,6 +328,14 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 
 The companion dashboard repo (`BERONG_SMP_WEB/apps/dashboard/scripts/seed-synthetic.mjs`) contains a seeder for 20 high-quality synthetic sessions used for dashboard testing. Run with `node apps/dashboard/scripts/seed-synthetic.mjs` from the web repo root.
 
+### Dashboard Movement Map (`MapPlayer.tsx`)
+
+The session detail page (`sessions/[id].astro`) renders a `MapPlayer` React island when `move_log_csv` is non-null. The map:
+- Parses `move_log_csv` client-side; filters rows by `event_type === 'move_tick'` for path rendering
+- Initialises to the last frame so the full player journey is visible immediately (click ↺ to replay)
+- Uses `var(--text-muted)` / `var(--border-card)` CSS variables for ghost path and room labels — renders correctly on both dark and light themes
+- **Light theme gotcha:** SVG ghost path was previously `rgba(255,255,255,0.07)` (invisible on `--bg-log-panel: #ede9e5`); now uses `var(--text-muted)` with 0.3 opacity
+
 ### Event log invariants verified by the seed script
 
 These constraints reflect what real mod sessions must produce — if the mod deviates, the synthetic baseline will diverge from live data:
