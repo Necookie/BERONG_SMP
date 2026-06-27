@@ -548,12 +548,31 @@ public class SimulationManager {
     }
 
     private static double hazardDistance(SimulationSession session, ServerLevel level, ServerPlayer player) {
+        if (session.getState() == SimulationState.CCS_FIRE) {
+            return nearestCCSHazardDistance(level, player.blockPosition());
+        }
         if (session.getState().isFire()) {
             return nearestFireDistance(level, player.blockPosition());
         }
         return session.getEpicenter() != null
                 ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                 : 99.0;
+    }
+
+    private static double nearestCCSHazardDistance(ServerLevel level, BlockPos origin) {
+        double minSq = Double.MAX_VALUE;
+        for (BlockPos check : BlockPos.betweenClosed(origin.offset(-15, -5, -15), origin.offset(15, 5, 15))) {
+            net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
+            boolean isHazard = bs.is(net.minecraft.world.level.block.Blocks.FIRE)
+                    || bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)
+                    || (bs.getBlock() instanceof net.necookie.disastersim.block.ComputerBlock
+                        && bs.getValue(net.necookie.disastersim.block.ComputerBlock.BURNING));
+            if (isHazard) {
+                double d = origin.distSqr(check);
+                if (d < minSq) minSq = d;
+            }
+        }
+        return minSq == Double.MAX_VALUE ? 99.0 : Math.sqrt(minSq);
     }
 
     @SubscribeEvent
