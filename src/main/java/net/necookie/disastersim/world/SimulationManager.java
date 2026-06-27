@@ -34,7 +34,7 @@ public class SimulationManager {
     public static final BlockPos SIM_POS = new BlockPos(30, -34, 83);
 
     private static final BlockPos SSC_POS = new BlockPos(11,  -33, 90);
-    private static final BlockPos CCS_POS = new BlockPos(76, -34, 4);
+    public static final BlockPos CCS_POS = new BlockPos(76, -34, 4);
 
     // Separate from QUAKE_INTERVAL so tuning earthquake rate doesn't silently change HUD update frequency.
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
@@ -258,7 +258,7 @@ public class SimulationManager {
         TelemetryCsvWriter.flush();
 
         if (TursoClient.isReady()) {
-            String simType = session.getState().isFire() ? "FIRE" : "EARTHQUAKE";
+            String simType = session.getState().name(); // FIRE, EARTHQUAKE, CCS_FIRE, or CCS_EARTHQUAKE
             boolean passed = session.getState().isFire()
                     && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
             net.necookie.disastersim.BerongSMP.LOGGER.info(

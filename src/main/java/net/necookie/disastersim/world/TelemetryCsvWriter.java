@@ -43,15 +43,18 @@ public class TelemetryCsvWriter {
     private static boolean fireAlarmsScanDone = false;
     private static String cachedModVersion = null;
 
+    // Nominal extinguisher cabinet positions — extinguishers are issued as items at session start,
+    // so these are fixed reference points for map_metadata.json (not scanned from placed blocks).
+    private static final BlockPos LIBRARY_EXTINGUISHER_POS = new BlockPos(33, -33, 108); // west wall, entrance hall
+    private static final BlockPos CCS_EXTINGUISHER_POS     = new BlockPos(82, -32,   8); // ground floor near CCS entrance
+
     public static void init(Path runDir) {
         try {
             telemetryDir = runDir.resolve("telemetry");
             Files.createDirectories(telemetryDir);
 
-            Path metaFile = telemetryDir.resolve("map_metadata.json");
-            if (!Files.exists(metaFile)) {
-                writeMapMetadata(metaFile);
-            }
+            // Always rewrite so new scenario sections and extinguisher positions take effect.
+            writeMapMetadata(telemetryDir.resolve("map_metadata.json"));
 
             openEventWriter();
             openSessionWriter();
@@ -213,6 +216,18 @@ public class TelemetryCsvWriter {
         return cachedModVersion;
     }
 
+    private static String buildExtinguisherJson(BlockPos... positions) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < positions.length; i++) {
+            if (i > 0) sb.append(",");
+            BlockPos p = positions[i];
+            sb.append(String.format(
+                "{\"x\":%d,\"y\":%d,\"z\":%d,\"note\":\"nominal — extinguisher issued as item at session start\"}",
+                p.getX(), p.getY(), p.getZ()));
+        }
+        return sb.toString();
+    }
+
     private static String buildAlarmJson() {
         if (fireAlarmPositions.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
@@ -253,21 +268,35 @@ public class TelemetryCsvWriter {
             (int) az.minX, (int) az.minY, (int) az.minZ,
             (int) az.maxX, (int) az.maxY, (int) az.maxZ);
         net.minecraft.core.BlockPos sp = SimulationManager.SIM_POS;
+        net.minecraft.core.BlockPos ccs = SimulationManager.CCS_POS;
         String json = "{\n" +
             "  \"contract_version\": \"" + CONTRACT_VERSION + "\",\n" +
             "  \"sim_pos\": {\"x\": " + sp.getX() + ", \"y\": " + sp.getY() + ", \"z\": " + sp.getZ() + "},\n" +
+            "  \"ccs_pos\": {\"x\": " + ccs.getX() + ", \"y\": " + ccs.getY() + ", \"z\": " + ccs.getZ() + "},\n" +
             "  \"scenarios\": {\n" +
             "    \"fire\": {\n" +
             "      \"exits\": [\n        " + exits + "\n      ],\n" +
             "      \"assembly_area\": " + assemblyJson + ",\n" +
             "      \"fire_alarm_positions\": [" + buildAlarmJson() + "],\n" +
-            "      \"extinguisher_positions\": [],\n" +
+            "      \"extinguisher_positions\": [" + buildExtinguisherJson(LIBRARY_EXTINGUISHER_POS) + "],\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"Approximate library interior — see sim_pos\"}\n" +
             "    },\n" +
             "    \"earthquake\": {\n" +
             "      \"exits\": [],\n" +
             "      \"assembly_area\": " + assemblyJson + ",\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"Epicenter varies per session — see sessions CSV magnitude column\"}\n" +
+            "    },\n" +
+            "    \"ccs_fire\": {\n" +
+            "      \"exits\": [],\n" +
+            "      \"assembly_area\": " + assemblyJson + ",\n" +
+            "      \"fire_alarm_positions\": [],\n" +
+            "      \"extinguisher_positions\": [" + buildExtinguisherJson(CCS_EXTINGUISHER_POS) + "],\n" +
+            "      \"hazard_spawn_zone\": {\"note\": \"CCS Admin Building interior — x:80-135 z:6-69 y covers both floors\"}\n" +
+            "    },\n" +
+            "    \"ccs_earthquake\": {\n" +
+            "      \"exits\": [],\n" +
+            "      \"assembly_area\": " + assemblyJson + ",\n" +
+            "      \"hazard_spawn_zone\": {\"note\": \"Epicenter varies per session inside CCS Admin Building\"}\n" +
             "    }\n" +
             "  }\n" +
             "}\n";

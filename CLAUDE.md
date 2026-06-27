@@ -321,6 +321,9 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 | T-10 | 🔴 Critical | CSV `move` event misnamed — ML pipeline expects `move_tick` | ✅ Done | Renamed `"move"` → `"move_tick"` in `SimulationManager.tickTelemetry()` |
 | T-11 | 🟠 High | CO2 extinguisher not in Turso `event_log` | ✅ Done | Added `session.logger.log("extinguisher_use", ...)` to `CO2ExtinguisherItem.sprayServer()` every 20 damage ticks; dashboard `extractRubricSignals` now counts both `EXT_SPRAY` and `extinguisher_use` |
 | T-12 | 🟢 Low | `SIM_START` event missing spawn position | ✅ Done | Moved `SIM_START` logger call to after `spawnPos` resolution; now includes `x/y/z` so dashboard event timeline shows where the player spawned |
+| T-13 | 🟠 High | `extinguisher_positions: []` always empty in `map_metadata.json` | ✅ Done | Added static nominal positions (`LIBRARY_EXTINGUISHER_POS`, `CCS_EXTINGUISHER_POS`) in `TelemetryCsvWriter`; `map_metadata.json` now written on every server start (not just first) |
+| T-14 | 🟡 Medium | Contract doc used `move` but mod emitted `move_tick` | ✅ Done | Updated `telemetry_contract.md` §3, §4, §6, §7 to say `move_tick` throughout |
+| T-15 | 🟡 Medium | CCS scenario types (`ccs_fire`/`ccs_earthquake`) missing from contract and DB | ✅ Done | Updated `telemetry_contract.md` §2/§3/§5; `endSimulation` stores `session.getState().name()` so CCS sessions write `CCS_FIRE`/`CCS_EARTHQUAKE` to Turso; dashboard `simulation_type` type and SQL aggregations updated |
 
 ---
 
