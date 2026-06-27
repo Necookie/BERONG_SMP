@@ -321,3 +321,21 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 | T-10 | 🔴 Critical | CSV `move` event misnamed — ML pipeline expects `move_tick` | ✅ Done | Renamed `"move"` → `"move_tick"` in `SimulationManager.tickTelemetry()` |
 | T-11 | 🟠 High | CO2 extinguisher not in Turso `event_log` | ✅ Done | Added `session.logger.log("extinguisher_use", ...)` to `CO2ExtinguisherItem.sprayServer()` every 20 damage ticks; dashboard `extractRubricSignals` now counts both `EXT_SPRAY` and `extinguisher_use` |
 | T-12 | 🟢 Low | `SIM_START` event missing spawn position | ✅ Done | Moved `SIM_START` logger call to after `spawnPos` resolution; now includes `x/y/z` so dashboard event timeline shows where the player spawned |
+
+---
+
+## Synthetic Dataset Reference
+
+The companion dashboard repo (`BERONG_SMP_WEB/apps/dashboard/scripts/seed-synthetic.mjs`) contains a seeder for 20 high-quality synthetic sessions used for dashboard testing. Run with `node apps/dashboard/scripts/seed-synthetic.mjs` from the web repo root.
+
+### Event log invariants verified by the seed script
+
+These constraints reflect what real mod sessions must produce — if the mod deviates, the synthetic baseline will diverge from live data:
+
+| Invariant | What the mod must emit | Location in mod |
+|---|---|---|
+| `EXT_PIN_PULL` before CO2 use | `session.logger.log("EXT_PIN_PULL", ...)` emitted when CO2 pin is pulled | `CO2ExtinguisherItem` (same flow as `FireExtinguisherItem`) |
+| CCS assembly zone reachable | Players evacuating CCS must walk north-west (z increasing from ~10 to 64+) to reach `AABB(30,-35,64)→(76,-28,82)` | `AssemblyZone` checks this AABB |
+| `assembly_area_reached` x/y/z inside AABB | All assembly events must have coords inside `(30,-35,64)→(76,-28,82)` | `AssemblyZone.onPlayerArrived()` |
+| `SIM_START` includes `x/y/z` | Spawn position logged after `spawnPos` is resolved | `SimulationManager.startSimulation()` |
+| Section codes no-hyphen | e.g. `BSCS3A` not `BSCS-3A` | `/register` command user input |
