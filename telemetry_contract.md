@@ -96,6 +96,8 @@ One **long-format CSV per data-collection batch**, one row per logged sample **o
 - "First valid action" (for `decision_delay`) = first `fire_alarm_activate` / `door_open` / `extinguisher_use` / `emergency_exit` after first hazard exposure. Confirm this set matches `INTERACTION_EVENT_TYPES` (which must now include `fire_alarm_activate`).
 - "First hazard exposure" = first row where `hazard_distance < SAFE_HAZARD_DISTANCE` (currently `5.0` blocks — **to be calibrated**, §9).
 - On `extinguisher_use`, always populate `nearby_player_count` (0 = alone).
+- **CO2 extinguisher (CCS_FIRE scenarios) uses the same pin-pull → spray sequence as the ABC extinguisher.** The mod emits `EXT_PIN_PULL` when the CO2 pin is pulled, followed by `extinguisher_use` events per spray. Synthetic dataset and rubric scoring both expect this sequence — a missing `EXT_PIN_PULL` before `extinguisher_use` is a data quality error.
+- **CCS evacuation assembly path:** Players in CCS Admin Building sessions must travel north-west (x decreasing from ~120, z increasing toward 64+) to reach the shared assembly zone `AABB(30,-35,64)→(76,-28,82)`. A due-west path along z≈8 does not reach the assembly zone and will never trigger `assembly_area_reached`.
 
 ---
 
