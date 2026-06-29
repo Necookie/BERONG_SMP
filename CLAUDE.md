@@ -174,7 +174,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `TrashCanBlock` | Open-top trash can; no FACING (symmetric). Model: light-gray body + gray rim + black inner top. |
 | `BulletinBoardBlock` | Cork bulletin board (note_block texture); FACING only. Model: dark-oak frame + 3 paper slips + 3 red/orange push-pins. Flammable. |
 | `CeilingFanBlock` | Ceiling fan; no FACING (symmetric). Model: iron mounting rod + gray motor housing + 4 oak/white blades (N/S/E/W) + glowstone light bowl (light level 5). |
-| `SimRoom` | Enum mapping player position to a named room (LSPU Library or CCS). Holds `CcsRoom` record + `CCS_UPPER_ROOMS` list of 9 F3-verified 2nd floor rooms (absolute world AABBs, Y −25 to −22). `fromPos()` / `fromCCSPos()` used for telemetry room labels. |
+| `SimRoom` | Enum mapping player position to a named room (LSPU Library or CCS). Holds `CcsRoom` record + `CCS_UPPER_ROOMS` (9 rooms, Y −25 to −22) and `CCS_GROUND_ROOMS` (7 rooms, Y −32 to −29) — all F3-verified absolute world AABBs. `fromPos()` / `fromCCSPos()` used for telemetry room labels. |
 | `AssemblyZone` | Static utility in `world/`; defines the safe-zone AABB outside the LSPU Library. Spawns green `HAPPY_VILLAGER`+`SCRAPE` particle force-field border every 5 ticks during simulations. Detects player entry → fires `assembly_area_reached` event + ends simulation with `end_reason=assembly_reached`. Coordinates are PLACEHOLDER — tune with F3 in-game. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. CSV event types: `session_start`, `move_tick` (10 Hz, x/y/z + hazard_distance), `extinguisher_use`, `fire_alarm_activate`, `assembly_area_reached`, `emergency_exit`, `door_open`, `session_end`. |
 | `ExitZones` | Static record list in `world/`; defines three named AABB emergency-exit zones (`main_exit`, `side_exit`, `rear_exit`) near the LSPU Library doors. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. All coordinates are PLACEHOLDER — tune with F3 in-game. |
@@ -186,9 +186,23 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 - **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
 - **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 0 CCW rotations (`ccs_admin_building2.4.schem`)
 
+#### CCS 1st Floor Named Rooms (`SimRoom.CCS_GROUND_ROOMS`)
+
+Floor Y=−32, ceiling Y=−29 (3 blocks tall). Absolute world coords verified with F3.
+
+| Room | X min | X max | Z min | Z max |
+|---|---|---|---|---|
+| Room 105 | 94 | 99 | 6 | 11 |
+| Room 106 | 101 | 105 | 6 | 11 |
+| Room 107 | 107 | 112 | 6 | 11 |
+| Dean's Office | 114 | 119 | 6 | 11 |
+| Faculty Room | 121 | 126 | 6 | 11 |
+| ICTS | 130 | 136 | 17 | 26 |
+| ICTS 2 | 131 | 136 | 28 | 31 |
+
 #### CCS 2nd Floor Named Rooms (`SimRoom.CCS_UPPER_ROOMS`)
 
-All rooms at floor Y=−25, ceiling Y=−22 (3 blocks tall). Absolute world coords verified with F3.
+Floor Y=−25, ceiling Y=−22 (3 blocks tall). Absolute world coords verified with F3.
 
 | Room | X min | X max | Z min | Z max |
 |---|---|---|---|---|
@@ -202,7 +216,7 @@ All rooms at floor Y=−25, ceiling Y=−22 (3 blocks tall). Absolute world coor
 | MacLab | 130 | 136 | 33 | 39 |
 | Room 207 | 132 | 136 | 41 | 49 |
 
-`SimulationManager.findRandomSpawnInCCS()` shuffles `CCS_UPPER_ROOMS` and scans each for a valid solid-floor + 2-air-above spawn before falling back to blind arena scan.
+`SimulationManager.findRandomSpawnInCCS()` shuffles both `CCS_GROUND_ROOMS` and `CCS_UPPER_ROOMS` into a single pool, scanning for a valid solid-floor + 2-air-above position. No blind arena scan — player always spawns inside a named room.
 
 ### Structures
 
