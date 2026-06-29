@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
 /**
  * Maps a player's block position (relative to SIM_POS) to a named room inside the LSPU library.
  * Bounding boxes are approximate — tune against the actual NBT after running the server.
@@ -19,6 +21,25 @@ public enum SimRoom {
     CCS_GROUND_FLOOR,
     CCS_UPPER_FLOOR,
     OUTSIDE;
+
+    /** A named room on the CCS 2nd floor with its absolute world-space AABB. */
+    public record CcsRoom(String name, AABB bounds) {}
+
+    /**
+     * Named rooms on the CCS Admin Building 2nd floor (absolute world coords).
+     * Floor Y = -25, ceiling Y = -22 (3-block-tall rooms). Coords verified with F3.
+     */
+    public static final List<CcsRoom> CCS_UPPER_ROOMS = List.of(
+        new CcsRoom("CCS Mini Library", new AABB( 94, -25,  6,  99, -22, 11)),
+        new CcsRoom("Room 202",         new AABB(101, -25,  6, 105, -22, 11)),
+        new CcsRoom("Room 203",         new AABB(107, -25,  6, 112, -22, 11)),
+        new CcsRoom("Room 204",         new AABB(114, -25,  6, 119, -22, 11)),
+        new CcsRoom("Room 205",         new AABB(121, -25,  6, 126, -22, 11)),
+        new CcsRoom("TESOL",            new AABB(130, -25, 17, 136, -22, 22)),
+        new CcsRoom("Computer Lab",     new AABB(130, -25, 24, 136, -22, 31)),
+        new CcsRoom("MacLab",           new AABB(130, -25, 33, 136, -22, 39)),
+        new CcsRoom("Room 207",         new AABB(132, -25, 41, 136, -22, 49))
+    );
 
     // Offsets relative to SIM_POS = (30, -34, 83). Y=0 is the ground floor.
     // Placeholder values — tune after walking the structure in-game.

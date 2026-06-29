@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -626,7 +627,44 @@ public class SimulationManager {
         return candidates.get(level.getRandom().nextInt(candidates.size()));
     }
 
+    /**
+     * Picks a random CCS 2nd floor named room and finds a valid spawn inside it.
+     * Returns empty if none of the rooms have a solid-floor + 2-air-above position.
+     */
+    private static Optional<BlockPos> findSpawnInCcsNamedRoom(ServerLevel level) {
+        net.minecraft.util.RandomSource random = level.getRandom();
+        List<SimRoom.CcsRoom> shuffled = new ArrayList<>(SimRoom.CCS_UPPER_ROOMS);
+        Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
+        for (SimRoom.CcsRoom room : shuffled) {
+            List<BlockPos> candidates = new ArrayList<>();
+            int xMin = (int) room.bounds().minX, xMax = (int) room.bounds().maxX;
+            int yMin = (int) room.bounds().minY, yMax = (int) room.bounds().maxY;
+            int zMin = (int) room.bounds().minZ, zMax = (int) room.bounds().maxZ;
+            for (int x = xMin + 1; x < xMax; x++) {
+                for (int z = zMin + 1; z < zMax; z++) {
+                    for (int y = yMin; y < yMax; y++) {
+                        BlockPos pos = new BlockPos(x, y, z);
+                        if (!level.getBlockState(pos.below()).isAir()
+                                && level.getBlockState(pos).isAir()
+                                && level.getBlockState(pos.above()).isAir()) {
+                            candidates.add(pos.immutable());
+                        }
+                    }
+                }
+            }
+            if (!candidates.isEmpty()) {
+                return Optional.of(candidates.get(random.nextInt(candidates.size())));
+            }
+        }
+        return Optional.empty();
+    }
+
     private static BlockPos findRandomSpawnInCCS(ServerLevel level) {
+        // Prefer a known named room on the 2nd floor
+        Optional<BlockPos> named = findSpawnInCcsNamedRoom(level);
+        if (named.isPresent()) return named.get();
+
+        // Fall back to blind scan of the entire CCS area
         List<BlockPos> candidates = new ArrayList<>();
         for (int dx = 2; dx < CCS_AREA_SPAN_X - 2; dx++) {
             for (int dz = 2; dz < CCS_AREA_SPAN_Z - 2; dz++) {
