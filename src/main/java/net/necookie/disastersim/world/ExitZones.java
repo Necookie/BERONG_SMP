@@ -38,7 +38,8 @@ public class ExitZones {
      * CCS_POS = (76, -34, 4); building spans X: 76–136, Z: 4–72.
      */
     public static final List<ExitZone> CCS_ZONES = List.of(
-        new ExitZone("ccs_main_exit", new AABB(76, -33, 70, 90, -29, 74))
+        // PLACEHOLDER — centre of south wall (X:95–125, Z:68–74). Verify with F3.
+        new ExitZone("ccs_main_exit", new AABB(95, -33, 68, 125, -29, 74))
         // ccs_side_exit — add when tuned with F3 in-game
     );
 

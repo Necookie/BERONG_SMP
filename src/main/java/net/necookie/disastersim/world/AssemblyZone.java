@@ -23,9 +23,10 @@ public class AssemblyZone {
     // Verified — open area north of the LSPU Library main entrance.
     private static final AABB ZONE = new AABB(30, -35, 64, 76, -28, 82);
 
-    // PLACEHOLDER — open area south of the CCS Admin Building (Z > 72 face).
-    // CCS_POS = (76,-34,4), building spans Z: 4–72. Adjust after F3 walk.
-    private static final AABB CCS_ZONE = new AABB(76, -35, 72, 136, -28, 88);
+    // Outside south face of CCS Admin Building (building ends at Z=72).
+    // Z:73–90 = open area directly south of the building — the designed assembly area.
+    // PLACEHOLDER — walk with F3 to confirm exact coordinates (see docs/f3_tuning_todo.md).
+    private static final AABB CCS_ZONE = new AABB(76, -35, 73, 136, -28, 90);
 
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;
