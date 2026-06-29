@@ -504,7 +504,7 @@ public class SimulationManager {
     private static void tickExitZone(SimulationSession session, UUID uuid,
                                      ServerLevel level, ServerPlayer player, int ticks) {
         if (session.hasPassedExit()) return;
-        ExitZones.ExitZone exit = ExitZones.find(player.position());
+        ExitZones.ExitZone exit = ExitZones.find(player.position(), session.getState().isCCS());
         if (exit == null) return;
         session.markPassedExit();
         double elapsedS   = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
@@ -526,9 +526,9 @@ public class SimulationManager {
     private static boolean tickAssemblyZone(SimulationSession session, UUID uuid,
                                             ServerLevel level, ServerPlayer player, int ticks) {
         if (ticks % 5 == 0) {
-            AssemblyZone.spawnBorderParticles(level);
+            AssemblyZone.spawnBorderParticles(level, session.getState().isCCS());
         }
-        if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position())) {
+        if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position(), session.getState().isCCS())) {
             session.markAssemblyReached();
             double hazDist = hazardDistance(session, level, player);
             AssemblyZone.onPlayerArrived(player, session, level, hazDist);

@@ -9,34 +9,37 @@ import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.Config;
 
 /**
- * Defines the assembly (safe) zone outside the LSPU Library.
+ * Defines assembly (safe) zones outside the LSPU Library and CCS Admin Building.
  *
  * During any active simulation, a green particle force-field border is drawn
- * around the perimeter of the zone every 5 ticks. When the player steps inside,
- * the assembly_area_reached telemetry event fires and the simulation ends.
+ * around the perimeter of the active zone every 5 ticks. When the player steps
+ * inside, the assembly_area_reached telemetry event fires and the simulation ends.
  *
- * IMPORTANT: ZONE coordinates are PLACEHOLDER — tune with F3 in-game after
- * running ./gradlew runServer. The zone should be a clear open area outside
- * the library's main exit.
+ * IMPORTANT: CCS_ZONE coordinates are PLACEHOLDER — tune with F3 in-game after
+ * running ./gradlew runServer. See docs/f3_tuning_todo.md for the full checklist.
  */
 public class AssemblyZone {
 
-    // PLACEHOLDER — open area in front of the library main entrance (Z- face, before Z≈83).
-    // Students approach from the lobby (Z≈0) so the front face is the low-Z side.
-    // Adjust min/max after walking in-game with F3.
+    // Verified — open area north of the LSPU Library main entrance.
     private static final AABB ZONE = new AABB(30, -35, 64, 76, -28, 82);
+
+    // PLACEHOLDER — open area south of the CCS Admin Building (Z > 72 face).
+    // CCS_POS = (76,-34,4), building spans Z: 4–72. Adjust after F3 walk.
+    private static final AABB CCS_ZONE = new AABB(76, -35, 72, 136, -28, 88);
 
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;
 
     /**
-     * Spawns the green force-field border particles around the zone perimeter.
+     * Spawns the green force-field border particles around the active zone perimeter.
      * Call every 5 server ticks from SimulationManager while a simulation is active.
+     * @param isCCS true for CCS Admin Building simulations, false for LSPU Library.
      */
-    public static void spawnBorderParticles(ServerLevel level) {
-        double minX = ZONE.minX, maxX = ZONE.maxX;
-        double minZ = ZONE.minZ, maxZ = ZONE.maxZ;
-        double baseY = ZONE.minY;
+    public static void spawnBorderParticles(ServerLevel level, boolean isCCS) {
+        AABB zone = isCCS ? CCS_ZONE : ZONE;
+        double minX = zone.minX, maxX = zone.maxX;
+        double minZ = zone.minZ, maxZ = zone.maxZ;
+        double baseY = zone.minY;
 
         for (int layer = 0; layer < WALL_HEIGHT; layer++) {
             double y = baseY + layer;
@@ -58,9 +61,12 @@ public class AssemblyZone {
         }
     }
 
-    /** Returns true if the player position is inside the assembly zone. */
-    public static boolean isInside(Vec3 pos) {
-        return ZONE.contains(pos);
+    /**
+     * Returns true if the player position is inside the assembly zone for the given scenario.
+     * @param isCCS true for CCS Admin Building simulations, false for LSPU Library.
+     */
+    public static boolean isInside(Vec3 pos, boolean isCCS) {
+        return (isCCS ? CCS_ZONE : ZONE).contains(pos);
     }
 
     /**
@@ -96,5 +102,6 @@ public class AssemblyZone {
                 pos.x, pos.y + 1, pos.z, 15, 0.5, 0.5, 0.5, 0.2);
     }
 
-    public static AABB getZone() { return ZONE; }
+    public static AABB getZone()    { return ZONE; }
+    public static AABB getCcsZone() { return CCS_ZONE; }
 }

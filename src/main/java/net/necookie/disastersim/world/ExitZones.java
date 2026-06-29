@@ -23,20 +23,32 @@ public class ExitZones {
     }
 
     /**
-     * All named emergency exits for the LSPU Library.
-     * IMPORTANT: coordinates below are PLACEHOLDER — tune after runServer.
-     * SIM_POS = (30, -34, 83); main front door faces Z-negative (south-facing structure).
+     * Emergency exits for the LSPU Library.
+     * SIM_POS = (30, -34, 83); main front door faces Z-negative.
      */
     public static final List<ExitZone> ZONES = List.of(
         new ExitZone("main_exit", new AABB(50, -34, 93, 54, -30, 96))
-        // side_exit and rear_exit — add when additional building exits are tuned in-game
+        // side_exit and rear_exit — add when tuned with F3 in-game
+    );
+
+    /**
+     * Emergency exits for the CCS Admin Building.
+     * IMPORTANT: all coordinates below are PLACEHOLDER — tune with F3 in-game.
+     * See docs/f3_tuning_todo.md for the full checklist.
+     * CCS_POS = (76, -34, 4); building spans X: 76–136, Z: 4–72.
+     */
+    public static final List<ExitZone> CCS_ZONES = List.of(
+        new ExitZone("ccs_main_exit", new AABB(76, -33, 70, 90, -29, 74))
+        // ccs_side_exit — add when tuned with F3 in-game
     );
 
     /**
      * Returns the first ExitZone that contains the given position, or null.
+     * @param isCCS true to search CCS zones, false for LSPU Library zones.
      */
-    public static ExitZone find(Vec3 pos) {
-        for (ExitZone z : ZONES) {
+    public static ExitZone find(Vec3 pos, boolean isCCS) {
+        List<ExitZone> list = isCCS ? CCS_ZONES : ZONES;
+        for (ExitZone z : list) {
             if (z.contains(pos)) return z;
         }
         return null;
