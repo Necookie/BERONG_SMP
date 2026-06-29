@@ -660,28 +660,9 @@ public class SimulationManager {
     }
 
     private static BlockPos findRandomSpawnInCCS(ServerLevel level) {
-        // Prefer a known named room on the 2nd floor
-        Optional<BlockPos> named = findSpawnInCcsNamedRoom(level);
-        if (named.isPresent()) return named.get();
-
-        // Fall back to blind scan of the entire CCS area
-        List<BlockPos> candidates = new ArrayList<>();
-        for (int dx = 2; dx < CCS_AREA_SPAN_X - 2; dx++) {
-            for (int dz = 2; dz < CCS_AREA_SPAN_Z - 2; dz++) {
-                for (int dy = 1; dy < CCS_AREA_HEIGHT - 2; dy++) {
-                    BlockPos pos = CCS_FIRE_BASE.offset(dx, dy, dz);
-                    if (!level.getBlockState(pos.below()).isAir()
-                            && level.getBlockState(pos).isAir()
-                            && level.getBlockState(pos.above()).isAir()) {
-                        candidates.add(pos);
-                    }
-                }
-            }
-        }
-        if (candidates.isEmpty()) {
-            return CCS_POS.offset(31, 3, 33);
-        }
-        return candidates.get(level.getRandom().nextInt(candidates.size()));
+        // Only spawn inside a known named room — no blind arena scan.
+        return findSpawnInCcsNamedRoom(level)
+                .orElseGet(() -> new BlockPos(133, -24, 27)); // Computer Lab centre, absolute last resort
     }
 
     /** Scans the CCS arena for every computer and returns their positions. */
@@ -718,22 +699,31 @@ public class SimulationManager {
         }
     }
 
+    /** Returns true if pos is inside any of the named CCS 2nd floor rooms. */
+    private static boolean isInCcsNamedRoom(BlockPos pos) {
+        net.minecraft.world.phys.Vec3 v = net.minecraft.world.phys.Vec3.atCenterOf(pos);
+        for (SimRoom.CcsRoom room : SimRoom.CCS_UPPER_ROOMS) {
+            if (room.bounds().contains(v)) return true;
+        }
+        return false;
+    }
+
     /**
-     * Finds a safe floor position (solid below, 2 air above) within a few blocks
-     * of a randomly chosen computer from the list.  Spawning here puts the player
-     * right inside the computer lab where the fire started.
+     * Finds a safe floor position near a burning computer that is also inside a
+     * named 2nd floor room. Falls back to any named room if no computer is
+     * adjacent to one.
      */
     private static BlockPos findSpawnNearComputer(ServerLevel level, List<BlockPos> computers) {
         if (computers.isEmpty()) return findRandomSpawnInCCS(level);
         net.minecraft.util.RandomSource random = level.getRandom();
-        // Shuffle attempts across all computers so we don't bias toward the first one
         List<BlockPos> shuffled = new ArrayList<>(computers);
         Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
         for (BlockPos comp : shuffled) {
             for (int ddx = -3; ddx <= 3; ddx++) {
                 for (int ddz = -3; ddz <= 3; ddz++) {
                     BlockPos candidate = comp.offset(ddx, 0, ddz);
-                    if (!level.getBlockState(candidate.below()).isAir()
+                    if (isInCcsNamedRoom(candidate)
+                            && !level.getBlockState(candidate.below()).isAir()
                             && level.getBlockState(candidate).isAir()
                             && level.getBlockState(candidate.above()).isAir()) {
                         return candidate;
