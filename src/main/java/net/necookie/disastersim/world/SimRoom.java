@@ -41,6 +41,20 @@ public enum SimRoom {
         new CcsRoom("Room 207",         new AABB(132, -25, 41, 136, -22, 49))
     );
 
+    /**
+     * Named rooms on the CCS Admin Building 1st floor (absolute world coords).
+     * Floor Y = -32, ceiling Y = -29 (3-block-tall rooms). Coords verified with F3.
+     */
+    public static final List<CcsRoom> CCS_GROUND_ROOMS = List.of(
+        new CcsRoom("Room 105",      new AABB( 94, -32,  6,  99, -29, 11)),
+        new CcsRoom("Room 106",      new AABB(101, -32,  6, 105, -29, 11)),
+        new CcsRoom("Room 107",      new AABB(107, -32,  6, 112, -29, 11)),
+        new CcsRoom("Dean's Office", new AABB(114, -32,  6, 119, -29, 11)),
+        new CcsRoom("Faculty Room",  new AABB(121, -32,  6, 126, -29, 11)),
+        new CcsRoom("ICTS",          new AABB(130, -32, 17, 136, -29, 26)),
+        new CcsRoom("ICTS 2",        new AABB(131, -32, 28, 136, -29, 31))
+    );
+
     // Offsets relative to SIM_POS = (30, -34, 83). Y=0 is the ground floor.
     // Placeholder values — tune after walking the structure in-game.
     private static final Object[][] BOUNDS_DATA = {

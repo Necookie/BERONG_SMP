@@ -628,12 +628,15 @@ public class SimulationManager {
     }
 
     /**
-     * Picks a random CCS 2nd floor named room and finds a valid spawn inside it.
-     * Returns empty if none of the rooms have a solid-floor + 2-air-above position.
+     * Picks a random named room from either CCS floor and finds a valid spawn inside it.
+     * Returns empty if no room on either floor has a solid-floor + 2-air-above position.
      */
     private static Optional<BlockPos> findSpawnInCcsNamedRoom(ServerLevel level) {
         net.minecraft.util.RandomSource random = level.getRandom();
-        List<SimRoom.CcsRoom> shuffled = new ArrayList<>(SimRoom.CCS_UPPER_ROOMS);
+        List<SimRoom.CcsRoom> all = new ArrayList<>(SimRoom.CCS_UPPER_ROOMS.size() + SimRoom.CCS_GROUND_ROOMS.size());
+        all.addAll(SimRoom.CCS_UPPER_ROOMS);
+        all.addAll(SimRoom.CCS_GROUND_ROOMS);
+        List<SimRoom.CcsRoom> shuffled = all;
         Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
         for (SimRoom.CcsRoom room : shuffled) {
             List<BlockPos> candidates = new ArrayList<>();
@@ -699,10 +702,13 @@ public class SimulationManager {
         }
     }
 
-    /** Returns true if pos is inside any of the named CCS 2nd floor rooms. */
+    /** Returns true if pos is inside any named CCS room on either floor. */
     private static boolean isInCcsNamedRoom(BlockPos pos) {
         net.minecraft.world.phys.Vec3 v = net.minecraft.world.phys.Vec3.atCenterOf(pos);
         for (SimRoom.CcsRoom room : SimRoom.CCS_UPPER_ROOMS) {
+            if (room.bounds().contains(v)) return true;
+        }
+        for (SimRoom.CcsRoom room : SimRoom.CCS_GROUND_ROOMS) {
             if (room.bounds().contains(v)) return true;
         }
         return false;
