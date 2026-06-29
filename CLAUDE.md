@@ -175,9 +175,9 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `BulletinBoardBlock` | Cork bulletin board (note_block texture); FACING only. Model: dark-oak frame + 3 paper slips + 3 red/orange push-pins. Flammable. |
 | `CeilingFanBlock` | Ceiling fan; no FACING (symmetric). Model: iron mounting rod + gray motor housing + 4 oak/white blades (N/S/E/W) + glowstone light bowl (light level 5). |
 | `SimRoom` | Enum mapping player position to a named room (LSPU Library or CCS). Holds `CcsRoom` record + `CCS_UPPER_ROOMS` (9 rooms, Y −25 to −22) and `CCS_GROUND_ROOMS` (7 rooms, Y −32 to −29) — all F3-verified absolute world AABBs. `fromPos()` / `fromCCSPos()` used for telemetry room labels. |
-| `AssemblyZone` | Static utility in `world/`; defines assembly-zone AABBs for both buildings. `ZONE` (LSPU Library, verified) + `CCS_ZONE` (PLACEHOLDER — see `docs/f3_tuning_todo.md`). `spawnBorderParticles(level, isCCS)` and `isInside(pos, isCCS)` select the correct zone. Fires `assembly_area_reached` telemetry + ends simulation. |
+| `AssemblyZone` | Static utility in `world/`; defines assembly-zone AABBs for both buildings. `ZONE = AABB(30,-35,64,76,-28,82)` (LSPU Library, verified north of building) + `CCS_ZONE = AABB(76,-35,73,136,-28,90)` (open area immediately south of CCS Admin Building, Z:73–90). `spawnBorderParticles(level, isCCS)` and `isInside(pos, isCCS)` select the correct zone. Fires `assembly_area_reached` telemetry + ends simulation. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. CSV event types: `session_start`, `move_tick` (10 Hz, x/y/z + hazard_distance), `extinguisher_use`, `fire_alarm_activate`, `assembly_area_reached`, `emergency_exit`, `door_open`, `session_end`. |
-| `ExitZones` | Static record list in `world/`; defines named AABB exit zones for both buildings. `ZONES` (LSPU Library, `main_exit` tuned) + `CCS_ZONES` (`ccs_main_exit` PLACEHOLDER). `find(pos, isCCS)` searches the correct list. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. See `docs/f3_tuning_todo.md` for CCS coords to tune. |
+| `ExitZones` | Static record list in `world/`; defines named AABB exit zones for both buildings. `ZONES` (LSPU Library, `main_exit = AABB(50,-34,93,54,-30,96)` tuned) + `CCS_ZONES` (`ccs_main_exit = AABB(95,-33,68,125,-29,74)` — centre of south wall). `find(pos, isCCS)` searches the correct list. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. |
 
 ### World Coordinates
 
@@ -346,8 +346,8 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 | T-2 | 🔴 Critical | `assembly_area_reached` not written to CSV | ✅ Done | Added `TelemetryCsvWriter.writeRow()` in `AssemblyZone.onPlayerArrived()` alongside existing `session.logger.log()` |
 | T-3 | 🟠 High | `session_end` hazard_distance hardcoded to `99.0` | ✅ Done | Replaced with `hazardDistance(session, level, playerForCsv)` in `SimulationManager.endSimulation()` |
 | T-4 | 🟠 High | CO2ExtinguisherItem emits no telemetry | ✅ Done | Added `extinguisher_use` row with `nearby_player_count` in `CO2ExtinguisherItem.sprayServer()`; `extinguishAt` now returns `boolean`; added `countNearbyPlayers` helper |
-| T-5 | 🟡 Medium | AssemblyZone coordinates are placeholder | ✅ Done | AABB `(30,-35,64)→(76,-28,82)` confirmed correct — same AABB drives green force-field particles and `isInside()` detection; force-field visually verified in-game |
-| T-6 | 🟡 Medium | ExitZones coordinates are placeholder | ✅ Done | `main_exit` tuned from F3 (51.4–52.5/−32/94) → `AABB(50,-34,93,54,-30,96)`; side/rear exits removed until additional buildings are added |
+| T-5 | 🟡 Medium | AssemblyZone coordinates are placeholder | ✅ Done | Library `AABB(30,-35,64,76,-28,82)` north of building (verified); CCS `AABB(76,-35,73,136,-28,90)` outside south wall (Z:73–90) |
+| T-6 | 🟡 Medium | ExitZones coordinates are placeholder | ✅ Done | `main_exit AABB(50,-34,93,54,-30,96)` tuned; `ccs_main_exit AABB(95,-33,68,125,-29,74)` set (south-wall centre) |
 | T-7 | 🟡 Medium | `fire_alarm_positions` in map_metadata.json was empty `[]` | ✅ Done | Added `TelemetryCsvWriter.scanAndRegisterFireAlarms()` which scans the arena for `FireAlarmBlock` after first structure placement; rewrites `map_metadata.json` with discovered positions |
 | T-8 | 🟢 Low | `mod_version` missing from sessions CSV | ✅ Done | Added `mod_version` column to `sessions_*.csv` header and rows; resolved via `ModList.get()` + cached in `TelemetryCsvWriter` |
 | T-9 | 🟢 Low | `extinguisher_use` throttled to one per 40 ticks | ✅ Done | Decoupled `resetExtinguishEventPending()` from `cleanupFireOutsideBounds()`; now resets every 20 ticks (1 s window) for better temporal resolution |
@@ -362,7 +362,7 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 
 ## Synthetic Dataset Reference
 
-The companion dashboard repo (`BERONG_SMP_WEB/apps/dashboard/scripts/seed-synthetic.mjs`) contains a seeder for 20 high-quality synthetic sessions used for dashboard testing. Run with `node apps/dashboard/scripts/seed-synthetic.mjs` from the web repo root.
+The companion dashboard repo (`BERONG_SMP_WEB/apps/dashboard/scripts/seed-synthetic.mjs`) contains a seeder for 20 sessions used for dashboard testing: 7 Library FIRE, 5 Library EARTHQUAKE, 5 CCS_FIRE, 3 CCS_EARTHQUAKE. All movement paths use real building coordinates and correctly cross the exit zones and assembly zones. Run with `node apps/dashboard/scripts/seed-synthetic.mjs` from the web repo root.
 
 ### Dashboard Movement Map (`MapPlayer.tsx`)
 
@@ -379,7 +379,8 @@ These constraints reflect what real mod sessions must produce — if the mod dev
 | Invariant | What the mod must emit | Location in mod |
 |---|---|---|
 | `EXT_PIN_PULL` before CO2 use | `session.logger.log("EXT_PIN_PULL", ...)` emitted when CO2 pin is pulled | `CO2ExtinguisherItem` (same flow as `FireExtinguisherItem`) |
-| CCS assembly zone reachable | Players evacuating CCS must walk north-west (z increasing from ~10 to 64+) to reach `AABB(30,-35,64)→(76,-28,82)` | `AssemblyZone` checks this AABB |
-| `assembly_area_reached` x/y/z inside AABB | All assembly events must have coords inside `(30,-35,64)→(76,-28,82)` | `AssemblyZone.onPlayerArrived()` |
+| Library assembly zone reachable | Players evacuating the Library walk north (z decreasing) from ~Z:83 to reach `AABB(30,-35,64,76,-28,82)` | `AssemblyZone.isInside(pos, false)` |
+| CCS assembly zone reachable | Players evacuating CCS walk south (z increasing from ~Z:4–72) to reach `AABB(76,-35,73,136,-28,90)` outside the south wall | `AssemblyZone.isInside(pos, true)` |
+| `assembly_area_reached` x/y/z inside AABB | Library coords inside `(30,-35,64,76,-28,82)`; CCS coords inside `(76,-35,73,136,-28,90)` | `AssemblyZone.onPlayerArrived()` |
 | `SIM_START` includes `x/y/z` | Spawn position logged after `spawnPos` is resolved | `SimulationManager.startSimulation()` |
 | Section codes no-hyphen | e.g. `BSCS3A` not `BSCS-3A` | `/register` command user input |
