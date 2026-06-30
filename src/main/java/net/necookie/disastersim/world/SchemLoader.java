@@ -173,18 +173,14 @@ public class SchemLoader implements StructurePlacer {
         // Entities list is at the root nbt level in both Sponge v2 and v3.
         Tag entitiesRaw = nbt.get("Entities");
         if (!(entitiesRaw instanceof ListTag entityList)) {
-            BerongSMP.LOGGER.info("[SchemLoader] No Entities tag in {}", resourcePath);
+            BerongSMP.LOGGER.debug("[SchemLoader] No Entities tag in {}", resourcePath);
             return;
         }
         if (entityList.isEmpty()) {
-            BerongSMP.LOGGER.info("[SchemLoader] Entities tag is empty in {}", resourcePath);
+            BerongSMP.LOGGER.debug("[SchemLoader] Entities tag is empty in {}", resourcePath);
             return;
         }
-        BerongSMP.LOGGER.info("[SchemLoader] Found {} entities in {}", entityList.size(), resourcePath);
-        // Debug: dump first entity's full NBT so we can see exact field names and values.
-        if (!entityList.isEmpty() && entityList.get(0) instanceof CompoundTag first) {
-            BerongSMP.LOGGER.info("[SchemLoader] First entity NBT: {}", first);
-        }
+        BerongSMP.LOGGER.debug("[SchemLoader] Found {} entities in {}", entityList.size(), resourcePath);
 
         // Footprint of the placed schematic after rotation (dimensions swap on 90°/270°).
         int placedW = (ccwRotations % 2 == 0) ? schemWidth  : schemLength;
@@ -251,7 +247,7 @@ public class SchemLoader implements StructurePlacer {
                 spawnNbt.putByte("Facing", rotatedFacing);
             }
 
-            BerongSMP.LOGGER.info("[SchemLoader] Spawning {} at world ({}, {}, {})",
+            BerongSMP.LOGGER.debug("[SchemLoader] Spawning {} at world ({}, {}, {})",
                     entityId, (int) worldX, (int) worldY, (int) worldZ);
 
             // Item frames: Sponge v3 top-level Pos = entity's OWN block (the air block where the
@@ -284,7 +280,7 @@ public class SchemLoader implements StructurePlacer {
                         origin.getX() + rotBX, origin.getY() + blkY, origin.getZ() + rotBZ);
                 BlockPos wallBlock = entityBlock.relative(outward.getOpposite());
 
-                BerongSMP.LOGGER.info("[SchemLoader] ItemFrame entityBlock={} wallBlock={} wallBlockState={} rawFacing={} outward={}",
+                BerongSMP.LOGGER.debug("[SchemLoader] ItemFrame entityBlock={} wallBlock={} wallBlockState={} rawFacing={} outward={}",
                         entityBlock, wallBlock, level.getBlockState(wallBlock).getBlock(), rawFacing, outward);
 
                 if (spawnItemFrame(level, entityTag, entityId, entityBlock, outward)) {
@@ -393,26 +389,13 @@ public class SchemLoader implements StructurePlacer {
                 ItemStack.OPTIONAL_CODEC.parse(ops, itemTag).result().ifPresent(stack -> {
                     if (!stack.isEmpty()) {
                         frame.setItem(stack, false);
-                        BerongSMP.LOGGER.info("[SchemLoader] Frame item: {}", stack.getItem());
+                        BerongSMP.LOGGER.debug("[SchemLoader] Frame item: {}", stack.getItem());
                     }
                 });
             })
         );
 
         return level.addFreshEntity(frame);
-    }
-
-    /** Converts a Facing byte to an (x,y,z) step vector. */
-    private static int[] facingByteToStep(byte facing) {
-        return switch (facing) {
-            case 0 -> new int[]{  0, -1,  0 }; // DOWN
-            case 1 -> new int[]{  0,  1,  0 }; // UP
-            case 2 -> new int[]{  0,  0, -1 }; // NORTH
-            case 3 -> new int[]{  0,  0,  1 }; // SOUTH
-            case 4 -> new int[]{ -1,  0,  0 }; // WEST
-            case 5 -> new int[]{  1,  0,  0 }; // EAST
-            default -> new int[]{  0,  0,  0 };
-        };
     }
 
     /** Reads a string value from a CompoundTag key using raw Tag access (avoids Optional vs String API ambiguity). */
