@@ -3,3 +3,12 @@
 # are changed when only line endings change.
 src/generated/**/.cache/* text eol=lf
 src/generated/**/*.json text eol=lf
+
+# Normalize source and text files to LF so Windows checkouts stop reporting
+# spurious CRLF<->LF changes on every commit.
+*.java   text eol=lf
+*.json   text eol=lf
+*.md     text eol=lf
+*.toml   text eol=lf
+*.gradle text eol=lf
+*.txt    text eol=lf
