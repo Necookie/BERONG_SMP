@@ -319,6 +319,15 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 
 The repo root no longer carries the decompiled vanilla `net/` reference dump, the `old_stuffs/` backup, or untitled dev screenshots — all removed and (where applicable) gitignored. Vanilla source lookups should use an external decompiler, not committed files.
 
+### Shared Base Classes & Helper Conventions
+
+Reuse these instead of re-copying boilerplate:
+
+- **`item/AbstractExtinguisherItem`** — base for handheld extinguishers (pin gate, spray ray, durability, charge tooltip). New extinguisher = subclass + `extinguishAt`/particles/`sprayPitch`/`onSprayResolved` hooks.
+- **`block/HorizontalFacingBlock`** / **`block/FlammableFacingBlock`** — base for FACING-only furniture; subclass supplies only `shapeFor(Direction)` (use `byFacing(...)`). Use the flammable variant for wood/paper props.
+- **Internal command/event guards** — `BfpAdminCommands.appendSessionRow`, `ItemCommands.requirePlayer`, `LobbyManager.gatesPassed` centralise patterns that were previously duplicated; extend these rather than re-inlining.
+- **Logging** — keep per-entity/per-iteration logs at `debug`; reserve `info` for once-per-operation summaries (see `SchemLoader`).
+
 ### Block Registration Pattern (NeoForge 26.x)
 
 Custom block subclasses **must** use `BLOCKS.registerBlock(name, Constructor::new, () -> Block.Properties.of()...)` — NOT `BLOCKS.register(name, () -> new MyBlock(Block.Properties.of()...))`. In NeoForge 26.1.2, `BlockBehaviour.<init>` calls `effectiveDrops()` which requires the registry key to already be set on the Properties object. The `registerBlock` overload injects the key before passing Properties to the constructor; the plain `Supplier` overload does not. Using a plain `Supplier` causes a `NullPointerException: Block id not set` crash at startup.
