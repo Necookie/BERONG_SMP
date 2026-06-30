@@ -163,7 +163,10 @@ public class SessionManager {
      * directly by SimulationManager.endSimulation using the row ID it already holds.
      */
     public static void onSimulationEnd(ServerPlayer player, SimulationSession sim) {
-        String type = sim.getState().isFire() ? "FIRE" : "EARTHQUAKE";
+        // Keep the full scenario name (FIRE/EARTHQUAKE/CCS_FIRE/CCS_EARTHQUAKE) so /bfp session
+        // info matches what SimulationManager persists to Turso; the old isFire()?FIRE:EARTHQUAKE
+        // form silently collapsed both CCS variants.
+        String type = sim.getState().name();
         int score = sim.getState().isFire()
                 ? Math.min(100, sim.getFiresExtinguished() * 2)
                 : 0;

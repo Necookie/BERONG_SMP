@@ -12,6 +12,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Lightweight HTTP client for the Turso libSQL REST API.
@@ -30,7 +32,12 @@ public class TursoClient {
     private static HttpClient httpClient;
     private static String pipelineUrl;
     private static String authHeader;
-    private static boolean ready = false;
+    private static volatile boolean ready = false;
+
+    // Dedicated pool for the blocking HTTP writes. Keeping them off ForkJoinPool.commonPool()
+    // avoids starving the shared pool (which parallel streams elsewhere also use) and bounds the
+    // number of concurrent Turso connections. Daemon threads so they never block JVM shutdown.
+    private static ExecutorService writeExecutor;
 
     private TursoClient() {}
 
@@ -52,6 +59,11 @@ public class TursoClient {
         httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .build();
+        writeExecutor = Executors.newFixedThreadPool(2, runnable -> {
+            Thread t = new Thread(runnable, "TursoClient-Writer");
+            t.setDaemon(true);
+            return t;
+        });
         ready = true;
         BerongSMP.LOGGER.info("[TursoClient] Ready. Endpoint: {}", pipelineUrl);
         createSchemaAsync();
@@ -59,6 +71,10 @@ public class TursoClient {
 
     public static void shutdown() {
         ready = false;
+        if (writeExecutor != null) {
+            writeExecutor.shutdown();
+            writeExecutor = null;
+        }
         httpClient = null;
     }
 
@@ -89,7 +105,7 @@ public class TursoClient {
             } catch (Exception e) {
                 BerongSMP.LOGGER.warn("[TursoClient] Write error: {}", e.getMessage());
             }
-        });
+        }, writeExecutor);
     }
 
     /**
@@ -260,7 +276,7 @@ public class TursoClient {
             } catch (Exception e) {
                 BerongSMP.LOGGER.debug("[TursoClient] silentAlter skipped (column may already exist): {}", e.getMessage());
             }
-        });
+        }, writeExecutor);
     }
 
     private static HttpRequest buildRequest(String body) {
