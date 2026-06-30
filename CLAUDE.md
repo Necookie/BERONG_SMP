@@ -151,8 +151,9 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `ItemCommands` | `/spawn_lspu`, `/get_extinguisher`, `/get_co2_extinguisher` |
 | `SimulationCommands` | `/sim_fire <library\|ccs>`, `/sim_earthquake <library\|ccs> [magnitude]`, `/sim_magnitude`, `/sim_stop`, `/sim_status`, `/sim_list`, `/sim_freeze`, `/sim_unfreeze`, `/sim_time` |
 | `BfpAdminCommands` | All `/bfp` admin commands; owns `bfpAuthorized` Set and `isBfpAuthorized()` predicate |
-| `FireExtinguisherItem` | Custom item; right-click extinguishes fire blocks and calls `SimulationManager.getSession(uuid).recordExtinguish()` |
-| `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires. Same pin-pull → hold-spray flow as `FireExtinguisherItem`. Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
+| `AbstractExtinguisherItem` | Shared base for both extinguishers: safety-pin gate, held-spray ray geometry, durability drain, sound scaffolding, nearby-player count, and charge tooltip. Subclasses supply only `extinguishAt`, particles, `sprayPitch`, telemetry (`onSprayResolved`), and flavour messages. |
+| `FireExtinguisherItem` | ABC dry-chemical extinguisher (extends `AbstractExtinguisherItem`); extinguishes fire/soul-fire/LIT blocks, counts toward FIRE score via `recordExtinguish()`, drives the tutorial PASS drill. 300 durability. |
+| `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires (extends `AbstractExtinguisherItem`). Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
 | `ComputerBlock` | Custom block in `block/` package; registry ID `berongsmp:computer` (field `BerongSMP.COMPUTER`). Has `FACING` (horizontal), `LIT`, `BURNING`, and `BROKEN` states. State machine: OFF↔ON (right-click), ANY→BURNING (flint & steel — immediately places fire on all adjacent air), BURNING→BROKEN (CO2 extinguisher). `BURNING=true`: scans 2-block radius every `randomTick` for `ignitedByLava()` blocks and seeds vanilla fire next to them (enabling chain-spread into wood/wool/leaves); `animateTick` emits FLAME from top + all 4 sides, SOUL_FIRE_FLAME (cyan electrical signature), wild ELECTRIC_SPARK arcs, LARGE_SMOKE columns, LAVA ember drips; light level 15. `BROKEN=true`: cracked screen + scorched case texture, all interactions blocked, emits occasional SMOKE wisps. Only CO2 extinguisher ends the fire (and causes BROKEN). Registered via `BLOCKS.registerBlock(name, Constructor::new, () -> Props)` pattern required by NeoForge 26.x. |
 | `TutorialStage` | Enum of all tutorial stages: `NOT_STARTED → PASS_SPRAY → EXT_TYPE_A/B/C → QUAKE_DROP/COVER/HOLDON → COMPLETED` |
 | `TutorialManager` | Static utility: station placement, interaction dispatch, extinguish counting, QUAKE tick detection, completion. Gates simulation buttons via `isComplete(UUID)` |
@@ -160,7 +161,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `TutorialStatusPayload` | Server→client packet carrying `prompt` (String) and `intensity` (float) for tutorial HUD and camera shake |
 | `TutorialHud` | Client-side HUD renderer for tutorial prompts; drives camera shake during QUAKE stages; hidden when SimulationHud is active |
 | `StudentSession` | POJO holding per-student data: name, account UUID, start/end times, tutorial timing, simulation type/score/passed, Turso row ID |
-| `TursoClient` | HTTP wrapper for the Turso libSQL REST API (`/v2/pipeline`); fire-and-forget async writes via `CompletableFuture`, synchronous reads for commands; creates schema on first init |
+| `TursoClient` | HTTP wrapper for the Turso libSQL REST API (`/v2/pipeline`); fire-and-forget async writes via `CompletableFuture` on a **dedicated 2-thread daemon executor** (kept off `ForkJoinPool.commonPool()`), synchronous reads for commands; creates schema on first init. `shutdown()` stops the executor cleanly. |
 | `SessionManager` | Manages `Map<UUID, StudentSession>` for shared station accounts; hooks into tutorial completion and simulation end to persist scores; exposes `/bfp` admin flow |
 | `FireAlarmBlock` | Wall-mounted block in `block/` package; states `FACING` + `ACTIVATED`. Right-click during an active FIRE simulation sets `ACTIVATED=true`, plays bell sound, logs `fire_alarm_activate` telemetry event. Auto-resets when simulation structure is restored. |
 | `WhiteboardBlock` | Flat wall-mounted classroom whiteboard; FACING only. Model: white-concrete board surface + gray frame + light-gray marker tray. Tile 2–3 side-by-side for a wide whiteboard. |
@@ -305,6 +306,16 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 ### Thread Safety
 
 `SimulationManager.activeSessions` is a `ConcurrentHashMap`. `startSimulation` and `endSimulation` are `synchronized`. Tick-driven mutations are single-threaded via `ServerTickEvent.Post`. Network packet handling uses `context.enqueueWork()` to marshal HUD updates (including the new `intensity` field) onto the main client thread. `SimulationHud.intensity` is written on the main client thread and read from `ViewportEvent.ComputeCameraAngles`, which also fires on the main client thread — no extra synchronisation needed.
+
+### Performance Notes
+
+- **Fire-proximity scan memo** — `SimulationManager.nearestFireDistance` (the ~4,800-block hot scan) is memoised per `(game-tick, packed position)`. The several callers that need it for the same player on the same tick (PLAYER_TICK log, move_tick CSV row, `hazardDistance`) share one scan. Server-thread only, so the single-slot static cache needs no synchronisation. Scan radii live in named constants (`FIRE_SCAN_RADIUS_*`, `CCS_HAZARD_RADIUS_*`).
+- **Earthquake PEAK scan** — `SimulationEffects.enqueuePeakDestructions` reads each scanned block state once (was 3×).
+- **Turso writes** — run on a dedicated 2-thread daemon pool, not the common ForkJoinPool (see `TursoClient`).
+
+### Repo Hygiene
+
+The repo root no longer carries the decompiled vanilla `net/` reference dump, the `old_stuffs/` backup, or untitled dev screenshots — all removed and (where applicable) gitignored. Vanilla source lookups should use an external decompiler, not committed files.
 
 ### Block Registration Pattern (NeoForge 26.x)
 
