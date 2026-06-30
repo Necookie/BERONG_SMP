@@ -47,11 +47,8 @@ public class ItemCommands {
 
         dispatcher.register(Commands.literal("get_co2_extinguisher")
                 .executes(ctx -> {
-                    if (!ctx.getSource().isPlayer()) {
-                        ctx.getSource().sendFailure(Component.literal("This command can only be run by a player."));
-                        return 0;
-                    }
-                    ServerPlayer player = ctx.getSource().getPlayer();
+                    ServerPlayer player = requirePlayer(ctx.getSource());
+                    if (player == null) return 0;
                     player.getInventory().add(BerongSMP.CO2_EXTINGUISHER.get().getDefaultInstance());
                     ctx.getSource().sendSuccess(() -> Component.literal(
                             "§aCO2 Extinguisher added to your inventory! Use it on burning computer blocks."), true);
@@ -61,11 +58,8 @@ public class ItemCommands {
 
     private static int spawnNpc(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack source = ctx.getSource();
-        if (!source.isPlayer()) {
-            source.sendFailure(Component.literal("This command can only be run by a player."));
-            return 0;
-        }
-        ServerPlayer player = source.getPlayer();
+        ServerPlayer player = requirePlayer(source);
+        if (player == null) return 0;
         String typeId = StringArgumentType.getString(ctx, "type");
         NpcType npcType = NpcType.fromId(typeId);
 
@@ -88,11 +82,8 @@ public class ItemCommands {
 
     private static int spawnLSPU(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        if (!source.isPlayer()) {
-            source.sendFailure(Component.literal("This command can only be run by a player."));
-            return 0;
-        }
-        ServerPlayer player = source.getPlayer();
+        ServerPlayer player = requirePlayer(source);
+        if (player == null) return 0;
         BlockPos pos = player.blockPosition();
         new CCSBuildingConstructor().construct(player.level(), pos);
         source.sendSuccess(() -> Component.literal("LSPU Building spawned at your position!"), true);
@@ -101,13 +92,19 @@ public class ItemCommands {
 
     private static int getExtinguisher(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
-        if (!source.isPlayer()) {
-            source.sendFailure(Component.literal("This command can only be run by a player."));
-            return 0;
-        }
-        ServerPlayer player = source.getPlayer();
+        ServerPlayer player = requirePlayer(source);
+        if (player == null) return 0;
         player.getInventory().add(BerongSMP.FIRE_EXTINGUISHER.get().getDefaultInstance());
         source.sendSuccess(() -> Component.literal("Fire Extinguisher added to your inventory!"), true);
         return 1;
+    }
+
+    /** Returns the source's player, or {@code null} after sending a failure if the source isn't a player. */
+    private static ServerPlayer requirePlayer(CommandSourceStack source) {
+        if (!source.isPlayer()) {
+            source.sendFailure(Component.literal("This command can only be run by a player."));
+            return null;
+        }
+        return source.getPlayer();
     }
 }
