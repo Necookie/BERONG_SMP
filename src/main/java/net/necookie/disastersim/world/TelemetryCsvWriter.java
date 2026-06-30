@@ -13,7 +13,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Writes per-tick and event rows to a local CSV file conforming to
@@ -35,10 +34,6 @@ public class TelemetryCsvWriter {
     private static Path telemetryDir;
     private static BufferedWriter eventWriter;
     private static BufferedWriter sessionWriter;
-    private static boolean eventHeaderWritten = false;
-    private static boolean sessionHeaderWritten = false;
-
-    private static final ConcurrentHashMap<String, Boolean> openSessions = new ConcurrentHashMap<>();
     private static final List<BlockPos> fireAlarmPositions = new ArrayList<>();
     private static boolean fireAlarmsScanDone = false;
     private static String cachedModVersion = null;
@@ -65,14 +60,8 @@ public class TelemetryCsvWriter {
         }
     }
 
-    public static void openSession(String sessionId) {
-        if (telemetryDir == null) return;
-        openSessions.put(sessionId, true);
-    }
-
     public static void closeSession(String sessionId, Map<String, Object> metadata) {
         if (telemetryDir == null) return;
-        openSessions.remove(sessionId);
         try {
             ensureSessionWriter();
             StringBuilder sb = new StringBuilder();
@@ -178,7 +167,6 @@ public class TelemetryCsvWriter {
             eventWriter.write("player_id,session_id,scenario_type,timestamp,event_type," +
                     "x,y,z,hazard_distance,interaction_target,nearby_player_count");
             eventWriter.newLine();
-            eventHeaderWritten = true;
         }
     }
 
@@ -194,7 +182,6 @@ public class TelemetryCsvWriter {
                     "aftershock_count,aftershock_magnitude_scale,final_earthquake_phase," +
                     "contract_version,mod_version");
             sessionWriter.newLine();
-            sessionHeaderWritten = true;
         }
     }
 

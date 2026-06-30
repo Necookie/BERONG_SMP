@@ -191,7 +191,6 @@ public class SimulationManager {
                 : (session.getEpicenter() != null
                         ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                         : 99.0);
-        TelemetryCsvWriter.openSession(session.getSessionId());
         session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), uuid.toString(), state.name().toLowerCase(),
                 0.0, "session_start",
