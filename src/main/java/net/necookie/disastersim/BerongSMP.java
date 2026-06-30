@@ -404,34 +404,19 @@ public class BerongSMP {
         }
     }
 
-    /**
-     * Server-side initialisation that runs once after the world is loaded but
-     * before any players can connect.
-     *
-     * <p>Steps performed:
-     * <ol>
-     *   <li>Place the lobby NBT structure and discover the two simulation buttons.</li>
-     *   <li>Pin the world respawn point to the lobby centre so that players who die
-     *       outside a simulation (no {@code pendingLobbyRespawn} entry) still land
-     *       inside the lobby rather than at world origin (0, 0, 0).</li>
-     *   <li>Freeze the sun and weather so the arena lighting is always consistent
-     *       regardless of how long a session has been running.</li>
-     * </ol>
-     *
-     * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
-     */
+    /** Registers attribute defaults for the custom NPC entity (every {@code Mob} EntityType needs them). */
+    private void onEntityAttributes(EntityAttributeCreationEvent event) {
+        event.put(CUSTOM_NPC.get(), CustomNpcEntity.createAttributes().build());
+    }
+
     /**
      * Item frames always return their item to the player's inventory, regardless of the
      * doEntityDrops gamerule.  Vanilla ItemFrame.hurt() skips the drop when doEntityDrops=false,
      * silently deleting the item.  We intercept the attack here, handle the removal ourselves
      * with a forced inventory-add, and cancel the event so vanilla logic doesn't run.
      *
-     * Covers both ItemFrame and GlowItemFrame (GlowItemFrame extends ItemFrame).
+     * <p>Covers both ItemFrame and GlowItemFrame (GlowItemFrame extends ItemFrame).
      */
-    private void onEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(CUSTOM_NPC.get(), CustomNpcEntity.createAttributes().build());
-    }
-
     @SubscribeEvent
     public void onAttackItemFrame(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
         if (!(event.getTarget() instanceof net.minecraft.world.entity.decoration.ItemFrame frame)) return;
@@ -473,6 +458,23 @@ public class BerongSMP {
         net.necookie.disastersim.world.TelemetryCsvWriter.shutdown();
     }
 
+    /**
+     * Server-side initialisation that runs once after the world is loaded but
+     * before any players can connect.
+     *
+     * <p>Steps performed:
+     * <ol>
+     *   <li>Place the lobby NBT structure and discover the two simulation buttons.</li>
+     *   <li>Build the tutorial lobby structure and initialise the session manager + telemetry.</li>
+     *   <li>Pin the world respawn point to the lobby centre so that players who die
+     *       outside a simulation (no {@code pendingLobbyRespawn} entry) still land
+     *       inside the lobby rather than at world origin (0, 0, 0).</li>
+     *   <li>Freeze the sun and weather so the arena lighting is always consistent
+     *       regardless of how long a session has been running.</li>
+     * </ol>
+     *
+     * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
+     */
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("=== BerongSMP session build: UUID-subquery writes (2026-06-21-v4) ===");
