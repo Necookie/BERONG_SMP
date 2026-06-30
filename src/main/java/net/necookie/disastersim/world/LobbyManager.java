@@ -174,60 +174,46 @@ public class LobbyManager {
 
         BlockPos pos = event.getPos();
 
-        boolean testBypass = net.necookie.disastersim.command.BfpAdminCommands.isTestBypass(player.getUUID());
-
         if (fireButtonPos != null && pos.equals(fireButtonPos)) {
-            if (!testBypass) {
-                if (!RegistrationManager.isRegistered(player)) {
-                    player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-                if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
-                    player.sendSystemMessage(Component.literal(
-                        "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-                if (!TutorialManager.isComplete(player.getUUID())) {
-                    player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-            }
+            if (!gatesPassed(player, event)) return;
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_FIRE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
-            if (!testBypass) {
-                if (!RegistrationManager.isRegistered(player)) {
-                    player.sendSystemMessage(Component.literal("§cPlease /register first! Usage: /register <student_id> <section> <full_name>"));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-                if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
-                    player.sendSystemMessage(Component.literal(
-                        "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one."));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-                if (!TutorialManager.isComplete(player.getUUID())) {
-                    player.sendSystemMessage(Component.literal("§cComplete the safety tutorial first!"));
-                    event.setCancellationResult(InteractionResult.FAIL);
-                    event.setCanceled(true);
-                    return;
-                }
-            }
+            if (!gatesPassed(player, event)) return;
             // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
             double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;
             SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_EARTHQUAKE, magnitude);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
+    }
+
+    /**
+     * Runs the lobby entry gates (registration → active session → tutorial complete), unless the
+     * player has an admin test-bypass. Returns {@code true} if the player may start a simulation;
+     * otherwise messages the reason, cancels the interaction with FAIL, and returns {@code false}.
+     */
+    private static boolean gatesPassed(ServerPlayer player, PlayerInteractEvent.RightClickBlock event) {
+        if (net.necookie.disastersim.command.BfpAdminCommands.isTestBypass(player.getUUID())) return true;
+        if (!RegistrationManager.isRegistered(player)) {
+            return denyGate(player, event,
+                "§cPlease /register first! Usage: /register <student_id> <section> <full_name>");
+        }
+        if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
+            return denyGate(player, event,
+                "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one.");
+        }
+        if (!TutorialManager.isComplete(player.getUUID())) {
+            return denyGate(player, event, "§cComplete the safety tutorial first!");
+        }
+        return true;
+    }
+
+    private static boolean denyGate(ServerPlayer player, PlayerInteractEvent.RightClickBlock event, String message) {
+        player.sendSystemMessage(Component.literal(message));
+        event.setCancellationResult(InteractionResult.FAIL);
+        event.setCanceled(true);
+        return false;
     }
 }
