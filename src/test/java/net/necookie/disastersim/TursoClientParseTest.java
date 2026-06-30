@@ -32,6 +32,19 @@ class TursoClientParseTest {
                    "{\"type\":\"integer\",\"value\":\"90\"}]]" +
         "}}}]}";
 
+    private static final String NULL_CELL =
+        "{\"results\":[{\"response\":{\"result\":{" +
+        "\"cols\":[{\"name\":\"id\"},{\"name\":\"notes\"}]," +
+        "\"rows\":[[{\"type\":\"integer\",\"value\":\"7\"}," +
+                   "{\"type\":\"null\",\"value\":null}]]" +
+        "}}}]}";
+
+    private static final String FEWER_CELLS =
+        "{\"results\":[{\"response\":{\"result\":{" +
+        "\"cols\":[{\"name\":\"id\"},{\"name\":\"score\"}]," +
+        "\"rows\":[[{\"type\":\"integer\",\"value\":\"9\"}]]" +
+        "}}}]}";
+
     @Test
     void nullInputReturnsEmptyArray() {
         JsonArray result = TursoClient.parseRows(null);
@@ -63,6 +76,24 @@ class TursoClientParseTest {
         assertEquals("2", rows.get(1).getAsJsonObject().get("id").getAsString());
         assertEquals("75", rows.get(0).getAsJsonObject().get("score").getAsString());
         assertEquals("90", rows.get(1).getAsJsonObject().get("score").getAsString());
+    }
+
+    @Test
+    void nullCellValueIsPreservedAsJsonNull() {
+        JsonArray rows = TursoClient.parseRows(NULL_CELL);
+        assertEquals(1, rows.size());
+        JsonObject row = rows.get(0).getAsJsonObject();
+        assertEquals("7", row.get("id").getAsString());
+        assertTrue(row.get("notes").isJsonNull(), "a null cell should map to JSON null");
+    }
+
+    @Test
+    void fewerCellsThanColsOnlyMapsPresentColumns() {
+        JsonArray rows = TursoClient.parseRows(FEWER_CELLS);
+        assertEquals(1, rows.size());
+        JsonObject row = rows.get(0).getAsJsonObject();
+        assertEquals("9", row.get("id").getAsString());
+        assertFalse(row.has("score"), "a missing trailing cell must not create a key");
     }
 
     // NOTE: tests for malformed/empty-string inputs are intentionally excluded.
