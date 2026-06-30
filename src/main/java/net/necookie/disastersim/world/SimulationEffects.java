@@ -20,6 +20,27 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Stateless world-mutation helpers for the two disaster scenarios. All methods run on the
+ * server thread, driven from {@link SimulationManager}'s tick loop.
+ *
+ * <h2>Fire</h2>
+ * {@link #simulateFire} seeds random fire blocks inside the arena (library);
+ * {@link #spreadComputerFire} ignites cached {@link ComputerBlock} positions (CCS electrical fire);
+ * {@link #applyFireProximityEffects} applies nausea + air-drain near flames;
+ * {@link #cleanupFireOutsideBounds} / {@link #clearFireInArena} keep vanilla fire-spread contained.
+ *
+ * <h2>Earthquake</h2>
+ * Phase-dispatched from {@link #simulateEarthquake}: RUMBLE/AFTERSHOCK break random blocks in a
+ * magnitude-scaled radius; PEAK scans for unsupported blocks and enqueues them closest-first into
+ * {@link SimulationSession#getPendingDestructions()}, drained a few per tick by
+ * {@link #drainEarthquakePending}. {@link #breakOrDebris} turns wood/glass into gravity-driven
+ * {@link FallingBlockEntity} debris (with fall damage) and destroys everything else outright.
+ *
+ * <p><b>Performance note:</b> the scan-heavy methods here are the hot path during a simulation.
+ * Block states are read once per position where possible, since these loops cover thousands of
+ * positions every few ticks.
+ */
 public class SimulationEffects {
 
     private static final Set<Block> DEBRIS_BLOCKS = Set.of(
@@ -209,8 +230,11 @@ public class SimulationEffects {
             for (int dz = -radius; dz <= radius; dz++) {
                 for (int dy = 0; dy < areaHeight; dy++) {
                     BlockPos pos = epicenter.offset(dx, dy, dz);
-                    if (!level.getBlockState(pos).isAir()
-                            && level.getBlockState(pos).getBlock() != Blocks.BEDROCK
+                    // Cache the state once: this loop visits thousands of positions per
+                    // PEAK interval, and re-reading the same block 3x was pure overhead.
+                    BlockState state = level.getBlockState(pos);
+                    if (!state.isAir()
+                            && state.getBlock() != Blocks.BEDROCK
                             && level.getBlockState(pos.below()).isAir()) { // unsupported = nothing below
                         candidates.add(pos);
                     }
