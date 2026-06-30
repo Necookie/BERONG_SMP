@@ -29,6 +29,22 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Central registry and tick driver for all active disaster simulations.
+ *
+ * <p>Holds one {@link SimulationSession} per player UUID in a {@link ConcurrentHashMap} and advances
+ * them from {@link #onServerTick}. Each tick a session runs, in order: telemetry sampling, the
+ * scenario effect (fire or earthquake), exit-zone and assembly-zone checks, and a HUD sync packet.
+ *
+ * <p>{@link #startSimulation}/{@link #endSimulation} are {@code synchronized}; everything else runs
+ * single-threaded on the server tick thread. Buildings are (re)placed from {@link #BUILDINGS} on both
+ * start and end so every session begins with clean, undamaged structures.
+ *
+ * <p><b>Hot path:</b> the fire-proximity scan ({@link #nearestFireDistance}) is the most frequent
+ * heavy world read. It is memoised per (game-tick, position) so the several callers that need it for
+ * the same player on the same tick — PLAYER_TICK, the move_tick CSV row, and {@link #hazardDistance}
+ * — share a single scan instead of repeating it.
+ */
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class SimulationManager {
 
@@ -41,6 +57,21 @@ public class SimulationManager {
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
 
     private static final int TICKS_PER_SECOND = 20;
+
+    // Half-extents of the proximity scan boxes (XZ radius, Y radius), and the sentinel
+    // distance returned when no hazard is found in range.
+    private static final int FIRE_SCAN_RADIUS_XZ = 10;
+    private static final int FIRE_SCAN_RADIUS_Y  = 5;
+    private static final int CCS_HAZARD_RADIUS_XZ = 15;
+    private static final int CCS_HAZARD_RADIUS_Y  = 5;
+    private static final double NO_HAZARD_DISTANCE = 99.0;
+
+    // Single-slot per-tick memo for the fire scan — the heaviest per-tick world read.
+    // Repeated calls for the same player on the same tick reuse the result instead of
+    // re-scanning ~4,800 blocks. Server-thread only, so no synchronisation is needed.
+    private static long   fireScanTick = Long.MIN_VALUE;
+    private static long   fireScanPos  = Long.MIN_VALUE;
+    private static double fireScanVal  = NO_HAZARD_DISTANCE;
 
     private static final double SIM_ENTRY_OFFSET_X = 5.5;
     private static final double SIM_ENTRY_OFFSET_Y = 2.0;
@@ -563,7 +594,9 @@ public class SimulationManager {
 
     private static double nearestCCSHazardDistance(ServerLevel level, BlockPos origin) {
         double minSq = Double.MAX_VALUE;
-        for (BlockPos check : BlockPos.betweenClosed(origin.offset(-15, -5, -15), origin.offset(15, 5, 15))) {
+        for (BlockPos check : BlockPos.betweenClosed(
+                origin.offset(-CCS_HAZARD_RADIUS_XZ, -CCS_HAZARD_RADIUS_Y, -CCS_HAZARD_RADIUS_XZ),
+                origin.offset( CCS_HAZARD_RADIUS_XZ,  CCS_HAZARD_RADIUS_Y,  CCS_HAZARD_RADIUS_XZ))) {
             net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
             boolean isHazard = bs.is(net.minecraft.world.level.block.Blocks.FIRE)
                     || bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)
@@ -574,7 +607,7 @@ public class SimulationManager {
                 if (d < minSq) minSq = d;
             }
         }
-        return minSq == Double.MAX_VALUE ? 99.0 : Math.sqrt(minSq);
+        return minSq == Double.MAX_VALUE ? NO_HAZARD_DISTANCE : Math.sqrt(minSq);
     }
 
     @SubscribeEvent
@@ -589,9 +622,27 @@ public class SimulationManager {
                 Collections.emptySet(), 0.0f, 0.0f, true);
     }
 
+    /**
+     * Straight-line distance from {@code origin} to the nearest fire/soul-fire block within the
+     * scan box, or {@link #NO_HAZARD_DISTANCE} if none. Memoised per (game-tick, position): the
+     * common case of several callers asking for the same player on the same tick costs one scan.
+     */
     public static double nearestFireDistance(ServerLevel level, BlockPos origin) {
+        long gameTime  = level.getGameTime();
+        long packedPos = origin.asLong();
+        if (gameTime == fireScanTick && packedPos == fireScanPos) return fireScanVal;
+        double result = computeNearestFireDistance(level, origin);
+        fireScanTick = gameTime;
+        fireScanPos  = packedPos;
+        fireScanVal  = result;
+        return result;
+    }
+
+    private static double computeNearestFireDistance(ServerLevel level, BlockPos origin) {
         double minSq = Double.MAX_VALUE;
-        for (BlockPos check : BlockPos.betweenClosed(origin.offset(-10, -5, -10), origin.offset(10, 5, 10))) {
+        for (BlockPos check : BlockPos.betweenClosed(
+                origin.offset(-FIRE_SCAN_RADIUS_XZ, -FIRE_SCAN_RADIUS_Y, -FIRE_SCAN_RADIUS_XZ),
+                origin.offset( FIRE_SCAN_RADIUS_XZ,  FIRE_SCAN_RADIUS_Y,  FIRE_SCAN_RADIUS_XZ))) {
             net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
             if (bs.is(net.minecraft.world.level.block.Blocks.FIRE) ||
                 bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)) {
@@ -599,7 +650,7 @@ public class SimulationManager {
                 if (d < minSq) minSq = d;
             }
         }
-        return minSq == Double.MAX_VALUE ? 99.0 : Math.sqrt(minSq);
+        return minSq == Double.MAX_VALUE ? NO_HAZARD_DISTANCE : Math.sqrt(minSq);
     }
 
     private static BlockPos findRandomSpawnInLibrary(ServerLevel level) {
