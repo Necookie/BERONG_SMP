@@ -75,26 +75,10 @@ public class SimulationHud {
     }
 
     /**
-     * Applies camera shake proportional to the current earthquake intensity.
-     * Two layers: a slow sinusoidal rumble and a fast random jitter, both scaled by intensity.
+     * Applies earthquake camera shake proportional to the current intensity.
      * Registered to the NeoForge event bus from BerongSMPClient so it only runs client-side.
      */
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
-        if (intensity <= 0f) return;
-        Minecraft mc = Minecraft.getInstance();
-        long time = (mc.level != null) ? mc.level.getGameTime() : System.currentTimeMillis() / 50L;
-        // Low-frequency ground roll (~1 Hz) — feels like the earth heaving underfoot.
-        float rumbleSlow = (float) Math.sin(time * 0.314) * intensity * 1.4f;
-        // Mid-frequency secondary oscillation (~3 Hz) — building resonance.
-        float rumbleMid  = (float) Math.sin(time * 0.942) * intensity * 0.7f;
-        // High-frequency random jitter — structural noise and micro-tremors.
-        float jitterYaw   = ((float) Math.random() * 2f - 1f) * intensity * 1.0f;
-        float jitterPitch = ((float) Math.random() * 2f - 1f) * intensity * 0.7f;
-        // Roll shake — tilts the horizon for maximum disorientation during strong shaking.
-        float roll = (float) Math.sin(time * 0.628) * intensity * 0.9f
-                   + ((float) Math.random() * 2f - 1f) * intensity * 0.4f;
-        event.setYaw((float) event.getYaw() + rumbleSlow + rumbleMid + jitterYaw);
-        event.setPitch((float) event.getPitch() + jitterPitch);
-        event.setRoll((float) event.getRoll() + roll);
+        CameraShake.apply(event, intensity);
     }
 }

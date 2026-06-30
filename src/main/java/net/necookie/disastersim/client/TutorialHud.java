@@ -85,19 +85,8 @@ public class TutorialHud {
         return lines.isEmpty() ? List.of(text) : lines;
     }
 
-    /** Applies camera shake for QUAKE tutorial stages — same multi-layer approach as SimulationHud. */
+    /** Applies camera shake for QUAKE tutorial stages — shared with SimulationHud via CameraShake. */
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
-        if (intensity <= 0f) return;
-        Minecraft mc = Minecraft.getInstance();
-        long time = (mc.level != null) ? mc.level.getGameTime() : System.currentTimeMillis() / 50L;
-        float rumbleSlow = (float) Math.sin(time * 0.314) * intensity * 1.4f;
-        float rumbleMid  = (float) Math.sin(time * 0.942) * intensity * 0.7f;
-        float jitterYaw   = ((float) Math.random() * 2f - 1f) * intensity * 1.0f;
-        float jitterPitch = ((float) Math.random() * 2f - 1f) * intensity * 0.7f;
-        float roll = (float) Math.sin(time * 0.628) * intensity * 0.9f
-                   + ((float) Math.random() * 2f - 1f) * intensity * 0.4f;
-        event.setYaw((float)   event.getYaw()   + rumbleSlow + rumbleMid + jitterYaw);
-        event.setPitch((float) event.getPitch() + jitterPitch);
-        event.setRoll((float)  event.getRoll()  + roll);
+        CameraShake.apply(event, intensity);
     }
 }
