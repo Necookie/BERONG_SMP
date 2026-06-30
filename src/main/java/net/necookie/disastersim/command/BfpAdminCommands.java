@@ -214,14 +214,7 @@ public class BfpAdminCommands {
                                             StringBuilder sb = new StringBuilder("§6Search results (")
                                                     .append(rows.size()).append("):\n");
                                             for (JsonElement el : rows) {
-                                                JsonObject r = el.getAsJsonObject();
-                                                sb.append("§7#").append(str(r, "id"))
-                                                  .append(" §f").append(str(r, "student_name"))
-                                                  .append("§7@").append(str(r, "station_account"))
-                                                  .append(" §e").append(str(r, "simulation_type"))
-                                                  .append(" §ascore=").append(str(r, "simulation_score"))
-                                                  .append(" pass=").append(str(r, "passed"))
-                                                  .append(" [").append(str(r, "status")).append("]\n");
+                                                appendSessionRow(sb, el.getAsJsonObject());
                                             }
                                             String msg = sb.toString();
                                             ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
@@ -389,14 +382,7 @@ public class BfpAdminCommands {
         }
         StringBuilder sb = new StringBuilder("§6--- Sessions (page " + page + ") ---\n");
         for (JsonElement el : rows) {
-            JsonObject r = el.getAsJsonObject();
-            sb.append("§7#").append(str(r, "id"))
-              .append(" §f").append(str(r, "student_name"))
-              .append("§7@").append(str(r, "station_account"))
-              .append(" §e").append(str(r, "simulation_type"))
-              .append(" §ascore=").append(str(r, "simulation_score"))
-              .append(" pass=").append(str(r, "passed"))
-              .append(" [").append(str(r, "status")).append("]\n");
+            appendSessionRow(sb, el.getAsJsonObject());
         }
         String msg = sb.toString();
         ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
@@ -440,6 +426,17 @@ public class BfpAdminCommands {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;
+    }
+
+    /** Appends one "§7#id §fname§7@station §eTYPE §ascore=.. pass=.. [status]" line for a session row. */
+    private static void appendSessionRow(StringBuilder sb, JsonObject r) {
+        sb.append("§7#").append(str(r, "id"))
+          .append(" §f").append(str(r, "student_name"))
+          .append("§7@").append(str(r, "station_account"))
+          .append(" §e").append(str(r, "simulation_type"))
+          .append(" §ascore=").append(str(r, "simulation_score"))
+          .append(" pass=").append(str(r, "passed"))
+          .append(" [").append(str(r, "status")).append("]\n");
     }
 
     private static int setPrepLevel(CommandContext<CommandSourceStack> ctx, String level) {
@@ -532,14 +529,7 @@ public class BfpAdminCommands {
         }
         StringBuilder sb = new StringBuilder("§6Today's sessions (").append(rows.size()).append("):\n");
         for (JsonElement el : rows) {
-            JsonObject r = el.getAsJsonObject();
-            sb.append("§7#").append(str(r, "id"))
-              .append(" §f").append(str(r, "student_name"))
-              .append("§7@").append(str(r, "station_account"))
-              .append(" §e").append(str(r, "simulation_type"))
-              .append(" §ascore=").append(str(r, "simulation_score"))
-              .append(" pass=").append(str(r, "passed"))
-              .append(" [").append(str(r, "status")).append("]\n");
+            appendSessionRow(sb, el.getAsJsonObject());
         }
         String msg = sb.toString();
         ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
