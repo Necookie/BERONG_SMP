@@ -40,12 +40,19 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.necookie.disastersim.entity.CustomNpcEntity;
+import net.necookie.disastersim.entity.NpcType;
+import net.necookie.disastersim.item.NpcSpawnerItem;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.necookie.disastersim.world.LobbyManager;
 import net.necookie.disastersim.world.TutorialLobbyManager;
 
@@ -71,8 +78,42 @@ public class BerongSMP {
     /** Deferred Register for Creative Mode Tabs. */
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
+    /** Deferred Register for Entity Types. */
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
+
     /** Deferred Register for Sound Events. */
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
+
+    // ── NPC entity ───────────────────────────────────────────────────────────
+
+    /** Single entity type shared by all five instructors; NpcType stored in NBT selects the skin. */
+    public static final DeferredHolder<EntityType<?>, EntityType<CustomNpcEntity>> CUSTOM_NPC =
+            ENTITY_TYPES.register("custom_npc", id ->
+                    EntityType.Builder.<CustomNpcEntity>of(CustomNpcEntity::new, MobCategory.MISC)
+                            .sized(0.6f, 1.8f)
+                            .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
+
+    // ── NPC spawner items (one per instructor) ───────────────────────────────
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_REYES =
+            ITEMS.registerItem("npc_sgt_reyes",
+                    p -> new NpcSpawnerItem(NpcType.SGT_REYES, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_SANTOS =
+            ITEMS.registerItem("npc_sgt_santos",
+                    p -> new NpcSpawnerItem(NpcType.SGT_SANTOS, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_OFFICER_CRUZ =
+            ITEMS.registerItem("npc_officer_cruz",
+                    p -> new NpcSpawnerItem(NpcType.OFFICER_CRUZ, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_CAPT_MORFE =
+            ITEMS.registerItem("npc_capt_morfe",
+                    p -> new NpcSpawnerItem(NpcType.CAPT_MORFE, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_SECURITY_TUAZON =
+            ITEMS.registerItem("npc_security_tuazon",
+                    p -> new NpcSpawnerItem(NpcType.SECURITY_TUAZON, p.stacksTo(16)));
 
     /** Fire alarm ringing sound — loops via scheduled block ticks while ACTIVATED=true. */
     public static final DeferredHolder<SoundEvent, SoundEvent> FIRE_ALARM_RING =
@@ -240,6 +281,11 @@ public class BerongSMP {
                 output.accept(CO2_EXTINGUISHER.get());
                 output.accept(COMPUTER_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
+                output.accept(NPC_SGT_REYES.get());
+                output.accept(NPC_SGT_SANTOS.get());
+                output.accept(NPC_OFFICER_CRUZ.get());
+                output.accept(NPC_CAPT_MORFE.get());
+                output.accept(NPC_SECURITY_TUAZON.get());
             }).build());
 
     /** Creative tab: furniture and props for building scenarios. */
@@ -284,8 +330,10 @@ public class BerongSMP {
         // vanilla registries when NeoForge fires the matching RegistryEvent.
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        ENTITY_TYPES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         SOUND_EVENTS.register(modEventBus);
+        modEventBus.addListener(this::onEntityAttributes);
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
         // on the mod bus — it must be registered here so NeoForge picks it up.
@@ -380,6 +428,10 @@ public class BerongSMP {
      *
      * Covers both ItemFrame and GlowItemFrame (GlowItemFrame extends ItemFrame).
      */
+    private void onEntityAttributes(EntityAttributeCreationEvent event) {
+        event.put(CUSTOM_NPC.get(), CustomNpcEntity.createAttributes().build());
+    }
+
     @SubscribeEvent
     public void onAttackItemFrame(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
         if (!(event.getTarget() instanceof net.minecraft.world.entity.decoration.ItemFrame frame)) return;

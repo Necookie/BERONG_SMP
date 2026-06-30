@@ -1,16 +1,22 @@
 package net.necookie.disastersim.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.BerongSMP;
-import net.minecraft.server.level.ServerLevel;
+import net.necookie.disastersim.entity.CustomNpcEntity;
+import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.building.CCSBuildingConstructor;
+
+import java.util.Arrays;
 
 public class ItemCommands {
 
@@ -32,6 +38,13 @@ public class ItemCommands {
                     return 1;
                 }));
 
+        dispatcher.register(Commands.literal("spawn_npc")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .then(Commands.argument("type", StringArgumentType.word())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                Arrays.stream(NpcType.values()).map(t -> t.id), builder))
+                        .executes(ItemCommands::spawnNpc)));
+
         dispatcher.register(Commands.literal("get_co2_extinguisher")
                 .executes(ctx -> {
                     if (!ctx.getSource().isPlayer()) {
@@ -44,6 +57,33 @@ public class ItemCommands {
                             "§aCO2 Extinguisher added to your inventory! Use it on burning computer blocks."), true);
                     return 1;
                 }));
+    }
+
+    private static int spawnNpc(CommandContext<CommandSourceStack> ctx) {
+        CommandSourceStack source = ctx.getSource();
+        if (!source.isPlayer()) {
+            source.sendFailure(Component.literal("This command can only be run by a player."));
+            return 0;
+        }
+        ServerPlayer player = source.getPlayer();
+        String typeId = StringArgumentType.getString(ctx, "type");
+        NpcType npcType = NpcType.fromId(typeId);
+
+        ServerLevel level = source.getLevel();
+        BlockPos pos = player.blockPosition();
+
+        CustomNpcEntity npc = new CustomNpcEntity(BerongSMP.CUSTOM_NPC.get(), level);
+        npc.setNpcType(npcType);
+        npc.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        double dx = player.getX() - (pos.getX() + 0.5);
+        double dz = player.getZ() - (pos.getZ() + 0.5);
+        npc.setYRot((float) Math.toDegrees(Math.atan2(-dx, dz)));
+        npc.yRotO = npc.getYRot();
+        level.addFreshEntity(npc);
+
+        source.sendSuccess(() -> Component.literal(
+                "§aSpawned §r" + npcType.displayName + "§a at your position."), true);
+        return 1;
     }
 
     private static int spawnLSPU(CommandContext<CommandSourceStack> context) {
