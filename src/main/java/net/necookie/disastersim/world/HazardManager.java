@@ -73,7 +73,7 @@ public final class HazardManager {
             }
 
             if (isHazardCapable(state) && !isHazardous(state) && random.nextInt(DEVELOP_CHANCE_DENOM) == 0) {
-                activate(level, session, pos, state);
+                activate(level, session, pos);
             }
         }
     }
@@ -83,12 +83,24 @@ public final class HazardManager {
         int amount = state.getValue(WoodshopSawdustLayerBlock.ACCUMULATION);
         if (amount >= 5) return;
         if (random.nextInt(SAWDUST_STEP_CHANCE_DENOM) != 0) return;
-        int next = amount + 1;
-        level.setBlockAndUpdate(pos, state.setValue(WoodshopSawdustLayerBlock.ACCUMULATION, next));
-        if (next == 5) flashIgniteSawdust(level, session, pos);
+        setSawdustLevel(level, session, pos, amount + 1, session.getPlayer());
     }
 
-    private static void flashIgniteSawdust(ServerLevel level, SimulationSession session, BlockPos pos) {
+    /** Sets the sawdust layer's accumulation directly (0–5); flash-ignites if it lands on 5. Returns true if it flashed. */
+    public static boolean setSawdustLevel(ServerLevel level, SimulationSession session, BlockPos pos,
+                                          int amount, ServerPlayer notifyPlayer) {
+        BlockState state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof WoodshopSawdustLayerBlock)) return false;
+        int clamped = Math.max(0, Math.min(5, amount));
+        level.setBlockAndUpdate(pos, state.setValue(WoodshopSawdustLayerBlock.ACCUMULATION, clamped));
+        if (clamped == 5) {
+            flashIgniteSawdust(level, session, pos, notifyPlayer);
+            return true;
+        }
+        return false;
+    }
+
+    private static void flashIgniteSawdust(ServerLevel level, SimulationSession session, BlockPos pos, ServerPlayer notifyPlayer) {
         int lit = 0;
         for (BlockPos target : BlockPos.betweenClosed(pos.offset(-1, 0, -1), pos.offset(1, 2, 1))) {
             if (lit >= 6) break;
@@ -99,15 +111,22 @@ public final class HazardManager {
         }
         level.setBlockAndUpdate(pos, level.getBlockState(pos).setValue(WoodshopSawdustLayerBlock.ACCUMULATION, 0));
         level.playSound(null, pos, SoundEvents.FIRE_AMBIENT, SoundSource.BLOCKS, 1.0f, 0.6f);
-        notifyFailure(session, pos, "§c🪚 Thick sawdust flash-ignites across the shop floor!");
+        if (session != null) session.getHazardTimers().remove(pos);
+        notifyFailure(notifyPlayer, "§c🪚 Thick sawdust flash-ignites across the shop floor!");
     }
 
-    private static void activate(ServerLevel level, SimulationSession session, BlockPos pos, BlockState state) {
+    /** Sets a hazard-capable prop to hazardous=true and starts its failure timer. Returns false if not applicable. */
+    public static boolean activate(ServerLevel level, SimulationSession session, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (!isHazardCapable(state) || isHazardous(state)) return false;
         level.setBlockAndUpdate(pos, state.setValue(HazardBlock.HAZARDOUS, true));
-        session.getHazardTimers().put(pos, 0);
-        session.logger.log("hazard_activated", Map.of(
-                "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
-                "hazard", BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath()));
+        if (session != null) {
+            session.getHazardTimers().put(pos, 0);
+            session.logger.log("hazard_activated", Map.of(
+                    "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                    "hazard", BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath()));
+        }
+        return true;
     }
 
     private static void advanceFailureTimers(ServerLevel level, SimulationSession session) {
@@ -125,7 +144,7 @@ public final class HazardManager {
                     : state.getBlock() instanceof HazardFacingBlock hfb ? hfb.failureDelayTicks()
                     : 300;
             if (elapsed >= delay) {
-                triggerFailure(level, session, pos, state);
+                triggerFailure(level, session, pos, state, session.getPlayer());
                 it.remove();
             } else {
                 entry.setValue(elapsed);
@@ -133,7 +152,25 @@ public final class HazardManager {
         }
     }
 
-    private static void triggerFailure(ServerLevel level, SimulationSession session, BlockPos pos, BlockState state) {
+    /**
+     * Forces a hazard prop straight to its failure consequence, regardless of its current state
+     * or timer — used by the hazard wand for instant testing. Activates it first if it was still
+     * in its normal state. Returns false if {@code pos} isn't a hazard prop.
+     */
+    public static boolean forceFailure(ServerLevel level, SimulationSession session, BlockPos pos, ServerPlayer notifyPlayer) {
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof WoodshopSawdustLayerBlock) {
+            setSawdustLevel(level, session, pos, 5, notifyPlayer);
+            return true;
+        }
+        if (!isHazardCapable(state)) return false;
+        triggerFailure(level, session, pos, state, notifyPlayer);
+        if (session != null) session.getHazardTimers().remove(pos);
+        return true;
+    }
+
+    private static void triggerFailure(ServerLevel level, SimulationSession session, BlockPos pos,
+                                        BlockState state, ServerPlayer notifyPlayer) {
         Block block = state.getBlock();
         String message = "§c⚠ A neglected hazard just started a fire!";
         if (block instanceof HazardBlock hb) {
@@ -143,15 +180,16 @@ public final class HazardManager {
             hfb.onHazardFailure(level, pos, state);
             message = hfb.failureMessage();
         }
-        session.incrementFireSpread();
-        session.logger.log("hazard_failure", Map.of(
-                "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
-                "hazard", BuiltInRegistries.BLOCK.getKey(block).getPath()));
-        notifyFailure(session, pos, message);
+        if (session != null) {
+            session.incrementFireSpread();
+            session.logger.log("hazard_failure", Map.of(
+                    "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                    "hazard", BuiltInRegistries.BLOCK.getKey(block).getPath()));
+        }
+        notifyFailure(notifyPlayer, message);
     }
 
-    private static void notifyFailure(SimulationSession session, BlockPos pos, String message) {
-        ServerPlayer player = session.getPlayer();
+    private static void notifyFailure(ServerPlayer player, String message) {
         if (player != null) {
             player.sendSystemMessage(Component.literal(message));
         }
