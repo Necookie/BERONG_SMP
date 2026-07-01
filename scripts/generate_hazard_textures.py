@@ -329,6 +329,16 @@ def tex_pc_tower_vent_dusty():
     save(im, "pc_tower_vent_dusty")
 
 
+def tex_backpack_fabric():
+    im = new_canvas((35, 55, 80))
+    hbands(im, [(42, 65, 92), (28, 45, 68)])
+    rect(im, 4, 4, 11, 9, (22, 35, 55))  # front pocket
+    rect(im, 7, 2, 8, 13, (18, 28, 45))  # zipper line
+    speckle(im, [(50, 75, 105)], density=0.1)
+    border(im, (15, 22, 35))
+    save(im, "backpack_fabric")
+
+
 # ---------------------------------------------------------------------------
 # 7. charging_cart
 # ---------------------------------------------------------------------------
@@ -411,6 +421,16 @@ def tex_phone_body_swollen():
     speckle(im, [(60, 55, 38), (30, 28, 18)], density=0.3)
     border(im, (20, 18, 10))
     save(im, "phone_body_swollen")
+
+
+def tex_leather_jacket_fabric():
+    im = new_canvas((90, 55, 35))
+    hbands(im, [(100, 62, 40), (75, 45, 28)])
+    speckle(im, [(110, 70, 45), (60, 35, 20)], density=0.25)
+    rect(im, 2, 3, 13, 4, (65, 38, 22))  # seam
+    rect(im, 2, 10, 13, 11, (65, 38, 22))  # seam
+    border(im, (45, 25, 14))
+    save(im, "leather_jacket_fabric")
 
 
 # ---------------------------------------------------------------------------
@@ -602,12 +622,13 @@ ALL = [
     tex_floor_tile_clean, tex_sawdust_pile,
     tex_spotlight_housing_black, tex_spotlight_lens_off,
     tex_cardboard_box, tex_cardboard_box_charred,
-    tex_pc_tower_case, tex_pc_tower_vent_dusty,
+    tex_pc_tower_case, tex_pc_tower_vent_dusty, tex_backpack_fabric,
     tex_cart_cabinet_metal,
     tex_wire_cord_black,
     tex_vending_body_blue,
     tex_projector_housing_white, tex_projector_lens_ring,
     tex_phone_body_black, tex_phone_screen_glass, tex_phone_body_swollen,
+    tex_leather_jacket_fabric,
     tex_lipo_foil_silver, tex_lipo_foil_damaged,
     tex_locker_door_steel,
     tex_pa_rack_metal,

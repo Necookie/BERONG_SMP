@@ -1,17 +1,17 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "tower":  "minecraft:block/light_gray_concrete",
-    "screen": "minecraft:block/black_concrete",
-    "vents":  "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/light_gray_concrete"
+    "tower":  "berongsmp:block/pc_tower_case",
+    "slot":   "berongsmp:block/hazard_glass_screen_off",
+    "led":    "berongsmp:block/hazard_ok_led",
+    "particle": "berongsmp:block/pc_tower_case"
   },
   "elements": [
     { "name": "tower", "from": [3, 0, 2], "to": [13, 14, 14],
-      "faces": { "north": {"texture":"#screen"}, "south": {"texture":"#tower"}, "east": {"texture":"#vents"}, "west": {"texture":"#vents"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
+      "faces": { "north": {"texture":"#tower"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
     { "name": "drive_bay", "from": [4, 9, 1], "to": [9, 11, 3],
-      "faces": { "north": {"texture":"#vents"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
+      "faces": { "north": {"texture":"#slot"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
     { "name": "power_button", "from": [10, 10, 1], "to": [12, 12, 2],
-      "faces": { "north": {"texture":"#screen"} } }
+      "faces": { "north": {"texture":"#led"} } }
   ]
 }

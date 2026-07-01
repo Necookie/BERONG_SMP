@@ -1,20 +1,20 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "tower":  "minecraft:block/light_gray_concrete",
-    "screen": "minecraft:block/black_concrete",
-    "vents":  "minecraft:block/gray_concrete",
-    "dust":   "minecraft:block/sand",
-    "particle": "minecraft:block/light_gray_concrete"
+    "tower":  "berongsmp:block/pc_tower_case",
+    "dustvent": "berongsmp:block/pc_tower_vent_dusty",
+    "backpack": "berongsmp:block/backpack_fabric",
+    "led":    "berongsmp:block/hazard_warning_led",
+    "particle": "berongsmp:block/pc_tower_case"
   },
   "elements": [
     { "name": "tower", "from": [3, 0, 2], "to": [13, 14, 14],
-      "faces": { "north": {"texture":"#screen"}, "south": {"texture":"#tower"}, "east": {"texture":"#vents"}, "west": {"texture":"#vents"}, "up": {"texture":"#dust"}, "down": {"texture":"#tower"} } },
+      "faces": { "north": {"texture":"#tower"}, "south": {"texture":"#dustvent"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
     { "name": "drive_bay", "from": [4, 9, 1], "to": [9, 11, 3],
-      "faces": { "north": {"texture":"#dust"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#dust"}, "down": {"texture":"#tower"} } },
-    { "name": "dust_pack_side", "from": [1, 4, 0], "to": [3, 12, 14],
-      "faces": { "north": {"texture":"#dust"}, "south": {"texture":"#dust"}, "east": {"texture":"#dust"}, "west": {"texture":"#dust"}, "up": {"texture":"#dust"}, "down": {"texture":"#dust"} } },
+      "faces": { "north": {"texture":"#tower"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
+    { "name": "backpack_wedged", "from": [1, 3, 13], "to": [12, 13, 16],
+      "faces": { "north": {"texture":"#backpack"}, "south": {"texture":"#backpack"}, "east": {"texture":"#backpack"}, "west": {"texture":"#backpack"}, "up": {"texture":"#backpack"} } },
     { "name": "power_button", "from": [10, 10, 1], "to": [12, 12, 2],
-      "faces": { "north": {"texture":"#screen"} } }
+      "faces": { "north": {"texture":"#led"} } }
   ]
 }
