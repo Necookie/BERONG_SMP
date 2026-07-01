@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/block",
-  "textures": { "dust": "minecraft:block/soul_sand", "particle": "minecraft:block/soul_sand" },
-  "elements": [{ "name": "dust", "from": [0,0,0], "to": [16,4,16],
+  "textures": { "dust": "berongsmp:block/sawdust_pile", "particle": "berongsmp:block/sawdust_pile" },
+  "elements": [{ "name": "sawdust", "from": [0,0,0], "to": [16,4,16],
     "faces": { "up": {"texture":"#dust","uv":[0,0,16,16]}, "north":{"texture":"#dust","uv":[0,12,16,16]}, "south":{"texture":"#dust","uv":[0,12,16,16]}, "east":{"texture":"#dust","uv":[0,12,16,16]}, "west":{"texture":"#dust","uv":[0,12,16,16]}, "down":{"texture":"#dust","uv":[0,0,16,16]} } }]
 }
