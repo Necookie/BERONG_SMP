@@ -1,22 +1,22 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":    "minecraft:block/light_gray_concrete",
-    "display": "minecraft:block/black_concrete",
-    "tray":    "minecraft:block/gray_concrete",
-    "warning": "minecraft:block/orange_concrete",
-    "particle": "minecraft:block/light_gray_concrete"
+    "body":    "berongsmp:block/vending_body_blue",
+    "display": "berongsmp:block/hazard_glass_screen_glitch",
+    "tray":    "berongsmp:block/pa_rack_metal",
+    "smoke":   "berongsmp:block/hazard_smoke_stain",
+    "particle": "berongsmp:block/vending_body_blue"
   },
   "elements": [
     { "name": "body", "from": [1, 0, 2], "to": [15, 16, 15],
-      "faces": { "north": {"texture":"#body"}, "south": {"texture":"#warning"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
+      "faces": { "north": {"texture":"#body"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
     { "name": "display", "from": [2, 9, 1], "to": [14, 14, 2],
-      "faces": { "north": {"texture":"#warning"} } },
+      "faces": { "north": {"texture":"#display"} } },
     { "name": "coin_slot", "from": [11, 7, 1], "to": [13, 8, 2],
-      "faces": { "north": {"texture":"#tray"} } },
+      "faces": { "north": {"texture":"#smoke"} } },
     { "name": "tray", "from": [3, 1, 1], "to": [13, 4, 3],
       "faces": { "north": {"texture":"#tray"}, "up": {"texture":"#tray"}, "down": {"texture":"#tray"} } },
     { "name": "vent_back", "from": [3, 12, 15], "to": [13, 15, 16],
-      "faces": { "south": {"texture":"#tray"} } }
+      "faces": { "south": {"texture":"#smoke"} } }
   ]
 }

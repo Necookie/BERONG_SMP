@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":    "minecraft:block/light_gray_concrete",
-    "display": "minecraft:block/black_concrete",
-    "tray":    "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/light_gray_concrete"
+    "body":    "berongsmp:block/vending_body_blue",
+    "display": "berongsmp:block/hazard_glass_screen_off",
+    "tray":    "berongsmp:block/pa_rack_metal",
+    "particle": "berongsmp:block/vending_body_blue"
   },
   "elements": [
     { "name": "body", "from": [1, 0, 2], "to": [15, 16, 15],
