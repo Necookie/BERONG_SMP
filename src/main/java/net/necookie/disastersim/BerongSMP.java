@@ -392,6 +392,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("frayed_console_wire", FRAYED_CONSOLE_WIRE);
     static { HAZARD_ITEM_MAP.put("frayed_console_wire", FRAYED_CONSOLE_WIRE_ITEM); }
 
+    /** Vending machine with shorted compressor — smokes from back vents when hazardous. */
+    public static final DeferredBlock<MalfunctioningVendingBlock> MALFUNCTIONING_VENDING = BLOCKS.registerBlock(
+            "malfunctioning_vending", MalfunctioningVendingBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_BLUE)
+                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> MALFUNCTIONING_VENDING_ITEM =
+            ITEMS.registerSimpleBlockItem("malfunctioning_vending", MALFUNCTIONING_VENDING);
+    static { HAZARD_ITEM_MAP.put("malfunctioning_vending", MALFUNCTIONING_VENDING_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
