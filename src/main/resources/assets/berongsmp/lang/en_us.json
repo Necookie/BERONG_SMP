@@ -35,5 +35,6 @@
   "block.berongsmp.daisy_chain_extension": "Daisy-Chain Extension Cord",
   "block.berongsmp.woodshop_sawdust_layer": "Woodshop Sawdust Layer",
   "block.berongsmp.stage_spotlight": "Stage Spotlight (Overheating)",
-  "block.berongsmp.archive_box_stack": "Archive Box Stack (Fire Hazard)"
+  "block.berongsmp.archive_box_stack": "Archive Box Stack (Fire Hazard)",
+  "block.berongsmp.dust_choked_pc": "Dust-Choked PC Tower"
 }

@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,hazardous=false": { "model": "berongsmp:block/dust_choked_pc" },
+    "facing=north,hazardous=true":  { "model": "berongsmp:block/dust_choked_pc_hazardous" },
+    "facing=south,hazardous=false": { "model": "berongsmp:block/dust_choked_pc", "y": 180 },
+    "facing=south,hazardous=true":  { "model": "berongsmp:block/dust_choked_pc_hazardous", "y": 180 },
+    "facing=east,hazardous=false":  { "model": "berongsmp:block/dust_choked_pc", "y": 90 },
+    "facing=east,hazardous=true":   { "model": "berongsmp:block/dust_choked_pc_hazardous", "y": 90 },
+    "facing=west,hazardous=false":  { "model": "berongsmp:block/dust_choked_pc", "y": 270 },
+    "facing=west,hazardous=true":   { "model": "berongsmp:block/dust_choked_pc_hazardous", "y": 270 }
+  }
+}

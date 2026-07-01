@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "tower":  "minecraft:block/light_gray_concrete",
+    "screen": "minecraft:block/black_concrete",
+    "vents":  "minecraft:block/gray_concrete",
+    "dust":   "minecraft:block/sand",
+    "particle": "minecraft:block/light_gray_concrete"
+  },
+  "elements": [
+    { "name": "tower", "from": [3, 0, 2], "to": [13, 14, 14],
+      "faces": { "north": {"texture":"#screen"}, "south": {"texture":"#tower"}, "east": {"texture":"#vents"}, "west": {"texture":"#vents"}, "up": {"texture":"#dust"}, "down": {"texture":"#tower"} } },
+    { "name": "drive_bay", "from": [4, 9, 1], "to": [9, 11, 3],
+      "faces": { "north": {"texture":"#dust"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#dust"}, "down": {"texture":"#tower"} } },
+    { "name": "dust_pack_side", "from": [1, 4, 0], "to": [3, 12, 14],
+      "faces": { "north": {"texture":"#dust"}, "south": {"texture":"#dust"}, "east": {"texture":"#dust"}, "west": {"texture":"#dust"}, "up": {"texture":"#dust"}, "down": {"texture":"#dust"} } },
+    { "name": "power_button", "from": [10, 10, 1], "to": [12, 12, 2],
+      "faces": { "north": {"texture":"#screen"} } }
+  ]
+}

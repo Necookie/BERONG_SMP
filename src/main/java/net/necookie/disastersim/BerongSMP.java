@@ -363,6 +363,16 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("archive_box_stack", ARCHIVE_BOX_STACK);
     static { HAZARD_ITEM_MAP.put("archive_box_stack", ARCHIVE_BOX_STACK_ITEM); }
 
+    /** Desktop PC tower with dust-clogged vents — overheats and emits smoke when hazardous. */
+    public static final DeferredBlock<DustChokedPcBlock> DUST_CHOKED_PC = BLOCKS.registerBlock(
+            "dust_choked_pc", DustChokedPcBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+    public static final DeferredItem<BlockItem> DUST_CHOKED_PC_ITEM =
+            ITEMS.registerSimpleBlockItem("dust_choked_pc", DUST_CHOKED_PC);
+    static { HAZARD_ITEM_MAP.put("dust_choked_pc", DUST_CHOKED_PC_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
