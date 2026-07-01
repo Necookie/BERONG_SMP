@@ -448,6 +448,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("pa_system_backup", PA_SYSTEM_BACKUP);
     static { HAZARD_ITEM_MAP.put("pa_system_backup", PA_SYSTEM_BACKUP_ITEM); }
 
+    /** Smartboard power inverter — roof leak drips on live electronics when hazardous. */
+    public static final DeferredBlock<SmartboardInverterBlock> SMARTBOARD_INVERTER = BLOCKS.registerBlock(
+            "smartboard_inverter", SmartboardInverterBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> SMARTBOARD_INVERTER_ITEM =
+            ITEMS.registerSimpleBlockItem("smartboard_inverter", SMARTBOARD_INVERTER);
+    static { HAZARD_ITEM_MAP.put("smartboard_inverter", SMARTBOARD_INVERTER_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
