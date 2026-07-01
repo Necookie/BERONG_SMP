@@ -2,6 +2,8 @@ package net.necookie.disastersim;
 
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -306,6 +308,19 @@ public class BerongSMP {
                 output.accept(TRASH_CAN_ITEM.get());
                 output.accept(CEILING_FAN_ITEM.get());
             }).build());
+
+    // ── Hazard prop blocks (20 items — populated below as blocks are declared) ──
+
+    /** Maps hazard block registry name → its DeferredItem for the /item hazard command. */
+    public static final LinkedHashMap<String, DeferredItem<BlockItem>> HAZARD_ITEM_MAP = new LinkedHashMap<>();
+
+    /** Creative tab: all 20 hazard prop blocks for the simulation building. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards"))
+            .withTabsBefore(FURN_TAB.getKey())
+            .icon(() -> net.minecraft.world.item.Items.FIRE_CHARGE.getDefaultInstance())
+            .displayItems((parameters, output) -> HAZARD_ITEM_MAP.values().forEach(i -> output.accept(i.get())))
+            .build());
 
     /**
      * Constructor for BerongSMP. Registers registers and listeners to the mod event bus.

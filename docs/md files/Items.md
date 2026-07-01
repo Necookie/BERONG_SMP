@@ -1,0 +1,226 @@
+## 🪵 Lecture Area / Classroom Zone
+
+### 1. Trash Bin with Paper Waste (`firesim:plastic_trash_bin`)
+
+- **Target Room:** Main Restroom / Corridor
+    
+- **Normal State (`has_vape=false`):** A clean, standard plastic waste container block. Safe to leave alone.
+    
+- **Hazardous State (`has_vape=true`):** Overfilled with paper towels and emitting small grey smoke particles from a hidden, smoldering vape battery.
+    
+- **Failure Consequence:** Spawns a **Class A (Red)** structural fire.
+    
+
+### 2. Desktop Power Strip (`firesim:daisy_chain_extension`)
+
+- **Target Room:** Lecture Hall / Group Study Rooms
+    
+- **Normal State (`overloaded=false`):** A regular extension cord strip lying flat on a student desk with standard devices plugged in safely.
+    
+- **Hazardous State (`overloaded=true`):** Three extension cords plugged into one another in a chain, actively throwing electric spark particles from the wall junction.
+    
+- **Failure Consequence:** Spawns a **Class E (Green)** electrical wall fire.
+    
+
+### 3. Woodshop Floor Substrate (`firesim:woodshop_sawdust_layer`)
+
+- **Target Room:** Industrial Arts / Vocational Shop Class
+    
+- **Normal State (`accumulation_level=0`):** Clean, standard concrete or tile shop floor blocks.
+    
+- **Hazardous State (`accumulation_level=5`):** A thick, beige carpet-like block layer representing massive sawdust accumulation around the machinery.
+    
+- **Failure Consequence:** Flash-ignites a 3x3 area into a **Class A (Red)** fire.
+    
+
+### 4. Stage Lighting Rig (`firesim:stage_spotlight`)
+
+- **Target Room:** Theater Stage / Main Auditorium
+    
+- **Normal State (`thermal_status=nominal`):** The spotlight is turned off or operating at a safe temperature away from flammable sets.
+    
+- **Hazardous State (`thermal_status=overheated`):** The spotlight is on, projecting a blinding cone of light particles directly into wool curtains while emitting wavy heat distortion particles.
+    
+- **Failure Consequence:** Ignites the curtains into a climbing **Class A (Red)** structural fire.
+    
+
+### 5. Administrative File Stack (`firesim:archive_box_stack`)
+
+- **Target Room:** Admin Records Room / Faculty Archive
+    
+- **Normal State (`proximity_hazard=false`):** Record boxes stored neatly on metal shelves away from building appliances.
+    
+- **Hazardous State (`proximity_hazard=true`):** Cardboard boxes stacked directly flush against a hot, active radiator wall pipe, emitting subtle brown smoke.
+    
+- **Failure Consequence:** Triggers a deep, smoldering **Class A (Red)** archive fire.
+    
+
+## ⚡ Laboratory Zone
+
+### 6. Classroom Computer (`firesim:dust_choked_pc`)
+
+- **Target Room:** Computer Laboratory / ICT Testing Room
+    
+- **Normal State (`ventilation=clear`):** A standard desktop computer tower running quietly with clear space around its vents.
+    
+- **Hazardous State (`ventilation=blocked`):** A student backpack asset model is physically wedged against the rear fan, trapping heavy dust particles inside the machine block.
+    
+- **Failure Consequence:** Power supply unit pops, creating a **Class E (Green)** hardware fire.
+    
+
+### 7. Mobile Device Cart (`firesim:charging_cart`)
+
+- **Target Room:** STEM Research Lab
+    
+- **Normal State (`charge_cycle=disconnected`):** A mobile device cabinet displaying solid green indicator LEDs. The unit is silent and completely safe.
+    
+- **Hazardous State (`charge_cycle=overloaded`):** The cart hums aggressively with a 60Hz loop sound while a red warning indicator light flashes, showing an unsafe power draw.
+    
+- **Failure Consequence:** Explodes due to battery thermal runaway, forcing an immediate transition to Phase 2.
+    
+
+### 8. Recreation Console Wiring (`firesim:frayed_console_wire`)
+
+- **Target Room:** Student Recreation Lounge / STEM Breakroom
+    
+- **Normal State (`wire_integrity=insulated`):** A clean, black power cable lying flat on the floor connecting the lounge TV.
+    
+- **Hazardous State (`wire_integrity=frayed`):** The cord texture shows exposed bare copper wires that periodically emit blue electric arc particles.
+    
+- **Failure Consequence:** Arcs and ignites the carpet block directly underneath into an electrical fire.
+    
+
+### 9. Hallway Vending Machine (`firesim:malfunctioning_vending`)
+
+- **Target Room:** Main Laboratory Access Corridor
+    
+- **Normal State (`circuit_state=isolated`):** A functional vending machine dispensing items normally, or safely powered down with a dark screen.
+    
+- **Hazardous State (`circuit_state=shorted`):** The internal display matrix glitches out with scrambled symbols while grey smoke leaks out from the coin slot.
+    
+- **Failure Consequence:** Internal plastics catch fire, filling the corridor with blinding **Class E (Green)** smoke.
+    
+
+### 10. Overhead Media Projector (`firesim:ceiling_projector`)
+
+- **Target Room:** AV-Equipped Chemistry Lecture Lab
+    
+- **Normal State (`fan_operational=standby`):** The ceiling-mounted projector is off or running with its cooling fan spinning cleanly.
+    
+- **Hazardous State (`fan_operational=false`):** The projector lens projects a high-brightness flickering light beam while the cooling fan model is stuck, causing status LEDs to blink warning orange.
+    
+- **Failure Consequence:** Bulb shatters, dropping melting plastic fire clusters onto lab benches.
+    
+
+## 🔋 Laboratory Zone (Special Tech Infrastructure)
+
+### 11. Student Mobile Device (`firesim:swollen_phone_battery`)
+
+- **Target Room:** Physics Lab Workbenches
+    
+- **Normal State (`insulated_heat=dissipated`):** A student phone item sitting uncovered on top of a hard laboratory desk surface.
+    
+- **Hazardous State (`insulated_heat=critical`):** The phone model is completely covered by a heavy leather jacket block, trapping thermal energy and leaking green battery gas particles.
+    
+- **Failure Consequence:** Battery ruptures into an intense, torch-like chemical fire.
+    
+
+### 12. Robotics Power Pack (`firesim:damaged_lipo_pack`)
+
+- **Target Room:** Robotics Construction Lab
+    
+- **Normal State (`cell_pressure=contained`):** A flat, silver lithium polymer battery resting safely inside a storage cabinet or fire-retardant safety bag.
+    
+- **Hazardous State (`cell_pressure=unstable`):** A standalone battery pack sitting loose on a workbench that features a severe physical dent and a visibly bloated, swollen 3D model.
+    
+- **Failure Consequence:** Expels a violent white-hot chemical burst across a 2-block radius.
+    
+
+### 13. Student Hallway Locker (`firesim:vape_in_iron_locker`)
+
+- **Target Room:** Student Hallway Lockers (Lab Exterior)
+    
+- **Normal State (`internal_hazard=false`):** A standard vertical iron storage locker containing textbooks or regular school supplies.
+    
+- **Hazardous State (`internal_hazard=true`):** Green spark particles snap through the locker vents accompanied by a rhythmic, metallic rattling audio clip from an unstable device inside.
+    
+- **Failure Consequence:** Explodes internally, superheating the locker metal and igniting neighboring lockers.
+    
+
+### 14. Emergency PA Enclosure (`firesim:pa_system_backup`)
+
+- **Target Room:** Main Emergency Operations Center
+    
+- **Normal State (`load_distribution=bypassed`):** The backup power box runs on normal voltage thresholds with solid green indicator lights.
+    
+- **Hazardous State (`load_distribution=faulty`):** The wall-mounted panel box screams with a warning siren while its status lights flash crimson under a failing battery cell load.
+    
+- **Failure Consequence:** Severe **Class E (Green)** electrical panel fire accompanied by a total PA system blackout.
+    
+
+### 15. Classroom Smartboard Panel (`firesim:smartboard_inverter`)
+
+- **Target Room:** Digital Lecture Lab
+    
+- **Normal State (`liquid_ingress=false`):** The interactive digital whiteboard display functions smoothly on a dry, secure wall.
+    
+- **Hazardous State (`liquid_ingress=true`):** Water droplet particles fall from a ceiling pipe leak directly onto the top edge of the active smartboard screen housing.
+    
+- **Failure Consequence:** Circuitry shorts and arcs, igniting the wall substrate behind the display screen.
+    
+
+## 🍳 Cooking Zones / Cafeteria
+
+### 16. Kitchen Gas Cooktop (`firesim:unattended_grease_pan`)
+
+- **Target Room:** Home Economics Cooking Lab / Kitchen
+    
+- **Normal State (`oil_flashpoint=cooling`):** A clean stove block with all dials set to zero (burner off) and cooking pans removed or cold.
+    
+- **Hazardous State (`oil_flashpoint=critical`):** A pan full of cooking oil sits over an active, flaming burner ring while the liquid oil inside bubbles violently and spits hot yellow particles.
+    
+- **Failure Consequence:** Erupts into a **Class F/K (Yellow)** grease fire. _Water triggers a 3x3 fiery explosion!_
+    
+
+### 17. Kitchen Range Vent (`firesim:grease_clogged_hood`)
+
+- **Target Room:** Main Cafeteria Kitchen / Commercial Line
+    
+- **Normal State (`grease_saturation=0`):** Clean, stainless steel ventilation grates mounted above the cooking appliances.
+    
+- **Hazardous State (`grease_saturation=100`):** The underside of the exhaust hood block turns a dark, glistening brown color to represent a heavy coating of flammable grease buildup.
+    
+- **Failure Consequence:** Sparks ignite the ventilation ducts, causing an invisible fire inside the ceiling voids.
+    
+
+### 18. Cafeteria Disposal Bin (`firesim:contaminated_kitchen_bin`)
+
+- **Target Room:** Cafeteria Dishwashing Area
+    
+- **Normal State (`volatile_contents=false`):** A normal green waste bin containing standard organic food scraps and trash.
+    
+- **Hazardous State (`volatile_contents=true`):** Thick yellow grease residues coat the outer walls of the bin while steam particles rise from the lid due to warm cooking oils being dumped incorrectly.
+    
+- **Failure Consequence:** Catches fire instantly if any stray heat touches it, creating unquenchable floor flames.
+    
+
+### 19. Commercial Sandwich Press (`firesim:jammed_panini_press`)
+
+- **Target Room:** Student Self-Service Cafe Counter
+    
+- **Normal State (`clamp_lock=false`):** The sandwich press grill sits wide open on the countertop, safely cutting power to the elements.
+    
+- **Hazardous State (`clamp_lock=true`):** The press mechanism is jammed clamped shut while active, billowing heavy black smoke columns out from its heated sides.
+    
+- **Failure Consequence:** Carbonized oils ignite, instantly engulfing the entire countertop line in grease flames.
+    
+
+### 20. Cafeteria Deep Fryer Vat (`firesim:commercial_deep_fryer`)
+
+- **Target Room:** Main Cafeteria Deep Fry Line
+    
+- **Normal State (`thermostat_status=isolated`):** The commercial fryer maintains a safe, stable oil temperature with its indicator set to normal limits.
+    
+- **Hazardous State (`thermostat_status=failed`):** The front display panel flashes red warning text indicating temperatures soaring past safe limits (`450°C`) along with an intermittent high-pitch alarm tone.
+    
+- **Failure Consequence:** Oil reaches auto-ignition temperature, erupting into a massive kitchen grease fire.
