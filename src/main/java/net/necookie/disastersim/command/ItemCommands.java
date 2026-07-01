@@ -23,12 +23,19 @@ public class ItemCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         List<String> hazardIds = List.copyOf(BerongSMP.HAZARD_ITEM_MAP.keySet());
+        List<String> allIds = List.copyOf(BerongSMP.ALL_ITEM_MAP.keySet());
         dispatcher.register(Commands.literal("item")
                 .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .then(Commands.literal("hazard")
                         .then(Commands.argument("name", StringArgumentType.word())
                                 .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(hazardIds, builder))
-                                .executes(ItemCommands::giveHazardItem))));
+                                .executes(ItemCommands::giveHazardItem)))
+                .then(Commands.literal("get")
+                        .then(Commands.argument("name", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(allIds, builder))
+                                .executes(ItemCommands::giveAnyItem)))
+                .then(Commands.literal("kit")
+                        .executes(ItemCommands::giveKit)));
         dispatcher.register(Commands.literal("spawn_lspu")
                 .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(ItemCommands::spawnLSPU));
@@ -104,6 +111,30 @@ public class ItemCommands {
         if (player == null) return 0;
         player.getInventory().add(BerongSMP.FIRE_EXTINGUISHER.get().getDefaultInstance());
         source.sendSuccess(() -> Component.literal("Fire Extinguisher added to your inventory!"), true);
+        return 1;
+    }
+
+    private static int giveAnyItem(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = requirePlayer(ctx.getSource());
+        if (player == null) return 0;
+        String name = StringArgumentType.getString(ctx, "name");
+        net.neoforged.neoforge.registries.DeferredItem<? extends net.minecraft.world.item.Item> item =
+                BerongSMP.ALL_ITEM_MAP.get(name);
+        if (item == null) {
+            ctx.getSource().sendFailure(Component.literal("§cUnknown item: §r" + name));
+            return 0;
+        }
+        player.getInventory().add(item.get().getDefaultInstance());
+        ctx.getSource().sendSuccess(() -> Component.literal("§aGave item: §r" + name), true);
+        return 1;
+    }
+
+    private static int giveKit(CommandContext<CommandSourceStack> ctx) {
+        ServerPlayer player = requirePlayer(ctx.getSource());
+        if (player == null) return 0;
+        BerongSMP.ALL_ITEM_MAP.values().forEach(item -> player.getInventory().add(item.get().getDefaultInstance()));
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§aGave one of every BerongSMP item (§r" + BerongSMP.ALL_ITEM_MAP.size() + "§a)."), true);
         return 1;
     }
 

@@ -134,7 +134,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 
 | Class | Responsibility |
 |---|---|
-| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. |
+| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. `ALL_ITEM_MAP` (LinkedHashMap, superset including `HAZARD_ITEM_MAP`) covers every custom item (extinguishers, computer/fire alarm, NPC spawners, furniture, hazards) for `/item get` and `/item kit`. |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale; `arenaOrigin/spanX/spanZ/height` set by SimulationManager to target the correct building |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
@@ -323,6 +323,8 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/sim_time add <seconds>` | Add/subtract seconds from remaining time |
 | `/get_co2_extinguisher` | Give CO2 extinguisher for Class C fires (any player) |
 | `/item hazard <name>` | Give a hazard prop block item by registry name (tab-completes all 20 names). OP level 2. |
+| `/item get <name>` | Give any custom BerongSMP item by registry name — extinguishers, computer, fire alarm, NPC spawners, furniture, hazards (tab-completes all `ALL_ITEM_MAP` names). OP level 2. |
+| `/item kit` | Give one of every custom BerongSMP item at once, for quick full-scene dev testing. OP level 2. |
 
 **Auto-hooks**: `TutorialManager.completeTutorial` → `SessionManager.onTutorialComplete` (records tutorial duration); `SimulationManager.endSimulation` → `SessionManager.onSimulationEnd` (records type/score/passed, closes row).
 

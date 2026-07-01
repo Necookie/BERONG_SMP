@@ -512,6 +512,32 @@ public class BerongSMP {
             .displayItems((parameters, output) -> HAZARD_ITEM_MAP.values().forEach(i -> output.accept(i.get())))
             .build());
 
+    /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
+    public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
+    static {
+        ALL_ITEM_MAP.put("fire_extinguisher", FIRE_EXTINGUISHER);
+        ALL_ITEM_MAP.put("co2_extinguisher", CO2_EXTINGUISHER);
+        ALL_ITEM_MAP.put("computer", COMPUTER_ITEM);
+        ALL_ITEM_MAP.put("fire_alarm", FIRE_ALARM_ITEM);
+        ALL_ITEM_MAP.put("npc_sgt_reyes", NPC_SGT_REYES);
+        ALL_ITEM_MAP.put("npc_sgt_santos", NPC_SGT_SANTOS);
+        ALL_ITEM_MAP.put("npc_officer_cruz", NPC_OFFICER_CRUZ);
+        ALL_ITEM_MAP.put("npc_capt_morfe", NPC_CAPT_MORFE);
+        ALL_ITEM_MAP.put("npc_security_tuazon", NPC_SECURITY_TUAZON);
+        ALL_ITEM_MAP.put("whiteboard", WHITEBOARD_ITEM);
+        ALL_ITEM_MAP.put("bulletin_board", BULLETIN_BOARD_ITEM);
+        ALL_ITEM_MAP.put("computer_table", COMPUTER_TABLE_ITEM);
+        ALL_ITEM_MAP.put("chair", CHAIR_ITEM);
+        ALL_ITEM_MAP.put("drawers", DRAWERS_ITEM);
+        ALL_ITEM_MAP.put("filing_cabinet", FILING_CABINET_ITEM);
+        ALL_ITEM_MAP.put("locker", LOCKER_ITEM);
+        ALL_ITEM_MAP.put("toilet", TOILET_ITEM);
+        ALL_ITEM_MAP.put("sink", SINK_ITEM);
+        ALL_ITEM_MAP.put("trash_can", TRASH_CAN_ITEM);
+        ALL_ITEM_MAP.put("ceiling_fan", CEILING_FAN_ITEM);
+        ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
+    }
+
     /**
      * Constructor for BerongSMP. Registers registers and listeners to the mod event bus.
      *
