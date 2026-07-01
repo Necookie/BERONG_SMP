@@ -141,6 +141,11 @@ public class SimulationManager {
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
 
+        if (state.isFire()) {
+            session.setHazardPositions(HazardManager.scanHazardProps(level,
+                    session.getArenaOrigin(), session.getArenaSpanX(), session.getArenaSpanZ(), session.getArenaHeight()));
+        }
+
         BlockPos spawnPos;
         if (state == SimulationState.CCS_FIRE) {
             List<BlockPos> computers = findComputersInCCS(level);
@@ -469,6 +474,7 @@ public class SimulationManager {
         if (ticks % 20 == 0) {
             session.resetExtinguishEventPending();
         }
+        HazardManager.tick(level, session, ticks);
         if (session.getState().isCCS()) {
             tickCcsFireNarrative(player, ticks);
         }

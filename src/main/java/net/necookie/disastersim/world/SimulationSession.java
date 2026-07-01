@@ -42,6 +42,10 @@ public class SimulationSession {
     // --- CCS computer positions (cached at session start for fast spread targeting) ---
     private List<BlockPos> computerPositions = new ArrayList<>();
 
+    // --- Hazard props (cached at session start; ticks-since-hazardous drives failure timing) ---
+    private List<BlockPos> hazardPositions = new ArrayList<>();
+    private final java.util.Map<BlockPos, Integer> hazardTimers = new java.util.HashMap<>();
+
     // --- Earthquake state ---
     private BlockPos epicenter;
     private EarthquakePhase quakePhase;
@@ -75,6 +79,10 @@ public class SimulationSession {
 
     public void setComputerPositions(List<BlockPos> positions) { this.computerPositions = new ArrayList<>(positions); }
     public List<BlockPos> getComputerPositions() { return computerPositions; }
+
+    public void setHazardPositions(List<BlockPos> positions) { this.hazardPositions = new ArrayList<>(positions); }
+    public List<BlockPos> getHazardPositions() { return hazardPositions; }
+    public java.util.Map<BlockPos, Integer> getHazardTimers() { return hazardTimers; }
 
     public void tick() {
         if (!frozen) timerTicks--;

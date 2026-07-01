@@ -65,6 +65,9 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                 sp.sendSystemMessage(Component.literal(
                         "§a✓ Electrical fire suppressed! §7(Computer destroyed — replace it)"));
             }
+        } else {
+            SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
+            extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
         }
 
         if (extinguished) {

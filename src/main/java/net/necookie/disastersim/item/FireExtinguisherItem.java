@@ -70,6 +70,9 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
             level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 3);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
+        } else {
+            SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
+            extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
         }
 
         if (extinguished && user instanceof ServerPlayer serverPlayer) {
