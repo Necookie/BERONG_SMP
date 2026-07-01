@@ -34,5 +34,6 @@
   "block.berongsmp.plastic_trash_bin":    "Plastic Trash Bin (Vape Hazard)",
   "block.berongsmp.daisy_chain_extension": "Daisy-Chain Extension Cord",
   "block.berongsmp.woodshop_sawdust_layer": "Woodshop Sawdust Layer",
-  "block.berongsmp.stage_spotlight": "Stage Spotlight (Overheating)"
+  "block.berongsmp.stage_spotlight": "Stage Spotlight (Overheating)",
+  "block.berongsmp.archive_box_stack": "Archive Box Stack (Fire Hazard)"
 }

@@ -354,6 +354,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("stage_spotlight", STAGE_SPOTLIGHT);
     static { HAZARD_ITEM_MAP.put("stage_spotlight", STAGE_SPOTLIGHT_ITEM); }
 
+    /** Stack of flammable archive document boxes — fire proximity raises hazard. */
+    public static final DeferredBlock<ArchiveBoxStackBlock> ARCHIVE_BOX_STACK = BLOCKS.registerBlock(
+            "archive_box_stack", ArchiveBoxStackBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BROWN)
+                    .strength(1.0f, 1.0f).sound(SoundType.WOOL).noOcclusion());
+    public static final DeferredItem<BlockItem> ARCHIVE_BOX_STACK_ITEM =
+            ITEMS.registerSimpleBlockItem("archive_box_stack", ARCHIVE_BOX_STACK);
+    static { HAZARD_ITEM_MAP.put("archive_box_stack", ARCHIVE_BOX_STACK_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

@@ -1,0 +1,17 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "box":    "minecraft:block/oak_planks",
+    "tape":   "minecraft:block/stripped_oak_log",
+    "char":   "minecraft:block/netherrack",
+    "particle": "minecraft:block/oak_planks"
+  },
+  "elements": [
+    { "name": "box_bottom", "from": [1, 0, 1], "to": [15, 5, 15],
+      "faces": { "north": {"texture":"#box"}, "south": {"texture":"#box"}, "east": {"texture":"#box"}, "west": {"texture":"#box"}, "up": {"texture":"#char"}, "down": {"texture":"#box"} } },
+    { "name": "box_middle", "from": [2, 5, 2], "to": [14, 10, 14],
+      "faces": { "north": {"texture":"#char"}, "south": {"texture":"#box"}, "east": {"texture":"#box"}, "west": {"texture":"#char"}, "up": {"texture":"#char"}, "down": {"texture":"#box"} } },
+    { "name": "box_top_tilted", "from": [2, 10, 2], "to": [14, 16, 8],
+      "faces": { "north": {"texture":"#char"}, "south": {"texture":"#box"}, "east": {"texture":"#box"}, "west": {"texture":"#box"}, "up": {"texture":"#char"}, "down": {"texture":"#box"} } }
+  ]
+}
