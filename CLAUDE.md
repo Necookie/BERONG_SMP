@@ -137,7 +137,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 
 | Class | Responsibility |
 |---|---|
-| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. `ALL_ITEM_MAP` (LinkedHashMap, superset including `HAZARD_ITEM_MAP`) covers every custom item (extinguishers, computer/fire alarm, NPC spawners, furniture, hazards) for `/item get` and `/item kit`. |
+| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. `ALL_ITEM_MAP` (LinkedHashMap, superset including `HAZARD_ITEM_MAP`) covers every custom item (extinguishers, hazard wand, computer/fire alarm, NPC spawners, furniture, hazards) for `/item get` and `/item kit`. |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale; `arenaOrigin/spanX/spanZ/height` set by SimulationManager to target the correct building |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
@@ -157,6 +157,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `AbstractExtinguisherItem` | Shared base for both extinguishers: safety-pin gate, held-spray ray geometry, durability drain, sound scaffolding, nearby-player count, and charge tooltip. Subclasses supply only `extinguishAt`, particles, `sprayPitch`, telemetry (`onSprayResolved`), and flavour messages. |
 | `FireExtinguisherItem` | ABC dry-chemical extinguisher (extends `AbstractExtinguisherItem`); extinguishes fire/soul-fire/LIT blocks, counts toward FIRE score via `recordExtinguish()`, drives the tutorial PASS drill. 300 durability. |
 | `CO2ExtinguisherItem` | Green CO2 extinguisher for Class C electrical fires (extends `AbstractExtinguisherItem`). Targets `ComputerBlock` with `BURNING=true` → sets BURNING=false + LIT=false + BROKEN=true (computer is destroyed after fire). Also suppresses regular fire/soul fire. 200 durability. |
+| `HazardWandItem` | Dev-only tool (`berongsmp:hazard_wand`) for testing hazard prop states without `/setblock` coordinates — right-click a hazard prop to call `HazardManager.activate`/`defuse` (toggle normal↔hazardous) or `setSawdustLevel` (step accumulation 0→5); shift+right-click calls `HazardManager.forceFailure` to trigger the failure consequence immediately. Works with or without an active simulation session (`SimulationManager.getSession` may be null; `HazardManager`'s mutation entry points are all session-nullable). |
 | `ComputerBlock` | Custom block in `block/` package; registry ID `berongsmp:computer` (field `BerongSMP.COMPUTER`). Has `FACING` (horizontal), `LIT`, `BURNING`, and `BROKEN` states. State machine: OFF↔ON (right-click), ANY→BURNING (flint & steel — immediately places fire on all adjacent air), BURNING→BROKEN (CO2 extinguisher). `BURNING=true`: scans 2-block radius every `randomTick` for `ignitedByLava()` blocks and seeds vanilla fire next to them (enabling chain-spread into wood/wool/leaves); `animateTick` emits FLAME from top + all 4 sides, SOUL_FIRE_FLAME (cyan electrical signature), wild ELECTRIC_SPARK arcs, LARGE_SMOKE columns, LAVA ember drips; light level 15. `BROKEN=true`: cracked screen + scorched case texture, all interactions blocked, emits occasional SMOKE wisps. Only CO2 extinguisher ends the fire (and causes BROKEN). Registered via `BLOCKS.registerBlock(name, Constructor::new, () -> Props)` pattern required by NeoForge 26.x. |
 | `TutorialStage` | Enum of all tutorial stages: `NOT_STARTED → PASS_SPRAY → EXT_TYPE_A/B/C → QUAKE_DROP/COVER/HOLDON → COMPLETED` |
 | `TutorialManager` | Static utility: station placement, interaction dispatch, extinguish counting, QUAKE tick detection, completion. Gates simulation buttons via `isComplete(UUID)` |
@@ -327,7 +328,7 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/sim_time add <seconds>` | Add/subtract seconds from remaining time |
 | `/get_co2_extinguisher` | Give CO2 extinguisher for Class C fires (any player) |
 | `/item hazard <name>` | Give a hazard prop block item by registry name (tab-completes all 20 names). OP level 2. |
-| `/item get <name>` | Give any custom BerongSMP item by registry name — extinguishers, computer, fire alarm, NPC spawners, furniture, hazards (tab-completes all `ALL_ITEM_MAP` names). OP level 2. |
+| `/item get <name>` | Give any custom BerongSMP item by registry name — extinguishers, hazard wand, computer, fire alarm, NPC spawners, furniture, hazards (tab-completes all `ALL_ITEM_MAP` names). Use `/item get hazard_wand` to grab the state-testing tool. OP level 2. |
 | `/item kit` | Give one of every custom BerongSMP item at once, for quick full-scene dev testing. OP level 2. |
 
 **Auto-hooks**: `TutorialManager.completeTutorial` → `SessionManager.onTutorialComplete` (records tutorial duration); `SimulationManager.endSimulation` → `SessionManager.onSimulationEnd` (records type/score/passed, closes row).
@@ -467,6 +468,8 @@ Tracks the rollout of gameplay-driven state management for the 20 hazard prop bl
 | S-20 | `commercial_deep_fryer` | ✅ Done | Oil reaches auto-ignition, massive grease fire (short delay, wide radius) |
 
 **Not yet implemented:** the water-triggers-explosion interaction called out for `unattended_grease_pan` ("Water triggers a 3x3 fiery explosion!") is flavor text only for now — no `neighborChanged`/fluid-contact hook exists yet. Score impact from hazard failures (beyond incrementing `fireSpreadCount`) is also not tuned.
+
+**Dev testing tool:** `HazardManager.tick()` only runs inside an active FIRE/CCS_FIRE session (hazard positions are cached once at `startSimulation`), so there's no automatic way to exercise the state machine outside one. `HazardWandItem` (`berongsmp:hazard_wand`, get it via `/item get hazard_wand`) closes that gap — right-click any hazard prop to toggle normal↔hazardous or force its failure consequence immediately, with or without a live session, instead of typing `/setblock` coordinates.
 
 ---
 
