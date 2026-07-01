@@ -32,4 +32,14 @@ public class DaisyChainExtensionBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.1 + rand.nextDouble() * 0.8;
         level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0.0, 0.05, 0.0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c⚡ The daisy-chained cords arc at the wall junction, igniting a Class E fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
