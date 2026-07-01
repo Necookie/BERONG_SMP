@@ -26,4 +26,14 @@ public class VapeInIronLockerBlock extends HazardFacingBlock {
         level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0, 0.03, 0);
         level.addParticle(ParticleTypes.SMOKE, x, y + 0.1, z, 0, 0.02, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§4🚪 The device inside the locker explodes, superheating the metal and igniting the row!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteRadius(level, pos, 2, 3);
+    }
 }
