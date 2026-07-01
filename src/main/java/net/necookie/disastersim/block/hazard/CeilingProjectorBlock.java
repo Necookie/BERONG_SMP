@@ -27,4 +27,14 @@ public class CeilingProjectorBlock extends HazardFacingBlock {
         if (rand.nextBoolean())
             level.addParticle(ParticleTypes.LAVA, x, y + 0.05, z, 0, 0, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c📽 The projector bulb shatters, dropping melting plastic fire clusters onto the benches!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteRadius(level, pos, 1, 2);
+    }
 }
