@@ -9,6 +9,10 @@
     { "name": "bin_body", "from": [2, 0, 2], "to": [14, 12, 14],
       "faces": { "north": {"texture":"#bin"}, "south": {"texture":"#bin"}, "east": {"texture":"#bin"}, "west": {"texture":"#bin"}, "up": {"texture":"#bin"}, "down": {"texture":"#bin"} } },
     { "name": "lid", "from": [1, 12, 1], "to": [15, 14, 15],
-      "faces": { "north": {"texture":"#lid"}, "south": {"texture":"#lid"}, "east": {"texture":"#lid"}, "west": {"texture":"#lid"}, "up": {"texture":"#lid"}, "down": {"texture":"#lid"} } }
+      "faces": { "north": {"texture":"#lid"}, "south": {"texture":"#lid"}, "east": {"texture":"#lid"}, "west": {"texture":"#lid"}, "up": {"texture":"#lid"}, "down": {"texture":"#lid"} } },
+    { "name": "lid_handle", "from": [6, 14, 6], "to": [10, 15, 10],
+      "faces": { "up": {"texture":"#lid"}, "north": {"texture":"#lid"}, "south": {"texture":"#lid"}, "east": {"texture":"#lid"}, "west": {"texture":"#lid"} } },
+    { "name": "foot_pedal", "from": [5, 0, 14], "to": [11, 1, 16],
+      "faces": { "up": {"texture":"#lid"}, "north": {"texture":"#lid"}, "east": {"texture":"#lid"}, "west": {"texture":"#lid"} } }
   ]
 }
