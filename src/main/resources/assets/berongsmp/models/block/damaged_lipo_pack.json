@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "pack": "minecraft:block/red_concrete",
-    "cell": "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/red_concrete"
+    "pack": "berongsmp:block/lipo_foil_silver",
+    "cell": "berongsmp:block/pa_rack_metal",
+    "particle": "berongsmp:block/lipo_foil_silver"
   },
   "elements": [
     { "name": "pack_body", "from": [2, 0, 4], "to": [14, 3, 12],
