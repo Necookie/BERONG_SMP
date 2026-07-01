@@ -1,15 +1,16 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":   "minecraft:block/black_concrete",
-    "lens":   "minecraft:block/redstone_lamp_on",
-    "mount":  "minecraft:block/gray_concrete",
-    "vent":   "minecraft:block/netherrack",
-    "particle": "minecraft:block/black_concrete"
+    "body":   "berongsmp:block/projector_housing_white",
+    "lens":   "berongsmp:block/hazard_ember_glow",
+    "mount":  "berongsmp:block/pa_rack_metal",
+    "vent":   "berongsmp:block/hazard_smoke_stain",
+    "led":    "berongsmp:block/hazard_warning_led",
+    "particle": "berongsmp:block/projector_housing_white"
   },
   "elements": [
     { "name": "projector_body", "from": [3, 10, 4], "to": [13, 15, 12],
-      "faces": { "north": {"texture":"#vent"}, "south": {"texture":"#vent"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
+      "faces": { "north": {"texture":"#vent"}, "south": {"texture":"#led"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
     { "name": "lens_housing", "from": [5, 8, 2], "to": [11, 14, 4],
       "faces": { "north": {"texture":"#lens"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
     { "name": "ceiling_mount", "from": [6, 15, 6], "to": [10, 16, 10],
