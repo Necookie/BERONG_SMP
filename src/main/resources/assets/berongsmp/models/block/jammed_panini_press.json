@@ -1,19 +1,19 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "press": "minecraft:block/iron_block",
-    "plate": "minecraft:block/polished_andesite",
-    "cord":  "minecraft:block/black_concrete",
-    "particle": "minecraft:block/iron_block"
+    "press": "berongsmp:block/press_body_metal",
+    "plate": "berongsmp:block/press_grill_ridged",
+    "cord":  "berongsmp:block/cord_wire_black",
+    "particle": "berongsmp:block/press_body_metal"
   },
   "elements": [
     { "name": "base_plate", "from": [1, 0, 2], "to": [15, 3, 14],
       "faces": { "north": {"texture":"#press"}, "south": {"texture":"#press"}, "east": {"texture":"#press"}, "west": {"texture":"#press"}, "up": {"texture":"#plate"}, "down": {"texture":"#press"} } },
     { "name": "grill_lines", "from": [2, 3, 3], "to": [14, 4, 13],
       "faces": { "up": {"texture":"#plate"} } },
-    { "name": "lid", "from": [1, 4, 2], "to": [15, 6, 14],
-      "faces": { "north": {"texture":"#press"}, "south": {"texture":"#press"}, "east": {"texture":"#press"}, "west": {"texture":"#press"}, "up": {"texture":"#press"}, "down": {"texture":"#plate"} } },
-    { "name": "hinge", "from": [6, 5, 13], "to": [10, 7, 15],
+    { "name": "lid_open", "from": [1, 4, 12], "to": [15, 15, 14],
+      "faces": { "north": {"texture":"#press"}, "south": {"texture":"#press"}, "east": {"texture":"#press"}, "west": {"texture":"#press"}, "up": {"texture":"#plate"} } },
+    { "name": "hinge", "from": [6, 4, 13], "to": [10, 6, 15],
       "faces": { "up": {"texture":"#press"}, "south": {"texture":"#press"} } },
     { "name": "power_cord", "from": [7, 0, 0], "to": [9, 1, 2],
       "faces": { "north": {"texture":"#cord"}, "down": {"texture":"#cord"} } }
