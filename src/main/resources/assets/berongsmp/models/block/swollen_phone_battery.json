@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "phone": "minecraft:block/black_concrete",
-    "screen": "minecraft:block/light_gray_concrete",
-    "particle": "minecraft:block/black_concrete"
+    "phone": "berongsmp:block/phone_body_black",
+    "screen": "berongsmp:block/phone_screen_glass",
+    "particle": "berongsmp:block/phone_body_black"
   },
   "elements": [
     { "name": "phone_body", "from": [3, 0, 2], "to": [13, 1, 14],

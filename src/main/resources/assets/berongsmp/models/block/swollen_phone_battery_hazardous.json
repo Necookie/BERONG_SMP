@@ -1,15 +1,17 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "phone":   "minecraft:block/black_concrete",
-    "swollen": "minecraft:block/gray_concrete",
-    "gas":     "minecraft:block/soul_sand",
-    "particle": "minecraft:block/black_concrete"
+    "phone":   "berongsmp:block/phone_body_swollen",
+    "jacket":  "berongsmp:block/leather_jacket_fabric",
+    "gas":     "berongsmp:block/hazard_spark_arc_green",
+    "particle": "berongsmp:block/leather_jacket_fabric"
   },
   "elements": [
-    { "name": "phone_swollen", "from": [2, 0, 1], "to": [14, 4, 15],
-      "faces": { "north": {"texture":"#swollen"}, "south": {"texture":"#swollen"}, "east": {"texture":"#swollen"}, "west": {"texture":"#swollen"}, "up": {"texture":"#gas"}, "down": {"texture":"#phone"} } },
-    { "name": "bulge_center", "from": [4, 4, 4], "to": [12, 6, 12],
-      "faces": { "up": {"texture":"#gas"}, "north": {"texture":"#swollen"}, "south": {"texture":"#swollen"} } }
+    { "name": "phone_swollen", "from": [3, 0, 2], "to": [13, 3, 14],
+      "faces": { "north": {"texture":"#phone"}, "south": {"texture":"#phone"}, "east": {"texture":"#phone"}, "west": {"texture":"#phone"}, "down": {"texture":"#phone"} } },
+    { "name": "jacket_draped", "from": [1, 3, 0], "to": [15, 6, 16],
+      "faces": { "north": {"texture":"#jacket"}, "south": {"texture":"#jacket"}, "east": {"texture":"#jacket"}, "west": {"texture":"#jacket"}, "up": {"texture":"#jacket"}, "down": {"texture":"#jacket"} } },
+    { "name": "gas_seep", "from": [5, 6, 6], "to": [11, 7, 10],
+      "faces": { "up": {"texture":"#gas"} } }
   ]
 }
