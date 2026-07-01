@@ -25,4 +25,14 @@ public class DustChokedPcBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.1;
         level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.01, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c💻 The dust-choked PC's power supply pops — a Class E hardware fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
