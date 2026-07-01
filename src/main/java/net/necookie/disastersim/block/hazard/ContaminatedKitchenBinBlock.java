@@ -25,4 +25,19 @@ public class ContaminatedKitchenBinBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.3 + rand.nextDouble() * 0.4;
         level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.02, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 150;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§4🗑 Warm cooking oil dumped in the bin catches instantly, spreading unquenchable floor flames!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteRadius(level, pos, 2, 3);
+    }
 }
