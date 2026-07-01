@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "hood":   "minecraft:block/iron_block",
+    "grate":  "minecraft:block/netherrack",
+    "duct":   "minecraft:block/gray_concrete",
+    "grease": "minecraft:block/soul_sand",
+    "particle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    { "name": "hood_body", "from": [0, 8, 2], "to": [16, 15, 14],
+      "faces": { "north": {"texture":"#hood"}, "south": {"texture":"#hood"}, "east": {"texture":"#hood"}, "west": {"texture":"#hood"}, "up": {"texture":"#hood"}, "down": {"texture":"#grease"} } },
+    { "name": "duct_top", "from": [5, 15, 5], "to": [11, 16, 11],
+      "faces": { "up": {"texture":"#duct"}, "north": {"texture":"#duct"}, "south": {"texture":"#duct"}, "east": {"texture":"#duct"}, "west": {"texture":"#duct"} } },
+    { "name": "grate_clogged", "from": [1, 8, 3], "to": [15, 10, 13],
+      "faces": { "down": {"texture":"#grease"}, "north": {"texture":"#grease"} } }
+  ]
+}

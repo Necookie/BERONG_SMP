@@ -467,6 +467,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("unattended_grease_pan", UNATTENDED_GREASE_PAN);
     static { HAZARD_ITEM_MAP.put("unattended_grease_pan", UNATTENDED_GREASE_PAN_ITEM); }
 
+    /** Kitchen range hood with clogged grease filters — backflow smoke when hazardous. */
+    public static final DeferredBlock<GreaseCloggedHoodBlock> GREASE_CLOGGED_HOOD = BLOCKS.registerBlock(
+            "grease_clogged_hood", GreaseCloggedHoodBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> GREASE_CLOGGED_HOOD_ITEM =
+            ITEMS.registerSimpleBlockItem("grease_clogged_hood", GREASE_CLOGGED_HOOD);
+    static { HAZARD_ITEM_MAP.put("grease_clogged_hood", GREASE_CLOGGED_HOOD_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
