@@ -27,4 +27,19 @@ public class JammedPaniniPressBlock extends HazardFacingBlock {
         if (rand.nextBoolean())
             level.addParticle(ParticleTypes.SMOKE, x, y + 0.05, z, 0, 0.02, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 200;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§4🥪 Carbonized oils in the jammed press ignite, engulfing the countertop line in grease flames!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 2);
+    }
 }
