@@ -25,4 +25,19 @@ public class ArchiveBoxStackBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.2 + rand.nextDouble() * 0.6;
         level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.03, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 400;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§c📦 The boxes against the hot radiator finally ignite — a smoldering archive fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
