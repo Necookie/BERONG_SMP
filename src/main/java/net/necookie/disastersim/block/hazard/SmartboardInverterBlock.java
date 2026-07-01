@@ -28,4 +28,14 @@ public class SmartboardInverterBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.1;
         level.addParticle(ParticleTypes.DRIPPING_WATER, x, y, z, 0, -0.02, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c🖥 Water-shorted circuitry arcs, igniting the wall substrate behind the smartboard!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
