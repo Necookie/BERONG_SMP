@@ -27,5 +27,9 @@
   "block.berongsmp.locker":          "Locker",
   "block.berongsmp.trash_can":       "Trash Can",
   "block.berongsmp.bulletin_board":  "Bulletin Board",
-  "block.berongsmp.ceiling_fan":     "Ceiling Fan"
+  "block.berongsmp.ceiling_fan":     "Ceiling Fan",
+
+  "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
+
+  "block.berongsmp.plastic_trash_bin": "Plastic Trash Bin (Vape Hazard)"
 }

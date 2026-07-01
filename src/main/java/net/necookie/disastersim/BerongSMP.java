@@ -32,6 +32,7 @@ import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.ToiletBlock;
 import net.necookie.disastersim.block.TrashCanBlock;
 import net.necookie.disastersim.block.WhiteboardBlock;
+import net.necookie.disastersim.block.hazard.*;
 import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;
@@ -313,6 +314,17 @@ public class BerongSMP {
 
     /** Maps hazard block registry name → its DeferredItem for the /item hazard command. */
     public static final LinkedHashMap<String, DeferredItem<BlockItem>> HAZARD_ITEM_MAP = new LinkedHashMap<>();
+
+    // ── Classroom Zone (5 blocks) ─────────────────────────────────────────────
+
+    /** Plastic waste bin — emits smoke when has_vape=true (hazardous). */
+    public static final DeferredBlock<PlasticTrashBinBlock> PLASTIC_TRASH_BIN = BLOCKS.registerBlock(
+            "plastic_trash_bin", PlasticTrashBinBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.QUARTZ)
+                    .strength(0.5f, 1.0f).sound(SoundType.STONE).noOcclusion());
+    public static final DeferredItem<BlockItem> PLASTIC_TRASH_BIN_ITEM =
+            ITEMS.registerSimpleBlockItem("plastic_trash_bin", PLASTIC_TRASH_BIN);
+    static { HAZARD_ITEM_MAP.put("plastic_trash_bin", PLASTIC_TRASH_BIN_ITEM); }
 
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
