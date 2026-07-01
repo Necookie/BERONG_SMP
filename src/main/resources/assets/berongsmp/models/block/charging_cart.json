@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "cabinet": "minecraft:block/iron_block",
-    "shelf":   "minecraft:block/polished_andesite",
-    "panel":   "minecraft:block/black_concrete",
-    "particle": "minecraft:block/iron_block"
+    "cabinet": "berongsmp:block/cart_cabinet_metal",
+    "shelf":   "berongsmp:block/cart_cabinet_metal",
+    "panel":   "berongsmp:block/hazard_ok_led",
+    "particle": "berongsmp:block/cart_cabinet_metal"
   },
   "elements": [
     { "name": "body", "from": [1, 2, 1], "to": [15, 15, 15],
@@ -16,12 +16,12 @@
     { "name": "shelf3", "from": [2, 13, 2], "to": [14, 14, 14],
       "faces": { "up": {"texture":"#shelf"}, "down": {"texture":"#shelf"} } },
     { "name": "wheel_fl", "from": [1, 0, 1], "to": [3, 2, 3],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#panel"}, "east": {"texture":"#panel"}, "west": {"texture":"#panel"}, "down": {"texture":"#panel"} } },
+      "faces": { "north": {"texture":"#cabinet"}, "south": {"texture":"#cabinet"}, "east": {"texture":"#cabinet"}, "west": {"texture":"#cabinet"}, "down": {"texture":"#cabinet"} } },
     { "name": "wheel_fr", "from": [13, 0, 1], "to": [15, 2, 3],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#panel"}, "east": {"texture":"#panel"}, "west": {"texture":"#panel"}, "down": {"texture":"#panel"} } },
+      "faces": { "north": {"texture":"#cabinet"}, "south": {"texture":"#cabinet"}, "east": {"texture":"#cabinet"}, "west": {"texture":"#cabinet"}, "down": {"texture":"#cabinet"} } },
     { "name": "wheel_rl", "from": [1, 0, 13], "to": [3, 2, 15],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#panel"}, "east": {"texture":"#panel"}, "west": {"texture":"#panel"}, "down": {"texture":"#panel"} } },
+      "faces": { "north": {"texture":"#cabinet"}, "south": {"texture":"#cabinet"}, "east": {"texture":"#cabinet"}, "west": {"texture":"#cabinet"}, "down": {"texture":"#cabinet"} } },
     { "name": "wheel_rr", "from": [13, 0, 13], "to": [15, 2, 15],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#panel"}, "east": {"texture":"#panel"}, "west": {"texture":"#panel"}, "down": {"texture":"#panel"} } }
+      "faces": { "north": {"texture":"#cabinet"}, "south": {"texture":"#cabinet"}, "east": {"texture":"#cabinet"}, "west": {"texture":"#cabinet"}, "down": {"texture":"#cabinet"} } }
   ]
 }
