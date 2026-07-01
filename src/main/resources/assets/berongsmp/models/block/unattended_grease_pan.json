@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "stove":  "minecraft:block/polished_andesite",
-    "burner": "minecraft:block/black_concrete",
-    "pan":    "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/polished_andesite"
+    "stove":  "berongsmp:block/stove_burner_metal",
+    "burner": "berongsmp:block/stove_burner_metal",
+    "pan":    "berongsmp:block/pan_metal",
+    "particle": "berongsmp:block/stove_burner_metal"
   },
   "elements": [
     { "name": "stove_top", "from": [1, 0, 1], "to": [15, 6, 15],

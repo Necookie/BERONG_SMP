@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "stove":  "minecraft:block/polished_andesite",
-    "burner": "minecraft:block/netherrack",
-    "pan":    "minecraft:block/gray_concrete",
-    "grease": "minecraft:block/orange_concrete",
-    "flame":  "minecraft:block/redstone_lamp_on",
-    "particle": "minecraft:block/polished_andesite"
+    "stove":  "berongsmp:block/stove_burner_metal",
+    "burner": "berongsmp:block/hazard_ember_glow",
+    "pan":    "berongsmp:block/pan_metal",
+    "grease": "berongsmp:block/pan_oil_hazard",
+    "flame":  "berongsmp:block/hazard_ember_glow",
+    "particle": "berongsmp:block/stove_burner_metal"
   },
   "elements": [
     { "name": "stove_top", "from": [1, 0, 1], "to": [15, 6, 15],
