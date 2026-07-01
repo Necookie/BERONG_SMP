@@ -8,6 +8,8 @@
     { "name": "cord_ns", "from": [3, 0, 0], "to": [13, 2, 10],
       "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } },
     { "name": "cord_ew", "from": [5, 0, 10], "to": [13, 2, 16],
+      "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } },
+    { "name": "connector_plug", "from": [3, 0, 0], "to": [13, 3, 2],
       "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } }
   ]
 }
