@@ -1,20 +1,19 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":    "minecraft:block/iron_block",
-    "oil_vat": "minecraft:block/netherrack",
-    "panel":   "minecraft:block/black_concrete",
-    "warning": "minecraft:block/orange_concrete",
-    "led":     "minecraft:block/redstone_lamp_on",
-    "particle": "minecraft:block/iron_block"
+    "body":    "berongsmp:block/fryer_body_steel",
+    "oil_vat": "berongsmp:block/fryer_oil_hazard",
+    "panel":   "berongsmp:block/pa_rack_metal",
+    "led":     "berongsmp:block/hazard_warning_led",
+    "particle": "berongsmp:block/fryer_oil_hazard"
   },
   "elements": [
     { "name": "fryer_body", "from": [1, 0, 1], "to": [15, 12, 15],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#warning"}, "down": {"texture":"#body"} } },
+      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
     { "name": "oil_fire", "from": [2, 11, 2], "to": [14, 16, 14],
-      "faces": { "north": {"texture":"#oil_vat"}, "south": {"texture":"#oil_vat"}, "east": {"texture":"#oil_vat"}, "west": {"texture":"#oil_vat"}, "up": {"texture":"#led"}, "down": {"texture":"#oil_vat"} } },
+      "faces": { "north": {"texture":"#oil_vat"}, "south": {"texture":"#oil_vat"}, "east": {"texture":"#oil_vat"}, "west": {"texture":"#oil_vat"}, "up": {"texture":"#oil_vat"}, "down": {"texture":"#oil_vat"} } },
     { "name": "control_panel", "from": [2, 7, 0], "to": [14, 10, 1],
-      "faces": { "north": {"texture":"#warning"} } },
+      "faces": { "north": {"texture":"#panel"} } },
     { "name": "alarm_light", "from": [6, 10, 0], "to": [10, 12, 1],
       "faces": { "north": {"texture":"#led"} } },
     { "name": "legs", "from": [2, -1, 2], "to": [4, 0, 4],

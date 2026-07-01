@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":    "minecraft:block/iron_block",
-    "oil_vat": "minecraft:block/gray_concrete",
-    "panel":   "minecraft:block/black_concrete",
-    "knob":    "minecraft:block/polished_andesite",
-    "particle": "minecraft:block/iron_block"
+    "body":    "berongsmp:block/fryer_body_steel",
+    "oil_vat": "berongsmp:block/fryer_oil_surface",
+    "panel":   "berongsmp:block/pa_rack_metal",
+    "knob":    "berongsmp:block/hazard_ok_led",
+    "particle": "berongsmp:block/fryer_body_steel"
   },
   "elements": [
     { "name": "fryer_body", "from": [1, 0, 1], "to": [15, 12, 15],
