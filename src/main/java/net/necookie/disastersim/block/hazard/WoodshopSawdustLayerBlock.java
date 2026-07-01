@@ -16,6 +16,10 @@ import net.minecraft.world.level.BlockGetter;
 /**
  * Woodshop floor substrate — accumulates sawdust from 0 (clean) to 5 (critically thick).
  * Emits ash/smoke particles at accumulation >= 3. Special block: integer state, no facing.
+ *
+ * <p>Per Items.md #3: state progression (0→5) and the "flash-ignite a 3x3 area" failure
+ * consequence at accumulation=5 are driven by {@link net.necookie.disastersim.world.HazardManager}
+ * — this block has no {@code HAZARDOUS} property to hook, so there is no per-block override here.
  */
 public class WoodshopSawdustLayerBlock extends Block {
 
