@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "plastic":  "minecraft:block/light_gray_concrete",
-    "rim":      "minecraft:block/gray_concrete",
-    "inner":    "minecraft:block/black_concrete",
-    "paper":    "minecraft:block/white_concrete",
-    "particle": "minecraft:block/light_gray_concrete"
+    "plastic": "berongsmp:block/bin_plastic_gray",
+    "rim":     "berongsmp:block/bin_rim_dark",
+    "paper":   "berongsmp:block/hazard_crumpled_paper",
+    "glow":    "berongsmp:block/hazard_ember_glow",
+    "particle": "berongsmp:block/bin_plastic_gray"
   },
   "elements": [
     {
@@ -16,7 +16,7 @@
         "south": { "texture": "#plastic", "uv": [0, 0, 8, 11] },
         "east":  { "texture": "#plastic", "uv": [0, 0, 8, 11] },
         "west":  { "texture": "#plastic", "uv": [0, 0, 8, 11] },
-        "up":    { "texture": "#plastic", "uv": [0, 0, 8,  8] },
+        "up":    { "texture": "#paper",   "uv": [0, 0, 8,  8] },
         "down":  { "texture": "#plastic", "uv": [0, 0, 8,  8] }
       }
     },
@@ -47,7 +47,7 @@
       "name": "vape_glow",
       "from": [6, 9, 6], "to": [10, 11, 10],
       "faces": {
-        "up": { "texture": "minecraft:block/redstone_lamp_on", "uv": [0, 0, 4, 4] }
+        "up": { "texture": "#glow", "uv": [0, 0, 4, 4] }
       }
     }
   ]
