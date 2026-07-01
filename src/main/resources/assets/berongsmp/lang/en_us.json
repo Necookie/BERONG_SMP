@@ -43,5 +43,6 @@
   "block.berongsmp.ceiling_projector": "Ceiling Projector (Fan Failure)",
   "block.berongsmp.swollen_phone_battery": "Swollen Phone Battery",
   "block.berongsmp.damaged_lipo_pack": "Damaged LiPo Battery Pack",
-  "block.berongsmp.vape_in_iron_locker": "Iron Locker (Vape Inside)"
+  "block.berongsmp.vape_in_iron_locker": "Iron Locker (Vape Inside)",
+  "block.berongsmp.pa_system_backup": "PA System Backup Amp (Faulty)"
 }

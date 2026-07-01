@@ -438,6 +438,16 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("vape_in_iron_locker", VAPE_IN_IRON_LOCKER);
     static { HAZARD_ITEM_MAP.put("vape_in_iron_locker", VAPE_IN_IRON_LOCKER_ITEM); }
 
+    /** PA/public-address backup amp rack — faulty capacitors spark and glow when hazardous. */
+    public static final DeferredBlock<PaSystemBackupBlock> PA_SYSTEM_BACKUP = BLOCKS.registerBlock(
+            "pa_system_backup", PaSystemBackupBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
+    public static final DeferredItem<BlockItem> PA_SYSTEM_BACKUP_ITEM =
+            ITEMS.registerSimpleBlockItem("pa_system_backup", PA_SYSTEM_BACKUP);
+    static { HAZARD_ITEM_MAP.put("pa_system_backup", PA_SYSTEM_BACKUP_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
