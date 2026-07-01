@@ -457,6 +457,16 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("smartboard_inverter", SMARTBOARD_INVERTER);
     static { HAZARD_ITEM_MAP.put("smartboard_inverter", SMARTBOARD_INVERTER_ITEM); }
 
+    /** Stove with a grease pan left unattended — grease fire erupts when hazardous. */
+    public static final DeferredBlock<UnattendedGreasePanBlock> UNATTENDED_GREASE_PAN = BLOCKS.registerBlock(
+            "unattended_grease_pan", UnattendedGreasePanBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
+    public static final DeferredItem<BlockItem> UNATTENDED_GREASE_PAN_ITEM =
+            ITEMS.registerSimpleBlockItem("unattended_grease_pan", UNATTENDED_GREASE_PAN);
+    static { HAZARD_ITEM_MAP.put("unattended_grease_pan", UNATTENDED_GREASE_PAN_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "stove":  "minecraft:block/polished_andesite",
+    "burner": "minecraft:block/black_concrete",
+    "pan":    "minecraft:block/gray_concrete",
+    "particle": "minecraft:block/polished_andesite"
+  },
+  "elements": [
+    { "name": "stove_top", "from": [1, 0, 1], "to": [15, 6, 15],
+      "faces": { "north": {"texture":"#stove"}, "south": {"texture":"#stove"}, "east": {"texture":"#stove"}, "west": {"texture":"#stove"}, "up": {"texture":"#stove"}, "down": {"texture":"#stove"} } },
+    { "name": "burner_ring", "from": [4, 6, 4], "to": [12, 7, 12],
+      "faces": { "up": {"texture":"#burner"} } },
+    { "name": "pan_body", "from": [3, 6, 4], "to": [13, 9, 12],
+      "faces": { "north": {"texture":"#pan"}, "south": {"texture":"#pan"}, "east": {"texture":"#pan"}, "west": {"texture":"#pan"}, "up": {"texture":"#pan"}, "down": {"texture":"#pan"} } },
+    { "name": "pan_handle", "from": [13, 7, 7], "to": [16, 8, 9],
+      "faces": { "east": {"texture":"#pan"}, "up": {"texture":"#pan"} } }
+  ]
+}
