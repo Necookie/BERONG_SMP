@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "bin":    "minecraft:block/green_concrete",
-    "grease": "minecraft:block/soul_sand",
-    "lid":    "minecraft:block/gray_concrete",
-    "coat":   "minecraft:block/netherrack",
-    "particle": "minecraft:block/green_concrete"
+    "bin":    "berongsmp:block/bin_green_clean",
+    "grease": "berongsmp:block/bin_grease_stained",
+    "lid":    "berongsmp:block/bin_rim_dark",
+    "coat":   "berongsmp:block/bin_grease_stained",
+    "particle": "berongsmp:block/bin_grease_stained"
   },
   "elements": [
     { "name": "bin_body", "from": [2, 0, 2], "to": [14, 12, 14],

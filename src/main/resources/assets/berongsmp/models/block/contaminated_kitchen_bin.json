@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "bin":  "minecraft:block/green_concrete",
-    "lid":  "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/green_concrete"
+    "bin":  "berongsmp:block/bin_green_clean",
+    "lid":  "berongsmp:block/bin_rim_dark",
+    "particle": "berongsmp:block/bin_green_clean"
   },
   "elements": [
     { "name": "bin_body", "from": [2, 0, 2], "to": [14, 12, 14],
