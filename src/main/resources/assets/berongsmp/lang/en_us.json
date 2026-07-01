@@ -37,5 +37,6 @@
   "block.berongsmp.stage_spotlight": "Stage Spotlight (Overheating)",
   "block.berongsmp.archive_box_stack": "Archive Box Stack (Fire Hazard)",
   "block.berongsmp.dust_choked_pc": "Dust-Choked PC Tower",
-  "block.berongsmp.charging_cart": "Overloaded Charging Cart"
+  "block.berongsmp.charging_cart": "Overloaded Charging Cart",
+  "block.berongsmp.frayed_console_wire": "Frayed Console Wire"
 }

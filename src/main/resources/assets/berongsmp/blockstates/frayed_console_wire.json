@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "hazardous=false": { "model": "berongsmp:block/frayed_console_wire" },
+    "hazardous=true":  { "model": "berongsmp:block/frayed_console_wire_hazardous" }
+  }
+}

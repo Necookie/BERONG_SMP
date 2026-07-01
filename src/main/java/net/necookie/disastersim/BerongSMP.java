@@ -383,6 +383,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("charging_cart", CHARGING_CART);
     static { HAZARD_ITEM_MAP.put("charging_cart", CHARGING_CART_ITEM); }
 
+    /** Frayed AV/console wire on the floor — exposed copper arcs blue sparks when hazardous. */
+    public static final DeferredBlock<FrayedConsoleWireBlock> FRAYED_CONSOLE_WIRE = BLOCKS.registerBlock(
+            "frayed_console_wire", FrayedConsoleWireBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
+    public static final DeferredItem<BlockItem> FRAYED_CONSOLE_WIRE_ITEM =
+            ITEMS.registerSimpleBlockItem("frayed_console_wire", FRAYED_CONSOLE_WIRE);
+    static { HAZARD_ITEM_MAP.put("frayed_console_wire", FRAYED_CONSOLE_WIRE_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
