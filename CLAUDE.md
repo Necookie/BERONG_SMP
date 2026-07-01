@@ -101,7 +101,10 @@ SimulationManager.onServerTick (every tick):
            cleanupFireOutsideBounds every 40 ticks;
            applyFireProximityEffects every 20 ticks — scans 7-block radius, applies Nausea (amp 0–2) and
            drains air supply (oxygen depletion; vanilla suffocation triggers at zero) scaling with fire density +
-           proximity; no direct damage, no blindness
+           proximity; no direct damage, no blindness;
+           HazardManager.tick every tick — develops placed hazard props (normal→hazardous, ~1-in-30 chance
+           every 100 ticks) and advances their failure timers, igniting a structural fire per prop if left
+           hazardous past its failureDelayTicks(); extinguishers can defuse a hazardous prop back to safe
   → (EARTHQUAKE) session.tickQuakePhase(level.getRandom()) advances RUMBLE→PEAK→AFTERSHOCK(×2–4)→END
       → phase transitions send chat messages: "intensifying!" / "Aftershock!" / "shaking has stopped"
       → AFTERSHOCK re-enters itself aftershockCount times; each wave gets a random scale (0.2–0.55×
@@ -177,8 +180,9 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `TrashCanBlock` | Open-top trash can; no FACING (symmetric). Model: light-gray body + gray rim + black inner top. |
 | `BulletinBoardBlock` | Cork bulletin board (note_block texture); FACING only. Model: dark-oak frame + 3 paper slips + 3 red/orange push-pins. Flammable. |
 | `CeilingFanBlock` | Ceiling fan; no FACING (symmetric). Model: iron mounting rod + gray motor housing + 4 oak/white blades (N/S/E/W) + glowstone light bowl (light level 5). |
-| `HazardBlock` | Abstract base for hazard blocks without FACING (symmetric). Adds `HAZARDOUS` `BooleanProperty`; subclasses implement `spawnHazardParticles`. `animateTick` calls subclass only when `HAZARDOUS=true`. |
-| `HazardFacingBlock` | Abstract base for hazard blocks with FACING. Combines `HazardBlock`'s HAZARDOUS property with `HorizontalFacingBlock`'s FACING logic. Subclasses implement `shapeFor(Direction)` (use `byFacing(...)`) and `spawnHazardParticles`. |
+| `HazardBlock` | Abstract base for hazard blocks without FACING (symmetric). Adds `HAZARDOUS` `BooleanProperty`; subclasses implement `spawnHazardParticles`. `animateTick` calls subclass only when `HAZARDOUS=true`. Also declares the failure-consequence hooks (`failureDelayTicks`, `failureMessage`, `onHazardFailure`, plus `igniteAdjacent`/`igniteRadius` helpers) driven by `HazardManager`. |
+| `HazardFacingBlock` | Abstract base for hazard blocks with FACING. Combines `HazardBlock`'s HAZARDOUS property with `HorizontalFacingBlock`'s FACING logic. Subclasses implement `shapeFor(Direction)` (use `byFacing(...)`) and `spawnHazardParticles`. Carries the same failure-consequence hooks as `HazardBlock`. |
+| `HazardManager` | Drives the normal→hazardous→failure state machine for all 20 hazard prop blocks (plus the sawdust layer) inside an active FIRE-type arena, per `docs/md files/Items.md`. `scanHazardProps` runs once at session start (cached on `SimulationSession.hazardPositions`, mirroring `findComputersInCCS`); `tick()` (called from `SimulationManager.tickFireSession` every tick) randomly develops props to `HAZARDOUS=true` every 100 ticks (1-in-30 chance per prop) and advances a per-prop failure timer (`SimulationSession.hazardTimers`) that calls the block's `onHazardFailure` once `failureDelayTicks()` elapses without being defused. `woodshop_sawdust_layer`'s `ACCUMULATION` 0→5 ramp and 3×3 flash-ignite live directly in `HazardManager` (it has no `HAZARDOUS` property). `HazardManager.defuse()` lets either extinguisher item reset a hazardous prop back to safe — wired into `FireExtinguisherItem`/`CO2ExtinguisherItem.extinguishAt`. |
 | `WoodshopSawdustLayerBlock` | Floor sawdust accumulation layer; `ACCUMULATION` 0–5 integer state drives height (1–6 px). Emits ASH particles at accumulation ≥ 3. No FACING. |
 | `PlasticTrashBinBlock` | Classroom trash bin with vape inside; SMOKE particles when hazardous. |
 | `DaisyChainExtensionBlock` | Overloaded extension cord; ELECTRIC_SPARK particles when hazardous. |
@@ -432,6 +436,37 @@ Tracks fixes applied after an in-game screenshot showed hazard prop blocks rende
 | H-1 | `plastic_trash_bin_hazardous.json` `vape_glow` face used a raw `"minecraft:block/redstone_lamp_on"` string instead of a `"#variable"` reference | ✅ Done | Model faces can only resolve `#name` references — this rendered as the missing-texture placeholder in-game. Routed through a proper texture variable. |
 | H-2 | All 20 hazard blocks stretched plain vanilla concrete/andesite textures over cuboids, reading as abstract colored boxes | ✅ Done | Added `scripts/generate_hazard_textures.py` (53 hand-drawn 16×16 PNGs) and rewired every block/hazardous model pair to use them, matching the custom-texture quality bar set by `computer_block.json` / `fire_alarm_bell.png`. |
 | H-3 | Several models didn't match their Items.md state description (e.g. spotlight/projector lens always lit even in "normal/off" state; panini press lid always closed even when "open, safely cutting power") | ✅ Done | `stage_spotlight`/`ceiling_projector` normal state now shows a dark/idle lens; `jammed_panini_press` normal state now shows the lid propped open on its hinge; `dust_choked_pc` hazardous now models an actual backpack element wedged against the vent instead of a flat dust-textured slab; `swollen_phone_battery` hazardous now drapes an actual leather-jacket element over the phone. |
+
+---
+
+## Hazard Prop State Management Log
+
+Tracks the rollout of gameplay-driven state management for the 20 hazard prop blocks. Previously, `HAZARDOUS` (and the sawdust layer's `ACCUMULATION`) was set once to its safe default at placement and never changed at runtime — see the 2026-07-01 audit that found no `HazardManager`/`HazardSpawner` and no `SimulationManager`/`SimulationEffects` references to the `block.hazard` package at all. All 20 items below now have a working normal→hazardous→failure lifecycle per `docs/md files/Items.md`, driven by the new `HazardManager`.
+
+| # | Item | Status | Failure consequence (Items.md) |
+|---|---|---|---|
+| S-1 | `plastic_trash_bin` | ✅ Done | Class A fire from the smoldering vape battery |
+| S-2 | `daisy_chain_extension` | ✅ Done | Class E electrical wall fire at the cord junction |
+| S-3 | `woodshop_sawdust_layer` | ✅ Done | Flash-ignites a 3×3 area at accumulation=5 (state machine lives entirely in `HazardManager`, no `HAZARDOUS` property to hook) |
+| S-4 | `stage_spotlight` | ✅ Done | Ignites the curtains into a climbing Class A fire |
+| S-5 | `archive_box_stack` | ✅ Done | Deep, smoldering Class A archive fire |
+| S-6 | `dust_choked_pc` | ✅ Done | Class E hardware fire from the popped power supply |
+| S-7 | `charging_cart` | ✅ Done | Explosion from battery thermal runaway (short delay, wide radius) |
+| S-8 | `frayed_console_wire` | ✅ Done | Arcs and ignites the carpet underneath |
+| S-9 | `malfunctioning_vending` | ✅ Done | Internal plastics catch fire, Class E smoke |
+| S-10 | `ceiling_projector` | ✅ Done | Shattered bulb drops burning plastic clusters |
+| S-11 | `swollen_phone_battery` | ✅ Done | Torch-like chemical fire (short delay) |
+| S-12 | `damaged_lipo_pack` | ✅ Done | Violent white-hot burst, 2-block radius |
+| S-13 | `vape_in_iron_locker` | ✅ Done | Explodes internally, ignites neighboring lockers |
+| S-14 | `pa_system_backup` | ✅ Done | Severe Class E electrical panel fire, PA blackout |
+| S-15 | `smartboard_inverter` | ✅ Done | Water-shorted circuitry ignites the wall behind it |
+| S-16 | `unattended_grease_pan` | ✅ Done | Class F/K grease fire (short delay) |
+| S-17 | `grease_clogged_hood` | ✅ Done | Sparks ignite the duct work (long delay — slow buildup) |
+| S-18 | `contaminated_kitchen_bin` | ✅ Done | Instant ignition, unquenchable floor flames |
+| S-19 | `jammed_panini_press` | ✅ Done | Carbonized oils engulf the countertop line |
+| S-20 | `commercial_deep_fryer` | ✅ Done | Oil reaches auto-ignition, massive grease fire (short delay, wide radius) |
+
+**Not yet implemented:** the water-triggers-explosion interaction called out for `unattended_grease_pan` ("Water triggers a 3x3 fiery explosion!") is flavor text only for now — no `neighborChanged`/fluid-contact hook exists yet. Score impact from hazard failures (beyond incrementing `fireSpreadCount`) is also not tuned.
 
 ---
 
