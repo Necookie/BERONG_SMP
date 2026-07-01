@@ -335,6 +335,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("daisy_chain_extension", DAISY_CHAIN_EXTENSION);
     static { HAZARD_ITEM_MAP.put("daisy_chain_extension", DAISY_CHAIN_EXTENSION_ITEM); }
 
+    /** Floor sawdust accumulation layer — emits ash particles at accumulation >= 3. */
+    public static final DeferredBlock<WoodshopSawdustLayerBlock> WOODSHOP_SAWDUST_LAYER = BLOCKS.registerBlock(
+            "woodshop_sawdust_layer", WoodshopSawdustLayerBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.SAND)
+                    .strength(0.1f, 0.1f).sound(SoundType.SAND).noOcclusion());
+    public static final DeferredItem<BlockItem> WOODSHOP_SAWDUST_LAYER_ITEM =
+            ITEMS.registerSimpleBlockItem("woodshop_sawdust_layer", WOODSHOP_SAWDUST_LAYER);
+    static { HAZARD_ITEM_MAP.put("woodshop_sawdust_layer", WOODSHOP_SAWDUST_LAYER_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

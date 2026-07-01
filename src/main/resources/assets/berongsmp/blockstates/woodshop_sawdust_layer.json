@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "accumulation=0": { "model": "berongsmp:block/woodshop_sawdust_layer_0" },
+    "accumulation=1": { "model": "berongsmp:block/woodshop_sawdust_layer_1" },
+    "accumulation=2": { "model": "berongsmp:block/woodshop_sawdust_layer_2" },
+    "accumulation=3": { "model": "berongsmp:block/woodshop_sawdust_layer_3" },
+    "accumulation=4": { "model": "berongsmp:block/woodshop_sawdust_layer_4" },
+    "accumulation=5": { "model": "berongsmp:block/woodshop_sawdust_layer_5" }
+  }
+}
