@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "cord":   "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/gray_concrete"
+    "cord":   "berongsmp:block/wire_cord_black",
+    "particle": "berongsmp:block/wire_cord_black"
   },
   "elements": [
     { "name": "cord_ns", "from": [3, 0, 0], "to": [13, 2, 10],
