@@ -25,4 +25,19 @@ public class GreaseCloggedHoodBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.5;
         level.addParticle(ParticleTypes.LARGE_SMOKE, x, y, z, 0, 0.01, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 400;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§c🌀 Sparks ignite the grease-caked duct work — an invisible fire spreads inside the ceiling void!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
