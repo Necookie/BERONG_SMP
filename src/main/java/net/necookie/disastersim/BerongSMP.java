@@ -494,11 +494,21 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("jammed_panini_press", JAMMED_PANINI_PRESS);
     static { HAZARD_ITEM_MAP.put("jammed_panini_press", JAMMED_PANINI_PRESS_ITEM); }
 
+    /** Commercial deep fryer — overheated oil ignites and erupts smoke/flame when hazardous. */
+    public static final DeferredBlock<CommercialDeepFryerBlock> COMMERCIAL_DEEP_FRYER = BLOCKS.registerBlock(
+            "commercial_deep_fryer", CommercialDeepFryerBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
+    public static final DeferredItem<BlockItem> COMMERCIAL_DEEP_FRYER_ITEM =
+            ITEMS.registerSimpleBlockItem("commercial_deep_fryer", COMMERCIAL_DEEP_FRYER);
+    static { HAZARD_ITEM_MAP.put("commercial_deep_fryer", COMMERCIAL_DEEP_FRYER_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
             .withTabsBefore(FURN_TAB.getKey())
-            .icon(() -> net.minecraft.world.item.Items.FIRE_CHARGE.getDefaultInstance())
+            .icon(() -> DAISY_CHAIN_EXTENSION_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> HAZARD_ITEM_MAP.values().forEach(i -> output.accept(i.get())))
             .build());
 

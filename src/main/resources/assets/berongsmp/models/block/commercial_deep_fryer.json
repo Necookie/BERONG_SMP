@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body":    "minecraft:block/iron_block",
+    "oil_vat": "minecraft:block/gray_concrete",
+    "panel":   "minecraft:block/black_concrete",
+    "knob":    "minecraft:block/polished_andesite",
+    "particle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    { "name": "fryer_body", "from": [1, 0, 1], "to": [15, 12, 15],
+      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
+    { "name": "oil_vat", "from": [2, 11, 2], "to": [14, 14, 14],
+      "faces": { "north": {"texture":"#oil_vat"}, "south": {"texture":"#oil_vat"}, "east": {"texture":"#oil_vat"}, "west": {"texture":"#oil_vat"}, "up": {"texture":"#oil_vat"}, "down": {"texture":"#oil_vat"} } },
+    { "name": "control_panel", "from": [2, 7, 0], "to": [14, 10, 1],
+      "faces": { "north": {"texture":"#panel"} } },
+    { "name": "knob1", "from": [3, 7, 0], "to": [5, 9, 1],
+      "faces": { "north": {"texture":"#knob"} } },
+    { "name": "knob2", "from": [7, 7, 0], "to": [9, 9, 1],
+      "faces": { "north": {"texture":"#knob"} } },
+    { "name": "knob3", "from": [11, 7, 0], "to": [13, 9, 1],
+      "faces": { "north": {"texture":"#knob"} } },
+    { "name": "legs", "from": [2, -1, 2], "to": [4, 0, 4],
+      "faces": { "north": {"texture":"#body"}, "down": {"texture":"#body"} } }
+  ]
+}
