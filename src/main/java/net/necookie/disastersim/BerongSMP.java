@@ -373,6 +373,16 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("dust_choked_pc", DUST_CHOKED_PC);
     static { HAZARD_ITEM_MAP.put("dust_choked_pc", DUST_CHOKED_PC_ITEM); }
 
+    /** Rolling Chromebook/laptop charging cart — overloaded outlets spark when hazardous. */
+    public static final DeferredBlock<ChargingCartBlock> CHARGING_CART = BLOCKS.registerBlock(
+            "charging_cart", ChargingCartBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
+    public static final DeferredItem<BlockItem> CHARGING_CART_ITEM =
+            ITEMS.registerSimpleBlockItem("charging_cart", CHARGING_CART);
+    static { HAZARD_ITEM_MAP.put("charging_cart", CHARGING_CART_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
