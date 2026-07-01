@@ -31,4 +31,14 @@ public class PlasticTrashBinBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.25 + rand.nextDouble() * 0.5;
         level.addParticle(ParticleTypes.SMOKE, x, y, z, 0.0, 0.03, 0.0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c🔥 The overfilled trash bin's smoldering battery bursts into a Class A fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
