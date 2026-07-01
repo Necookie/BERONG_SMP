@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "strip":    "minecraft:block/gray_concrete",
-    "socket":   "minecraft:block/black_concrete",
-    "cord":     "minecraft:block/dark_oak_planks",
-    "particle": "minecraft:block/gray_concrete"
+    "strip":    "berongsmp:block/cord_strip_black",
+    "socket":   "berongsmp:block/hazard_ok_led",
+    "cord":     "berongsmp:block/cord_wire_black",
+    "particle": "berongsmp:block/cord_strip_black"
   },
   "elements": [
     {
