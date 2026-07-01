@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body":   "minecraft:block/black_concrete",
+    "lens":   "minecraft:block/redstone_lamp_on",
+    "mount":  "minecraft:block/gray_concrete",
+    "heat":   "minecraft:block/orange_concrete",
+    "particle": "minecraft:block/black_concrete"
+  },
+  "elements": [
+    { "name": "housing", "from": [4, 4, 4], "to": [12, 14, 12],
+      "faces": { "north": {"texture":"#body"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
+    { "name": "lens_cone", "from": [5, 1, 5], "to": [11, 5, 11],
+      "faces": { "north": {"texture":"#lens"}, "south": {"texture":"#lens"}, "east": {"texture":"#lens"}, "west": {"texture":"#lens"}, "up": {"texture":"#lens"}, "down": {"texture":"#lens"} } },
+    { "name": "mount_bracket", "from": [6, 14, 6], "to": [10, 16, 10],
+      "faces": { "north": {"texture":"#mount"}, "south": {"texture":"#mount"}, "east": {"texture":"#mount"}, "west": {"texture":"#mount"}, "up": {"texture":"#mount"}, "down": {"texture":"#mount"} } },
+    { "name": "heat_glow", "from": [3, 13, 3], "to": [13, 15, 13],
+      "faces": { "up": {"texture":"#heat"} } }
+  ]
+}
