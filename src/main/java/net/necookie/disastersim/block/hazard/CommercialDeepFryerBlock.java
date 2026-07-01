@@ -26,4 +26,19 @@ public class CommercialDeepFryerBlock extends HazardFacingBlock {
         if (rand.nextInt(2) == 0) level.addParticle(ParticleTypes.LARGE_SMOKE, x, y + 0.05, z, 0, 0.04, 0);
         if (rand.nextInt(6) == 0) level.addParticle(ParticleTypes.LAVA, x, y, z, 0, 0.02, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 100;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§4🍟 The fryer oil reaches auto-ignition temperature — a massive kitchen grease fire erupts!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteRadius(level, pos, 2, 4);
+    }
 }
