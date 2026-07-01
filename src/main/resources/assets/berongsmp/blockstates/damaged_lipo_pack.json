@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "hazardous=false": { "model": "berongsmp:block/damaged_lipo_pack" },
+    "hazardous=true":  { "model": "berongsmp:block/damaged_lipo_pack_hazardous" }
+  }
+}

@@ -420,6 +420,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("swollen_phone_battery", SWOLLEN_PHONE_BATTERY);
     static { HAZARD_ITEM_MAP.put("swollen_phone_battery", SWOLLEN_PHONE_BATTERY_ITEM); }
 
+    /** Damaged LiPo battery pack (drone/RC) — punctured cells off-gas smoke when hazardous. */
+    public static final DeferredBlock<DamagedLipoPackBlock> DAMAGED_LIPO_PACK = BLOCKS.registerBlock(
+            "damaged_lipo_pack", DamagedLipoPackBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
+    public static final DeferredItem<BlockItem> DAMAGED_LIPO_PACK_ITEM =
+            ITEMS.registerSimpleBlockItem("damaged_lipo_pack", DAMAGED_LIPO_PACK);
+    static { HAZARD_ITEM_MAP.put("damaged_lipo_pack", DAMAGED_LIPO_PACK_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
