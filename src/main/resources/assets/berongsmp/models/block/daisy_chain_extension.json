@@ -1,0 +1,60 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "strip":    "minecraft:block/gray_concrete",
+    "socket":   "minecraft:block/black_concrete",
+    "cord":     "minecraft:block/dark_oak_planks",
+    "particle": "minecraft:block/gray_concrete"
+  },
+  "elements": [
+    {
+      "name": "strip_body",
+      "from": [1, 0, 6], "to": [15, 2, 10],
+      "faces": {
+        "north": { "texture": "#strip", "uv": [0, 0, 14,  2] },
+        "south": { "texture": "#strip", "uv": [0, 0, 14,  2] },
+        "east":  { "texture": "#strip", "uv": [0, 0,  4,  2] },
+        "west":  { "texture": "#strip", "uv": [0, 0,  4,  2] },
+        "up":    { "texture": "#strip", "uv": [0, 0, 14,  4] },
+        "down":  { "texture": "#strip", "uv": [0, 0, 14,  4] }
+      }
+    },
+    {
+      "name": "socket_1",
+      "from": [2, 2, 7], "to": [5, 3, 9],
+      "faces": {
+        "up":    { "texture": "#socket", "uv": [0, 0, 3, 2] },
+        "north": { "texture": "#socket", "uv": [0, 0, 3, 1] },
+        "south": { "texture": "#socket", "uv": [0, 0, 3, 1] }
+      }
+    },
+    {
+      "name": "socket_2",
+      "from": [7, 2, 7], "to": [9, 3, 9],
+      "faces": {
+        "up":    { "texture": "#socket", "uv": [0, 0, 2, 2] },
+        "north": { "texture": "#socket", "uv": [0, 0, 2, 1] },
+        "south": { "texture": "#socket", "uv": [0, 0, 2, 1] }
+      }
+    },
+    {
+      "name": "socket_3",
+      "from": [11, 2, 7], "to": [14, 3, 9],
+      "faces": {
+        "up":    { "texture": "#socket", "uv": [0, 0, 3, 2] },
+        "north": { "texture": "#socket", "uv": [0, 0, 3, 1] },
+        "south": { "texture": "#socket", "uv": [0, 0, 3, 1] }
+      }
+    },
+    {
+      "name": "power_cord",
+      "from": [7, 0, 10], "to": [9, 1, 16],
+      "faces": {
+        "south": { "texture": "#cord", "uv": [0, 0, 2, 1] },
+        "east":  { "texture": "#cord", "uv": [0, 0, 6, 1] },
+        "west":  { "texture": "#cord", "uv": [0, 0, 6, 1] },
+        "up":    { "texture": "#cord", "uv": [0, 0, 2, 6] }
+      }
+    }
+  ]
+}
