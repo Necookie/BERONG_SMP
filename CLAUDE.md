@@ -134,7 +134,7 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 
 | Class | Responsibility |
 |---|---|
-| `BerongSMP` | Mod entry point, item/block registration, server startup init. Two creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm) and `FURN_TAB` (furn_tab — all 11 furniture blocks). |
+| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale; `arenaOrigin/spanX/spanZ/height` set by SimulationManager to target the correct building |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
@@ -177,6 +177,28 @@ Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if 
 | `TrashCanBlock` | Open-top trash can; no FACING (symmetric). Model: light-gray body + gray rim + black inner top. |
 | `BulletinBoardBlock` | Cork bulletin board (note_block texture); FACING only. Model: dark-oak frame + 3 paper slips + 3 red/orange push-pins. Flammable. |
 | `CeilingFanBlock` | Ceiling fan; no FACING (symmetric). Model: iron mounting rod + gray motor housing + 4 oak/white blades (N/S/E/W) + glowstone light bowl (light level 5). |
+| `HazardBlock` | Abstract base for hazard blocks without FACING (symmetric). Adds `HAZARDOUS` `BooleanProperty`; subclasses implement `spawnHazardParticles`. `animateTick` calls subclass only when `HAZARDOUS=true`. |
+| `HazardFacingBlock` | Abstract base for hazard blocks with FACING. Combines `HazardBlock`'s HAZARDOUS property with `HorizontalFacingBlock`'s FACING logic. Subclasses implement `shapeFor(Direction)` (use `byFacing(...)`) and `spawnHazardParticles`. |
+| `WoodshopSawdustLayerBlock` | Floor sawdust accumulation layer; `ACCUMULATION` 0–5 integer state drives height (1–6 px). Emits ASH particles at accumulation ≥ 3. No FACING. |
+| `PlasticTrashBinBlock` | Classroom trash bin with vape inside; SMOKE particles when hazardous. |
+| `DaisyChainExtensionBlock` | Overloaded extension cord; ELECTRIC_SPARK particles when hazardous. |
+| `StageSpotlightBlock` | Theatre spotlight overheating; FLAME + LARGE_SMOKE; light level 10 when hazardous. |
+| `ArchiveBoxStackBlock` | Stack of flammable document boxes; CAMPFIRE_COSY_SMOKE when hazardous. |
+| `DustChokedPcBlock` | PC tower with dust-blocked vents; SMOKE; light level 3 when hazardous. |
+| `ChargingCartBlock` | Rolling Chromebook charging cart; ELECTRIC_SPARK; light level 5 when hazardous. |
+| `FrayedConsoleWireBlock` | Floor-level AV wire with bare copper; ELECTRIC_SPARK + SOUL_FIRE_FLAME. No FACING. |
+| `MalfunctioningVendingBlock` | Vending machine with shorted compressor; SMOKE. |
+| `CeilingProjectorBlock` | Ceiling projector with failed cooling fan; LARGE_SMOKE + LAVA; light level 7 when hazardous. |
+| `SwollenPhoneBatteryBlock` | Thermally-swollen phone; SOUL_FIRE_FLAME gas. No FACING. |
+| `DamagedLipoPackBlock` | Punctured drone LiPo pack; CAMPFIRE_COSY_SMOKE. No FACING. |
+| `VapeInIronLockerBlock` | Locker with vaping device inside; ELECTRIC_SPARK + SMOKE leaking from vent. |
+| `PaSystemBackupBlock` | Wall-mounted PA amplifier rack; LAVA + ELECTRIC_SPARK; light level 8 when hazardous. Thin wall-panel shape. |
+| `SmartboardInverterBlock` | Smartboard panel with roof-leak water damage; DRIPPING_WATER. Thin wall-panel shape. |
+| `UnattendedGreasePanBlock` | Stove with frying pan left unattended; FLAME + LARGE_SMOKE; light level 10 when hazardous. |
+| `GreaseCloggedHoodBlock` | Ceiling range hood with clogged filters; LARGE_SMOKE. Raised shape (Y:8–15). |
+| `ContaminatedKitchenBinBlock` | Kitchen bin with oil-soaked rags; CAMPFIRE_COSY_SMOKE steam wisps. |
+| `JammedPaniniPressBlock` | Countertop panini press with burning food; LARGE_SMOKE + SMOKE. Low profile (Y:0–6). |
+| `CommercialDeepFryerBlock` | Commercial deep fryer; FLAME + LARGE_SMOKE + LAVA; light level 12 when hazardous. |
 | `SimRoom` | Enum mapping player position to a named room (LSPU Library or CCS). Holds `CcsRoom` record + `CCS_UPPER_ROOMS` (9 rooms, Y −25 to −22) and `CCS_GROUND_ROOMS` (7 rooms, Y −32 to −29) — all F3-verified absolute world AABBs. `fromPos()` / `fromCCSPos()` used for telemetry room labels. |
 | `AssemblyZone` | Static utility in `world/`; defines assembly-zone AABBs for both buildings. `ZONE = AABB(30,-35,64,76,-28,82)` (LSPU Library, verified north of building) + `CCS_ZONE = AABB(76,-35,73,136,-28,90)` (open area immediately south of CCS Admin Building, Z:73–90). `spawnBorderParticles(level, isCCS)` and `isInside(pos, isCCS)` select the correct zone. Fires `assembly_area_reached` telemetry + ends simulation. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. CSV event types: `session_start`, `move_tick` (10 Hz, x/y/z + hazard_distance), `extinguisher_use`, `fire_alarm_activate`, `assembly_area_reached`, `emergency_exit`, `door_open`, `session_end`. |
@@ -300,6 +322,7 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/sim_time set <seconds>` | Set remaining simulation time |
 | `/sim_time add <seconds>` | Add/subtract seconds from remaining time |
 | `/get_co2_extinguisher` | Give CO2 extinguisher for Class C fires (any player) |
+| `/item hazard <name>` | Give a hazard prop block item by registry name (tab-completes all 20 names). OP level 2. |
 
 **Auto-hooks**: `TutorialManager.completeTutorial` → `SessionManager.onTutorialComplete` (records tutorial duration); `SimulationManager.endSimulation` → `SessionManager.onSimulationEnd` (records type/score/passed, closes row).
 
