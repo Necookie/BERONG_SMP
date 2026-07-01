@@ -29,4 +29,14 @@ public class PaSystemBackupBlock extends HazardFacingBlock {
         level.addParticle(ParticleTypes.LAVA, x, y, z, 0, 0.02, 0);
         level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y + 0.05, z, 0, 0.01, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c📢 The failing battery cell ignites a severe electrical panel fire — PA system down!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
