@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Generates 16x16 pixel-art textures for the 20 hazard prop blocks.
 
-Matches the flat-shaded, bordered style already used by computer_case.png /
-fire_alarm_bell.png (solid color bands, 1px darker border, small bright
-accent highlights). Run from repo root:
+Builds on the flat-shaded, bordered style already used by computer_case.png /
+fire_alarm_bell.png, but adds a directional light gradient, inset highlight/
+shadow edges, and small object-specific iconography (plug prongs, screws,
+grille slats, warning glyphs) so each block reads as a recognizable object at
+a glance instead of a flat colored box. Run from repo root:
 
     python3 scripts/generate_hazard_textures.py
 
@@ -31,10 +33,27 @@ def set_px(im, x, y, color):
         im.putpixel((x, y), color)
 
 
+def get_px(im, x, y):
+    if 0 <= x < W and 0 <= y < H:
+        return im.getpixel((x, y))
+    return (0, 0, 0)
+
+
 def rect(im, x0, y0, x1, y1, color):
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             set_px(im, x, y, color)
+
+
+def line(im, x0, y0, x1, y1, color):
+    """Simple orthogonal/diagonal line via Bresenham-lite stepping."""
+    dx = x1 - x0
+    dy = y1 - y0
+    steps = max(abs(dx), abs(dy), 1)
+    for i in range(steps + 1):
+        x = x0 + round(dx * i / steps)
+        y = y0 + round(dy * i / steps)
+        set_px(im, x, y, color)
 
 
 def border(im, color, thickness=1):
@@ -42,6 +61,32 @@ def border(im, color, thickness=1):
     rect(im, 0, H - thickness, W - 1, H - 1, color)
     rect(im, 0, 0, thickness - 1, H - 1, color)
     rect(im, W - thickness, 0, W - 1, H - 1, color)
+
+
+def scale(color, factor):
+    return tuple(max(0, min(255, int(c * factor))) for c in color)
+
+
+def add(color, delta):
+    return tuple(max(0, min(255, c + d)) for c, d in zip(color, delta))
+
+
+def gradient_shade(im, x0, y0, x1, y1, base, light=1.35, dark=0.72):
+    """Diagonal top-left-lit shading across a rectangular region."""
+    span = max((x1 - x0) + (y1 - y0), 1)
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            t = ((x - x0) + (y - y0)) / span
+            factor = light + (dark - light) * t
+            set_px(im, x, y, scale(base, factor))
+
+
+def inset_edges(im, x0, y0, x1, y1, hi, lo):
+    """1px bright top/left + dark bottom/right, like a beveled panel."""
+    rect(im, x0, y0, x1, y0, hi)
+    rect(im, x0, y0, x0, y1, hi)
+    rect(im, x0, y1, x1, y1, lo)
+    rect(im, x1, y0, x1, y1, lo)
 
 
 def hbands(im, colors, start=0, end=H):
@@ -72,11 +117,22 @@ def grille_dots(im, x0, y0, x1, y1, color, spacing=2):
             set_px(im, x, y, color)
 
 
+def screws(im, positions, color=(25, 25, 25)):
+    for (x, y) in positions:
+        set_px(im, x, y, color)
+
+
 def diag_hazard_stripe(im, colors=((230, 160, 20), (20, 20, 20)), y0=0, y1=3):
     for y in range(y0, y1 + 1):
         for x in range(W):
             c = colors[(x + y) % 2]
             set_px(im, x, y, c)
+
+
+def plug_prongs(im, x0, y0, color=(190, 175, 60), gap=4):
+    """Two vertical prong marks — instantly reads as 'electrical plug'."""
+    rect(im, x0, y0, x0, y0 + 2, color)
+    rect(im, x0 + gap, y0, x0 + gap, y0 + 2, color)
 
 
 def save(im, name):
@@ -203,18 +259,20 @@ def tex_hazard_spark_arc_green():
 
 def tex_bin_plastic_gray():
     im = new_canvas((90, 100, 95))
-    hbands(im, [(95, 108, 102), (80, 92, 87), (95, 108, 102), (80, 92, 87)])
-    for y in range(0, H, 4):
-        rect(im, 0, y, W - 1, y, (70, 80, 76))
-    border(im, (55, 63, 60))
-    speckle(im, [(105, 118, 112), (65, 75, 72)], density=0.08)
+    gradient_shade(im, 1, 1, 14, 14, (90, 100, 95), light=1.25, dark=0.75)
+    for y in range(2, H - 1, 3):
+        rect(im, 1, y, 14, y, scale((90, 100, 95), 0.65))  # corrugation ribs
+    inset_edges(im, 1, 1, 14, 14, (135, 148, 140), (45, 52, 48))
+    border(im, (40, 48, 45))
+    speckle(im, [(105, 118, 112), (65, 75, 72)], density=0.06)
     save(im, "bin_plastic_gray")
 
 
 def tex_bin_rim_dark():
     im = new_canvas((60, 68, 65))
-    hbands(im, [(70, 78, 75), (50, 58, 55)])
-    border(im, (35, 42, 40))
+    hbands(im, [(75, 84, 80), (48, 55, 52)])
+    inset_edges(im, 0, 0, 15, 15, (95, 105, 100), (25, 30, 28))
+    border(im, (30, 36, 34))
     save(im, "bin_rim_dark")
 
 
@@ -224,19 +282,23 @@ def tex_bin_rim_dark():
 
 def tex_cord_strip_black():
     im = new_canvas((25, 25, 25))
-    border(im, (10, 10, 10))
-    for cx in (3, 7, 11):
-        rect(im, cx, 6, cx + 1, 9, (45, 45, 45))
-        rect(im, cx, 6, cx, 6, (15, 15, 15))
-    speckle(im, [(35, 35, 35)], density=0.08)
+    gradient_shade(im, 1, 1, 14, 14, (25, 25, 25), light=1.4, dark=0.7)
+    border(im, (8, 8, 8))
+    for cx in (2, 6, 10):
+        rect(im, cx, 5, cx + 2, 10, (48, 48, 48))
+        rect(im, cx, 5, cx + 2, 5, (20, 20, 20))
+        plug_prongs(im, cx, 7, color=(200, 185, 70), gap=1)
+    speckle(im, [(38, 38, 38)], density=0.06)
     save(im, "cord_strip_black")
 
 
 def tex_cord_wire_black():
     im = new_canvas((20, 20, 20))
-    for y in range(0, H, 3):
-        rect(im, 0, y, W - 1, y, (35, 35, 35))
-    border(im, (8, 8, 8))
+    gradient_shade(im, 0, 0, 15, 15, (20, 20, 20), light=1.3, dark=0.8)
+    for y in range(1, H - 1, 3):
+        rect(im, 0, y, W - 1, y, (38, 38, 38))
+        rect(im, 0, y + 1, W - 1, y + 1, (12, 12, 12))
+    border(im, (6, 6, 6))
     save(im, "cord_wire_black")
 
 
@@ -246,18 +308,25 @@ def tex_cord_wire_black():
 
 def tex_floor_tile_clean():
     im = new_canvas((150, 150, 150))
-    rect(im, 0, 0, W - 1, 0, (170, 170, 170))
-    rect(im, 0, H - 1, W - 1, H - 1, (120, 120, 120))
-    rect(im, 0, 0, 0, H - 1, (170, 170, 170))
-    rect(im, W - 1, 0, W - 1, H - 1, (120, 120, 120))
-    speckle(im, [(160, 160, 160), (135, 135, 135)], density=0.1)
+    gradient_shade(im, 1, 1, 14, 14, (150, 150, 150), light=1.15, dark=0.85)
+    rect(im, 0, 0, W - 1, 0, (175, 175, 175))
+    rect(im, 0, H - 1, W - 1, H - 1, (110, 110, 110))
+    rect(im, 0, 0, 0, H - 1, (175, 175, 175))
+    rect(im, W - 1, 0, W - 1, H - 1, (110, 110, 110))
+    for i in (5, 10):
+        line(im, i, 0, i, 15, (128, 128, 128))
+    speckle(im, [(160, 160, 160), (135, 135, 135)], density=0.08)
     save(im, "floor_tile_clean")
 
 
 def tex_sawdust_pile():
     im = new_canvas((205, 178, 120))
+    gradient_shade(im, 0, 0, 15, 15, (205, 178, 120), light=1.15, dark=0.85)
     speckle(im, [(225, 200, 145), (180, 150, 95), (235, 215, 170)], density=0.5)
-    speckle(im, [(140, 105, 60)], density=0.06)
+    speckle(im, [(140, 105, 60)], density=0.08)
+    for _ in range(6):
+        x, y = random.randint(1, 14), random.randint(1, 14)
+        set_px(im, x, y, (150, 115, 65))
     save(im, "sawdust_pile")
 
 
@@ -267,19 +336,24 @@ def tex_sawdust_pile():
 
 def tex_spotlight_housing_black():
     im = new_canvas((30, 30, 32))
-    hbands(im, [(38, 38, 40), (22, 22, 24), (38, 38, 40)])
-    border(im, (12, 12, 14))
+    gradient_shade(im, 1, 1, 14, 14, (30, 30, 32), light=1.5, dark=0.65)
+    border(im, (10, 10, 12))
+    inset_edges(im, 1, 1, 14, 14, (55, 55, 58), (12, 12, 14))
     for y in (2, 8, 13):
-        set_px(im, 1, y, (60, 60, 62))
-        set_px(im, 14, y, (60, 60, 62))
+        set_px(im, 1, y, (65, 65, 68))
+        set_px(im, 14, y, (65, 65, 68))
+    screws(im, [(2, 2), (13, 2), (2, 13), (13, 13)], (12, 12, 13))
+    rect(im, 6, 14, 9, 15, (18, 18, 20))  # mounting yoke
     save(im, "spotlight_housing_black")
 
 
 def tex_spotlight_lens_off():
     im = new_canvas((70, 70, 65))
-    rect(im, 2, 2, 13, 13, (110, 108, 95))
-    rect(im, 4, 4, 11, 11, (150, 148, 130))
-    border(im, (40, 40, 35))
+    gradient_shade(im, 2, 2, 13, 13, (85, 85, 78), light=1.2, dark=0.7)
+    rect(im, 4, 4, 11, 11, (55, 55, 50))
+    rect(im, 6, 6, 9, 9, (35, 35, 32))
+    border(im, (30, 30, 26))
+    rect(im, 5, 5, 6, 5, (110, 110, 100))  # cold glass glint
     save(im, "spotlight_lens_off")
 
 
@@ -289,21 +363,27 @@ def tex_spotlight_lens_off():
 
 def tex_cardboard_box():
     im = new_canvas((178, 140, 90))
-    speckle(im, [(190, 152, 100), (162, 126, 78)], density=0.15)
+    gradient_shade(im, 0, 0, 15, 15, (178, 140, 90), light=1.15, dark=0.85)
+    speckle(im, [(190, 152, 100), (162, 126, 78)], density=0.12)
     rect(im, 0, 6, W - 1, 7, (140, 105, 62))  # tape line
     rect(im, 6, 0, 9, H - 1, (140, 105, 62))  # vertical tape
     rect(im, 2, 10, 12, 13, (235, 230, 215))  # label
     for y in (11, 12):
         rect(im, 3, y, 10, y, (120, 118, 108))
-    border(im, (110, 82, 48))
+    # box-flap fold lines to sell the cardboard silhouette
+    line(im, 0, 3, 6, 0, (150, 115, 68))
+    line(im, 15, 3, 9, 0, (150, 115, 68))
+    border(im, (100, 74, 42))
     save(im, "cardboard_box")
 
 
 def tex_cardboard_box_charred():
     im = new_canvas((70, 45, 25))
+    gradient_shade(im, 0, 0, 15, 15, (70, 45, 25), light=1.2, dark=0.7)
     speckle(im, [(35, 22, 12), (90, 60, 30), (15, 10, 6)], density=0.4)
     rect(im, 0, 6, W - 1, 7, (20, 12, 6))
-    border(im, (10, 6, 3))
+    speckle(im, [(255, 120, 30), (200, 70, 10)], density=0.03)  # smoldering embers
+    border(im, (8, 5, 3))
     save(im, "cardboard_box_charred")
 
 
@@ -313,29 +393,36 @@ def tex_cardboard_box_charred():
 
 def tex_pc_tower_case():
     im = new_canvas((60, 62, 66))
-    hbands(im, [(70, 72, 76), (50, 52, 56)])
-    vents(im, [3, 4, 5, 9, 10, 11], (35, 37, 40))
-    border(im, (25, 26, 28))
-    rect(im, 11, 1, 13, 2, (30, 32, 34))
+    gradient_shade(im, 1, 1, 14, 14, (60, 62, 66), light=1.4, dark=0.7)
+    vents(im, [3, 4, 5, 9, 10, 11], (30, 32, 35))
+    inset_edges(im, 1, 1, 14, 14, (95, 98, 102), (22, 24, 27))
+    border(im, (18, 19, 21))
+    rect(im, 11, 1, 13, 2, (28, 30, 32))  # optical drive bay
+    set_px(im, 3, 13, (40, 170, 60))  # power LED
     save(im, "pc_tower_case")
 
 
 def tex_pc_tower_vent_dusty():
     im = new_canvas((60, 62, 66))
-    hbands(im, [(70, 72, 76), (50, 52, 56)])
+    gradient_shade(im, 1, 1, 14, 14, (60, 62, 66), light=1.4, dark=0.7)
     vents(im, [3, 4, 5, 9, 10, 11], (35, 37, 40))
-    speckle(im, [(190, 175, 140), (165, 150, 115)], density=0.45, y0=2, y1=13)
-    border(im, (25, 26, 28))
+    speckle(im, [(190, 175, 140), (165, 150, 115), (210, 195, 160)], density=0.5, y0=2, y1=13)
+    inset_edges(im, 1, 1, 14, 14, (95, 98, 102), (22, 24, 27))
+    border(im, (18, 19, 21))
+    set_px(im, 3, 13, (200, 60, 40))  # LED reads hot/red now
     save(im, "pc_tower_vent_dusty")
 
 
 def tex_backpack_fabric():
     im = new_canvas((35, 55, 80))
-    hbands(im, [(42, 65, 92), (28, 45, 68)])
+    gradient_shade(im, 0, 0, 15, 15, (35, 55, 80), light=1.25, dark=0.75)
     rect(im, 4, 4, 11, 9, (22, 35, 55))  # front pocket
     rect(im, 7, 2, 8, 13, (18, 28, 45))  # zipper line
+    for y in range(2, 14, 2):
+        set_px(im, 7, y, (140, 140, 145))  # zipper teeth glint
+        set_px(im, 8, y, (90, 90, 95))
     speckle(im, [(50, 75, 105)], density=0.1)
-    border(im, (15, 22, 35))
+    border(im, (12, 18, 30))
     save(im, "backpack_fabric")
 
 
@@ -345,9 +432,11 @@ def tex_backpack_fabric():
 
 def tex_cart_cabinet_metal():
     im = new_canvas((150, 152, 155))
-    hbands(im, [(160, 162, 165), (140, 142, 145), (160, 162, 165), (140, 142, 145)])
-    grille_dots(im, 2, 2, 13, 13, (110, 112, 115), spacing=3)
-    border(im, (95, 97, 100))
+    gradient_shade(im, 1, 1, 14, 14, (150, 152, 155), light=1.25, dark=0.78)
+    grille_dots(im, 2, 2, 13, 13, (105, 107, 110), spacing=3)
+    inset_edges(im, 1, 1, 14, 14, (190, 192, 195), (95, 97, 100))
+    border(im, (85, 87, 90))
+    rect(im, 6, 14, 9, 15, (60, 60, 63))  # caster wheel hint
     save(im, "cart_cabinet_metal")
 
 
@@ -357,9 +446,11 @@ def tex_cart_cabinet_metal():
 
 def tex_wire_cord_black():
     im = new_canvas((22, 22, 22))
+    gradient_shade(im, 0, 0, 15, 15, (22, 22, 22), light=1.3, dark=0.75)
     for y in range(2, 14, 3):
-        rect(im, 1, y, 14, y + 1, (34, 34, 34))
-    border(im, (12, 12, 12))
+        rect(im, 1, y, 14, y + 1, (36, 36, 36))
+        rect(im, 1, y, 14, y, (14, 14, 14))
+    border(im, (8, 8, 8))
     save(im, "wire_cord_black")
 
 
@@ -369,10 +460,13 @@ def tex_wire_cord_black():
 
 def tex_vending_body_blue():
     im = new_canvas((45, 85, 150))
-    hbands(im, [(55, 95, 160), (35, 70, 130)])
-    border(im, (20, 45, 90))
+    gradient_shade(im, 1, 1, 14, 9, (45, 85, 150), light=1.3, dark=0.75)
+    inset_edges(im, 1, 1, 14, 9, (85, 130, 200), (20, 45, 90))
+    border(im, (18, 40, 82))
     rect(im, 2, 12, 13, 14, (215, 215, 215))
     grille_dots(im, 3, 12, 12, 14, (150, 150, 150), spacing=2)
+    for x in (3, 6, 9, 12):
+        rect(im, x, 2, x, 8, (25, 55, 105))  # product-column dividers
     save(im, "vending_body_blue")
 
 
@@ -382,18 +476,22 @@ def tex_vending_body_blue():
 
 def tex_projector_housing_white():
     im = new_canvas((225, 222, 210))
-    hbands(im, [(235, 232, 220), (205, 202, 190)])
-    vents(im, [3, 4, 11, 12], (175, 172, 160))
-    border(im, (150, 148, 138))
+    gradient_shade(im, 1, 1, 14, 14, (225, 222, 210), light=1.1, dark=0.82)
+    vents(im, [3, 4, 11, 12], (170, 167, 155))
+    inset_edges(im, 1, 1, 14, 14, (245, 242, 232), (150, 148, 138))
+    border(im, (140, 138, 128))
+    screws(im, [(2, 2), (13, 13)], (120, 118, 110))
     save(im, "projector_housing_white")
 
 
 def tex_projector_lens_ring():
     im = new_canvas((40, 40, 40))
+    gradient_shade(im, 1, 1, 14, 14, (40, 40, 40), light=1.3, dark=0.7)
     rect(im, 2, 2, 13, 13, (25, 25, 28))
     rect(im, 5, 5, 10, 10, (60, 90, 120))
     rect(im, 6, 6, 9, 9, (140, 190, 220))
-    border(im, (15, 15, 18))
+    rect(im, 6, 6, 7, 6, (220, 235, 245))  # lens glint
+    border(im, (12, 12, 14))
     save(im, "projector_lens_ring")
 
 
@@ -403,33 +501,44 @@ def tex_projector_lens_ring():
 
 def tex_phone_body_black():
     im = new_canvas((25, 25, 28))
-    border(im, (10, 10, 12))
-    rect(im, 10, 2, 12, 4, (15, 15, 17))
+    gradient_shade(im, 1, 1, 14, 14, (25, 25, 28), light=1.5, dark=0.65)
+    border(im, (8, 8, 10))
+    rect(im, 10, 2, 12, 4, (15, 15, 17))  # camera bump
+    rect(im, 10, 2, 10, 2, (60, 90, 130))  # lens glint
+    rect(im, 3, 13, 12, 13, (14, 14, 16))  # bottom port shadow
     save(im, "phone_body_black")
 
 
 def tex_phone_screen_glass():
     im = new_canvas((20, 24, 32))
-    rect(im, 1, 1, 14, 14, (30, 36, 48))
-    rect(im, 2, 2, 6, 5, (55, 65, 85))
-    border(im, (10, 12, 16))
+    gradient_shade(im, 1, 1, 14, 14, (30, 36, 48), light=1.4, dark=0.75)
+    rect(im, 2, 2, 6, 5, (65, 78, 100))  # screen glare streak
+    rect(im, 7, 12, 13, 13, (18, 22, 30))  # nav bar
+    border(im, (8, 10, 14))
     save(im, "phone_screen_glass")
 
 
 def tex_phone_body_swollen():
     im = new_canvas((45, 42, 30))
-    speckle(im, [(60, 55, 38), (30, 28, 18)], density=0.3)
-    border(im, (20, 18, 10))
+    gradient_shade(im, 1, 1, 14, 14, (55, 50, 34), light=1.25, dark=0.75)
+    speckle(im, [(65, 58, 40), (32, 28, 18)], density=0.3)
+    inset_edges(im, 1, 1, 14, 14, (75, 68, 46), (18, 16, 10))
+    border(im, (16, 14, 8))
+    rect(im, 4, 6, 11, 9, (85, 65, 30))  # bulging seam split
+    speckle(im, [(140, 90, 20)], density=0.06, x0=4, y0=6, x1=11, y1=9)
     save(im, "phone_body_swollen")
 
 
 def tex_leather_jacket_fabric():
     im = new_canvas((90, 55, 35))
-    hbands(im, [(100, 62, 40), (75, 45, 28)])
-    speckle(im, [(110, 70, 45), (60, 35, 20)], density=0.25)
+    gradient_shade(im, 0, 0, 15, 15, (90, 55, 35), light=1.25, dark=0.75)
+    speckle(im, [(110, 70, 45), (60, 35, 20)], density=0.22)
     rect(im, 2, 3, 13, 4, (65, 38, 22))  # seam
     rect(im, 2, 10, 13, 11, (65, 38, 22))  # seam
-    border(im, (45, 25, 14))
+    for x in (3, 6, 9, 12):
+        set_px(im, x, 4, (30, 16, 8))  # stitching dots
+        set_px(im, x, 11, (30, 16, 8))
+    border(im, (40, 22, 12))
     save(im, "leather_jacket_fabric")
 
 
@@ -439,18 +548,24 @@ def tex_leather_jacket_fabric():
 
 def tex_lipo_foil_silver():
     im = new_canvas((195, 198, 202))
-    hbands(im, [(210, 213, 217), (180, 183, 187)])
+    gradient_shade(im, 1, 1, 14, 14, (195, 198, 202), light=1.25, dark=0.8)
     rect(im, 2, 6, 13, 6, (235, 60, 40))  # warning stripe
-    speckle(im, [(220, 223, 227), (165, 168, 172)], density=0.15)
-    border(im, (140, 143, 147))
+    rect(im, 4, 9, 11, 12, (150, 155, 160))  # printed spec label block
+    speckle(im, [(220, 223, 227), (165, 168, 172)], density=0.12)
+    inset_edges(im, 1, 1, 14, 14, (230, 233, 237), (120, 123, 127))
+    border(im, (130, 133, 137))
     save(im, "lipo_foil_silver")
 
 
 def tex_lipo_foil_damaged():
     im = new_canvas((120, 110, 95))
+    gradient_shade(im, 0, 0, 15, 15, (120, 110, 95), light=1.2, dark=0.7)
     speckle(im, [(80, 40, 20), (150, 130, 100), (40, 20, 10)], density=0.4)
     rect(im, 2, 6, 13, 6, (150, 40, 25))
-    border(im, (50, 30, 15))
+    # torn-foil puncture with visible dark cell beneath
+    rect(im, 6, 8, 10, 11, (25, 22, 20))
+    speckle(im, [(200, 90, 30), (255, 150, 40)], density=0.15, x0=6, y0=8, x1=10, y1=11)
+    border(im, (40, 25, 12))
     save(im, "lipo_foil_damaged")
 
 
@@ -460,11 +575,14 @@ def tex_lipo_foil_damaged():
 
 def tex_locker_door_steel():
     im = new_canvas((95, 100, 105))
-    hbands(im, [(105, 110, 115), (85, 90, 95)])
-    rect(im, 7, 0, 8, H - 1, (75, 80, 85))
-    vents(im, [2, 3, 12, 13], (60, 65, 70))
-    border(im, (55, 60, 65))
+    gradient_shade(im, 1, 1, 14, 14, (95, 100, 105), light=1.3, dark=0.75)
+    rect(im, 7, 0, 8, H - 1, (65, 70, 75))  # centre seam between double doors
+    vents(im, [2, 3, 12, 13], (55, 60, 65))
+    inset_edges(im, 1, 1, 14, 14, (135, 140, 145), (48, 52, 56))
+    border(im, (45, 50, 55))
     rect(im, 11, 7, 12, 9, (170, 170, 30))  # lock/handle
+    set_px(im, 11, 7, (225, 225, 90))
+    rect(im, 2, 2, 5, 2, (60, 65, 70))  # vent louvre accents
     save(im, "locker_door_steel")
 
 
@@ -474,9 +592,12 @@ def tex_locker_door_steel():
 
 def tex_pa_rack_metal():
     im = new_canvas((35, 35, 38))
-    hbands(im, [(45, 45, 48), (28, 28, 30), (45, 45, 48), (28, 28, 30)])
+    gradient_shade(im, 1, 1, 14, 14, (35, 35, 38), light=1.4, dark=0.68)
     grille_dots(im, 2, 2, 13, 13, (18, 18, 20), spacing=2)
-    border(im, (15, 15, 17))
+    inset_edges(im, 1, 1, 14, 14, (58, 58, 62), (14, 14, 16))
+    border(im, (12, 12, 14))
+    rect(im, 2, 13, 4, 13, (35, 170, 60))  # power indicator strip
+    rect(im, 6, 13, 8, 13, (220, 60, 40))  # fault indicator strip
     save(im, "pa_rack_metal")
 
 
@@ -486,9 +607,11 @@ def tex_pa_rack_metal():
 
 def tex_smartboard_bezel_black():
     im = new_canvas((20, 20, 22))
+    gradient_shade(im, 2, 2, 13, 13, (20, 20, 22), light=1.4, dark=0.7)
     border(im, (8, 8, 10), thickness=2)
     rect(im, 2, 2, 13, 13, (12, 14, 30))
     rect(im, 3, 3, 8, 6, (30, 45, 90))
+    rect(im, 3, 3, 5, 3, (55, 75, 130))  # screen glare corner
     save(im, "smartboard_bezel_black")
 
 
@@ -498,26 +621,34 @@ def tex_smartboard_bezel_black():
 
 def tex_stove_burner_metal():
     im = new_canvas((150, 150, 152))
-    hbands(im, [(160, 160, 162), (135, 135, 137)])
+    gradient_shade(im, 1, 1, 14, 14, (150, 150, 152), light=1.2, dark=0.8)
     rect(im, 4, 4, 11, 11, (60, 60, 62))
     rect(im, 6, 6, 9, 9, (30, 30, 32))
-    border(im, (100, 100, 102))
+    for i in range(0, 12, 3):
+        set_px(im, 4 + i % 8, 4, (85, 85, 88))  # coil highlight ticks
+    inset_edges(im, 1, 1, 14, 14, (185, 185, 187), (95, 95, 97))
+    border(im, (85, 85, 87))
     save(im, "stove_burner_metal")
 
 
 def tex_pan_metal():
     im = new_canvas((110, 110, 115))
-    rect(im, 1, 1, 14, 14, (130, 130, 135))
+    gradient_shade(im, 1, 1, 14, 14, (120, 120, 125), light=1.3, dark=0.72)
     rect(im, 3, 3, 12, 12, (85, 85, 90))
-    border(im, (60, 60, 65))
+    rect(im, 4, 4, 5, 4, (170, 170, 178))  # rim highlight
+    rect(im, 0, 6, 1, 9, (95, 95, 100))  # handle stub
+    border(im, (50, 50, 55))
     save(im, "pan_metal")
 
 
 def tex_pan_oil_hazard():
     im = new_canvas((200, 150, 30))
-    speckle(im, [(230, 180, 50), (170, 120, 15), (255, 210, 90)], density=0.35)
+    gradient_shade(im, 0, 0, 15, 15, (200, 150, 30), light=1.2, dark=0.78)
+    speckle(im, [(230, 180, 50), (170, 120, 15), (255, 210, 90)], density=0.3)
     rect(im, 3, 3, 12, 12, (215, 160, 35))
-    border(im, (120, 80, 10))
+    rect(im, 5, 5, 7, 6, (255, 225, 130))  # oil surface glare
+    speckle(im, [(90, 55, 5)], density=0.06)  # scorched bits
+    border(im, (100, 65, 8))
     save(im, "pan_oil_hazard")
 
 
@@ -527,16 +658,20 @@ def tex_pan_oil_hazard():
 
 def tex_hood_steel_clean():
     im = new_canvas((175, 178, 180))
-    hbands(im, [(185, 188, 190), (160, 163, 165)])
-    grille_dots(im, 2, 10, 13, 13, (130, 133, 135), spacing=2)
-    border(im, (120, 123, 125))
+    gradient_shade(im, 1, 1, 14, 14, (175, 178, 180), light=1.18, dark=0.82)
+    grille_dots(im, 2, 10, 13, 13, (125, 128, 130), spacing=2)
+    inset_edges(im, 1, 1, 14, 14, (205, 208, 210), (110, 113, 115))
+    border(im, (100, 103, 105))
     save(im, "hood_steel_clean")
 
 
 def tex_hood_grease_dirty():
     im = new_canvas((70, 52, 22))
-    speckle(im, [(95, 70, 30), (45, 32, 12), (115, 88, 40)], density=0.45)
-    border(im, (30, 20, 8))
+    gradient_shade(im, 0, 0, 15, 15, (70, 52, 22), light=1.15, dark=0.75)
+    speckle(im, [(95, 70, 30), (45, 32, 12), (115, 88, 40)], density=0.42)
+    for y in (11, 12, 13):
+        speckle(im, [(30, 20, 8)], density=0.4, y0=y, y1=y)  # drip streaks pooling low
+    border(im, (25, 17, 6))
     save(im, "hood_grease_dirty")
 
 
@@ -546,15 +681,20 @@ def tex_hood_grease_dirty():
 
 def tex_bin_green_clean():
     im = new_canvas((45, 110, 60))
-    hbands(im, [(55, 122, 70), (35, 95, 50)])
-    border(im, (22, 70, 35))
+    gradient_shade(im, 1, 1, 14, 14, (45, 110, 60), light=1.25, dark=0.78)
+    inset_edges(im, 1, 1, 14, 14, (75, 150, 90), (20, 65, 32))
+    border(im, (20, 65, 32))
+    rect(im, 1, 1, 14, 2, (55, 130, 72))  # lid rim
     save(im, "bin_green_clean")
 
 
 def tex_bin_grease_stained():
     im = new_canvas((60, 90, 50))
-    speckle(im, [(120, 95, 30), (80, 60, 15), (150, 120, 40)], density=0.45)
-    border(im, (35, 55, 25))
+    gradient_shade(im, 0, 0, 15, 15, (60, 90, 50), light=1.15, dark=0.78)
+    speckle(im, [(120, 95, 30), (80, 60, 15), (150, 120, 40)], density=0.42)
+    rect(im, 1, 1, 14, 2, (45, 65, 38))  # lid rim, grimed over
+    speckle(im, [(40, 28, 8)], density=0.1)
+    border(im, (28, 40, 22))
     save(im, "bin_grease_stained")
 
 
@@ -564,25 +704,32 @@ def tex_bin_grease_stained():
 
 def tex_press_body_metal():
     im = new_canvas((140, 140, 145))
-    hbands(im, [(150, 150, 155), (125, 125, 130)])
-    border(im, (85, 85, 90))
+    gradient_shade(im, 1, 1, 14, 14, (140, 140, 145), light=1.25, dark=0.78)
+    inset_edges(im, 1, 1, 14, 14, (175, 175, 180), (95, 95, 100))
+    border(im, (75, 75, 80))
+    rect(im, 6, 13, 9, 14, (50, 50, 54))  # control dial
+    set_px(im, 7, 13, (200, 60, 40))  # dial marker
     save(im, "press_body_metal")
 
 
 def tex_press_grill_ridged():
     im = new_canvas((60, 55, 50))
+    gradient_shade(im, 1, 1, 14, 14, (60, 55, 50), light=1.2, dark=0.75)
     for y in range(1, H - 1, 2):
-        rect(im, 1, y, 14, y, (85, 78, 70))
-    border(im, (35, 32, 28))
+        rect(im, 1, y, 14, y, (90, 82, 72))
+        rect(im, 1, y + 1, 14, y + 1, (40, 36, 32))
+    border(im, (30, 27, 24))
     save(im, "press_grill_ridged")
 
 
 def tex_press_grill_charred():
     im = new_canvas((30, 22, 15))
+    gradient_shade(im, 1, 1, 14, 14, (30, 22, 15), light=1.2, dark=0.7)
     for y in range(1, H - 1, 2):
-        rect(im, 1, y, 14, y, (50, 38, 25))
-    speckle(im, [(15, 10, 5)], density=0.2)
-    border(im, (10, 7, 4))
+        rect(im, 1, y, 14, y, (55, 42, 28))
+        rect(im, 1, y + 1, 14, y + 1, (15, 10, 6))
+    speckle(im, [(15, 10, 5), (255, 110, 30)], density=0.15)  # char + smolder
+    border(im, (8, 6, 3))
     save(im, "press_grill_charred")
 
 
@@ -592,22 +739,29 @@ def tex_press_grill_charred():
 
 def tex_fryer_body_steel():
     im = new_canvas((165, 168, 170))
-    hbands(im, [(175, 178, 180), (150, 153, 155), (175, 178, 180)])
-    border(im, (110, 113, 115))
+    gradient_shade(im, 1, 1, 14, 14, (165, 168, 170), light=1.25, dark=0.75)
+    inset_edges(im, 1, 1, 14, 14, (200, 203, 205), (105, 108, 110))
+    border(im, (95, 98, 100))
+    rect(im, 3, 13, 6, 14, (40, 40, 42))  # control panel
+    set_px(im, 4, 13, (220, 60, 40))  # power light
     save(im, "fryer_body_steel")
 
 
 def tex_fryer_oil_surface():
     im = new_canvas((190, 145, 30))
-    speckle(im, [(215, 170, 50), (160, 115, 15)], density=0.25)
-    border(im, (110, 80, 10))
+    gradient_shade(im, 0, 0, 15, 15, (190, 145, 30), light=1.2, dark=0.78)
+    speckle(im, [(215, 170, 50), (160, 115, 15)], density=0.22)
+    rect(im, 3, 3, 6, 4, (235, 200, 110))  # surface sheen
+    border(im, (100, 72, 8))
     save(im, "fryer_oil_surface")
 
 
 def tex_fryer_oil_hazard():
     im = new_canvas((120, 60, 10))
-    speckle(im, [(200, 90, 10), (60, 25, 5), (255, 160, 40)], density=0.4)
-    border(im, (60, 25, 5))
+    gradient_shade(im, 0, 0, 15, 15, (120, 60, 10), light=1.25, dark=0.7)
+    speckle(im, [(200, 90, 10), (60, 25, 5), (255, 160, 40)], density=0.38)
+    speckle(im, [(255, 220, 130)], density=0.05)  # boiling highlights
+    border(im, (50, 20, 4))
     save(im, "fryer_oil_hazard")
 
 
