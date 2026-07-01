@@ -25,4 +25,19 @@ public class ChargingCartBlock extends HazardFacingBlock {
         double z = pos.getZ() + rand.nextDouble();
         level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0, 0.01, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 100;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§4💥 The overloaded charging cart explodes from battery thermal runaway!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteRadius(level, pos, 2, 3);
+    }
 }
