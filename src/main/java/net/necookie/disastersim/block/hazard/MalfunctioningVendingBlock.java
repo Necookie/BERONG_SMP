@@ -25,4 +25,14 @@ public class MalfunctioningVendingBlock extends HazardFacingBlock {
         double z = pos.getZ() + 0.05;
         level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c🥤 The shorted vending machine's plastics catch fire, filling the corridor with Class E smoke!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
