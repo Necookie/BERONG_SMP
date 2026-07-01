@@ -401,6 +401,16 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("malfunctioning_vending", MALFUNCTIONING_VENDING);
     static { HAZARD_ITEM_MAP.put("malfunctioning_vending", MALFUNCTIONING_VENDING_ITEM); }
 
+    /** Ceiling-mounted projector with failed cooling fan — overheats and smokes. */
+    public static final DeferredBlock<CeilingProjectorBlock> CEILING_PROJECTOR = BLOCKS.registerBlock(
+            "ceiling_projector", CeilingProjectorBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
+    public static final DeferredItem<BlockItem> CEILING_PROJECTOR_ITEM =
+            ITEMS.registerSimpleBlockItem("ceiling_projector", CEILING_PROJECTOR);
+    static { HAZARD_ITEM_MAP.put("ceiling_projector", CEILING_PROJECTOR_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
