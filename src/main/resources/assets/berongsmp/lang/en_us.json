@@ -48,5 +48,6 @@
   "block.berongsmp.smartboard_inverter": "Smartboard Inverter (Water Damage)",
   "block.berongsmp.unattended_grease_pan": "Unattended Grease Pan",
   "block.berongsmp.grease_clogged_hood": "Grease-Clogged Range Hood",
-  "block.berongsmp.contaminated_kitchen_bin": "Contaminated Kitchen Bin"
+  "block.berongsmp.contaminated_kitchen_bin": "Contaminated Kitchen Bin",
+  "block.berongsmp.jammed_panini_press": "Jammed Panini Press"
 }

@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "press": "minecraft:block/iron_block",
+    "plate": "minecraft:block/polished_andesite",
+    "cord":  "minecraft:block/black_concrete",
+    "char":  "minecraft:block/netherrack",
+    "particle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    { "name": "base_plate", "from": [1, 0, 2], "to": [15, 3, 14],
+      "faces": { "north": {"texture":"#press"}, "south": {"texture":"#press"}, "east": {"texture":"#press"}, "west": {"texture":"#press"}, "up": {"texture":"#char"}, "down": {"texture":"#press"} } },
+    { "name": "burned_food", "from": [3, 3, 4], "to": [13, 4, 12],
+      "faces": { "up": {"texture":"#char"} } },
+    { "name": "lid_closed", "from": [1, 3, 2], "to": [15, 6, 14],
+      "faces": { "north": {"texture":"#press"}, "south": {"texture":"#press"}, "east": {"texture":"#press"}, "west": {"texture":"#press"}, "up": {"texture":"#press"}, "down": {"texture":"#char"} } },
+    { "name": "hinge", "from": [6, 5, 13], "to": [10, 7, 15],
+      "faces": { "up": {"texture":"#press"}, "south": {"texture":"#press"} } },
+    { "name": "power_cord", "from": [7, 0, 0], "to": [9, 1, 2],
+      "faces": { "north": {"texture":"#cord"}, "down": {"texture":"#cord"} } }
+  ]
+}

@@ -485,6 +485,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN);
     static { HAZARD_ITEM_MAP.put("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN_ITEM); }
 
+    /** Panini press with jammed lid and burning food — smoking when hazardous. */
+    public static final DeferredBlock<JammedPaniniPressBlock> JAMMED_PANINI_PRESS = BLOCKS.registerBlock(
+            "jammed_panini_press", JammedPaniniPressBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> JAMMED_PANINI_PRESS_ITEM =
+            ITEMS.registerSimpleBlockItem("jammed_panini_press", JAMMED_PANINI_PRESS);
+    static { HAZARD_ITEM_MAP.put("jammed_panini_press", JAMMED_PANINI_PRESS_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
