@@ -476,6 +476,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("grease_clogged_hood", GREASE_CLOGGED_HOOD);
     static { HAZARD_ITEM_MAP.put("grease_clogged_hood", GREASE_CLOGGED_HOOD_ITEM); }
 
+    /** Kitchen waste bin with oil-soaked contaminated rags — self-heating rags emit steam when hazardous. */
+    public static final DeferredBlock<ContaminatedKitchenBinBlock> CONTAMINATED_KITCHEN_BIN = BLOCKS.registerBlock(
+            "contaminated_kitchen_bin", ContaminatedKitchenBinBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GREEN)
+                    .strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> CONTAMINATED_KITCHEN_BIN_ITEM =
+            ITEMS.registerSimpleBlockItem("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN);
+    static { HAZARD_ITEM_MAP.put("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

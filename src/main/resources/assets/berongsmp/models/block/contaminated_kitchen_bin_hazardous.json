@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "bin":    "minecraft:block/green_concrete",
+    "grease": "minecraft:block/soul_sand",
+    "lid":    "minecraft:block/gray_concrete",
+    "coat":   "minecraft:block/netherrack",
+    "particle": "minecraft:block/green_concrete"
+  },
+  "elements": [
+    { "name": "bin_body", "from": [2, 0, 2], "to": [14, 12, 14],
+      "faces": { "north": {"texture":"#coat"}, "south": {"texture":"#bin"}, "east": {"texture":"#bin"}, "west": {"texture":"#coat"}, "up": {"texture":"#grease"}, "down": {"texture":"#bin"} } },
+    { "name": "outer_coat", "from": [1, 0, 1], "to": [15, 13, 15],
+      "faces": { "north": {"texture":"#coat"}, "south": {"texture":"#coat"}, "east": {"texture":"#coat"}, "west": {"texture":"#coat"} } },
+    { "name": "lid_tilted", "from": [0, 12, 0], "to": [16, 15, 10],
+      "faces": { "north": {"texture":"#grease"}, "south": {"texture":"#lid"}, "east": {"texture":"#lid"}, "west": {"texture":"#lid"}, "up": {"texture":"#lid"} } }
+  ]
+}
