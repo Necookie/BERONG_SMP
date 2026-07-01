@@ -18,4 +18,19 @@ public class SwollenPhoneBatteryBlock extends HazardBlock {
         double z = pos.getZ() + 0.2 + rand.nextDouble() * 0.6;
         level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, 0, 0.01, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 150;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§c📱 The overheating phone battery ruptures into an intense, torch-like chemical fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
