@@ -411,6 +411,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("ceiling_projector", CEILING_PROJECTOR);
     static { HAZARD_ITEM_MAP.put("ceiling_projector", CEILING_PROJECTOR_ITEM); }
 
+    /** Swollen Li-ion phone battery left on desk — thermal runaway risk; cyan soul-flame gas when hazardous. */
+    public static final DeferredBlock<SwollenPhoneBatteryBlock> SWOLLEN_PHONE_BATTERY = BLOCKS.registerBlock(
+            "swollen_phone_battery", SwollenPhoneBatteryBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+                    .strength(0.5f, 0.5f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> SWOLLEN_PHONE_BATTERY_ITEM =
+            ITEMS.registerSimpleBlockItem("swollen_phone_battery", SWOLLEN_PHONE_BATTERY);
+    static { HAZARD_ITEM_MAP.put("swollen_phone_battery", SWOLLEN_PHONE_BATTERY_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "hazardous=false": { "model": "berongsmp:block/swollen_phone_battery" },
+    "hazardous=true":  { "model": "berongsmp:block/swollen_phone_battery_hazardous" }
+  }
+}

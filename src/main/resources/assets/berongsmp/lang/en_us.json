@@ -40,5 +40,6 @@
   "block.berongsmp.charging_cart": "Overloaded Charging Cart",
   "block.berongsmp.frayed_console_wire": "Frayed Console Wire",
   "block.berongsmp.malfunctioning_vending": "Malfunctioning Vending Machine",
-  "block.berongsmp.ceiling_projector": "Ceiling Projector (Fan Failure)"
+  "block.berongsmp.ceiling_projector": "Ceiling Projector (Fan Failure)",
+  "block.berongsmp.swollen_phone_battery": "Swollen Phone Battery"
 }
