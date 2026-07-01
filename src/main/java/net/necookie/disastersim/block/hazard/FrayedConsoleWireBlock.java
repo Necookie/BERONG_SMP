@@ -20,4 +20,14 @@ public class FrayedConsoleWireBlock extends HazardBlock {
         if (rand.nextBoolean())
             level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y + 0.05, z, 0, 0.01, 0);
     }
+
+    @Override
+    public String failureMessage() {
+        return "§c🔌 The frayed wire arcs and ignites the carpet underneath!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 1);
+    }
 }
