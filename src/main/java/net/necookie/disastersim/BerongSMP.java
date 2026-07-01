@@ -429,6 +429,15 @@ public class BerongSMP {
             ITEMS.registerSimpleBlockItem("damaged_lipo_pack", DAMAGED_LIPO_PACK);
     static { HAZARD_ITEM_MAP.put("damaged_lipo_pack", DAMAGED_LIPO_PACK_ITEM); }
 
+    /** Iron locker with a vape device inside — sparks and smoke leak from vent slot when hazardous. */
+    public static final DeferredBlock<VapeInIronLockerBlock> VAPE_IN_IRON_LOCKER = BLOCKS.registerBlock(
+            "vape_in_iron_locker", VapeInIronLockerBlock::new,
+            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
+    public static final DeferredItem<BlockItem> VAPE_IN_IRON_LOCKER_ITEM =
+            ITEMS.registerSimpleBlockItem("vape_in_iron_locker", VAPE_IN_IRON_LOCKER);
+    static { HAZARD_ITEM_MAP.put("vape_in_iron_locker", VAPE_IN_IRON_LOCKER_ITEM); }
+
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))

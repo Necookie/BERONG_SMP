@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,hazardous=false": { "model": "berongsmp:block/vape_in_iron_locker" },
+    "facing=north,hazardous=true":  { "model": "berongsmp:block/vape_in_iron_locker_hazardous" },
+    "facing=south,hazardous=false": { "model": "berongsmp:block/vape_in_iron_locker", "y": 180 },
+    "facing=south,hazardous=true":  { "model": "berongsmp:block/vape_in_iron_locker_hazardous", "y": 180 },
+    "facing=east,hazardous=false":  { "model": "berongsmp:block/vape_in_iron_locker", "y": 90 },
+    "facing=east,hazardous=true":   { "model": "berongsmp:block/vape_in_iron_locker_hazardous", "y": 90 },
+    "facing=west,hazardous=false":  { "model": "berongsmp:block/vape_in_iron_locker", "y": 270 },
+    "facing=west,hazardous=true":   { "model": "berongsmp:block/vape_in_iron_locker_hazardous", "y": 270 }
+  }
+}

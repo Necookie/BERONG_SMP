@@ -42,5 +42,6 @@
   "block.berongsmp.malfunctioning_vending": "Malfunctioning Vending Machine",
   "block.berongsmp.ceiling_projector": "Ceiling Projector (Fan Failure)",
   "block.berongsmp.swollen_phone_battery": "Swollen Phone Battery",
-  "block.berongsmp.damaged_lipo_pack": "Damaged LiPo Battery Pack"
+  "block.berongsmp.damaged_lipo_pack": "Damaged LiPo Battery Pack",
+  "block.berongsmp.vape_in_iron_locker": "Iron Locker (Vape Inside)"
 }
