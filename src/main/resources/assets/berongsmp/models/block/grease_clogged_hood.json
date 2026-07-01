@@ -1,10 +1,10 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "hood":  "minecraft:block/iron_block",
-    "grate": "minecraft:block/stripped_oak_log",
-    "duct":  "minecraft:block/gray_concrete",
-    "particle": "minecraft:block/iron_block"
+    "hood":  "berongsmp:block/hood_steel_clean",
+    "grate": "berongsmp:block/hood_steel_clean",
+    "duct":  "berongsmp:block/pa_rack_metal",
+    "particle": "berongsmp:block/hood_steel_clean"
   },
   "elements": [
     { "name": "hood_body", "from": [0, 8, 2], "to": [16, 15, 14],
