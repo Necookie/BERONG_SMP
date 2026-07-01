@@ -25,4 +25,19 @@ public class StageSpotlightBlock extends HazardFacingBlock {
         if (rand.nextInt(3) == 0) level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0.04, 0);
         level.addParticle(ParticleTypes.LARGE_SMOKE, x, y + 0.1, z, 0, 0.02, 0);
     }
+
+    @Override
+    public int failureDelayTicks() {
+        return 200;
+    }
+
+    @Override
+    public String failureMessage() {
+        return "§c🎭 The overheated spotlight ignites the curtains — a climbing Class A fire!";
+    }
+
+    @Override
+    public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
+        igniteAdjacent(level, pos, 2);
+    }
 }
