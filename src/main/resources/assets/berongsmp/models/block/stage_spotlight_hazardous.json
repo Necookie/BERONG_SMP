@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":   "minecraft:block/black_concrete",
-    "lens":   "minecraft:block/redstone_lamp_on",
-    "mount":  "minecraft:block/gray_concrete",
-    "heat":   "minecraft:block/orange_concrete",
-    "particle": "minecraft:block/black_concrete"
+    "body":   "berongsmp:block/spotlight_housing_black",
+    "lens":   "berongsmp:block/hazard_ember_glow",
+    "mount":  "berongsmp:block/pa_rack_metal",
+    "heat":   "berongsmp:block/hazard_ember_glow",
+    "particle": "berongsmp:block/spotlight_housing_black"
   },
   "elements": [
     { "name": "housing", "from": [4, 4, 4], "to": [12, 14, 12],
