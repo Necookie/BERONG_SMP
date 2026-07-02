@@ -6,7 +6,7 @@ import net.minecraft.commands.CommandSourceStack;
 /**
  * Command registration entry point. Delegates to focused subclasses:
  * - RegistrationCommands  — /register
- * - ItemCommands          — /spawn_lspu, /get_extinguisher, /get_co2_extinguisher
+ * - ItemCommands          — /spawn_lspu, /get_extinguisher, /get_co2_extinguisher, /get_wet_chemical_extinguisher
  * - SimulationCommands    — /sim_fire, /sim_earthquake, /sim_stop, /sim_status, /sim_list, etc.
  * - BfpAdminCommands      — /bfp (login, checkin, checkout, sessions, student, ...)
  */

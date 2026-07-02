@@ -274,6 +274,10 @@ public class BerongSMP {
     public static final DeferredItem<net.necookie.disastersim.item.CO2ExtinguisherItem> CO2_EXTINGUISHER = ITEMS.registerItem("co2_extinguisher",
             props -> new net.necookie.disastersim.item.CO2ExtinguisherItem(props.durability(200)));
 
+    /** Wet chemical extinguisher — Philippine BFP yellow-coded Class F/K tool for kitchen grease fires. */
+    public static final DeferredItem<net.necookie.disastersim.item.WetChemicalExtinguisherItem> WET_CHEMICAL_EXTINGUISHER = ITEMS.registerItem("wet_chemical_extinguisher",
+            props -> new net.necookie.disastersim.item.WetChemicalExtinguisherItem(props.durability(240)));
+
     /** Dev-only tool: right-click a hazard prop to toggle its state, or shift+right-click to force its failure. */
     public static final DeferredItem<net.necookie.disastersim.item.HazardWandItem> HAZARD_WAND = ITEMS.registerItem("hazard_wand",
             props -> new net.necookie.disastersim.item.HazardWandItem(props.stacksTo(1)));
@@ -286,6 +290,7 @@ public class BerongSMP {
             .displayItems((parameters, output) -> {
                 output.accept(FIRE_EXTINGUISHER.get());
                 output.accept(CO2_EXTINGUISHER.get());
+                output.accept(WET_CHEMICAL_EXTINGUISHER.get());
                 output.accept(HAZARD_WAND.get());
                 output.accept(COMPUTER_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
@@ -522,6 +527,7 @@ public class BerongSMP {
     static {
         ALL_ITEM_MAP.put("fire_extinguisher", FIRE_EXTINGUISHER);
         ALL_ITEM_MAP.put("co2_extinguisher", CO2_EXTINGUISHER);
+        ALL_ITEM_MAP.put("wet_chemical_extinguisher", WET_CHEMICAL_EXTINGUISHER);
         ALL_ITEM_MAP.put("hazard_wand", HAZARD_WAND);
         ALL_ITEM_MAP.put("computer", COMPUTER_ITEM);
         ALL_ITEM_MAP.put("fire_alarm", FIRE_ALARM_ITEM);

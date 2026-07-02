@@ -69,6 +69,16 @@ public class ItemCommands {
                             "§aCO2 Extinguisher added to your inventory! Use it on burning computer blocks."), true);
                     return 1;
                 }));
+
+        dispatcher.register(Commands.literal("get_wet_chemical_extinguisher")
+                .executes(ctx -> {
+                    ServerPlayer player = requirePlayer(ctx.getSource());
+                    if (player == null) return 0;
+                    player.getInventory().add(BerongSMP.WET_CHEMICAL_EXTINGUISHER.get().getDefaultInstance());
+                    ctx.getSource().sendSuccess(() -> Component.literal(
+                            "§aWet Chemical Extinguisher added to your inventory! Use it on kitchen grease fires."), true);
+                    return 1;
+                }));
     }
 
     private static int spawnNpc(CommandContext<CommandSourceStack> ctx) {
