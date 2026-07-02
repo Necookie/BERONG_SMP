@@ -263,11 +263,11 @@ public class BerongSMP {
                     .lightLevel(s -> 5));
     public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
 
-    /** Hanging pendant light bulb — full-brightness (level 15) ceiling fixture; symmetric/no facing. */
+    /** Flush-mount LED panel light — cool-white full-brightness (level 15) ceiling fixture; symmetric/no facing. */
     public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = BLOCKS.registerBlock("light_bulb",
             LightBulbBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_YELLOW)
+                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
                     .strength(0.3f)
                     .sound(SoundType.GLASS)
                     .noOcclusion()

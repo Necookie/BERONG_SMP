@@ -9,8 +9,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class LightBulbBlock extends Block {
 
-    // Ceiling cap/cord + hanging glass globe; symmetric, no facing.
-    private static final VoxelShape SHAPE = Block.box(4, 6, 4, 12, 16, 12);
+    // Flush-mount LED panel: thin diffuser + recessed housing bezel near the ceiling; symmetric, no facing.
+    private static final VoxelShape SHAPE = Block.box(1, 14, 1, 15, 16, 15);
 
     public LightBulbBlock(Properties props) {
         super(props);
