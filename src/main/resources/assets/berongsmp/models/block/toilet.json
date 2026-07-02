@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "ceramic": "minecraft:block/white_concrete",
-    "tank":    "minecraft:block/light_gray_concrete",
-    "particle": "minecraft:block/white_concrete"
+    "ceramic": "berongsmp:block/ceramic_glossy_white",
+    "tank":    "berongsmp:block/fixture_chrome",
+    "particle": "berongsmp:block/ceramic_glossy_white"
   },
   "elements": [
     {

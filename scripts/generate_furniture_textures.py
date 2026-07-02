@@ -380,6 +380,29 @@ def tex_pin_metal_teal():
     save(im, "pin_metal_teal")
 
 
+# ---------------------------------------------------------------------------
+# ToiletBlock / SinkBlock — glossy porcelain + chrome fixtures
+# (was: raw white/light_gray concrete reuse). Shared across both blocks.
+# ---------------------------------------------------------------------------
+
+def tex_ceramic_glossy_white():
+    base = (246, 247, 249)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.1, dark=0.88)
+    rect(im, 2, 2, 4, 3, (255, 255, 255))  # specular highlight
+    inset_edges(im, 0, 0, W - 1, H - 1, (255, 255, 255), (190, 193, 197))
+    save(im, "ceramic_glossy_white")
+
+
+def tex_fixture_chrome():
+    base = (198, 201, 205)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.2)
+    rect(im, 0, 3, 15, 3, (235, 236, 238))  # reflective streak
+    inset_edges(im, 0, 0, W - 1, H - 1, (225, 227, 230), (120, 122, 126))
+    save(im, "fixture_chrome")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -392,6 +415,7 @@ ALL = [
     tex_whiteboard_surface, tex_whiteboard_frame_metal,
     tex_board_felt_charcoal, tex_note_paper_yellow, tex_note_paper_blue,
     tex_pin_metal_red, tex_pin_metal_teal,
+    tex_ceramic_glossy_white, tex_fixture_chrome,
 ]
 
 if __name__ == "__main__":
