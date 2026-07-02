@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.necookie.disastersim.BerongSMP;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -46,6 +47,7 @@ public final class DropAndRollManager {
         // (even after the fire ticks reach 0 mid-roll) extend the window.
         if (wasOnFire || droppedTicksRemaining.containsKey(id)) {
             droppedTicksRemaining.put(id, DROPPED_WINDOW_TICKS);
+            player.setData(BerongSMP.DROPPED_TICKS.get(), DROPPED_WINDOW_TICKS);
             applyCrawlEffects(player);
             spawnRollFeedback(player);
         }
@@ -64,10 +66,12 @@ public final class DropAndRollManager {
             }
             int remaining = entry.getValue() - 1;
             if (remaining <= 0) {
+                player.setData(BerongSMP.DROPPED_TICKS.get(), 0);
                 it.remove();
                 continue;
             }
             entry.setValue(remaining);
+            player.setData(BerongSMP.DROPPED_TICKS.get(), remaining);
             applyCrawlEffects(player);
         }
     }

@@ -47,10 +47,13 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.item.NpcSpawnerItem;
@@ -87,6 +90,20 @@ public class BerongSMP {
 
     /** Deferred Register for Sound Events. */
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
+
+    /** Deferred Register for Attachment Types (per-entity synced client-visible state). */
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
+            DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, MODID);
+
+    /**
+     * Ticks remaining in a player's drop-and-roll "dropped" window (0 = not dropped), mirroring
+     * {@code DropAndRollManager.droppedTicksRemaining}. Auto-synced to every client tracking the
+     * player (including their own client) so {@code DropAndRollRenderModifier} can drive the
+     * crouch/roll animation — purely cosmetic, never touches the real entity Pose/hitbox.
+     */
+    public static final java.util.function.Supplier<AttachmentType<Integer>> DROPPED_TICKS =
+            ATTACHMENT_TYPES.register("dropped_ticks",
+                    () -> AttachmentType.builder(() -> 0).sync(ByteBufCodecs.VAR_INT).build());
 
     // ── NPC entity ───────────────────────────────────────────────────────────
 
@@ -624,6 +641,7 @@ public class BerongSMP {
         ENTITY_TYPES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         SOUND_EVENTS.register(modEventBus);
+        ATTACHMENT_TYPES.register(modEventBus);
         modEventBus.addListener(this::onEntityAttributes);
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
