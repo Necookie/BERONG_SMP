@@ -54,6 +54,10 @@ public class BerongSMPClient {
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
         // Drive camera shake for QUAKE tutorial stages
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.TutorialHud::onCameraAngles);
+        // Supplementary whole-body rock for the drop-and-roll visual (crouch/tilt is registered
+        // separately via RegisterRenderStateModifiersEvent, below)
+        NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPre);
+        NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPost);
     }
 
     /**
