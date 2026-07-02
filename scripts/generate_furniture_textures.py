@@ -240,12 +240,63 @@ def tex_label_holder_white():
     save(im, "label_holder_white")
 
 
+# ---------------------------------------------------------------------------
+# LockerBlock — painted-steel school locker (was: raw iron_block reuse)
+# Reuses handle_bar_black and label_holder_white from FilingCabinetBlock.
+# ---------------------------------------------------------------------------
+
+def tex_locker_body_painted():
+    base = (38, 56, 88)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.12)
+    inset_edges(im, 0, 0, W - 1, H - 1, (70, 92, 130), (12, 18, 32))
+    save(im, "locker_body_painted")
+
+
+def tex_locker_door_painted():
+    base = (52, 72, 108)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (85, 108, 148), (20, 28, 46))
+    border(im, (15, 21, 36))
+    save(im, "locker_door_painted")
+
+
+def tex_locker_seam_dark():
+    base = (20, 27, 42)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.25, dark=0.85)
+    save(im, "locker_seam_dark")
+
+
+def tex_vent_slats_dark():
+    base = (22, 23, 25)
+    im = new_canvas(base)
+    vents(im, [2, 5, 8, 11, 14], (45, 46, 49), x0=0, x1=15)
+    border(im, (10, 10, 11))
+    save(im, "vent_slats_dark")
+
+
+def tex_keypad_lock():
+    base = (24, 25, 27)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.85)
+    border(im, (10, 10, 11))
+    for y in (4, 7, 10):
+        for x in (4, 8, 12):
+            set_px(im, x, y, (60, 62, 66))  # keypad buttons
+    set_px(im, 8, 13, (60, 220, 110))  # status LED
+    save(im, "keypad_lock")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
     tex_cabinet_body_painted, tex_drawer_front_painted, tex_handle_bar_metal,
     tex_cabinet_body_graphite, tex_drawer_face_graphite, tex_handle_bar_black,
     tex_label_holder_white,
+    tex_locker_body_painted, tex_locker_door_painted, tex_locker_seam_dark,
+    tex_vent_slats_dark, tex_keypad_lock,
 ]
 
 if __name__ == "__main__":

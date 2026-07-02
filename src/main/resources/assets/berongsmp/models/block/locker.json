@@ -1,13 +1,13 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "metal":  "minecraft:block/iron_block",
-    "door":   "minecraft:block/light_gray_concrete",
-    "seam":   "minecraft:block/gray_concrete",
-    "vent":   "minecraft:block/black_concrete",
-    "label":  "minecraft:block/white_concrete",
-    "lock":   "minecraft:block/gold_block",
-    "particle": "minecraft:block/iron_block"
+    "metal":  "berongsmp:block/locker_body_painted",
+    "door":   "berongsmp:block/locker_door_painted",
+    "seam":   "berongsmp:block/locker_seam_dark",
+    "vent":   "berongsmp:block/vent_slats_dark",
+    "label":  "berongsmp:block/label_holder_white",
+    "lock":   "berongsmp:block/keypad_lock",
+    "particle": "berongsmp:block/locker_body_painted"
   },
   "elements": [
     {
