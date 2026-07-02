@@ -90,7 +90,7 @@ public class BerongSMP {
 
     // ── NPC entity ───────────────────────────────────────────────────────────
 
-    /** Single entity type shared by all five instructors; NpcType stored in NBT selects the skin. */
+    /** Single entity type shared by all instructor/character NPCs; NpcType stored in NBT selects the skin. */
     public static final DeferredHolder<EntityType<?>, EntityType<CustomNpcEntity>> CUSTOM_NPC =
             ENTITY_TYPES.register("custom_npc", id ->
                     EntityType.Builder.<CustomNpcEntity>of(CustomNpcEntity::new, MobCategory.MISC)
@@ -118,6 +118,22 @@ public class BerongSMP {
     public static final DeferredItem<NpcSpawnerItem> NPC_SECURITY_TUAZON =
             ITEMS.registerItem("npc_security_tuazon",
                     p -> new NpcSpawnerItem(NpcType.SECURITY_TUAZON, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_DM_ORLANDA =
+            ITEMS.registerItem("npc_dm_orlanda",
+                    p -> new NpcSpawnerItem(NpcType.DM_ORLANDA, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_NECOOKIE =
+            ITEMS.registerItem("npc_necookie",
+                    p -> new NpcSpawnerItem(NpcType.NECOOKIE, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_SIR_BOOKMARK =
+            ITEMS.registerItem("npc_sir_bookmark",
+                    p -> new NpcSpawnerItem(NpcType.SIR_BOOKMARK, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT =
+            ITEMS.registerItem("npc_student",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT, p.stacksTo(16)));
 
     /** Fire alarm ringing sound — loops via scheduled block ticks while ACTIVATED=true. */
     public static final DeferredHolder<SoundEvent, SoundEvent> FIRE_ALARM_RING =
@@ -321,6 +337,10 @@ public class BerongSMP {
                 output.accept(NPC_OFFICER_CRUZ.get());
                 output.accept(NPC_CAPT_MORFE.get());
                 output.accept(NPC_SECURITY_TUAZON.get());
+                output.accept(NPC_DM_ORLANDA.get());
+                output.accept(NPC_NECOOKIE.get());
+                output.accept(NPC_SIR_BOOKMARK.get());
+                output.accept(NPC_STUDENT.get());
             }).build());
 
     /** Creative tab: furniture and props for building scenarios. */
@@ -559,6 +579,10 @@ public class BerongSMP {
         ALL_ITEM_MAP.put("npc_officer_cruz", NPC_OFFICER_CRUZ);
         ALL_ITEM_MAP.put("npc_capt_morfe", NPC_CAPT_MORFE);
         ALL_ITEM_MAP.put("npc_security_tuazon", NPC_SECURITY_TUAZON);
+        ALL_ITEM_MAP.put("npc_dm_orlanda", NPC_DM_ORLANDA);
+        ALL_ITEM_MAP.put("npc_necookie", NPC_NECOOKIE);
+        ALL_ITEM_MAP.put("npc_sir_bookmark", NPC_SIR_BOOKMARK);
+        ALL_ITEM_MAP.put("npc_student", NPC_STUDENT);
         ALL_ITEM_MAP.put("whiteboard", WHITEBOARD_ITEM);
         ALL_ITEM_MAP.put("bulletin_board", BULLETIN_BOARD_ITEM);
         ALL_ITEM_MAP.put("computer_table", COMPUTER_TABLE_ITEM);
