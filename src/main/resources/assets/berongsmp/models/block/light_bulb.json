@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:block/cube_all",
   "textures": {
-    "all": "berongsmp:block/led_diffuser_glow"
+    "all": "minecraft:block/white_concrete"
   }
 }
