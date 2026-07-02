@@ -15,7 +15,10 @@ brushed-metal accents) instead of grime/hazard accents. Run from repo root:
 Outputs to src/main/resources/assets/berongsmp/textures/block/.
 """
 import os
+import random
 from PIL import Image
+
+random.seed(11)
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources",
                     "assets", "berongsmp", "textures", "block")
@@ -81,6 +84,23 @@ def vents(im, y_positions, color, x0=2, x1=13):
         rect(im, x0, y, x1, y, color)
 
 
+def speckle(im, colors, density=0.1, x0=0, y0=0, x1=W - 1, y1=H - 1):
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if random.random() < density:
+                set_px(im, x, y, random.choice(colors))
+
+
+def mesh_weave(im, x0, y0, x1, y1, base, dark):
+    """Alternating checker dots simulating a woven mesh fabric."""
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            if (x + y) % 2 == 0:
+                set_px(im, x, y, dark)
+            else:
+                set_px(im, x, y, base)
+
+
 def save(im, name):
     im.save(os.path.join(OUT, f"{name}.png"))
 
@@ -120,8 +140,40 @@ def tex_desk_cable_panel_dark():
     save(im, "desk_cable_panel_dark")
 
 
+# ---------------------------------------------------------------------------
+# ChairBlock — modern task chair (was: raw dark_oak_planks + gray_concrete)
+# ---------------------------------------------------------------------------
+
+def tex_chair_frame_black():
+    base = (30, 30, 33)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.15)
+    inset_edges(im, 0, 0, W - 1, H - 1, (65, 65, 70), (8, 8, 10))
+    save(im, "chair_frame_black")
+
+
+def tex_chair_mesh_fabric():
+    base = (60, 63, 68)
+    dark = (38, 40, 44)
+    im = new_canvas(base)
+    mesh_weave(im, 0, 0, W - 1, H - 1, base, dark)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.12, dark=0.92)
+    border(im, (25, 26, 29))
+    save(im, "chair_mesh_fabric")
+
+
+def tex_chair_cushion_fabric():
+    base = (52, 54, 58)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    speckle(im, [scale(base, 1.25), scale(base, 0.8)], density=0.14, x0=1, y0=1, x1=14, y1=14)
+    inset_edges(im, 0, 0, W - 1, H - 1, (85, 87, 92), (20, 21, 24))
+    save(im, "chair_cushion_fabric")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
+    tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
 ]
 
 if __name__ == "__main__":
