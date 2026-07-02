@@ -1,13 +1,13 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "frame": "minecraft:block/dark_oak_planks",
-    "cork":  "minecraft:block/note_block",
-    "paper": "minecraft:block/white_concrete",
-    "paper2":"minecraft:block/birch_planks",
-    "pin1":  "minecraft:block/red_concrete",
-    "pin2":  "minecraft:block/orange_concrete",
-    "particle": "minecraft:block/dark_oak_planks"
+    "frame": "berongsmp:block/whiteboard_frame_metal",
+    "cork":  "berongsmp:block/board_felt_charcoal",
+    "paper": "berongsmp:block/note_paper_yellow",
+    "paper2":"berongsmp:block/note_paper_blue",
+    "pin1":  "berongsmp:block/pin_metal_red",
+    "pin2":  "berongsmp:block/pin_metal_teal",
+    "particle": "berongsmp:block/board_felt_charcoal"
   },
   "elements": [
     {

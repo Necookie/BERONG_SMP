@@ -334,6 +334,52 @@ def tex_whiteboard_frame_metal():
     save(im, "whiteboard_frame_metal")
 
 
+# ---------------------------------------------------------------------------
+# BulletinBoardBlock — felt pinboard with modern sticky notes
+# (was: note_block cork + raw concrete paper). Reuses whiteboard_frame_metal.
+# ---------------------------------------------------------------------------
+
+def tex_board_felt_charcoal():
+    base = (58, 60, 64)
+    im = new_canvas(base)
+    speckle(im, [scale(base, 1.2), scale(base, 0.82)], density=0.16)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.08, dark=0.94)
+    border(im, (30, 31, 34))
+    save(im, "board_felt_charcoal")
+
+
+def tex_note_paper_yellow():
+    base = (250, 214, 90)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.06, dark=0.9)
+    rect(im, 0, 12, W - 1, 15, scale(base, 0.85))  # folded-corner shadow
+    save(im, "note_paper_yellow")
+
+
+def tex_note_paper_blue():
+    base = (120, 180, 230)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.06, dark=0.9)
+    rect(im, 0, 12, W - 1, 15, scale(base, 0.85))
+    save(im, "note_paper_blue")
+
+
+def tex_pin_metal_red():
+    im = new_canvas((210, 40, 40))
+    gradient_shade(im, 1, 1, 14, 14, (210, 40, 40), light=1.3, dark=0.8)
+    set_px(im, 5, 4, (255, 140, 130))  # highlight glint
+    border(im, (90, 15, 15))
+    save(im, "pin_metal_red")
+
+
+def tex_pin_metal_teal():
+    im = new_canvas((30, 150, 150))
+    gradient_shade(im, 1, 1, 14, 14, (30, 150, 150), light=1.3, dark=0.8)
+    set_px(im, 5, 4, (140, 230, 225))
+    border(im, (10, 70, 70))
+    save(im, "pin_metal_teal")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -344,6 +390,8 @@ ALL = [
     tex_vent_slats_dark, tex_keypad_lock,
     tex_trash_body_charcoal, tex_trash_rim_metal,
     tex_whiteboard_surface, tex_whiteboard_frame_metal,
+    tex_board_felt_charcoal, tex_note_paper_yellow, tex_note_paper_blue,
+    tex_pin_metal_red, tex_pin_metal_teal,
 ]
 
 if __name__ == "__main__":
