@@ -403,6 +403,30 @@ def tex_fixture_chrome():
     save(im, "fixture_chrome")
 
 
+# ---------------------------------------------------------------------------
+# CeilingFanBlock — matte modern fan (was: raw concrete/iron/wood reuse)
+# Reuses handle_bar_black (rod) and label_holder_white (housing base tone
+# inspiration); the light bowl reuses light_bulb's led_diffuser_glow.png
+# for visual consistency with the mod's other ceiling fixture.
+# ---------------------------------------------------------------------------
+
+def tex_fan_housing_white():
+    base = (236, 237, 238)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.92)
+    inset_edges(im, 0, 0, W - 1, H - 1, (252, 252, 252), (185, 186, 188))
+    border(im, (160, 161, 163))
+    save(im, "fan_housing_white")
+
+
+def tex_fan_blade_matte():
+    base = (240, 240, 238)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.05, dark=0.93)
+    border(im, (190, 190, 188))
+    save(im, "fan_blade_matte")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -416,6 +440,7 @@ ALL = [
     tex_board_felt_charcoal, tex_note_paper_yellow, tex_note_paper_blue,
     tex_pin_metal_red, tex_pin_metal_teal,
     tex_ceramic_glossy_white, tex_fixture_chrome,
+    tex_fan_housing_white, tex_fan_blade_matte,
 ]
 
 if __name__ == "__main__":

@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "housing": "minecraft:block/gray_concrete",
-    "rod":     "minecraft:block/iron_block",
-    "blade_t": "minecraft:block/white_concrete",
-    "blade_b": "minecraft:block/dark_oak_planks",
-    "light":   "minecraft:block/glowstone",
-    "particle": "minecraft:block/gray_concrete"
+    "housing": "berongsmp:block/fan_housing_white",
+    "rod":     "berongsmp:block/handle_bar_black",
+    "blade_t": "berongsmp:block/fan_blade_matte",
+    "blade_b": "berongsmp:block/fan_blade_matte",
+    "light":   "berongsmp:block/led_diffuser_glow",
+    "particle": "berongsmp:block/fan_housing_white"
   },
   "elements": [
     {
