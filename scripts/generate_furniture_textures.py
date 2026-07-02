@@ -171,9 +171,41 @@ def tex_chair_cushion_fabric():
     save(im, "chair_cushion_fabric")
 
 
+# ---------------------------------------------------------------------------
+# DrawersBlock — modern flat-panel dresser (was: raw dark_oak/birch planks)
+# ---------------------------------------------------------------------------
+
+def tex_cabinet_body_painted():
+    base = (233, 233, 230)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.06, dark=0.95)
+    inset_edges(im, 0, 0, W - 1, H - 1, (248, 248, 246), (198, 198, 195))
+    border(im, (175, 175, 172))
+    save(im, "cabinet_body_painted")
+
+
+def tex_drawer_front_painted():
+    base = (208, 209, 212)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.92)
+    inset_edges(im, 0, 0, W - 1, H - 1, (228, 229, 232), (150, 151, 154))
+    border(im, (130, 131, 134))
+    save(im, "drawer_front_painted")
+
+
+def tex_handle_bar_metal():
+    base = (172, 174, 178)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    rect(im, 0, 3, 15, 4, (215, 216, 220))  # highlight stripe
+    inset_edges(im, 0, 0, W - 1, H - 1, (210, 211, 214), (110, 111, 114))
+    save(im, "handle_bar_metal")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
+    tex_cabinet_body_painted, tex_drawer_front_painted, tex_handle_bar_metal,
 ]
 
 if __name__ == "__main__":
