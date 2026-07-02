@@ -70,6 +70,10 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
             level.setBlock(pos, state.setValue(BlockStateProperties.LIT, false), 3);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
+        } else if (isKitchenHazard(state.getBlock())) {
+            if (net.necookie.disastersim.world.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+                warnWrongTool(sp, "§c✗ Dry chemical won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
+            }
         } else {
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
             extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
@@ -178,5 +182,6 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
         appendPinStatusTooltip(stack, tooltip, "Hold right-click to spray.");
         appendChargeTooltip(stack, tooltip);
         tooltip.accept(Component.literal("§7Puts out fire, soul fire, candles, and campfires."));
+        tooltip.accept(Component.literal("§c⚠ Not rated for §e[Class F/K]§c kitchen grease fires!"));
     }
 }

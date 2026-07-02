@@ -3,7 +3,6 @@ package net.necookie.disastersim.item;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,7 +12,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -24,7 +22,6 @@ import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 import net.necookie.disastersim.world.TelemetryCsvWriter;
 
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -34,16 +31,14 @@ import java.util.function.Consumer;
  * grease fire (see {@code docs/md files/Items.md} #16: "Water triggers a 3x3 fiery explosion!").
  *
  * <p>Suppresses ordinary fire/soul fire like the other units, and defuses any hazard prop via
- * {@link HazardManager#defuse}, but gives distinct feedback (message + golden foam particles) when
- * the target is one of the five kitchen/grease hazard props, reinforcing that this is the tool meant
- * for that job. Shared mechanics live in {@link AbstractExtinguisherItem}.
+ * {@link HazardManager#defuse}, with distinct feedback (message + golden foam particles) when the
+ * target is one of the five kitchen/grease hazard props. It is the <b>only</b> extinguisher that can
+ * defuse those five — {@link FireExtinguisherItem} and {@link CO2ExtinguisherItem} skip them (see
+ * {@link AbstractExtinguisherItem#isKitchenHazard}), mirroring the real Class B vs. Class F/K
+ * distinction: a dry-chemical or CO2 unit can splash or re-flash a deep-fat fire instead of
+ * smothering it. Shared mechanics live in {@link AbstractExtinguisherItem}.
  */
 public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
-
-    /** The five cafeteria/kitchen hazard props this unit is purpose-built for (Items.md §16–20). */
-    private static final Set<String> KITCHEN_HAZARD_IDS = Set.of(
-            "unattended_grease_pan", "grease_clogged_hood", "contaminated_kitchen_bin",
-            "jammed_panini_press", "commercial_deep_fryer");
 
     /** Golden foam mist color (packed RGB), matching the yellow Class F/K body colour. */
     private static final int FOAM_COLOR = 0xE8C800;
@@ -68,8 +63,7 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
         } else {
-            Block block = state.getBlock();
-            wasKitchenHazard = isKitchenHazard(block);
+            wasKitchenHazard = isKitchenHazard(state.getBlock());
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
             extinguished = HazardManager.defuse(level, hazardSession, pos);
         }
@@ -82,10 +76,6 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
             BerongSMP.LOGGER.debug("Wet chemical extinguisher suppressed block at {}", pos);
         }
         return extinguished;
-    }
-
-    private static boolean isKitchenHazard(Block block) {
-        return KITCHEN_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
     }
 
     @Override

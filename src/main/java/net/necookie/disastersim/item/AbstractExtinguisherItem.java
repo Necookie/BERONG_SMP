@@ -2,6 +2,7 @@ package net.necookie.disastersim.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -18,9 +19,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
@@ -51,6 +57,17 @@ public abstract class AbstractExtinguisherItem extends Item {
 
     /** Number of steps along the spray axis, and the per-step lateral/vertical sample offsets. */
     private static final int SPRAY_STEPS = 7;
+
+    /**
+     * The five cafeteria/kitchen hazard props (Items.md §16–20) that are Class F/K grease hazards —
+     * only {@link WetChemicalExtinguisherItem} may safely defuse these; ABC and CO2 units skip them.
+     */
+    protected static final Set<String> KITCHEN_HAZARD_IDS = Set.of(
+            "unattended_grease_pan", "grease_clogged_hood", "contaminated_kitchen_bin",
+            "jammed_panini_press", "commercial_deep_fryer");
+
+    private static final Map<UUID, Long> lastWrongToolWarningTick = new ConcurrentHashMap<>();
+    private static final long WRONG_TOOL_WARNING_COOLDOWN_TICKS = 60L;
 
     protected AbstractExtinguisherItem(Properties properties) {
         super(properties);
@@ -211,6 +228,20 @@ public abstract class AbstractExtinguisherItem extends Item {
                 self.getX() - radius, self.getY() - radius, self.getZ() - radius,
                 self.getX() + radius, self.getY() + radius, self.getZ() + radius);
         return level.getEntitiesOfClass(Player.class, box, p -> !p.getUUID().equals(self.getUUID())).size();
+    }
+
+    /** True if {@code block} is one of the five Class F/K cafeteria/kitchen hazard props. */
+    protected static boolean isKitchenHazard(Block block) {
+        return KITCHEN_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
+    }
+
+    /** Sends a "wrong tool" chat warning, throttled per-player to once every {@link #WRONG_TOOL_WARNING_COOLDOWN_TICKS}. */
+    protected static void warnWrongTool(ServerPlayer player, String message) {
+        long now = player.level().getGameTime();
+        Long last = lastWrongToolWarningTick.get(player.getUUID());
+        if (last != null && now - last < WRONG_TOOL_WARNING_COOLDOWN_TICKS) return;
+        lastWrongToolWarningTick.put(player.getUUID(), now);
+        player.sendSystemMessage(Component.literal(message));
     }
 
     // ── Subclass hooks ──────────────────────────────────────────────────────

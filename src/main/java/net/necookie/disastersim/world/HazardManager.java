@@ -200,7 +200,8 @@ public final class HazardManager {
         return state.hasProperty(HazardBlock.HAZARDOUS);
     }
 
-    private static boolean isHazardous(BlockState state) {
+    /** True if {@code state} carries the hazardous flag and it's currently set. */
+    public static boolean isHazardous(BlockState state) {
         return isHazardCapable(state) && state.getValue(HazardBlock.HAZARDOUS);
     }
 

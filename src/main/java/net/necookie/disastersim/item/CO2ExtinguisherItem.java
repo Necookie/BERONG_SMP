@@ -65,6 +65,10 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                 sp.sendSystemMessage(Component.literal(
                         "§a✓ Electrical fire suppressed! §7(Computer destroyed — replace it)"));
             }
+        } else if (isKitchenHazard(state.getBlock())) {
+            if (net.necookie.disastersim.world.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+                warnWrongTool(sp, "§c✗ CO2 won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
+            }
         } else {
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
             extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
@@ -169,5 +173,6 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
         tooltip.accept(Component.literal("§7Use on §c[Class C]§7 electrical fires (computers)."));
         tooltip.accept(Component.literal("§7Also suppresses regular fire and soul fire."));
         tooltip.accept(Component.literal("§c⚠ NEVER use water on electrical fires!"));
+        tooltip.accept(Component.literal("§c⚠ Not rated for §e[Class F/K]§c kitchen grease fires!"));
     }
 }
