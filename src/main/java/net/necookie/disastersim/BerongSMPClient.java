@@ -11,8 +11,10 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.necookie.disastersim.client.CustomNpcRenderer;
+import net.necookie.disastersim.client.DropAndRollRenderModifier;
 
 /**
  * Client-only entry point for BerongSMP.
@@ -68,5 +70,11 @@ public class BerongSMPClient {
     static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         SimulationHud.registerGuiLayers(event);
         net.necookie.disastersim.client.TutorialHud.registerGuiLayers(event);
+    }
+
+    /** Drives the purely cosmetic drop-and-roll crouch/tilt — see {@link DropAndRollRenderModifier}. */
+    @SubscribeEvent
+    static void onRegisterRenderStateModifiers(RegisterRenderStateModifiersEvent event) {
+        event.registerAvatarEntityModifier(new DropAndRollRenderModifier());
     }
 }
