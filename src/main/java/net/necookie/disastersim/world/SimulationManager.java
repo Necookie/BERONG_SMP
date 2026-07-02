@@ -507,6 +507,7 @@ public class SimulationManager {
 
     private static void tickEarthquakeSession(SimulationSession session, ServerLevel level,
                                               ServerPlayer player, int ticks) {
+        applyDuckCoverHold(session, level, player);
         SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
         session.tickQuakePhase(level.getRandom());
         SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
@@ -534,6 +535,44 @@ public class SimulationManager {
         EFFECTS.drainEarthquakePending(level, session);
         if (ticks % 20 == 0) {
             EFFECTS.clearFireInArena(level, session);
+        }
+    }
+
+    /** Ticks required crouched-under-cover to count the drill as performed correctly (5s). */
+    private static final int DUCK_COVER_HOLD_TARGET_TICKS = 100;
+
+    /**
+     * Live version of the tutorial's scripted QUAKE_DROP/COVER/HOLDON drill: during a real
+     * earthquake session, crouching under a solid block grants a brief Resistance buff (a stand-in
+     * for "protected under sturdy cover") and, the first time 5s of continuous compliance is
+     * reached, a one-time chat congratulation plus a duck_cover_hold telemetry event.
+     */
+    private static void applyDuckCoverHold(SimulationSession session, ServerLevel level, ServerPlayer player) {
+        if (session.getQuakePhase() == SimulationSession.EarthquakePhase.END) return;
+
+        boolean hasCover = !level.getBlockState(player.blockPosition().above(2)).isAir();
+        boolean compliant = player.isCrouching() && hasCover;
+
+        if (!compliant) {
+            session.setDuckCoverHoldTicks(0);
+            return;
+        }
+
+        int elapsed = session.getDuckCoverHoldTicks() + 1;
+        session.setDuckCoverHoldTicks(elapsed);
+        player.addEffect(new MobEffectInstance(MobEffects.RESISTANCE, 30, 1, false, false));
+
+        if (elapsed == DUCK_COVER_HOLD_TARGET_TICKS && !session.isDuckCoverHoldAchieved()) {
+            session.markDuckCoverHoldAchieved();
+            player.sendSystemMessage(Component.literal("§a✓ Duck, Cover, and Hold maintained — well done!"));
+            session.logger.log("duck_cover_hold", Map.of(
+                    "x", player.getX(), "y", player.getY(), "z", player.getZ()));
+            double elapsedS = (double) (Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+            session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                    session.getSessionId(), player.getUUID().toString(),
+                    session.getState().name().toLowerCase(),
+                    Math.round(elapsedS * 100.0) / 100.0, "duck_cover_hold",
+                    player.getX(), player.getY(), player.getZ(), 0.0, null, null));
         }
     }
 

@@ -55,6 +55,10 @@ public class SimulationSession {
     private int aftershockCount;
     private double aftershockMagnitudeScale = 1.0;
 
+    // --- Live duck/cover/hold compliance (mirrors the tutorial's QUAKE_DROP/COVER/HOLDON drill) ---
+    private int duckCoverHoldTicks;
+    private boolean duckCoverHoldAchieved;
+
     public SimulationSession(ServerPlayer player, SimulationManager.SimulationState state) {
         this.player     = player;
         this.state      = state;
@@ -174,6 +178,11 @@ public class SimulationSession {
         };
         return magnitude * Math.exp(-decayRate * distance) * phaseScale;
     }
+
+    public int getDuckCoverHoldTicks() { return duckCoverHoldTicks; }
+    public void setDuckCoverHoldTicks(int ticks) { this.duckCoverHoldTicks = ticks; }
+    public boolean isDuckCoverHoldAchieved() { return duckCoverHoldAchieved; }
+    public void markDuckCoverHoldAchieved() { this.duckCoverHoldAchieved = true; }
 
     public String getSessionId() { return sessionId; }
     public Instant getStartedAt() { return startedAt; }
