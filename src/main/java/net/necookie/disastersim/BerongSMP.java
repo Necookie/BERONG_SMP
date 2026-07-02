@@ -348,6 +348,46 @@ public class BerongSMP {
     public static final DeferredItem<net.necookie.disastersim.item.HazardWandItem> HAZARD_WAND = ITEMS.registerItem("hazard_wand",
             props -> new net.necookie.disastersim.item.HazardWandItem(props.stacksTo(1)));
 
+    // ── Firefighter uniform (armor) ──────────────────────────────────────────
+    // MC 26.1.2 has no ArmorItem class — armor is a plain Item built via
+    // Item.Properties.humanoidArmor(ArmorMaterial, ArmorType), and ArmorMaterial
+    // is a plain record, not a DeferredRegister entry. Rendering is driven by the
+    // resource-only assets/berongsmp/equipment/firefighter_uniform.json file.
+
+    /** Points at assets/berongsmp/equipment/firefighter_uniform.json — not a Java registration. */
+    public static final ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> FIREFIGHTER_UNIFORM_ASSET =
+            ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+                    Identifier.fromNamespaceAndPath(MODID, "firefighter_uniform"));
+
+    /**
+     * Protective training gear, not PVP equipment — defense/toughness deliberately modest
+     * (comparable to leather/chainmail). Reuses vanilla's leather equip sound/repair tag rather
+     * than registering new ones.
+     */
+    public static final net.minecraft.world.item.equipment.ArmorMaterial FIREFIGHTER_MATERIAL =
+            new net.minecraft.world.item.equipment.ArmorMaterial(
+                    15,
+                    java.util.Map.of(
+                            net.minecraft.world.item.equipment.ArmorType.BOOTS, 2,
+                            net.minecraft.world.item.equipment.ArmorType.LEGGINGS, 4,
+                            net.minecraft.world.item.equipment.ArmorType.CHESTPLATE, 6,
+                            net.minecraft.world.item.equipment.ArmorType.HELMET, 2,
+                            net.minecraft.world.item.equipment.ArmorType.BODY, 0),
+                    9,
+                    net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER,
+                    0.0F, 0.0F,
+                    net.minecraft.tags.ItemTags.REPAIRS_LEATHER_ARMOR,
+                    FIREFIGHTER_UNIFORM_ASSET);
+
+    public static final DeferredItem<Item> FIREFIGHTER_HELMET = ITEMS.registerItem("firefighter_helmet",
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.HELMET)));
+    public static final DeferredItem<Item> FIREFIGHTER_COAT = ITEMS.registerItem("firefighter_coat",
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.CHESTPLATE)));
+    public static final DeferredItem<Item> FIREFIGHTER_PANTS = ITEMS.registerItem("firefighter_pants",
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.LEGGINGS)));
+    public static final DeferredItem<Item> FIREFIGHTER_BOOTS = ITEMS.registerItem("firefighter_boots",
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.BOOTS)));
+
     /** Creative tab: simulation tools and interactive blocks. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SIM_TAB = CREATIVE_MODE_TABS.register("sim_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.simulation"))
@@ -358,6 +398,10 @@ public class BerongSMP {
                 output.accept(CO2_EXTINGUISHER.get());
                 output.accept(WET_CHEMICAL_EXTINGUISHER.get());
                 output.accept(HAZARD_WAND.get());
+                output.accept(FIREFIGHTER_HELMET.get());
+                output.accept(FIREFIGHTER_COAT.get());
+                output.accept(FIREFIGHTER_PANTS.get());
+                output.accept(FIREFIGHTER_BOOTS.get());
                 output.accept(COMPUTER_ITEM.get());
                 output.accept(FIRE_ALARM_ITEM.get());
                 output.accept(NPC_SGT_REYES.get());
@@ -601,6 +645,10 @@ public class BerongSMP {
         ALL_ITEM_MAP.put("co2_extinguisher", CO2_EXTINGUISHER);
         ALL_ITEM_MAP.put("wet_chemical_extinguisher", WET_CHEMICAL_EXTINGUISHER);
         ALL_ITEM_MAP.put("hazard_wand", HAZARD_WAND);
+        ALL_ITEM_MAP.put("firefighter_helmet", FIREFIGHTER_HELMET);
+        ALL_ITEM_MAP.put("firefighter_coat", FIREFIGHTER_COAT);
+        ALL_ITEM_MAP.put("firefighter_pants", FIREFIGHTER_PANTS);
+        ALL_ITEM_MAP.put("firefighter_boots", FIREFIGHTER_BOOTS);
         ALL_ITEM_MAP.put("computer", COMPUTER_ITEM);
         ALL_ITEM_MAP.put("fire_alarm", FIRE_ALARM_ITEM);
         ALL_ITEM_MAP.put("npc_sgt_reyes", NPC_SGT_REYES);

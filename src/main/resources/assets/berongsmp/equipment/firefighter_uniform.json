@@ -1,0 +1,6 @@
+{
+  "layers": {
+    "humanoid": [ { "texture": "berongsmp:firefighter_uniform" } ],
+    "humanoid_leggings": [ { "texture": "berongsmp:firefighter_uniform" } ]
+  }
+}
