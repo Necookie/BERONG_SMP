@@ -27,6 +27,7 @@ import net.necookie.disastersim.block.ComputerTableBlock;
 import net.necookie.disastersim.block.DrawersBlock;
 import net.necookie.disastersim.block.FilingCabinetBlock;
 import net.necookie.disastersim.block.FireAlarmBlock;
+import net.necookie.disastersim.block.LightBulbBlock;
 import net.necookie.disastersim.block.LockerBlock;
 import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.ToiletBlock;
@@ -262,6 +263,17 @@ public class BerongSMP {
                     .lightLevel(s -> 5));
     public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
 
+    /** Hanging pendant light bulb — full-brightness (level 15) ceiling fixture; symmetric/no facing. */
+    public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = BLOCKS.registerBlock("light_bulb",
+            LightBulbBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_YELLOW)
+                    .strength(0.3f)
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()
+                    .lightLevel(s -> 15));
+    public static final DeferredItem<BlockItem> LIGHT_BULB_ITEM = ITEMS.registerSimpleBlockItem("light_bulb", LIGHT_BULB);
+
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
@@ -318,6 +330,7 @@ public class BerongSMP {
                 output.accept(SINK_ITEM.get());
                 output.accept(TRASH_CAN_ITEM.get());
                 output.accept(CEILING_FAN_ITEM.get());
+                output.accept(LIGHT_BULB_ITEM.get());
             }).build());
 
     // ── Hazard prop blocks (20 items — populated below as blocks are declared) ──
@@ -547,6 +560,7 @@ public class BerongSMP {
         ALL_ITEM_MAP.put("sink", SINK_ITEM);
         ALL_ITEM_MAP.put("trash_can", TRASH_CAN_ITEM);
         ALL_ITEM_MAP.put("ceiling_fan", CEILING_FAN_ITEM);
+        ALL_ITEM_MAP.put("light_bulb", LIGHT_BULB_ITEM);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 

@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "cap":   "minecraft:block/iron_block",
+    "cord":  "minecraft:block/black_concrete",
+    "glow":  "minecraft:block/sea_lantern",
+    "particle": "minecraft:block/sea_lantern"
+  },
+  "elements": [
+    {
+      "name": "ceiling_cap",
+      "from": [6, 14, 6], "to": [10, 16, 10],
+      "faces": {
+        "north": { "texture": "#cap", "uv": [0, 0, 4, 2] },
+        "south": { "texture": "#cap", "uv": [0, 0, 4, 2] },
+        "east":  { "texture": "#cap", "uv": [0, 0, 4, 2] },
+        "west":  { "texture": "#cap", "uv": [0, 0, 4, 2] },
+        "up":    { "texture": "#cap", "uv": [0, 0, 4, 4] },
+        "down":  { "texture": "#cap", "uv": [0, 0, 4, 4] }
+      }
+    },
+    {
+      "name": "cord",
+      "from": [7, 13, 7], "to": [9, 14, 9],
+      "faces": {
+        "north": { "texture": "#cord", "uv": [0, 0, 2, 1] },
+        "south": { "texture": "#cord", "uv": [0, 0, 2, 1] },
+        "east":  { "texture": "#cord", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#cord", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#cord", "uv": [0, 0, 2, 2] },
+        "down":  { "texture": "#cord", "uv": [0, 0, 2, 2] }
+      }
+    },
+    {
+      "name": "globe",
+      "from": [4, 6, 4], "to": [12, 13, 12],
+      "faces": {
+        "north": { "texture": "#glow", "uv": [0, 0, 8, 7] },
+        "south": { "texture": "#glow", "uv": [0, 0, 8, 7] },
+        "east":  { "texture": "#glow", "uv": [0, 0, 8, 7] },
+        "west":  { "texture": "#glow", "uv": [0, 0, 8, 7] },
+        "up":    { "texture": "#glow", "uv": [0, 0, 8, 8] },
+        "down":  { "texture": "#glow", "uv": [0, 0, 8, 8] }
+      }
+    }
+  ]
+}
