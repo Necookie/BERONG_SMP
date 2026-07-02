@@ -45,6 +45,7 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
     @Override
     protected boolean extinguishAt(ServerLevel level, BlockPos pos, Player user) {
         BlockState state = level.getBlockState(pos);
+        SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
         boolean extinguished = false;
 
         if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
@@ -60,6 +61,7 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                     .setValue(ComputerBlock.LIT, false)
                     .setValue(ComputerBlock.BROKEN, true), 3);
             level.levelEvent(null, 1009, pos, 0);
+            if (hazardSession != null) hazardSession.getHazardTimers().remove(pos);
             extinguished = true;
             if (user instanceof ServerPlayer sp) {
                 sp.sendSystemMessage(Component.literal(
@@ -70,7 +72,6 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                 warnWrongTool(sp, "§c✗ CO2 won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
             }
         } else {
-            SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
             extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
         }
 

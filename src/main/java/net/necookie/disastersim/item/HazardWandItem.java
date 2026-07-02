@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.state.BlockState;
+import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.block.hazard.HazardBlock;
 import net.necookie.disastersim.block.hazard.WoodshopSawdustLayerBlock;
 import net.necookie.disastersim.world.HazardManager;
@@ -58,6 +59,18 @@ public class HazardWandItem extends Item {
             if (!flashed) {
                 player.sendSystemMessage(Component.literal("§eSawdust accumulation set to " + next + "/5."));
             }
+            return InteractionResult.CONSUME;
+        }
+
+        if (state.getBlock() instanceof ComputerBlock) {
+            boolean nowBurning = !state.getValue(ComputerBlock.BURNING);
+            level.setBlock(pos, state
+                    .setValue(ComputerBlock.BURNING, nowBurning)
+                    .setValue(ComputerBlock.LIT, nowBurning), 3);
+            if (!nowBurning && session != null) session.getHazardTimers().remove(pos);
+            player.sendSystemMessage(Component.literal(nowBurning
+                    ? "§c⚠ Computer set to burning."
+                    : "§a✓ Computer fire cleared."));
             return InteractionResult.CONSUME;
         }
 

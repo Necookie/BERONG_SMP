@@ -11,6 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.block.hazard.HazardBlock;
 import net.necookie.disastersim.block.hazard.HazardFacingBlock;
 import net.necookie.disastersim.block.hazard.WoodshopSawdustLayerBlock;
@@ -33,6 +34,8 @@ public final class HazardManager {
     private static final int SCAN_INTERVAL_TICKS = 100;
     private static final int DEVELOP_CHANCE_DENOM = 30;
     private static final int SAWDUST_STEP_CHANCE_DENOM = 20;
+    /** Shorter than the generic 300-tick default — electrical fires escalate fast. */
+    private static final int COMPUTER_FAILURE_DELAY_TICKS = 240;
 
     private HazardManager() {}
 
@@ -45,7 +48,7 @@ public final class HazardManager {
                     BlockPos pos = base.offset(dx, dy, dz);
                     Block block = level.getBlockState(pos).getBlock();
                     if (block instanceof HazardBlock || block instanceof HazardFacingBlock
-                            || block instanceof WoodshopSawdustLayerBlock) {
+                            || block instanceof WoodshopSawdustLayerBlock || block instanceof ComputerBlock) {
                         found.add(pos.immutable());
                     }
                 }
@@ -58,7 +61,24 @@ public final class HazardManager {
     public static void tick(ServerLevel level, SimulationSession session, int ticks) {
         if (session.getHazardPositions().isEmpty()) return;
         if (ticks % SCAN_INTERVAL_TICKS == 0) developHazards(level, session);
+        seedComputerTimers(level, session);
         advanceFailureTimers(level, session);
+    }
+
+    /**
+     * ComputerBlock never goes through {@link #activate}, since it uses its own BURNING property
+     * instead of the shared HAZARDOUS flag and has three independent ignition triggers elsewhere
+     * (flint & steel, session-start, periodic CCS spread). This lazily starts a failure timer the
+     * first tick any of those is observed to have set BURNING=true, so a computer left burning
+     * unattended still escalates like every other hazard prop.
+     */
+    private static void seedComputerTimers(ServerLevel level, SimulationSession session) {
+        for (BlockPos pos : session.getHazardPositions()) {
+            BlockState state = level.getBlockState(pos);
+            if (state.getBlock() instanceof ComputerBlock && state.getValue(ComputerBlock.BURNING)) {
+                session.getHazardTimers().putIfAbsent(pos, 0);
+            }
+        }
     }
 
     private static void developHazards(ServerLevel level, SimulationSession session) {
@@ -135,12 +155,13 @@ public final class HazardManager {
             Map.Entry<BlockPos, Integer> entry = it.next();
             BlockPos pos = entry.getKey();
             BlockState state = level.getBlockState(pos);
-            if (!isHazardous(state)) {
+            if (!isStillActive(state)) {
                 it.remove(); // defused by an extinguisher, or block gone
                 continue;
             }
             int elapsed = entry.getValue() + 1;
-            int delay = state.getBlock() instanceof HazardBlock hb ? hb.failureDelayTicks()
+            int delay = state.getBlock() instanceof ComputerBlock ? COMPUTER_FAILURE_DELAY_TICKS
+                    : state.getBlock() instanceof HazardBlock hb ? hb.failureDelayTicks()
                     : state.getBlock() instanceof HazardFacingBlock hfb ? hfb.failureDelayTicks()
                     : 300;
             if (elapsed >= delay) {
@@ -163,6 +184,15 @@ public final class HazardManager {
             setSawdustLevel(level, session, pos, 5, notifyPlayer);
             return true;
         }
+        if (state.getBlock() instanceof ComputerBlock) {
+            if (!state.getValue(ComputerBlock.BURNING)) {
+                level.setBlock(pos, state.setValue(ComputerBlock.BURNING, true).setValue(ComputerBlock.LIT, true), 3);
+                state = level.getBlockState(pos);
+            }
+            triggerFailure(level, session, pos, state, notifyPlayer);
+            if (session != null) session.getHazardTimers().remove(pos);
+            return true;
+        }
         if (!isHazardCapable(state)) return false;
         triggerFailure(level, session, pos, state, notifyPlayer);
         if (session != null) session.getHazardTimers().remove(pos);
@@ -173,7 +203,10 @@ public final class HazardManager {
                                         BlockState state, ServerPlayer notifyPlayer) {
         Block block = state.getBlock();
         String message = "§c⚠ A neglected hazard just started a fire!";
-        if (block instanceof HazardBlock hb) {
+        if (block instanceof ComputerBlock) {
+            HazardBlock.igniteAdjacent(level, pos, 2);
+            message = "§4⚠ The unattended electrical fire has spread to nearby equipment!";
+        } else if (block instanceof HazardBlock hb) {
             hb.onHazardFailure(level, pos, state);
             message = hb.failureMessage();
         } else if (block instanceof HazardFacingBlock hfb) {
@@ -203,6 +236,12 @@ public final class HazardManager {
     /** True if {@code state} carries the hazardous flag and it's currently set. */
     public static boolean isHazardous(BlockState state) {
         return isHazardCapable(state) && state.getValue(HazardBlock.HAZARDOUS);
+    }
+
+    /** True if a failure timer for {@code state} should keep running — HAZARDOUS, or a burning ComputerBlock. */
+    private static boolean isStillActive(BlockState state) {
+        return isHazardous(state)
+                || (state.getBlock() instanceof ComputerBlock && state.getValue(ComputerBlock.BURNING));
     }
 
     /** Defuses a hazardous prop at {@code pos} (sets hazardous=false, clears its failure timer). */
