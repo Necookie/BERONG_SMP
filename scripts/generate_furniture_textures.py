@@ -310,6 +310,30 @@ def tex_trash_rim_metal():
     save(im, "trash_rim_metal")
 
 
+# ---------------------------------------------------------------------------
+# WhiteboardBlock — glossy dry-erase surface (was: raw concrete reuse)
+# Tray reuses whiteboard_frame_metal.
+# ---------------------------------------------------------------------------
+
+def tex_whiteboard_surface():
+    base = (251, 251, 251)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.03, dark=0.97)
+    # Faint eraser/marker streaks — barely visible, reads as "used" not dirty.
+    rect(im, 2, 4, 9, 4, (240, 240, 240))
+    rect(im, 5, 9, 13, 9, (242, 242, 242))
+    border(im, (225, 225, 225))
+    save(im, "whiteboard_surface")
+
+
+def tex_whiteboard_frame_metal():
+    base = (188, 190, 194)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.12)
+    inset_edges(im, 0, 0, W - 1, H - 1, (222, 224, 227), (120, 122, 125))
+    save(im, "whiteboard_frame_metal")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -319,6 +343,7 @@ ALL = [
     tex_locker_body_painted, tex_locker_door_painted, tex_locker_seam_dark,
     tex_vent_slats_dark, tex_keypad_lock,
     tex_trash_body_charcoal, tex_trash_rim_metal,
+    tex_whiteboard_surface, tex_whiteboard_frame_metal,
 ]
 
 if __name__ == "__main__":
