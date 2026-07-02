@@ -1,34 +1,6 @@
 {
-  "parent": "minecraft:block/block",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "housing": "berongsmp:block/led_housing_white",
-    "glow":    "berongsmp:block/led_diffuser_glow",
-    "particle": "berongsmp:block/led_diffuser_glow"
-  },
-  "elements": [
-    {
-      "name": "diffuser_panel",
-      "from": [1, 14, 1], "to": [15, 15, 15],
-      "faces": {
-        "north": { "texture": "#glow", "uv": [0, 0, 14, 1] },
-        "south": { "texture": "#glow", "uv": [0, 0, 14, 1] },
-        "east":  { "texture": "#glow", "uv": [0, 0, 14, 1] },
-        "west":  { "texture": "#glow", "uv": [0, 0, 14, 1] },
-        "up":    { "texture": "#glow", "uv": [0, 0, 14, 14] },
-        "down":  { "texture": "#glow", "uv": [0, 0, 14, 14] }
-      }
-    },
-    {
-      "name": "housing_bezel",
-      "from": [2, 15, 2], "to": [14, 16, 14],
-      "faces": {
-        "north": { "texture": "#housing", "uv": [0, 0, 12, 1] },
-        "south": { "texture": "#housing", "uv": [0, 0, 12, 1] },
-        "east":  { "texture": "#housing", "uv": [0, 0, 12, 1] },
-        "west":  { "texture": "#housing", "uv": [0, 0, 12, 1] },
-        "up":    { "texture": "#housing", "uv": [0, 0, 12, 12] },
-        "down":  { "texture": "#housing", "uv": [0, 0, 12, 12] }
-      }
-    }
-  ]
+    "all": "berongsmp:block/led_diffuser_glow"
+  }
 }

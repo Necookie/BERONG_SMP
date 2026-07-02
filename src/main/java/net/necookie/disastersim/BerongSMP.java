@@ -263,14 +263,13 @@ public class BerongSMP {
                     .lightLevel(s -> 5));
     public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
 
-    /** Flush-mount LED panel light — cool-white full-brightness (level 15) ceiling fixture; symmetric/no facing. */
+    /** Full-cube glowing ceiling tile — max-brightness (level 15, vanilla cap) light source; tiles seamlessly with no gaps or visible seams when placed edge-to-edge, like a lit ceiling carpet. */
     public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = BLOCKS.registerBlock("light_bulb",
             LightBulbBlock::new,
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
                     .strength(0.3f)
                     .sound(SoundType.GLASS)
-                    .noOcclusion()
                     .lightLevel(s -> 15));
     public static final DeferredItem<BlockItem> LIGHT_BULB_ITEM = ITEMS.registerSimpleBlockItem("light_bulb", LIGHT_BULB);
 
