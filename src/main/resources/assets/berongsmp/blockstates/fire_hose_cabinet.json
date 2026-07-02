@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/fire_hose_cabinet" },
+    "facing=south": { "model": "berongsmp:block/fire_hose_cabinet", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/fire_hose_cabinet", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/fire_hose_cabinet", "y": 270 }
+  }
+}

@@ -32,6 +32,7 @@ import net.necookie.disastersim.block.LockerBlock;
 import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.ToiletBlock;
 import net.necookie.disastersim.block.TrashCanBlock;
+import net.necookie.disastersim.block.FireHoseCabinetBlock;
 import net.necookie.disastersim.block.WhiteboardBlock;
 import net.necookie.disastersim.block.hazard.*;
 import net.minecraft.world.level.storage.LevelData;
@@ -206,6 +207,16 @@ public class BerongSMP {
                     .noOcclusion());
     public static final DeferredItem<BlockItem> WHITEBOARD_ITEM = ITEMS.registerSimpleBlockItem("whiteboard", WHITEBOARD);
 
+    /** Wall-mounted fire hose reel cabinet — decorative safety-equipment prop, not a hazard. */
+    public static final DeferredBlock<FireHoseCabinetBlock> FIRE_HOSE_CABINET = BLOCKS.registerBlock("fire_hose_cabinet",
+            FireHoseCabinetBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+                    .strength(1.0f, 4.0f)
+                    .sound(SoundType.METAL)
+                    .noOcclusion());
+    public static final DeferredItem<BlockItem> FIRE_HOSE_CABINET_ITEM = ITEMS.registerSimpleBlockItem("fire_hose_cabinet", FIRE_HOSE_CABINET);
+
     /** Toilet block — ceramic basin+tank; right-click to flush. */
     public static final DeferredBlock<ToiletBlock> TOILET = BLOCKS.registerBlock("toilet",
             ToiletBlock::new,
@@ -367,6 +378,7 @@ public class BerongSMP {
             .icon(() -> CHAIR_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(WHITEBOARD_ITEM.get());
+                output.accept(FIRE_HOSE_CABINET_ITEM.get());
                 output.accept(BULLETIN_BOARD_ITEM.get());
                 output.accept(COMPUTER_TABLE_ITEM.get());
                 output.accept(CHAIR_ITEM.get());
@@ -601,6 +613,7 @@ public class BerongSMP {
         ALL_ITEM_MAP.put("npc_sir_bookmark", NPC_SIR_BOOKMARK);
         ALL_ITEM_MAP.put("npc_student", NPC_STUDENT);
         ALL_ITEM_MAP.put("whiteboard", WHITEBOARD_ITEM);
+        ALL_ITEM_MAP.put("fire_hose_cabinet", FIRE_HOSE_CABINET_ITEM);
         ALL_ITEM_MAP.put("bulletin_board", BULLETIN_BOARD_ITEM);
         ALL_ITEM_MAP.put("computer_table", COMPUTER_TABLE_ITEM);
         ALL_ITEM_MAP.put("chair", CHAIR_ITEM);

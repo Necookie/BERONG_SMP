@@ -101,6 +101,32 @@ def mesh_weave(im, x0, y0, x1, y1, base, dark):
                 set_px(im, x, y, base)
 
 
+def square_ring(im, cx, cy, r, color):
+    """Draws the outline of a square centered at (cx, cy) with half-width r — used to fake a
+    coiled loop of hose/rope viewed head-on (several concentric rings, decreasing r)."""
+    x0, y0, x1, y1 = cx - r, cy - r, cx + r, cy + r
+    rect(im, x0, y0, x1, y0, color)
+    rect(im, x0, y1, x1, y1, color)
+    rect(im, x0, y0, x0, y1, color)
+    rect(im, x1, y0, x1, y1, color)
+
+
+def crack_lines(im, x0, y0, x1, y1, color, count=4):
+    """Draws a few short jagged diagonal lines — for a cracked-glass look. No existing helper
+    produces linear cracks (border/inset_edges/speckle/mesh_weave are all axis-aligned or noise)."""
+    for _ in range(count):
+        x = random.randint(x0, x1)
+        y = random.randint(y0, y1)
+        dx = random.choice([-1, 1])
+        for _ in range(random.randint(3, 6)):
+            set_px(im, x, y, color)
+            if random.random() < 0.6:
+                x += dx
+            y += 1
+            if random.random() < 0.3:
+                dx = -dx
+
+
 def save(im, name):
     im.save(os.path.join(OUT, f"{name}.png"))
 
@@ -427,6 +453,37 @@ def tex_fan_blade_matte():
     save(im, "fan_blade_matte")
 
 
+# ---------------------------------------------------------------------------
+# FireHoseCabinetBlock — wall-mounted hose reel cabinet (new furniture prop,
+# not a hazard — inspired by, not copied from, a reference photo of a red
+# metal cabinet with a cracked glass door). Reuses handle_bar_metal for the
+# latch, so only 2 new textures are needed here.
+# ---------------------------------------------------------------------------
+
+def tex_hose_cabinet_body_red():
+    base = (168, 30, 28)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.8)
+    inset_edges(im, 0, 0, W - 1, H - 1, (210, 60, 55), (90, 12, 10))
+    border(im, (70, 10, 8))
+    save(im, "hose_cabinet_body_red")
+
+
+def tex_fire_hose_window():
+    base = (188, 208, 205)  # faintly tinted glass
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.15, dark=0.85)
+    hose = (235, 235, 228)
+    hose_shadow = (200, 198, 188)
+    for r in (6, 5, 4, 3, 2, 1):
+        square_ring(im, 8, 8, r, hose if r % 2 == 0 else hose_shadow)
+    crack_lines(im, 1, 1, 14, 14, (255, 255, 255), count=5)
+    crack_lines(im, 1, 1, 14, 14, (140, 150, 148), count=3)
+    inset_edges(im, 0, 0, W - 1, H - 1, (220, 230, 228), (90, 100, 98))
+    border(im, (60, 70, 68))
+    save(im, "fire_hose_window")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -441,6 +498,7 @@ ALL = [
     tex_pin_metal_red, tex_pin_metal_teal,
     tex_ceramic_glossy_white, tex_fixture_chrome,
     tex_fan_housing_white, tex_fan_blade_matte,
+    tex_hose_cabinet_body_red, tex_fire_hose_window,
 ]
 
 if __name__ == "__main__":

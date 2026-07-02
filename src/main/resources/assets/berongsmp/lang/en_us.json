@@ -21,6 +21,7 @@
   "berongsmp.configuration.magicNumber": "Magic Number",
 
   "block.berongsmp.whiteboard":      "Classroom Whiteboard",
+  "block.berongsmp.fire_hose_cabinet": "Fire Hose Cabinet",
   "block.berongsmp.toilet":          "Toilet",
   "block.berongsmp.sink":            "Sink",
   "block.berongsmp.drawers":         "Office Drawers",
