@@ -24,7 +24,6 @@ public class ClientEvents {
             return;
         }
 
-        // Future client-side logic (e.g., custom input handling or state monitoring) 
-        // can be implemented here.
+        KeyMappings.pollDropAndRoll();
     }
 }

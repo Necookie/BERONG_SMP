@@ -357,6 +357,7 @@ public class SimulationManager {
         net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
             TutorialManager.tick(server.overworld());
+            net.necookie.disastersim.player.DropAndRollManager.tick(server.overworld());
         }
 
         // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.

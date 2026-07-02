@@ -2,6 +2,7 @@ package net.necookie.disastersim;
 
 import net.necookie.disastersim.client.SimulationHud;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -22,13 +23,18 @@ public class BerongSMPClient {
 
     /**
      * Constructor for the client-side mod class.
-     * Registers the configuration screen factory.
-     * 
-     * @param container The mod container for BerongSMP.
+     * Registers the configuration screen factory and client-only keybindings.
+     *
+     * @param modEventBus The mod event bus, needed here (rather than in the common BerongSMP
+     *                    constructor) so KeyMappings — which holds a real client-only KeyMapping
+     *                    field — is only ever registered on the physical client.
+     * @param container   The mod container for BerongSMP.
      */
-    public BerongSMPClient(ModContainer container) {
+    public BerongSMPClient(IEventBus modEventBus, ModContainer container) {
         // Register a factory to create the configuration screen for this mod
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+
+        modEventBus.register(net.necookie.disastersim.client.KeyMappings.class);
     }
 
     /**

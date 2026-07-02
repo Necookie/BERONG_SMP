@@ -630,13 +630,17 @@ public class BerongSMP {
         // on the mod bus — it must be registered here so NeoForge picks it up.
         modEventBus.register(net.necookie.disastersim.network.SimulationStatusPayload.class);
         modEventBus.register(net.necookie.disastersim.network.TutorialStatusPayload.class);
+        modEventBus.register(net.necookie.disastersim.network.DropAndRollPayload.class);
 
         // BerongSMPClient is annotated @Mod(dist = CLIENT) so it only loads on the
         // physical client, keeping server JARs free of client-only Minecraft classes.
         modEventBus.register(net.necookie.disastersim.BerongSMPClient.class);
 
-        // KeyMappings registers custom keybindings during the client setup phase.
-        modEventBus.register(net.necookie.disastersim.client.KeyMappings.class);
+        // NOTE: KeyMappings is intentionally NOT registered here. It holds a real KeyMapping
+        // field, a client-only Minecraft type — registering it from this common constructor
+        // (which runs on both distributions) would crash a dedicated server. It's registered
+        // from BerongSMPClient's own constructor instead, which is dist-gated by @Mod(dist=CLIENT)
+        // and therefore never even loaded on a dedicated server.
 
         // Register 'this' on the global runtime bus so @SubscribeEvent methods in this
         // class (e.g., onServerStarting) receive game events.
