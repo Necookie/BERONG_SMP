@@ -1,8 +1,23 @@
 {
   "variants": {
-    "facing=north": { "model": "berongsmp:block/whiteboard" },
-    "facing=south": { "model": "berongsmp:block/whiteboard", "y": 180 },
-    "facing=east":  { "model": "berongsmp:block/whiteboard", "y": 90 },
-    "facing=west":  { "model": "berongsmp:block/whiteboard", "y": 270 }
+    "facing=north,connected_up=false,connected_down=false": { "model": "berongsmp:block/whiteboard" },
+    "facing=north,connected_up=true,connected_down=false":  { "model": "berongsmp:block/whiteboard_bottom" },
+    "facing=north,connected_up=false,connected_down=true":  { "model": "berongsmp:block/whiteboard_top" },
+    "facing=north,connected_up=true,connected_down=true":   { "model": "berongsmp:block/whiteboard_middle" },
+
+    "facing=south,connected_up=false,connected_down=false": { "model": "berongsmp:block/whiteboard", "y": 180 },
+    "facing=south,connected_up=true,connected_down=false":  { "model": "berongsmp:block/whiteboard_bottom", "y": 180 },
+    "facing=south,connected_up=false,connected_down=true":  { "model": "berongsmp:block/whiteboard_top", "y": 180 },
+    "facing=south,connected_up=true,connected_down=true":   { "model": "berongsmp:block/whiteboard_middle", "y": 180 },
+
+    "facing=east,connected_up=false,connected_down=false": { "model": "berongsmp:block/whiteboard", "y": 90 },
+    "facing=east,connected_up=true,connected_down=false":  { "model": "berongsmp:block/whiteboard_bottom", "y": 90 },
+    "facing=east,connected_up=false,connected_down=true":  { "model": "berongsmp:block/whiteboard_top", "y": 90 },
+    "facing=east,connected_up=true,connected_down=true":   { "model": "berongsmp:block/whiteboard_middle", "y": 90 },
+
+    "facing=west,connected_up=false,connected_down=false": { "model": "berongsmp:block/whiteboard", "y": 270 },
+    "facing=west,connected_up=true,connected_down=false":  { "model": "berongsmp:block/whiteboard_bottom", "y": 270 },
+    "facing=west,connected_up=false,connected_down=true":  { "model": "berongsmp:block/whiteboard_top", "y": 270 },
+    "facing=west,connected_up=true,connected_down=true":   { "model": "berongsmp:block/whiteboard_middle", "y": 270 }
   }
 }

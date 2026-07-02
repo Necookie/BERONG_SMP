@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "board":    "berongsmp:block/whiteboard_surface",
+    "frame":    "berongsmp:block/whiteboard_frame_metal",
+    "particle": "berongsmp:block/whiteboard_frame_metal"
+  },
+  "elements": [
+    {
+      "name": "board_body",
+      "from": [0, 0, 13], "to": [16, 16, 16],
+      "faces": {
+        "north": { "texture": "#board", "uv": [0, 0, 16, 16] },
+        "south": { "texture": "#frame", "uv": [0, 0, 16, 16] },
+        "east":  { "texture": "#frame", "uv": [0, 0, 3, 16] },
+        "west":  { "texture": "#frame", "uv": [0, 0, 3, 16] },
+        "up":    { "texture": "#frame", "uv": [0, 0, 16, 3] },
+        "down":  { "texture": "#frame", "uv": [0, 0, 16, 3] }
+      }
+    }
+  ]
+}
