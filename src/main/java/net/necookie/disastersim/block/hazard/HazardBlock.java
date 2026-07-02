@@ -54,7 +54,7 @@ public abstract class HazardBlock extends Block {
     }
 
     /** Lights up to {@code maxBlocks} adjacent air blocks on fire. */
-    protected static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
+    public static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
         int lit = 0;
         for (Direction dir : Direction.values()) {
             if (lit >= maxBlocks) break;
@@ -67,7 +67,7 @@ public abstract class HazardBlock extends Block {
     }
 
     /** Lights up to {@code maxBlocks} air blocks within a horizontal {@code radius} — for explosive failures. */
-    protected static void igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
+    public static void igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
         int lit = 0;
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
