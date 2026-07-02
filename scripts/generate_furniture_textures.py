@@ -289,6 +289,27 @@ def tex_keypad_lock():
     save(im, "keypad_lock")
 
 
+# ---------------------------------------------------------------------------
+# TrashCanBlock — matte pedal-bin look (was: raw concrete reuse)
+# Reuses handle_bar_black (from FilingCabinetBlock) for the dark interior.
+# ---------------------------------------------------------------------------
+
+def tex_trash_body_charcoal():
+    base = (48, 50, 53)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 0, 14, 15, base, light=1.2, dark=0.85)
+    inset_edges(im, 0, 0, W - 1, H - 1, (80, 82, 86), (18, 19, 21))
+    save(im, "trash_body_charcoal")
+
+
+def tex_trash_rim_metal():
+    base = (150, 152, 156)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.15)
+    inset_edges(im, 0, 0, W - 1, H - 1, (195, 197, 200), (95, 97, 100))
+    save(im, "trash_rim_metal")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -297,6 +318,7 @@ ALL = [
     tex_label_holder_white,
     tex_locker_body_painted, tex_locker_door_painted, tex_locker_seam_dark,
     tex_vent_slats_dark, tex_keypad_lock,
+    tex_trash_body_charcoal, tex_trash_rim_metal,
 ]
 
 if __name__ == "__main__":

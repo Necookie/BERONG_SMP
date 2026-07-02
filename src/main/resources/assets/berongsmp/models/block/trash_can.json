@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":   "minecraft:block/light_gray_concrete",
-    "rim":    "minecraft:block/gray_concrete",
-    "bottom": "minecraft:block/gray_concrete",
-    "inner":  "minecraft:block/black_concrete",
-    "particle": "minecraft:block/gray_concrete"
+    "body":   "berongsmp:block/trash_body_charcoal",
+    "rim":    "berongsmp:block/trash_rim_metal",
+    "bottom": "berongsmp:block/trash_body_charcoal",
+    "inner":  "berongsmp:block/handle_bar_black",
+    "particle": "berongsmp:block/trash_body_charcoal"
   },
   "elements": [
     {
