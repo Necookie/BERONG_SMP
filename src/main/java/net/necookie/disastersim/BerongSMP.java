@@ -169,7 +169,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
                     .strength(0.5f, 2.0f)
-                    .sound(SoundType.STONE));
+                    .sound(SoundType.STONE)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> WHITEBOARD_ITEM = ITEMS.registerSimpleBlockItem("whiteboard", WHITEBOARD);
 
     /** Toilet block — ceramic basin+tank; right-click to flush. */
@@ -178,7 +179,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
                     .strength(1.0f, 4.0f)
-                    .sound(SoundType.STONE));
+                    .sound(SoundType.STONE)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> TOILET_ITEM = ITEMS.registerSimpleBlockItem("toilet", TOILET);
 
     /** Wall-mounted sink with iron faucet and handles; right-click for water sound. */
@@ -187,7 +189,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
                     .strength(1.0f, 4.0f)
-                    .sound(SoundType.STONE));
+                    .sound(SoundType.STONE)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> SINK_ITEM = ITEMS.registerSimpleBlockItem("sink", SINK);
 
     /** Office chest-of-drawers — dark oak body with birch drawer fronts and iron handles. */
@@ -196,7 +199,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                     .strength(1.5f, 3.0f)
-                    .sound(SoundType.WOOD));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> DRAWERS_ITEM = ITEMS.registerSimpleBlockItem("drawers", DRAWERS);
 
     /** Flammable oak computer desk with 4 legs and a back cable-management panel. */
@@ -205,7 +209,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                     .strength(1.5f, 3.0f)
-                    .sound(SoundType.WOOD));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> COMPUTER_TABLE_ITEM = ITEMS.registerSimpleBlockItem("computer_table", COMPUTER_TABLE);
 
     /** Dark oak classroom/office chair with gray cushion seat and backrest. */
@@ -214,7 +219,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                     .strength(1.0f, 2.0f)
-                    .sound(SoundType.WOOD));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> CHAIR_ITEM = ITEMS.registerSimpleBlockItem("chair", CHAIR);
 
     /** Tall metal filing cabinet with 2 drawers, label slots, and pull handles. */
@@ -223,7 +229,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                     .strength(2.0f, 6.0f)
-                    .sound(SoundType.METAL));
+                    .sound(SoundType.METAL)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> FILING_CABINET_ITEM = ITEMS.registerSimpleBlockItem("filing_cabinet", FILING_CABINET);
 
     /** Tall metal school/office locker with vents, door seam, handle, and gold lock. */
@@ -232,7 +239,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                     .strength(2.0f, 6.0f)
-                    .sound(SoundType.METAL));
+                    .sound(SoundType.METAL)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> LOCKER_ITEM = ITEMS.registerSimpleBlockItem("locker", LOCKER);
 
     /** Small cylindrical trash can — no facing, symmetric, open-top. */
@@ -241,7 +249,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                     .strength(0.5f, 2.0f)
-                    .sound(SoundType.METAL));
+                    .sound(SoundType.METAL)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> TRASH_CAN_ITEM = ITEMS.registerSimpleBlockItem("trash_can", TRASH_CAN);
 
     /** Wall-mounted cork bulletin board with pinned paper slips. */
@@ -250,7 +259,8 @@ public class BerongSMP {
             () -> Block.Properties.of()
                     .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
                     .strength(0.5f, 2.0f)
-                    .sound(SoundType.WOOD));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
     public static final DeferredItem<BlockItem> BULLETIN_BOARD_ITEM = ITEMS.registerSimpleBlockItem("bulletin_board", BULLETIN_BOARD);
 
     /** Ceiling fan — motor housing + 4 blades + glowstone light bowl; symmetric/no facing. */
@@ -260,6 +270,7 @@ public class BerongSMP {
                     .mapColor(net.minecraft.world.level.material.MapColor.METAL)
                     .strength(0.5f, 2.0f)
                     .sound(SoundType.METAL)
+                    .noOcclusion()
                     .lightLevel(s -> 5));
     public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
 
