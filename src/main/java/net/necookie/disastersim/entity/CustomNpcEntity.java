@@ -54,9 +54,15 @@ public class CustomNpcEntity extends Mob {
     /** Max up/down head pitch in degrees. */
     private static final float MAX_HEAD_PITCH = 40.0f;
 
+    /** Speed used for the occasional tiny idle step on NpcTypes with minimalWander=true. */
+    private static final double WANDER_SPEED = 0.35;
+
     @Override
     protected void registerGoals() {
-        // No vanilla AI — the gaze is driven manually in tick() so the NPC stays put.
+        // No vanilla AI beyond this — the gaze is driven manually in tick(). This goal only
+        // ever runs for NpcTypes with minimalWander=true, since setNpcType() is the sole place
+        // that flips setNoAi(false) for those, and noAi mobs never tick their goal selector.
+        this.goalSelector.addGoal(1, new MinimalWanderGoal(this, WANDER_SPEED));
     }
 
     @Override
@@ -105,6 +111,11 @@ public class CustomNpcEntity extends Mob {
         this.entityData.set(DATA_NPC_TYPE, type.id);
         this.setCustomName(Component.literal(type.displayName));
         this.setCustomNameVisible(true);
+        this.setNoAi(!type.minimalWander);
+        var movementSpeed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (movementSpeed != null) {
+            movementSpeed.setBaseValue(type.minimalWander ? 0.05 : 0.0);
+        }
     }
 
     @Override
