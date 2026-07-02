@@ -202,10 +202,50 @@ def tex_handle_bar_metal():
     save(im, "handle_bar_metal")
 
 
+# ---------------------------------------------------------------------------
+# FilingCabinetBlock — graphite metal cabinet (was: raw iron_block reuse)
+# ---------------------------------------------------------------------------
+
+def tex_cabinet_body_graphite():
+    base = (58, 60, 63)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (95, 97, 101), (18, 19, 21))
+    save(im, "cabinet_body_graphite")
+
+
+def tex_drawer_face_graphite():
+    base = (78, 81, 85)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.88)
+    rect(im, 1, 1, 14, 1, scale(base, 1.35))  # top seam highlight
+    inset_edges(im, 0, 0, W - 1, H - 1, (110, 113, 117), (30, 31, 34))
+    border(im, (22, 23, 25))
+    save(im, "drawer_face_graphite")
+
+
+def tex_handle_bar_black():
+    base = (26, 27, 29)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.4, dark=0.8)
+    inset_edges(im, 0, 0, W - 1, H - 1, (55, 56, 59), (5, 5, 6))
+    save(im, "handle_bar_black")
+
+
+def tex_label_holder_white():
+    base = (240, 240, 238)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.05, dark=0.95)
+    border(im, (150, 150, 148))
+    save(im, "label_holder_white")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
     tex_cabinet_body_painted, tex_drawer_front_painted, tex_handle_bar_metal,
+    tex_cabinet_body_graphite, tex_drawer_face_graphite, tex_handle_bar_black,
+    tex_label_holder_white,
 ]
 
 if __name__ == "__main__":

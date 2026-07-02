@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "metal":   "minecraft:block/iron_block",
-    "face":    "minecraft:block/light_gray_concrete",
-    "handle":  "minecraft:block/gray_concrete",
-    "label":   "minecraft:block/white_concrete",
-    "particle": "minecraft:block/iron_block"
+    "metal":   "berongsmp:block/cabinet_body_graphite",
+    "face":    "berongsmp:block/drawer_face_graphite",
+    "handle":  "berongsmp:block/handle_bar_black",
+    "label":   "berongsmp:block/label_holder_white",
+    "particle": "berongsmp:block/cabinet_body_graphite"
   },
   "elements": [
     {
