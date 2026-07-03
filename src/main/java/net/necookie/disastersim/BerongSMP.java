@@ -842,6 +842,9 @@ public class BerongSMP {
     public void onServerStarted(ServerStartedEvent event) {
         // Entity chunk storage is fully loaded by now — safe to find and remove old NPCs
         TutorialLobbyManager.initNpcs(event.getServer().overworld());
+        // Also bakes in its own NPCs/armor stands from the schematic's Entities tag — same
+        // entity-storage-must-be-ready requirement as the call above.
+        net.necookie.disastersim.world.NewTutBuildingManager.place(event.getServer().overworld());
     }
 
     @SubscribeEvent
