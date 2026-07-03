@@ -157,19 +157,34 @@ A second, **fully independent** tutorial — "the Academy" — lives in `new_tut
 Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-mark WASD walk) → MAZE (reach the
   next zone) → JUMP (reach the next zone) → GOSTOP_STAGE/GOSTOP_RUN (Officer Cruz calls GO/STOP on
   a random 3-6s cadence; moving past Config.ACADEMY_GOSTOP_GRACE_TICKS after a STOP call warps the
-  player back to the staging line and counts a movement mistake) → DONE
+  player back to the staging line and counts a movement mistake) → DONE. A single Cruz
+  (`CruzRoomManager.findCruz`, 3-tier fallback: cached direct ref → UUID lookup → bounded AABB scan
+  tie-broken by proximity) physically escorts the player through Briefing/Maze/Jump via
+  `CustomNpcEntity.setEscorting(true)` + a periodic `getNavigation().moveTo(...)` re-issued every
+  ~15 ticks toward the same objective `Vec3` the compass arrow already points at. She waits at the
+  Go/Stop staging line rather than entering the tunnel — her fixed 0.6×1.8 hitbox can't crouch to
+  fit the low slabs the way a player can — and calls GO/STOP/finish from there as a "shout"
+  (`sendPrompt` only, no movement). A leftover duplicate Cruz baked into the schematic at the old
+  two-NPC handoff spot (~(-123.5,-33,49.5)) is discarded every placement by
+  `NewTutBuildingManager.discardDuplicateCruz` — permanent fixup, not a one-time migration, since
+  `SchemLoader` respawns every schematic entity fresh on each server start.
 
 Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (inventory contains all 3
-  extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO — ReyesRoomManager places
-  3 hazard props (ArchiveBoxStack/Class A, ComputerBlock/electrical, UnattendedGreasePan/kitchen)
-  and forces each hazardous/burning via HazardManager.forceFailure(level, null, pos, null), the
-  same session-nullable entry point HazardWandItem already uses. Correct-tool attribution watches
-  each position's active-hazard flag for a true→false transition while the player is nearby (only
-  the 5 kitchen props get an automatic wrong-tool warning today, so this is tracked independently
-  for scoring). Defusing the kitchen prop ignites the player
-  (player.setRemainingFireTicks(Config.ACADEMY_IGNITE_DEMO_TICKS)) to force a scripted drop-and-roll
-  beat, polling the already-public DropAndRollManager.isDropped(uuid) — zero new drop-and-roll
-  logic. → DONE once all 3 props are handled and the ignite window resolves.
+  extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO, now taught **sequentially**
+  one hazard at a time in a fixed order (`ReyesRoomManager.HAZARDS`: Class A archive boxes →
+  electrical computer → kitchen grease pan). Entering a hazard's turn plays its
+  `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
+  through the shared dialogue sequencer; only once that finishes does `igniteHazard` actually call
+  `HazardManager.forceFailure(level, null, pos, null)` (the same session-nullable entry point
+  `HazardWandItem` uses). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
+  re-ignites the same prop immediately, so the player must get it right before the sequence
+  advances. After all 3, the scripted ignite-demo fires: the player is set alight and
+  `tickIgniteDemo` continuously refreshes their fire ticks every tick
+  (`Math.max(current, FIRE_REFRESH_TICKS)`) so the fire never burns out on its own — it only clears
+  the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player actually performed
+  drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a safety-cap timeout for a
+  player who never rolls, not the real burn duration. → DONE once all 3 hazards are correctly
+  defused and the ignite window resolves.
 
 Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
   TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
@@ -187,19 +202,33 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. No static dialogue en
   certified, no further gating changes. Fail → resets the player's entire AcademyProgress (phases
   + scoring counters, clean slate) and teleports them back to Room 1's briefing zone.
 
-World-space waypoint arrows ("follow the green floor arrows", said literally in several lines):
-  AcademyVisuals.spawnWaypointArrow draws a dashed green particle trail + chevron toward the next
-  objective, used within Room 1's phases and for each room's "go find the next NPC" nudge once
-  that room is DONE and the next hasn't started yet.
+World-space navigation, "compass" style ("follow the green floor arrows", said literally in
+  several lines): `AcademyVisuals.spawnCompassArrow` floats a small 7-point arrowhead ~1.8 blocks in
+  front of the player, continuously re-oriented toward the current objective — called **every
+  tick** (20Hz) for smooth rotation rather than the old 10-tick dashed-trail version, from every
+  room's "go find the next NPC"/in-phase nudge. Cruz's Room 1 also calls `highlightBlocks` on the
+  4 unhit WASD green marks every 5 ticks so they're actually visible, not just invisible trigger
+  zones, pairing the glow with the compass arrow pointing at the nearest unhit one.
+
+Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click starts a phase's
+  whole line sequence via `AcademyManager.startOrAdvanceDialogue`; each line auto-advances after a
+  word-count-based reading-pace delay (`tickDialogues`, clamped ~3-10s), and clicking again while a
+  sequence plays skips immediately to the next line. `AcademyManager.cancelDialogue` drops a
+  player's in-flight session without firing its `onComplete` — used at the two spots that mutate
+  phase state out from under a possibly-active sequence (Cruz's Go/Stop violation revert, Morfe's
+  fail-path reset) — plus a `PlayerEvent.PlayerLoggedOutEvent` hook that cancels dialogue and clears
+  every room manager's transient per-player maps.
 ```
 
 **Key classes**: `AcademyManager` (the single `PlayerInteractEvent.EntityInteract` handler for
 `CustomNpcEntity` — none existed anywhere else in the mod; dispatches by `NpcType`, ignores the
-schematic's 5 other decorative NPCs) + shared `stepDialogue`/`sendPrompt`/`playNpcSound` helpers;
-`AcademyProgress`/`AcademySavedData` (per-player persisted state — 4 phases + Capt. Morfe's
-scoring inputs, `SavedData`+`Codec` pattern-cloned from `TutorialSavedData` but storing a compound
-record instead of one enum; all mutation goes through `AcademySavedData.mutate` so `setDirty()` is
-never forgotten); `AcademyDialogue` (Cruz/Reyes/Santos static line content, transcribed from
+schematic's 5 other decorative NPCs) + the shared dialogue sequencer
+(`startOrAdvanceDialogue`/`tickDialogues`/`cancelDialogue`, see above) and
+`sendPrompt`/`playNpcSound` helpers; `AcademyProgress`/`AcademySavedData` (per-player persisted
+state — 4 phases + Capt. Morfe's scoring inputs, `SavedData`+`Codec` pattern-cloned from
+`TutorialSavedData` but storing a compound record instead of one enum; all mutation goes through
+`AcademySavedData.mutate` so `setDirty()` is never forgotten); `AcademyDialogue` (Cruz/Reyes/Santos
+static line content plus `REYES_HAZARD_LINES` per-hazard explanations, transcribed from
 `docs/new_tutorial_script.md`); `AcademyStatusPayload`/`AcademyHud` (own caption channel,
 pattern-cloned from `TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing);
 `room1.CruzRoomManager`/`room2.ReyesRoomManager`/`room3.SantosRoomManager`/`room4.MorfeRoomManager`
@@ -224,7 +253,7 @@ actual placed entity data.
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
 | `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), places blocks, and spawns entities from the `Entities` tag — including modded mobs like `berongsmp:custom_npc`, not just vanilla decoration entities. Any pre-existing non-player entity in the placement footprint is discarded before re-placing to prevent duplicates (broadened from an item-frame-only check once schematics started baking in mobs/armor stands too — session restores never touch players, since they're explicitly excluded). **Item frame placement invariant (MC 26.x):** Sponge v3 top-level `Pos` = the entity's own AIR block (not the wall). `Data.Facing` = OUTWARD direction (frame face toward viewer, no `.getOpposite()` needed). `ItemFrame(level, pos, direction)` takes the entity's own block as `pos`; the wall is `pos.relative(direction.getOpposite())` — handled by a dedicated `spawnItemFrame` path since item frames need this wall-relative math the generic path doesn't do. **Generic entity deserialization gotcha (found while loading `new_tut_building1.0.schem`):** Sponge v3 nests an entity's *real* Minecraft save data under a `Data` sub-compound — `Id`/`Pos` are Sponge-level siblings, not part of it. Deserializing the raw entity tag directly (as this used to) left every actual field invisible to `EntityType.create`, so `CustomNpcEntity` silently read a missing `NpcType` and fell back to its default role for every copy. Fixed by merging `Data` into a fresh root before deserializing. That same root also needs `block_pos` (used by `BlockAttachedEntity` subclasses like `Painting`, checked with a 16-block sanity radius against the entity's real position) and any `facing`/`Facing` byte re-derived/rotated — left stale, `block_pos` still pointed at the original copy location, failed the sanity check, and vanilla logged "Block-attached entity at invalid position" while the entity failed to attach. |
-| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 11 `berongsmp:custom_npc` NPCs, 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. |
+| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 11 `berongsmp:custom_npc` NPCs, 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. `discardDuplicateCruz` runs after every successful placement, discarding any `OFFICER_CRUZ` found near the old two-NPC-handoff spot (`DUPLICATE_CRUZ_BOUNDS`, ~(-123.5,-33,49.5)) baked into the schematic — a permanent per-placement fixup (not a one-time migration), since entities are discarded+respawned fresh on every server start. |
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `DropAndRollPayload` | Client→server packet (channel v3) — the mod's first serverbound payload; empty record, `StreamCodec.unit(...)`, sent when the player presses the "Drop and Roll" key. Handler calls `DropAndRollManager.onDropAndRollRequest`. |
 | `DropAndRollManager` | Static per-UUID transient state (`droppedTicksRemaining`, same idiom as `TutorialManager.holdOnTimers`) driving the "stop, drop, and roll" fire response: reduces the requester's remaining fire ticks by 30/press if on fire, opens/extends a 100-tick "dropped" window during which `MobEffects.SLOWNESS` is continuously refreshed (crawl stand-in). `tick()` runs from `SimulationManager.onServerTick`. |
@@ -365,7 +394,7 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
 | `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
 | `bfpAdminPin` | `""` | PIN for `/bfp login`. Empty = PIN login disabled (OP-only access). A WARN is logged at startup if left blank. |
-| `academyIgniteDemoTicks` | 100 | Ticks the player is on fire for during Sgt. Reyes's scripted drop-and-roll demo (5 s, matching `DropAndRollManager`'s own dropped-window size) |
+| `academyIgniteDemoTicks` | 200 | Safety-cap timeout (10 s) for Sgt. Reyes's scripted drop-and-roll demo — the fire itself stays lit until the player actually rolls; this only forces it out if they never do |
 | `academyGoStopGraceTicks` | 20 | Grace period after Officer Cruz calls STOP before movement counts as a Go/Stop violation (1 s) |
 | `academyPassThreshold` | 70 | Minimum score (0–100) Capt. Morfe requires to certify a player after the Academy |
 

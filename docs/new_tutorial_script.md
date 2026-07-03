@@ -27,22 +27,27 @@ flowchart TD
     R1B -->|4 green marks reached| R1M[Phase 2: Maze Path]
     R1M -->|maze exit reached| R1J[Phase 3: Jump Zone]
     R1J -->|obstacles cleared| R1G1[Phase 4a: Go/Stop Staging]
-    R1G1 -->|GO/STOP loop, Sgt Cruz calls it| R1G2{Moved during STOP?}
+    R1G1 -->|GO/STOP loop, Cruz calls it| R1G2{Moved during STOP?}
     R1G2 -->|Yes, after grace period| R1G1
-    R1G2 -->|No — compliant| R1F[Phase 4b: Tunnel Finish<br/>2nd Cruz NPC]
+    R1G2 -->|No — compliant| R1F[Phase 4b: Tunnel Finish<br/>same Cruz shouts from<br/>the staging line, no 2nd NPC]
     R1F -->|"Follow the green arrows"| R2T
 
     R1B -. idle too long .-> R1B
     R1M -. wrong turn / stuck .-> R1M
     R1J -. missed the jump .-> R1J
 
-    R2T[Room 2 · Reyes<br/>Phase 1: Tool Selection Wall] -->|all 3 extinguishers collected| R2L[Phase 2: Live Fire Demo]
-    R2L -->|Class A defused correctly| R2L
-    R2L -->|Class C/electrical defused correctly| R2L
-    R2L -->|Class F/K kitchen defused correctly| R2Ignite[Scripted ignition:<br/>player catches fire]
+    Note1[/One Cruz escorts the whole room<br/>via setEscorting + moveTo/]
+    Note1 -.-> R1B
+
+    R2T[Room 2 · Reyes<br/>Phase 1: Tool Selection Wall] -->|all 3 extinguishers collected| R2A[Explain + ignite:<br/>Class A boxes]
+    R2A -->|correct: red ABC| R2C[Explain + ignite:<br/>Class C computer]
+    R2C -->|correct: green CO2| R2K[Explain + ignite:<br/>Class F/K grease pan]
+    R2K -->|correct: yellow wet chemical| R2Ignite[Scripted ignition:<br/>player catches fire,<br/>refreshed every tick]
     R2Ignite -->|Shift + R = Drop and Roll| R2Done[Room 2 complete]
 
-    R2L -. wrong extinguisher used .-> R2L
+    R2A -. wrong tool: re-ignites .-> R2A
+    R2C -. wrong tool: re-ignites .-> R2C
+    R2K -. wrong tool: re-ignites .-> R2K
 
     R2Done --> R3P[Room 3 · Santos<br/>Phase 1: Pre-Drill Briefing]
     R3P -->|table row highlighted green| R3Q[Phase 2: Quake Active<br/>screen shake + rumble]
@@ -170,38 +175,57 @@ at `(-168,-32,10)`, yellow wet-chemical at `(-166,-32,10)`.
 > §6[Sgt. Reyes] §7Go ahead, take them off the wall! Walk up and click on each one.
 
 ### Phase 2 — Live Fire Demo & Drop/Roll
-Once all 3 extinguishers are in inventory, Sgt. Reyes forces three hazard props into their
-hazardous/failure state (`HazardManager.forceFailure`/`activate`, same mechanism `HazardWandItem`
-uses for manual testing — no randomness, this is scripted):
+Once all 3 extinguishers are in inventory, Sgt. Reyes teaches the three hazards **one at a time, in
+a fixed order** (`ReyesRoomManager.HAZARDS`) rather than igniting all three at once — each hazard
+gets its own explanation of what's burning and why that specific tool, delivered through the timed
+dialogue sequencer, *before* it's actually ignited:
 
-| Hazard | Class | Correct extinguisher |
-|---|---|---|
-| `ArchiveBoxStackBlock` (paper/document boxes) | A — ordinary combustibles | Red ABC (`FireExtinguisherItem`) |
-| `ComputerBlock` (`BURNING=true`) | C — electrical | Green CO2 (`CO2ExtinguisherItem`) |
-| `UnattendedGreasePanBlock` | F/K — kitchen grease | Yellow wet chemical (`WetChemicalExtinguisherItem`) |
+| Order | Hazard | Class | Correct extinguisher |
+|---|---|---|---|
+| 1 | `ArchiveBoxStackBlock` (paper/document boxes) | A — ordinary combustibles | Red ABC (`FireExtinguisherItem`) |
+| 2 | `ComputerBlock` (`BURNING=true`) | C — electrical | Green CO2 (`CO2ExtinguisherItem`) |
+| 3 | `UnattendedGreasePanBlock` | F/K — kitchen grease | Yellow wet chemical (`WetChemicalExtinguisherItem`) |
 
-> §6[Sgt. Reyes] §fHere we go — three real hazards, right in front of you! Remember: PULL the pin,
-> AIM low at the base, SQUEEZE the handle, SWEEP side to side. Match the right extinguisher to the
-> right fire!
+**Per-hazard explanation** (`AcademyDialogue.REYES_HAZARD_LINES[idx]`, plays once per hazard;
+`igniteHazard` — via the same `HazardManager.forceFailure` mechanism `HazardWandItem` uses — only
+fires once the explanation finishes):
 
-**Correct extinguish** (per prop, fires once):
-> §6[Sgt. Reyes] §aPerfect! That's exactly the right tool for that fire.
+> §6[Sgt. Reyes] §fFirst up — that stack of document boxes! Paper and cardboard are Class A
+> materials, ordinary combustibles.
+>
+> §6[Sgt. Reyes] §fGrab your §cred ABC extinguisher§f and put it out — aim at the base, sweep side
+> to side!
 
-**Wrong extinguisher used** (the mod's existing `warnWrongTool` already fires for the kitchen prop
-against ABC/CO2; for the other two props this room's own logic notices the mismatch for scoring
-purposes even though the item still mechanically works — see `CLAUDE.md`/plan notes on the
-extinguisher cross-class gap):
-> §6[Sgt. Reyes] §cHold on — that's not the right extinguisher for this one! Think about what's
-> burning before you spray.
+> §6[Sgt. Reyes] §fNext — that computer's sparking! This is a Class C electrical fire.
+>
+> §6[Sgt. Reyes] §cNever use water or foam here.§f Grab the §aGreen CO2 extinguisher§f — it won't
+> conduct electricity back into you!
 
-**Scripted ignition** (once the kitchen prop is correctly defused, Reyes "demonstrates" what
-happens if you're not careful — the player is set on fire for `ACADEMY_IGNITE_DEMO_TICKS`):
-> §6[Sgt. Reyes] §cWatch out — you caught a spark! Hit §eShift§f, then press §eR§f to Drop and Roll
-> it out — just like we practice!
+> §6[Sgt. Reyes] §fLast one — that pan of oil is a Class F/K kitchen fire! Regular extinguishers can
+> make grease fires explode.
+>
+> §6[Sgt. Reyes] §fGrab the §eyellow wet chemical extinguisher§f — it cools and seals the oil
+> safely!
 
-**Drop-and-roll compliance confirmed** (`DropAndRollManager.isDropped` observed true during the
-ignition window):
-> §6[Sgt. Reyes] §aThat's it — smothered! You just put yourself out safely. Great reflexes!
+**Correct tool used** — the sequence advances to the next hazard's explanation (or, after the
+third, into the scripted ignition below).
+
+**Wrong extinguisher used** — the hazard **re-ignites immediately** (`checkAndHandleDefuse` calls
+`igniteHazard` again on the same prop) instead of just warning; the player must get it right before
+moving on:
+> §6[Sgt. Reyes] §c...the fire flares right back up! That's not the right tool for this one — think
+> about what's burning before you spray.
+
+**Scripted ignition** (once all 3 hazards are correctly handled, Reyes "demonstrates" what happens
+if you're not careful — the player is set on fire and *stays* on fire, `tickIgniteDemo` refreshing
+their remaining fire ticks every tick, until they actually drop and roll):
+> §6[Sgt. Reyes] §c...caught a spark! Hit §eShift§f, then press §eR§f to Drop and Roll it out — just
+> like we practice!
+
+**Drop-and-roll compliance confirmed** (`DropAndRollManager.isDropped` observed true — this is what
+clears the fire, not a timer; `ACADEMY_IGNITE_DEMO_TICKS` is only a 200-tick/10s safety-cap timeout
+for a player who never rolls):
+> §6[Sgt. Reyes] §a...smothered! You just put yourself out safely. Great reflexes!
 >
 > §6[Sgt. Reyes] §fYou've mastered all three fire classes and how to handle catching fire yourself.
 > Head over to Sgt. Santos for the earthquake drill — you're doing amazing!
