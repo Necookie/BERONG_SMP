@@ -24,8 +24,12 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>{@link #NORTH}/{@link #SOUTH}/{@link #EAST}/{@link #WEST} (the same idiom as vanilla fences
  * and glass panes) track same-type neighbours so lining tables up merges them into one continuous
- * tabletop — the blockstate hides the corner apron model on any connected side — instead of
- * reading as separate tables placed side by side.
+ * tabletop. A corner leg only renders (and collides) when *both* sides meeting at that corner are
+ * unconnected — e.g. the NW leg needs north AND west both false — so a leg only survives at a
+ * true outer corner of a run; two tables pushed together lose the shared interior legs entirely,
+ * reading as one longer table instead of two placed side by side. The blockstate mirrors this
+ * with per-corner {@code table_leg}/{@code table_stretcher} multipart entries plus the existing
+ * {@code table_apron} trim, all hidden on connected sides.
  *
  * <p>A real table is under a metre tall, so a single block of it can never satisfy
  * {@code DuckCoverHoldManager}'s "solid block above the player's feet" test on its own cell —
@@ -39,14 +43,34 @@ public class TableBlock extends Block {
     public static final BooleanProperty EAST = BlockStateProperties.EAST;
     public static final BooleanProperty WEST = BlockStateProperties.WEST;
 
-    // Tabletop (Y12-15) + four corner-post legs (Y0-12) — an open kneehole between the legs,
-    // unlike ComputerTableBlock's uniform box(0,0,0,16,14,16).
-    private static final VoxelShape SHAPE = Shapes.or(
-            Block.box(0, 12, 0, 16, 15, 16),
-            Block.box(1, 0, 1, 3, 12, 3),
-            Block.box(13, 0, 1, 15, 12, 3),
-            Block.box(1, 0, 13, 3, 12, 15),
-            Block.box(13, 0, 13, 15, 12, 15));
+    // Tabletop (Y12-15, always present) + four corner-post legs (Y0-12) — an open kneehole
+    // between the legs, unlike ComputerTableBlock's uniform box(0,0,0,16,14,16).
+    private static final VoxelShape TOP = Block.box(0, 12, 0, 16, 15, 16);
+    private static final VoxelShape LEG_NW = Block.box(1, 0, 1, 3, 12, 3);
+    private static final VoxelShape LEG_NE = Block.box(13, 0, 1, 15, 12, 3);
+    private static final VoxelShape LEG_SW = Block.box(1, 0, 13, 3, 12, 15);
+    private static final VoxelShape LEG_SE = Block.box(13, 0, 13, 15, 12, 15);
+
+    // Indexed by (north?1:0)|(south?2:0)|(east?4:0)|(west?8:0) — precomputed once since there are
+    // only 16 combinations, rather than rebuilding a VoxelShape union on every getShape() call.
+    private static final VoxelShape[] SHAPES_BY_CONNECTIONS = buildShapes();
+
+    private static VoxelShape[] buildShapes() {
+        VoxelShape[] shapes = new VoxelShape[16];
+        for (int mask = 0; mask < 16; mask++) {
+            boolean north = (mask & 1) != 0;
+            boolean south = (mask & 2) != 0;
+            boolean east = (mask & 4) != 0;
+            boolean west = (mask & 8) != 0;
+            VoxelShape shape = TOP;
+            if (!north && !west) shape = Shapes.or(shape, LEG_NW);
+            if (!north && !east) shape = Shapes.or(shape, LEG_NE);
+            if (!south && !west) shape = Shapes.or(shape, LEG_SW);
+            if (!south && !east) shape = Shapes.or(shape, LEG_SE);
+            shapes[mask] = shape;
+        }
+        return shapes;
+    }
 
     public TableBlock(Properties props) {
         super(props);
@@ -62,7 +86,9 @@ public class TableBlock extends Block {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
+        int mask = (state.getValue(NORTH) ? 1 : 0) | (state.getValue(SOUTH) ? 2 : 0)
+                | (state.getValue(EAST) ? 4 : 0) | (state.getValue(WEST) ? 8 : 0);
+        return SHAPES_BY_CONNECTIONS[mask];
     }
 
     @Override
