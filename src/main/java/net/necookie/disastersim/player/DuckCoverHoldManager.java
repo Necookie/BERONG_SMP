@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 import net.necookie.disastersim.world.TelemetryCsvWriter;
@@ -23,7 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Cover is recognized under either 1 or 2 blocks of clearance (a short desk or a taller
  * shelter both count), matching the same {@code isCrouching()} + solid-block-above idiom already
- * proven in {@code TutorialManager}'s scripted drill. When a real quake-type session is active for
+ * proven in {@code TutorialManager}'s scripted drill — plus, separately, crouching within 1 block
+ * of a {@link TableBlock}, since a real table is too short to ever occupy the "block above the
+ * player's feet" cell on its own. When a real quake-type session is active for
  * the player, reaching the target also logs the {@code duck_cover_hold} telemetry event; outside a
  * session, the buff and message still fire (for testing) but nothing is logged, matching how
  * {@link DropAndRollManager} already treats the no-session case.
@@ -62,10 +65,27 @@ public final class DuckCoverHoldManager {
         }
     }
 
-    /** Solid block 1 OR 2 above the player's feet both count — a short desk is real cover too. */
+    /**
+     * Solid block 1 OR 2 above the player's feet both count — a tall shelter overhead is real
+     * cover. A real table is under a metre tall though, so a single-block {@link TableBlock}
+     * can never occupy the player's own feet-relative cell above them; instead, being crouched
+     * within 1 block of one (any direction, same or one block up) counts as sheltering under it.
+     */
     private static boolean hasCoverAbove(ServerLevel level, ServerPlayer player) {
         BlockPos feet = player.blockPosition();
-        return !level.getBlockState(feet.above(1)).isAir() || !level.getBlockState(feet.above(2)).isAir();
+        if (!level.getBlockState(feet.above(1)).isAir() || !level.getBlockState(feet.above(2)).isAir()) {
+            return true;
+        }
+        return hasNearbyTable(level, feet);
+    }
+
+    private static boolean hasNearbyTable(ServerLevel level, BlockPos feet) {
+        for (BlockPos pos : BlockPos.betweenClosed(feet.offset(-1, 0, -1), feet.offset(1, 1, 1))) {
+            if (level.getBlockState(pos).getBlock() instanceof TableBlock) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void onHoldAchieved(ServerLevel level, ServerPlayer player) {
