@@ -359,6 +359,7 @@ public class SimulationManager {
             TutorialManager.tick(server.overworld());
             net.necookie.disastersim.player.DropAndRollManager.tick(server.overworld());
             net.necookie.disastersim.player.DuckCoverHoldManager.tick(server.overworld());
+            net.necookie.disastersim.academy.AcademyManager.tick(server.overworld());
         }
 
         // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.
