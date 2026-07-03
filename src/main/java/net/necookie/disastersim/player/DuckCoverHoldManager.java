@@ -41,11 +41,15 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Transient per-player state (see {@link DropAndRollManager}'s own javadoc for why this idiom
  * doesn't need to survive a server restart).
+ *
+ * <p>{@link #isCompliant}/{@link #ticksHeld}/{@link #TARGET_TICKS} are read-only accessors used by
+ * {@code academy.room3.SantosRoomManager} to gate the new tutorial building's earthquake drill on
+ * this exact same compliance state, without duplicating any duck/cover/hold logic.
  */
 public final class DuckCoverHoldManager {
 
     /** Ticks of continuous compliance required to count the drill as performed correctly (5s). */
-    private static final int TARGET_TICKS = 100;
+    public static final int TARGET_TICKS = 100;
 
     private static final Map<UUID, Integer> ticksHeld = new ConcurrentHashMap<>();
     private static final Set<UUID> achievedThisHold = ConcurrentHashMap.newKeySet();
@@ -140,6 +144,16 @@ public final class DuckCoverHoldManager {
         if (player.getPose() != Pose.SWIMMING) {
             player.setPose(Pose.SWIMMING);
         }
+    }
+
+    /** Whether {@code id} currently has any continuous compliance streak going (>0 ticks held). */
+    public static boolean isCompliant(UUID id) {
+        return ticksHeld.containsKey(id);
+    }
+
+    /** Current continuous compliance streak length in ticks, or 0 if not currently complying. */
+    public static int ticksHeld(UUID id) {
+        return ticksHeld.getOrDefault(id, 0);
     }
 
     private static void onHoldAchieved(ServerLevel level, ServerPlayer player) {
