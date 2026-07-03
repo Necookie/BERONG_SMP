@@ -4,14 +4,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.AcademyVisuals;
 import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
+import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.item.AbstractExtinguisherItem;
@@ -93,8 +96,20 @@ public final class ReyesRoomManager {
             switch (progress.reyesPhase()) {
                 case TOOL_SELECTION -> tickToolSelection(level, player, data);
                 case LIVE_FIRE_DEMO -> tickLiveFireDemo(level, player, data);
+                case DONE -> tickDone(level, player, data);
                 default -> { }
             }
+        }
+    }
+
+    /** Sgt. Santos's anchor — points there until the player has actually started Room 3. */
+    private static final Vec3 SANTOS_ANCHOR = new Vec3(-170.5, -33.0, 33.5);
+    private static final int WAYPOINT_INTERVAL_TICKS = 10;
+
+    private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        if (data.get(player.getUUID()).santosPhase() != SantosPhase.NOT_STARTED) return;
+        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
+            AcademyVisuals.spawnWaypointArrow(level, player.position(), SANTOS_ANCHOR);
         }
     }
 

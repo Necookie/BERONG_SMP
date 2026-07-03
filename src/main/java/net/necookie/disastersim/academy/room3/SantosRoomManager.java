@@ -3,11 +3,13 @@ package net.necookie.disastersim.academy.room3;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.academy.AcademyVisuals;
+import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.entity.CustomNpcEntity;
@@ -43,6 +45,9 @@ public final class SantosRoomManager {
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final float QUAKE_SHAKE_INTENSITY = 1.5f;
     private static final double NEAR_TABLE_RANGE_SQ = 3.0 * 3.0;
+    private static final int WAYPOINT_INTERVAL_TICKS = 10;
+    /** Capt. Morfe's anchor — points there until the player has actually started Room 4. */
+    private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
 
     private static final Map<UUID, Long> preDrillStartTick = new ConcurrentHashMap<>();
 
@@ -84,6 +89,7 @@ public final class SantosRoomManager {
             switch (progress.santosPhase()) {
                 case PRE_DRILL -> tickPreDrill(level, player, data);
                 case QUAKE_ACTIVE -> tickQuakeActive(level, player, data);
+                case DONE -> tickDone(level, player, data);
                 default -> { }
             }
         }
@@ -125,6 +131,14 @@ public final class SantosRoomManager {
         if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Get back under the table! "
                     + "The ground is still moving!", QUAKE_SHAKE_INTENSITY);
+        }
+    }
+
+    /** Points toward Capt. Morfe until the player has actually started Room 4. */
+    private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        if (data.get(player.getUUID()).morfePhase() != MorfePhase.NOT_STARTED) return;
+        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
+            AcademyVisuals.spawnWaypointArrow(level, player.position(), MORFE_ANCHOR);
         }
     }
 
