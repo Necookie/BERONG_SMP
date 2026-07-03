@@ -118,6 +118,34 @@ public class CustomNpcEntity extends Mob {
         }
     }
 
+    /** Walk speed (attribute base value) used while {@link #setEscorting} is active. */
+    private static final double ESCORT_SPEED = 0.4;
+
+    private boolean escorting = false;
+
+    /**
+     * Toggles real pathfinding movement on/off for NPCs that need to actively walk somewhere
+     * (e.g. Officer Cruz escorting a player through the Academy's Movement School), independent of
+     * {@link NpcType#minimalWander}'s idle-shuffle behavior. Idempotent — a no-op if already in the
+     * requested state, so callers driving this from a per-tick loop across multiple players don't
+     * needlessly reset synced entity data/attributes every tick.
+     *
+     * <p>{@code setNoAi(false)} is what actually lets {@code serverAiStep()} (goal selector,
+     * {@code PathNavigation}, {@code MoveControl}) tick at all; the movement speed attribute is
+     * bumped separately since {@code getNavigation().moveTo(...)}'s speed parameter scales that
+     * attribute's base value rather than replacing it — leaving it at the default {@code 0.0} for
+     * non-wander NpcTypes would mean no amount of {@code moveTo} ever actually moves them.
+     */
+    public void setEscorting(boolean escorting) {
+        if (this.escorting == escorting) return;
+        this.escorting = escorting;
+        this.setNoAi(!escorting);
+        var movementSpeed = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (movementSpeed != null) {
+            movementSpeed.setBaseValue(escorting ? ESCORT_SPEED : (getNpcType().minimalWander ? 0.05 : 0.0));
+        }
+    }
+
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);

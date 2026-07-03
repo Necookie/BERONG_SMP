@@ -25,6 +25,14 @@ public class MinimalWanderGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        // Only NpcTypes flagged minimalWander should ever idle-shuffle. This goal is registered
+        // unconditionally on every CustomNpcEntity in registerGoals(), so without this guard it
+        // would start firing the moment any other NpcType (e.g. an escorting Officer Cruz) has
+        // setNoAi(false) — randomly veering it off whatever path something else just issued via
+        // getNavigation().moveTo(...), since this goal holds no exclusive claim on movement.
+        if (!npc.getNpcType().minimalWander) {
+            return false;
+        }
         if (anchor == null) {
             anchor = npc.position();
         }
