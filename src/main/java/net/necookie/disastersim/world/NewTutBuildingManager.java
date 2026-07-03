@@ -45,6 +45,13 @@ public final class NewTutBuildingManager {
             "officer_cruz", new Viewpoint(-148.570, -33.0, 32.248, 88.3f, 0f)
     );
 
+    /**
+     * Key into {@link #VIEWPOINTS} used by the bare {@code /bfp new_tutorial} (no section
+     * argument), mirroring {@code /bfp tutorial}'s no-arg quick-test form. Repoint this once a
+     * dedicated entrance viewpoint is captured; for now the only known-good spot is Officer Cruz's.
+     */
+    public static final String DEFAULT_VIEWPOINT = "officer_cruz";
+
     private NewTutBuildingManager() {}
 
     /** Call once from {@code ServerStartedEvent}. */

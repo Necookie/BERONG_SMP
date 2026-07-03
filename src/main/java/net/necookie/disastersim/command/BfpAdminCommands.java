@@ -359,14 +359,27 @@ public class BfpAdminCommands {
     }
 
     /**
-     * {@code /bfp new_tutorial <section> [player]} — teleports to a named F3-captured reference
-     * viewpoint inside the new tutorial building ({@link NewTutBuildingManager#VIEWPOINTS}), for
-     * tuning/verifying NPC placement in-game. One literal subcommand per map entry, so adding a
-     * new named viewpoint there (e.g. once the fire-practice or earthquake-drill spots are
-     * captured) automatically adds its own {@code /bfp new_tutorial <name>} subcommand here.
+     * {@code /bfp new_tutorial [player]} — like {@code /bfp tutorial}, a bare no-argument form for
+     * quick testing: teleports straight to {@link NewTutBuildingManager#DEFAULT_VIEWPOINT}.
+     * {@code /bfp new_tutorial <section> [player]} teleports to any other named F3-captured
+     * reference viewpoint ({@link NewTutBuildingManager#VIEWPOINTS}). One literal subcommand per
+     * map entry, so adding a new named viewpoint there (e.g. once the fire-practice or
+     * earthquake-drill spots are captured) automatically adds its own
+     * {@code /bfp new_tutorial <name>} subcommand here.
      */
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
-        var root = Commands.literal("new_tutorial");
+        NewTutBuildingManager.Viewpoint defaultViewpoint =
+                NewTutBuildingManager.VIEWPOINTS.get(NewTutBuildingManager.DEFAULT_VIEWPOINT);
+
+        var root = Commands.literal("new_tutorial")
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return teleportToViewpoint(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> teleportToViewpoint(
+                                ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint)));
+
         for (Map.Entry<String, NewTutBuildingManager.Viewpoint> entry : NewTutBuildingManager.VIEWPOINTS.entrySet()) {
             NewTutBuildingManager.Viewpoint viewpoint = entry.getValue();
             root.then(Commands.literal(entry.getKey())
