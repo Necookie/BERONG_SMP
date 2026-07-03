@@ -3,6 +3,7 @@ package net.necookie.disastersim.academy.room1;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.Config;
@@ -13,6 +14,7 @@ import net.necookie.disastersim.academy.AcademyVisuals;
 import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.entity.CustomNpcEntity;
+import net.necookie.disastersim.entity.NpcType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,11 +26,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Room 1 — Officer Cruz's Movement School. Two {@code CustomNpcEntity} instances share
- * {@code NpcType.OFFICER_CRUZ} in the schematic (one at the briefing start, one at the Go/Stop
- * tunnel finish); both route through {@link #onInteract} and are shown whatever line list matches
- * the player's *current* phase, so which physical NPC was clicked doesn't matter — a player can't
- * legitimately reach the finish-line NPC before finishing the phases in between.
+ * Room 1 — Officer Cruz's Movement School. A single {@code CustomNpcEntity} (the schematic's
+ * duplicate near the old Go/Stop tunnel finish is discarded by
+ * {@code world.NewTutBuildingManager}) physically escorts the player through Briefing/Maze/Jump
+ * via real vanilla pathfinding (see {@link #updateCruzEscort}), then waits at the Go/Stop staging
+ * line and calls out GO/STOP and the finish line from there — her fixed hitbox can't crouch
+ * through the tunnel's low slabs the way a player can, so she supervises the last phase rather
+ * than walking it (see the plan notes on this decision).
  *
  * <p>Zone boxes below are the exact boxes from the user's blueprint. The 4 green floor marks
  * (Phase 1) are placeholder positions spread inside that box — the user described them without
@@ -71,6 +75,17 @@ public final class CruzRoomManager {
     private static final Map<UUID, Set<Integer>> marksHit = new ConcurrentHashMap<>();
     private static final Map<UUID, GoStopState> goStopStates = new ConcurrentHashMap<>();
 
+    // -----------------------------------------------------------------------
+    // Cruz escort — cached entity reference + periodic pathfinding re-issue
+    // -----------------------------------------------------------------------
+
+    private static final Vec3 BRIEFING_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
+    private static final int ESCORT_MOVE_INTERVAL_TICKS = 15;
+
+    private static CustomNpcEntity cachedCruz;
+    private static UUID cachedCruzId;
+    private static long nextEscortMoveTick;
+
     private CruzRoomManager() {}
 
     public static void onInteract(ServerPlayer player, CustomNpcEntity npc) {
@@ -96,6 +111,8 @@ public final class CruzRoomManager {
 
     public static void tick(ServerLevel level) {
         AcademySavedData data = AcademySavedData.get(level);
+        ServerPlayer escortTarget = null;
+
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             CruzPhase phase = data.get(player.getUUID()).cruzPhase();
             switch (phase) {
@@ -106,7 +123,99 @@ public final class CruzRoomManager {
                 case DONE -> tickDone(level, player, data);
                 default -> { }
             }
+            if (escortTarget == null && isEscortablePhase(phase)) {
+                escortTarget = player;
+            }
         }
+
+        updateCruzEscort(level, escortTarget);
+    }
+
+    private static boolean isEscortablePhase(CruzPhase phase) {
+        return phase == CruzPhase.BRIEFING || phase == CruzPhase.MAZE || phase == CruzPhase.JUMP
+                || phase == CruzPhase.GOSTOP_STAGE || phase == CruzPhase.GOSTOP_RUN;
+    }
+
+    /**
+     * Toggles Cruz's escort mode on/off and, while escorting, periodically re-issues a path toward
+     * whichever player is being escorted (first found in the online-players iteration if more than
+     * one is active — matches this system's already-accepted single-station-at-a-time limitation).
+     * Re-issued every {@link #ESCORT_MOVE_INTERVAL_TICKS} ticks rather than every tick, since
+     * short-hop pathfinding doesn't need to be recomputed that often and it keeps server cost down.
+     */
+    private static void updateCruzEscort(ServerLevel level, ServerPlayer escortTarget) {
+        CustomNpcEntity cruz = findCruz(level);
+        if (cruz == null) return;
+
+        if (escortTarget == null) {
+            cruz.setEscorting(false);
+            return;
+        }
+        cruz.setEscorting(true);
+
+        long now = level.getGameTime();
+        if (now < nextEscortMoveTick) return;
+        nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
+
+        AcademySavedData data = AcademySavedData.get(level);
+        CruzPhase phase = data.get(escortTarget.getUUID()).cruzPhase();
+        Vec3 target = switch (phase) {
+            case BRIEFING -> nextUnhitMarkFor(escortTarget);
+            case MAZE -> MAZE_EXIT_POINT;
+            case JUMP -> JUMP_EXIT_POINT;
+            case GOSTOP_STAGE, GOSTOP_RUN -> STAGING_POS;
+            default -> null;
+        };
+        if (target == null) return;
+        // Return value intentionally unused: a failed path (e.g. no route found) just means this
+        // cycle's move request was a no-op — the next periodic re-issue tries again automatically.
+        cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
+    }
+
+    private static Vec3 nextUnhitMarkFor(ServerPlayer player) {
+        Set<Integer> hits = marksHit.getOrDefault(player.getUUID(), Set.of());
+        for (int i = 0; i < GREEN_MARKS.size(); i++) {
+            if (!hits.contains(i)) return Vec3.atCenterOf(GREEN_MARKS.get(i));
+        }
+        return Vec3.atCenterOf(GREEN_MARKS.get(GREEN_MARKS.size() - 1));
+    }
+
+    /**
+     * Resolves the single Officer Cruz instance, caching a direct object reference (schematic
+     * entities are discarded and respawned as fresh Java objects on every server start, so a
+     * cached reference only needs to survive within one running session). Falls back to a UUID
+     * lookup, then a bounded area scan, tie-broken by proximity to her known briefing anchor in
+     * case a duplicate is ever manually spawned (e.g. via {@code NpcSpawnerItem}).
+     */
+    private static CustomNpcEntity findCruz(ServerLevel level) {
+        if (cachedCruz != null && !cachedCruz.isRemoved() && cachedCruz.isAlive()) {
+            return cachedCruz;
+        }
+        if (cachedCruzId != null) {
+            Entity entity = level.getEntity(cachedCruzId);
+            if (entity instanceof CustomNpcEntity npc && npc.getNpcType() == NpcType.OFFICER_CRUZ && !npc.isRemoved()) {
+                cachedCruz = npc;
+                return npc;
+            }
+        }
+
+        AABB searchBounds = new AABB(-180, -40, 0, -95, -25, 65);
+        List<CustomNpcEntity> found = level.getEntitiesOfClass(CustomNpcEntity.class, searchBounds,
+                e -> e.getNpcType() == NpcType.OFFICER_CRUZ);
+        if (found.isEmpty()) return null;
+
+        CustomNpcEntity best = found.get(0);
+        double bestDistSq = best.position().distanceToSqr(BRIEFING_ANCHOR);
+        for (CustomNpcEntity npc : found) {
+            double distSq = npc.position().distanceToSqr(BRIEFING_ANCHOR);
+            if (distSq < bestDistSq) {
+                best = npc;
+                bestDistSq = distSq;
+            }
+        }
+        cachedCruz = best;
+        cachedCruzId = best.getUUID();
+        return best;
     }
 
     private static void tickBriefing(ServerLevel level, ServerPlayer player, AcademySavedData data) {
