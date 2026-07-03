@@ -43,7 +43,6 @@ public final class SantosRoomManager {
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final float QUAKE_SHAKE_INTENSITY = 1.5f;
     private static final double NEAR_TABLE_RANGE_SQ = 3.0 * 3.0;
-    private static final int WAYPOINT_INTERVAL_TICKS = 10;
     /** Capt. Morfe's anchor — points there until the player has actually started Room 4. */
     private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
 
@@ -133,9 +132,7 @@ public final class SantosRoomManager {
     /** Points toward Capt. Morfe until the player has actually started Room 4. */
     private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         if (data.get(player.getUUID()).morfePhase() != MorfePhase.NOT_STARTED) return;
-        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
-            AcademyVisuals.spawnWaypointArrow(level, player.position(), MORFE_ANCHOR);
-        }
+        AcademyVisuals.spawnCompassArrow(level, player, MORFE_ANCHOR);
     }
 
     private static boolean isNearTableRow(ServerPlayer player) {

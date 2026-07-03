@@ -14,6 +14,7 @@ import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +61,7 @@ public final class CruzRoomManager {
     private static final int GOSTOP_MIN_INTERVAL_TICKS = 60;  // 3s
     private static final int GOSTOP_MAX_INTERVAL_TICKS = 120; // 6s
     private static final double GOSTOP_MOVE_EPSILON_SQ = 0.35 * 0.35;
-    private static final int WAYPOINT_INTERVAL_TICKS = 10;
+    private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches AssemblyZone's/Santos's cadence
 
     private static final Vec3 MAZE_EXIT_POINT = new Vec3(-121.5, -33.0, 31.5);
     private static final Vec3 JUMP_EXIT_POINT = new Vec3(-105.5, -33.0, 31.5);
@@ -113,13 +114,15 @@ public final class CruzRoomManager {
         Set<Integer> hits = marksHit.computeIfAbsent(id, k -> new HashSet<>());
         Vec3 pos = player.position();
         int nextMark = -1;
+        List<BlockPos> unhitMarks = new ArrayList<>();
         for (int i = 0; i < GREEN_MARKS.size(); i++) {
             if (hits.contains(i)) continue;
             BlockPos mark = GREEN_MARKS.get(i);
             if (pos.distanceToSqr(mark.getX() + 0.5, mark.getY(), mark.getZ() + 0.5) <= MARK_RADIUS_SQ) {
                 hits.add(i);
-            } else if (nextMark < 0) {
-                nextMark = i;
+            } else {
+                unhitMarks.add(mark);
+                if (nextMark < 0) nextMark = i;
             }
         }
         if (hits.size() >= GREEN_MARKS.size()) {
@@ -129,9 +132,11 @@ public final class CruzRoomManager {
                     + "Follow the green arrows through this maze — steer your camera, not just forward!");
             return;
         }
-        if (nextMark >= 0 && level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
-            BlockPos mark = GREEN_MARKS.get(nextMark);
-            AcademyVisuals.spawnWaypointArrow(level, pos, Vec3.atCenterOf(mark));
+        if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+            AcademyVisuals.highlightBlocks(level, unhitMarks);
+        }
+        if (nextMark >= 0) {
+            AcademyVisuals.spawnCompassArrow(level, player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Still looking for the marks? "
@@ -147,9 +152,7 @@ public final class CruzRoomManager {
                     + "hit Spacebar to hop right over them. Don't stop moving!");
             return;
         }
-        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
-            AcademyVisuals.spawnWaypointArrow(level, player.position(), MAZE_EXIT_POINT);
-        }
+        AcademyVisuals.spawnCompassArrow(level, player, MAZE_EXIT_POINT);
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Bumping into walls slows you down! "
                     + "Look at the green arrows and turn your camera before your feet.");
@@ -164,9 +167,7 @@ public final class CruzRoomManager {
                     + "Come find me at the tunnel entrance for the last lesson.");
             return;
         }
-        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
-            AcademyVisuals.spawnWaypointArrow(level, player.position(), JUMP_EXIT_POINT);
-        }
+        AcademyVisuals.spawnCompassArrow(level, player, JUMP_EXIT_POINT);
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Keep your momentum! "
                     + "Walk straight at it and tap Spacebar right before you'd hit it.");
@@ -176,9 +177,7 @@ public final class CruzRoomManager {
     /** Points toward Sgt. Reyes until the player has actually started Room 2. */
     private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         if (data.get(player.getUUID()).reyesPhase() != ReyesPhase.NOT_STARTED) return;
-        if (level.getGameTime() % WAYPOINT_INTERVAL_TICKS == 0) {
-            AcademyVisuals.spawnWaypointArrow(level, player.position(), REYES_ANCHOR);
-        }
+        AcademyVisuals.spawnCompassArrow(level, player, REYES_ANCHOR);
     }
 
     // -----------------------------------------------------------------------
