@@ -54,6 +54,8 @@ public class BerongSMPClient {
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
         // Drive camera shake for QUAKE tutorial stages
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.TutorialHud::onCameraAngles);
+        // Drive camera shake for the Academy's earthquake drill (Sgt. Santos, Room 3)
+        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.AcademyHud::onCameraAngles);
         // Supplementary whole-body rock for the drop-and-roll visual (crouch/tilt is registered
         // separately via RegisterRenderStateModifiersEvent, below)
         NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPre);
@@ -74,6 +76,7 @@ public class BerongSMPClient {
     static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         SimulationHud.registerGuiLayers(event);
         net.necookie.disastersim.client.TutorialHud.registerGuiLayers(event);
+        net.necookie.disastersim.client.AcademyHud.registerGuiLayers(event);
     }
 
     /** Drives the purely cosmetic drop-and-roll crouch/tilt — see {@link DropAndRollRenderModifier}. */

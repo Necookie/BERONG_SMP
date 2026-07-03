@@ -66,8 +66,11 @@ public class TutorialHud {
         }
     }
 
-    /** Splits {@code text} (which may contain §-codes) into lines that fit within {@code maxWidth}. */
-    private static List<String> wrapText(Font font, String text, int maxWidth) {
+    /**
+     * Splits {@code text} (which may contain §-codes) into lines that fit within {@code maxWidth}.
+     * Package-visible so {@link AcademyHud} can reuse it instead of duplicating the wrap logic.
+     */
+    static List<String> wrapText(Font font, String text, int maxWidth) {
         List<String> lines = new ArrayList<>();
         String[] words = text.split(" ");
         StringBuilder current = new StringBuilder();
