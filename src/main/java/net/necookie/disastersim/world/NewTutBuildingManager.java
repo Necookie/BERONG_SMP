@@ -3,8 +3,12 @@ package net.necookie.disastersim.world;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.phys.AABB;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.entity.CustomNpcEntity;
+import net.necookie.disastersim.entity.NpcType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +31,16 @@ public final class NewTutBuildingManager {
     public static final BlockPos POS = new BlockPos(-177, -34, 8);
 
     private static final String SCHEM_PATH = "structure/new_tut_building1.0.schem";
+
+    /**
+     * Old tunnel-finish handoff spot from the two-NPC Cruz design (pre-Academy-polish-pass) — the
+     * schematic still bakes in a second {@code OFFICER_CRUZ} here. The Academy now routes all of
+     * Room 1's dialogue through a single escorting Cruz, so this duplicate is discarded right after
+     * every placement. This is a permanent fixup, not a one-time migration: {@link SchemLoader}
+     * discards and respawns every schematic entity fresh on every server start, so without this the
+     * duplicate would silently reappear on each boot.
+     */
+    private static final AABB DUPLICATE_CRUZ_BOUNDS = new AABB(-123.5, -33, 49.5, -123.5, -33, 49.5).inflate(2);
 
     /** A named F3-captured reference viewpoint inside the building, for {@code /bfp new_tutorial}. */
     public record Viewpoint(double x, double y, double z, float yaw, float pitch) {}
@@ -68,8 +82,21 @@ public final class NewTutBuildingManager {
                 .place(level, POS);
         if (placed) {
             BerongSMP.LOGGER.info("New tutorial building placed at {}", POS);
+            discardDuplicateCruz(level);
         } else {
             BerongSMP.LOGGER.error("Failed to place new tutorial building ({}) at {}", SCHEM_PATH, POS);
+        }
+    }
+
+    /** See {@link #DUPLICATE_CRUZ_BOUNDS}. Runs after every placement, not just once. */
+    private static void discardDuplicateCruz(ServerLevel level) {
+        List<CustomNpcEntity> duplicates = level.getEntitiesOfClass(CustomNpcEntity.class, DUPLICATE_CRUZ_BOUNDS,
+                npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ);
+        for (CustomNpcEntity npc : duplicates) {
+            npc.discard();
+        }
+        if (!duplicates.isEmpty()) {
+            BerongSMP.LOGGER.info("Discarded {} duplicate Officer Cruz entity/entities from the old tunnel-finish spot", duplicates.size());
         }
     }
 }
