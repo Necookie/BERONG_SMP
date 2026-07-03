@@ -26,6 +26,7 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
+import net.necookie.disastersim.world.NewTutBuildingManager;
 import net.necookie.disastersim.world.TutorialLobbyManager;
 
 public class BfpAdminCommands {
@@ -160,6 +161,8 @@ public class BfpAdminCommands {
                         })
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> tutorialReset(ctx, EntityArgument.getPlayer(ctx, "player")))))
+
+                .then(newTutorialCommand())
 
                 .then(Commands.literal("session")
                         .then(Commands.literal("info")
@@ -353,6 +356,39 @@ public class BfpAdminCommands {
                                                     "§7[Test Bypass] OFF for §f" + target.getName().getString()), true);
                                             return 1;
                                         })))));
+    }
+
+    /**
+     * {@code /bfp new_tutorial <section> [player]} — teleports to a named F3-captured reference
+     * viewpoint inside the new tutorial building ({@link NewTutBuildingManager#VIEWPOINTS}), for
+     * tuning/verifying NPC placement in-game. One literal subcommand per map entry, so adding a
+     * new named viewpoint there (e.g. once the fire-practice or earthquake-drill spots are
+     * captured) automatically adds its own {@code /bfp new_tutorial <name>} subcommand here.
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
+        var root = Commands.literal("new_tutorial");
+        for (Map.Entry<String, NewTutBuildingManager.Viewpoint> entry : NewTutBuildingManager.VIEWPOINTS.entrySet()) {
+            NewTutBuildingManager.Viewpoint viewpoint = entry.getValue();
+            root.then(Commands.literal(entry.getKey())
+                    .executes(ctx -> {
+                        if (!ctx.getSource().isPlayer()) return 0;
+                        return teleportToViewpoint(ctx, ctx.getSource().getPlayer(), viewpoint);
+                    })
+                    .then(Commands.argument("player", EntityArgument.player())
+                            .executes(ctx -> teleportToViewpoint(
+                                    ctx, EntityArgument.getPlayer(ctx, "player"), viewpoint))));
+        }
+        return root;
+    }
+
+    private static int teleportToViewpoint(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
+                                            NewTutBuildingManager.Viewpoint viewpoint) {
+        net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
+        target.teleportTo(level, viewpoint.x(), viewpoint.y(), viewpoint.z(),
+                java.util.Collections.emptySet(), viewpoint.yaw(), viewpoint.pitch(), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§eTeleported §f" + target.getName().getString() + "§e to the new tutorial building."), true);
+        return 1;
     }
 
     private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
