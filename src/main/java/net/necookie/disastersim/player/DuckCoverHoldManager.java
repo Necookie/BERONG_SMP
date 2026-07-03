@@ -1,11 +1,13 @@
 package net.necookie.disastersim.player;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Pose;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.world.SimulationManager;
@@ -31,6 +33,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * session, the buff and message still fire (for testing) but nothing is logged, matching how
  * {@link DropAndRollManager} already treats the no-session case.
  *
+ * <p>Also drives the "go under a table" assist: crouching while facing or beside a
+ * {@link TableBlock} pre-emptively shrinks the player to vanilla's crawl hitbox
+ * ({@code Pose.SWIMMING}) so normal movement can actually carry them into its kneehole — see
+ * {@link #allowCrawlUnderTable}. This doesn't touch sneak/shift itself, only what fits under the
+ * player once they're already crouching near a table.
+ *
  * <p>Transient per-player state (see {@link DropAndRollManager}'s own javadoc for why this idiom
  * doesn't need to survive a server restart).
  */
@@ -48,6 +56,11 @@ public final class DuckCoverHoldManager {
     public static void tick(ServerLevel level) {
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             UUID id = player.getUUID();
+
+            if (player.isCrouching() && facingOrBesideTable(level, player)) {
+                allowCrawlUnderTable(player);
+            }
+
             boolean compliant = player.isCrouching() && hasCoverAbove(level, player);
 
             if (!compliant) {
@@ -86,6 +99,47 @@ public final class DuckCoverHoldManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Whether the player is directly beside a {@link TableBlock} (any of the 4 horizontal
+     * neighbours, or already standing in its footprint) or looking at one a short step ahead.
+     * Deliberately stricter than {@link #hasNearbyTable} (no diagonals, no "somewhere behind
+     * you") — this gates the crawl-under assist below, so it should only fire when the player is
+     * clearly walking towards/into a specific table, not merely near one.
+     */
+    private static boolean facingOrBesideTable(ServerLevel level, ServerPlayer player) {
+        BlockPos feet = player.blockPosition();
+        if (isTable(level, feet)) {
+            return true;
+        }
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            if (isTable(level, feet.relative(dir))) {
+                return true;
+            }
+        }
+        BlockPos ahead = BlockPos.containing(player.getEyePosition().add(player.getLookAngle().scale(1.5)));
+        return isTable(level, ahead);
+    }
+
+    private static boolean isTable(ServerLevel level, BlockPos pos) {
+        return level.getBlockState(pos).getBlock() instanceof TableBlock;
+    }
+
+    /**
+     * A single-block {@link TableBlock} is under a metre tall, well short of even the vanilla
+     * {@code Pose.CROUCHING} hitbox (1.5 blocks) — normal collision would just stop the player at
+     * its edge before {@code Player.updatePlayerPose()} ever gets a chance to shrink them further.
+     * Pre-emptively forcing {@code Pose.SWIMMING} (the same shrunk hitbox vanilla uses for
+     * crawling through tight gaps) while they're crouching towards/beside a table lets ordinary
+     * movement carry them into its kneehole; vanilla's own per-tick pose logic takes back over
+     * seamlessly once they're actually under it (or once they walk back out), so no cleanup is
+     * needed here.
+     */
+    private static void allowCrawlUnderTable(ServerPlayer player) {
+        if (player.getPose() != Pose.SWIMMING) {
+            player.setPose(Pose.SWIMMING);
+        }
     }
 
     private static void onHoldAchieved(ServerLevel level, ServerPlayer player) {
