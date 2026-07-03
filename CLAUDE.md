@@ -149,6 +149,68 @@ Two real-world drill techniques are modeled as live gameplay, not just tutorial 
   - **Physical cover object**: `TableBlock` (see Key Classes below) is a real, single-block table a player can shelter next to. Since a real table is under a metre tall, it can never occupy the "solid block above the player's feet" cell that `DuckCoverHoldManager`'s original check looks for — so `DuckCoverHoldManager.hasNearbyTable` separately scans a 1-block radius around the player for a `TableBlock` while crouching and counts that as valid cover too. `TutorialManager`'s scripted QUAKE_COVER/HOLDON drill is untouched (still the original station-based above-the-feet check only).
   - **Crawling under the table**: a table's kneehole (under 1 block tall) is shorter than even vanilla's `Pose.CROUCHING` hitbox, so normal collision would stop a player at its edge before they could ever shrink into it. `DuckCoverHoldManager.allowCrawlUnderTable` pre-emptively forces `Pose.SWIMMING` (vanilla's own crawl-through-tight-gaps hitbox) whenever a crouching player is facing or beside a `TableBlock` (`facingOrBesideTable` — stricter than `hasNearbyTable`: adjacent or a short look-direction raycast only, not "somewhere nearby"), letting ordinary movement carry them into the kneehole. Sneak/shift itself is untouched; this only changes what fits under the player once they're already crouching near a table, and vanilla's own per-tick pose logic (`Player.updatePlayerPose`) takes back over seamlessly on the way back out.
 
+### New Tutorial Building (Academy)
+
+A second, **fully independent** tutorial — "the Academy" — lives in `new_tut_building1.0.schem`, placed at `NewTutBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
+
+```
+Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-mark WASD walk) → MAZE (reach the
+  next zone) → JUMP (reach the next zone) → GOSTOP_STAGE/GOSTOP_RUN (Officer Cruz calls GO/STOP on
+  a random 3-6s cadence; moving past Config.ACADEMY_GOSTOP_GRACE_TICKS after a STOP call warps the
+  player back to the staging line and counts a movement mistake) → DONE
+
+Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (inventory contains all 3
+  extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO — ReyesRoomManager places
+  3 hazard props (ArchiveBoxStack/Class A, ComputerBlock/electrical, UnattendedGreasePan/kitchen)
+  and forces each hazardous/burning via HazardManager.forceFailure(level, null, pos, null), the
+  same session-nullable entry point HazardWandItem already uses. Correct-tool attribution watches
+  each position's active-hazard flag for a true→false transition while the player is nearby (only
+  the 5 kitchen props get an automatic wrong-tool warning today, so this is tracked independently
+  for scoring). Defusing the kitchen prop ignites the player
+  (player.setRemainingFireTicks(Config.ACADEMY_IGNITE_DEMO_TICKS)) to force a scripted drop-and-roll
+  beat, polling the already-public DropAndRollManager.isDropped(uuid) — zero new drop-and-roll
+  logic. → DONE once all 3 props are handled and the ignite window resolves.
+
+Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
+  TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
+  a per-block wireframe adaptation of AssemblyZone.spawnBorderParticles's particle-loop idiom —
+  there's no glow/highlight system elsewhere in the mod). After a short delay, triggers the quake
+  (own shake-intensity caption, same CameraShake mechanism TutorialHud already uses) → QUAKE_ACTIVE
+  reads compliance entirely from DuckCoverHoldManager.isCompliant/ticksHeld (new public accessors,
+  zero new duck/cover/hold logic) plus a proximity check against this room's specific table row →
+  DONE.
+
+Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. No static dialogue entry (unlike the
+  other 3 NPCs) — AcademyScoring.evaluate computes a fresh 0-100 rubric every interaction (25
+  points each: movement mistakes, fire correct/wrong ratio, drop-and-roll performed, quake
+  compliant), pattern-cloned from SimulationFeedback's threshold-driven scoring style. Pass →
+  certified, no further gating changes. Fail → resets the player's entire AcademyProgress (phases
+  + scoring counters, clean slate) and teleports them back to Room 1's briefing zone.
+
+World-space waypoint arrows ("follow the green floor arrows", said literally in several lines):
+  AcademyVisuals.spawnWaypointArrow draws a dashed green particle trail + chevron toward the next
+  objective, used within Room 1's phases and for each room's "go find the next NPC" nudge once
+  that room is DONE and the next hasn't started yet.
+```
+
+**Key classes**: `AcademyManager` (the single `PlayerInteractEvent.EntityInteract` handler for
+`CustomNpcEntity` — none existed anywhere else in the mod; dispatches by `NpcType`, ignores the
+schematic's 5 other decorative NPCs) + shared `stepDialogue`/`sendPrompt`/`playNpcSound` helpers;
+`AcademyProgress`/`AcademySavedData` (per-player persisted state — 4 phases + Capt. Morfe's
+scoring inputs, `SavedData`+`Codec` pattern-cloned from `TutorialSavedData` but storing a compound
+record instead of one enum; all mutation goes through `AcademySavedData.mutate` so `setDirty()` is
+never forgotten); `AcademyDialogue` (Cruz/Reyes/Santos static line content, transcribed from
+`docs/new_tutorial_script.md`); `AcademyStatusPayload`/`AcademyHud` (own caption channel,
+pattern-cloned from `TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing);
+`room1.CruzRoomManager`/`room2.ReyesRoomManager`/`room3.SantosRoomManager`/`room4.MorfeRoomManager`
++ `room4.AcademyScoring`. `AcademyManager.tick` is hooked into `SimulationManager.onServerTick`
+alongside the existing `TutorialManager`/`DropAndRollManager`/`DuckCoverHoldManager` calls.
+
+Room 1's 4 green floor marks and maze/jump exit points are placeholder coordinates (the user
+described them without exact F3 readings) — tracked in `docs/f3_tuning_todo.md` §6. Everything else
+(building position, all 4 NPC anchors, the Room 3 table row) is confirmed against the schematic's
+actual placed entity data.
+
 ### Key Classes
 
 | Class | Responsibility |
@@ -303,6 +365,9 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
 | `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
 | `bfpAdminPin` | `""` | PIN for `/bfp login`. Empty = PIN login disabled (OP-only access). A WARN is logged at startup if left blank. |
+| `academyIgniteDemoTicks` | 100 | Ticks the player is on fire for during Sgt. Reyes's scripted drop-and-roll demo (5 s, matching `DropAndRollManager`'s own dropped-window size) |
+| `academyGoStopGraceTicks` | 20 | Grace period after Officer Cruz calls STOP before movement counts as a Go/Stop violation (1 s) |
+| `academyPassThreshold` | 70 | Minimum score (0–100) Capt. Morfe requires to certify a player after the Academy |
 
 ### Student Session System (`session/` package)
 
