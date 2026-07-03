@@ -321,6 +321,7 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/bfp checkout` | Finalise and save the caller's session |
 | `/bfp reset [player]` | Wipe tutorial + delete DB row (no record kept) |
 | `/bfp tutorial [player]` | Reset tutorial + teleport to lobby + re-init NPCs |
+| `/bfp new_tutorial [player]` | Bare no-argument quick-test form, mirroring `/bfp tutorial` — teleports straight to `NewTutBuildingManager.DEFAULT_VIEWPOINT` (currently `officer_cruz`). |
 | `/bfp new_tutorial <section> [player]` | Teleport to a named F3-captured reference viewpoint inside the new tutorial building (`NewTutBuildingManager.VIEWPOINTS`) — plain teleport, no tutorial/session reset. One literal subcommand per map entry; currently only `officer_cruz`. Dev/admin tool for tuning NPC placement in-game (see `docs/major_plan.md`-style "needs in-game F3 tuning" tasks). |
 | `/bfp note <text>` | Append instructor observation to active session (bfp_notes column) |
 | `/bfp confidence <1-5>` | Set instructor confidence rating 1.0–5.0 (confidence column) |
