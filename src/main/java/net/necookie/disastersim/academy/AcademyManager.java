@@ -20,12 +20,14 @@ import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.network.AcademyStatusPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Entry point for the Academy (new tutorial building): dispatches NPC right-clicks to the
@@ -67,10 +69,22 @@ public final class AcademyManager {
 
     /** Called once per server tick from {@code SimulationManager.onServerTick}. */
     public static void tick(ServerLevel level) {
+        tickDialogues(level);
         CruzRoomManager.tick(level);
         ReyesRoomManager.tick(level);
         SantosRoomManager.tick(level);
         MorfeRoomManager.tick(level);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            UUID id = player.getUUID();
+            cancelDialogue(player);
+            CruzRoomManager.clearPlayer(id);
+            ReyesRoomManager.clearPlayer(id);
+            SantosRoomManager.clearPlayer(id);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -100,31 +114,94 @@ public final class AcademyManager {
         ));
     }
 
+    // -----------------------------------------------------------------------
+    // Dialogue sequencer — timed auto-advance instead of one line per click
+    // -----------------------------------------------------------------------
+
     /**
-     * Generic "print the next line in this list for this player" stepper, shared by all 4 rooms
-     * (each owns its own transient {@code stepMap}, matching the {@code ConcurrentHashMap<UUID,?>}
-     * idiom already used by {@code TutorialManager.holdOnTimers}/{@code DropAndRollManager}).
-     * Returns {@code true} only when the line just delivered was both the last in the list AND
-     * flagged {@code advancesPhase} — callers use that to trigger their own phase transition.
-     * Re-clicking after the list is exhausted repeats the final line rather than erroring.
+     * One player's in-progress playback of a phase's line list. {@code lines} is compared by
+     * reference (each {@code AcademyDialogue} line list is a distinct {@code static final} field,
+     * so this is safe and avoids needing a separate "which phase" key).
      */
-    public static boolean stepDialogue(ServerPlayer player, Map<UUID, Integer> stepMap,
-                                        List<AcademyDialogue.DialogueLine> lines) {
-        if (lines == null || lines.isEmpty()) return false;
-        UUID id = player.getUUID();
-        int step = Math.min(stepMap.getOrDefault(id, 0), lines.size() - 1);
-        AcademyDialogue.DialogueLine line = lines.get(step);
+    private static final class DialogueSession {
+        final List<AcademyDialogue.DialogueLine> lines;
+        int index;
+        long nextAdvanceTick;
+        final Runnable onComplete;
 
-        sendPrompt(player, line.text());
-        playNpcSound(player, line.soundKey());
-
-        boolean isLast = step == lines.size() - 1;
-        stepMap.put(id, isLast ? step : step + 1);
-        return isLast && line.advancesPhase();
+        DialogueSession(List<AcademyDialogue.DialogueLine> lines, Runnable onComplete) {
+            this.lines = lines;
+            this.onComplete = onComplete;
+        }
     }
 
-    /** Resets a player's dialogue cursor for a room — call whenever that room's phase changes. */
-    public static void resetDialogueStep(Map<UUID, Integer> stepMap, ServerPlayer player) {
-        stepMap.remove(player.getUUID());
+    private static final Map<UUID, DialogueSession> activeSessions = new ConcurrentHashMap<>();
+
+    private static final int MIN_LINE_TICKS = 60;  // 3s floor
+    private static final int MAX_LINE_TICKS = 200; // 10s ceiling
+    private static final int TICKS_PER_WORD = 5;   // ~0.25s/word reading pace
+
+    /**
+     * Starts (or, if this exact line list is already playing for this player, immediately
+     * advances) a timed dialogue sequence. Each line auto-advances after a reading-pace delay
+     * (see {@link #ticksFor}); clicking the NPC again while a line is showing skips ahead
+     * immediately instead of waiting. {@code onComplete} fires once, after the last line's delay
+     * elapses (or is skipped past) — callers put their phase-transition logic there instead of
+     * checking a returned boolean, since completion is no longer synchronous with the call that
+     * started the sequence.
+     */
+    public static void startOrAdvanceDialogue(ServerPlayer player, List<AcademyDialogue.DialogueLine> lines,
+                                               Runnable onComplete) {
+        if (lines == null || lines.isEmpty()) return;
+        UUID id = player.getUUID();
+        DialogueSession session = activeSessions.get(id);
+
+        if (session != null && session.lines == lines) {
+            advanceSession(player, session);
+            return;
+        }
+
+        session = new DialogueSession(lines, onComplete);
+        activeSessions.put(id, session);
+        playCurrentLine(player, session);
+    }
+
+    /** Drops a player's active session without firing its completion callback. */
+    public static void cancelDialogue(ServerPlayer player) {
+        activeSessions.remove(player.getUUID());
+    }
+
+    /** Called from {@link #tick} — auto-advances any session whose delay has elapsed. */
+    private static void tickDialogues(ServerLevel level) {
+        if (activeSessions.isEmpty()) return;
+        long now = level.getGameTime();
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+            DialogueSession session = activeSessions.get(player.getUUID());
+            if (session != null && now >= session.nextAdvanceTick) {
+                advanceSession(player, session);
+            }
+        }
+    }
+
+    private static void advanceSession(ServerPlayer player, DialogueSession session) {
+        session.index++;
+        if (session.index >= session.lines.size()) {
+            activeSessions.remove(player.getUUID());
+            session.onComplete.run();
+            return;
+        }
+        playCurrentLine(player, session);
+    }
+
+    private static void playCurrentLine(ServerPlayer player, DialogueSession session) {
+        AcademyDialogue.DialogueLine line = session.lines.get(session.index);
+        sendPrompt(player, line.text());
+        playNpcSound(player, line.soundKey());
+        session.nextAdvanceTick = ((ServerLevel) player.level()).getGameTime() + ticksFor(line.text());
+    }
+
+    private static int ticksFor(String text) {
+        int words = text.trim().isEmpty() ? 1 : text.trim().split("\\s+").length;
+        return Math.max(MIN_LINE_TICKS, Math.min(MAX_LINE_TICKS, words * TICKS_PER_WORD));
     }
 }

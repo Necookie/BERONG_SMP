@@ -71,6 +71,7 @@ public final class MorfeRoomManager {
                 + "Room 1 and run the drills again — everyone needs more than one pass sometimes. Dismissed."));
 
         data.mutate(player.getUUID(), AcademyProgress::resetAll);
+        AcademyManager.cancelDialogue(player);
         player.teleportTo(level, RETRY_X, RETRY_Y, RETRY_Z,
                 Collections.emptySet(), player.getYRot(), player.getXRot(), true);
     }

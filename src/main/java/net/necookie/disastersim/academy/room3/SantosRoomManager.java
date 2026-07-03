@@ -31,8 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class SantosRoomManager {
 
-    private static final Map<UUID, Integer> dialogueSteps = new ConcurrentHashMap<>();
-
     private static final List<BlockPos> TABLE_ROW = List.of(
             new BlockPos(-170, -33, 29),
             new BlockPos(-169, -33, 29),
@@ -65,20 +63,18 @@ public final class SantosRoomManager {
 
         SantosPhase phase = progress.santosPhase();
         List<AcademyDialogue.DialogueLine> lines = AcademyDialogue.SANTOS_LINES.get(phase);
-        boolean advance = AcademyManager.stepDialogue(player, dialogueSteps, lines);
-        if (!advance) return;
-
-        SantosPhase next = switch (phase) {
-            case NOT_STARTED -> SantosPhase.PRE_DRILL;
-            default -> phase; // condition-gated, not dialogue-gated
-        };
-        if (next != phase) {
-            data.mutate(player.getUUID(), p -> p.setSantosPhase(next));
-            AcademyManager.resetDialogueStep(dialogueSteps, player);
-            if (next == SantosPhase.PRE_DRILL) {
-                preDrillStartTick.put(player.getUUID(), level.getGameTime());
+        AcademyManager.startOrAdvanceDialogue(player, lines, () -> {
+            SantosPhase next = switch (phase) {
+                case NOT_STARTED -> SantosPhase.PRE_DRILL;
+                default -> phase; // condition-gated, not dialogue-gated
+            };
+            if (next != phase) {
+                data.mutate(player.getUUID(), p -> p.setSantosPhase(next));
+                if (next == SantosPhase.PRE_DRILL) {
+                    preDrillStartTick.put(player.getUUID(), level.getGameTime());
+                }
             }
-        }
+        });
     }
 
     public static void tick(ServerLevel level) {
@@ -149,5 +145,10 @@ public final class SantosRoomManager {
             }
         }
         return false;
+    }
+
+    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
+    public static void clearPlayer(UUID id) {
+        preDrillStartTick.remove(id);
     }
 }

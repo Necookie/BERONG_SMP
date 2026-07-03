@@ -46,8 +46,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ReyesRoomManager {
 
-    private static final Map<UUID, Integer> dialogueSteps = new ConcurrentHashMap<>();
-
     /** PLACEHOLDER positions inside Room 2's box; see docs/f3_tuning_todo.md. */
     private static final BlockPos CLASS_A_POS = new BlockPos(-165, -33, 20);      // ArchiveBoxStack -> ABC
     private static final BlockPos ELECTRICAL_POS = new BlockPos(-169, -33, 16);  // ComputerBlock -> CO2
@@ -75,17 +73,15 @@ public final class ReyesRoomManager {
 
         ReyesPhase phase = progress.reyesPhase();
         List<AcademyDialogue.DialogueLine> lines = AcademyDialogue.REYES_LINES.get(phase);
-        boolean advance = AcademyManager.stepDialogue(player, dialogueSteps, lines);
-        if (!advance) return;
-
-        ReyesPhase next = switch (phase) {
-            case NOT_STARTED -> ReyesPhase.TOOL_SELECTION;
-            default -> phase; // condition-gated, not dialogue-gated
-        };
-        if (next != phase) {
-            data.mutate(player.getUUID(), p -> p.setReyesPhase(next));
-            AcademyManager.resetDialogueStep(dialogueSteps, player);
-        }
+        AcademyManager.startOrAdvanceDialogue(player, lines, () -> {
+            ReyesPhase next = switch (phase) {
+                case NOT_STARTED -> ReyesPhase.TOOL_SELECTION;
+                default -> phase; // condition-gated, not dialogue-gated
+            };
+            if (next != phase) {
+                data.mutate(player.getUUID(), p -> p.setReyesPhase(next));
+            }
+        });
     }
 
     public static void tick(ServerLevel level) {
@@ -218,5 +214,10 @@ public final class ReyesRoomManager {
             return state.hasProperty(ComputerBlock.BURNING) && state.getValue(ComputerBlock.BURNING);
         }
         return HazardManager.isHazardous(state);
+    }
+
+    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
+    public static void clearPlayer(UUID id) {
+        igniteWindow.remove(id);
     }
 }

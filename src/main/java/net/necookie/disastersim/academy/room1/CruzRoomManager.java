@@ -38,8 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class CruzRoomManager {
 
-    private static final Map<UUID, Integer> dialogueSteps = new ConcurrentHashMap<>();
-
     private static final AABB BRIEFING_ZONE = new AABB(-154, -34, 38, -137, -30, 25);
     private static final AABB MAZE_ZONE     = new AABB(-135, -34, 38, -122, -30, 25);
     private static final AABB JUMP_ZONE     = new AABB(-122, -34, 38, -106, -30, 25);
@@ -80,21 +78,19 @@ public final class CruzRoomManager {
         CruzPhase phase = data.get(player.getUUID()).cruzPhase();
 
         List<AcademyDialogue.DialogueLine> lines = AcademyDialogue.CRUZ_LINES.get(phase);
-        boolean advance = AcademyManager.stepDialogue(player, dialogueSteps, lines);
-        if (!advance) return;
+        AcademyManager.startOrAdvanceDialogue(player, lines, () -> {
+            CruzPhase next = switch (phase) {
+                case NOT_STARTED -> CruzPhase.BRIEFING;
+                case GOSTOP_STAGE -> CruzPhase.GOSTOP_RUN;
+                default -> phase; // this phase's advancement is condition-gated, not dialogue-gated
+            };
+            if (next == phase) return;
 
-        CruzPhase next = switch (phase) {
-            case NOT_STARTED -> CruzPhase.BRIEFING;
-            case GOSTOP_STAGE -> CruzPhase.GOSTOP_RUN;
-            default -> phase; // this phase's advancement is condition-gated, not dialogue-gated
-        };
-        if (next == phase) return;
-
-        data.mutate(player.getUUID(), p -> p.setCruzPhase(next));
-        AcademyManager.resetDialogueStep(dialogueSteps, player);
-        if (next == CruzPhase.GOSTOP_RUN) {
-            startGoStop(level, player);
-        }
+            data.mutate(player.getUUID(), p -> p.setCruzPhase(next));
+            if (next == CruzPhase.GOSTOP_RUN) {
+                startGoStop(level, player);
+            }
+        });
     }
 
     public static void tick(ServerLevel level) {
@@ -239,7 +235,7 @@ public final class CruzRoomManager {
                         Collections.emptySet(), player.getYRot(), player.getXRot(), true);
                 data.mutate(id, p -> { p.setCruzPhase(CruzPhase.GOSTOP_STAGE); p.addMovementMistake(); });
                 goStopStates.remove(id);
-                AcademyManager.resetDialogueStep(dialogueSteps, player);
+                AcademyManager.cancelDialogue(player);
                 AcademyManager.sendPrompt(player, "§c[Officer Cruz] §7Whoa — you moved after STOP! Back to the "
                         + "staging line. Watch for my call and freeze the instant you hear it.");
                 return;
@@ -253,5 +249,11 @@ public final class CruzRoomManager {
                     + "and you know how to freeze on command. Follow the green floor arrows to Sgt. Reyes "
                     + "for your Fire Safety Drill!");
         }
+    }
+
+    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
+    public static void clearPlayer(UUID id) {
+        marksHit.remove(id);
+        goStopStates.remove(id);
     }
 }
