@@ -30,6 +30,7 @@ import net.necookie.disastersim.block.FireAlarmBlock;
 import net.necookie.disastersim.block.LightBulbBlock;
 import net.necookie.disastersim.block.LockerBlock;
 import net.necookie.disastersim.block.SinkBlock;
+import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.block.ToiletBlock;
 import net.necookie.disastersim.block.TrashCanBlock;
 import net.necookie.disastersim.block.FireHoseCabinetBlock;
@@ -257,6 +258,21 @@ public class BerongSMP {
                     .noOcclusion());
     public static final DeferredItem<BlockItem> COMPUTER_TABLE_ITEM = ITEMS.registerSimpleBlockItem("computer_table", COMPUTER_TABLE);
 
+    /**
+     * Extendable study/library table, 2 blocks tall (HALF=LOWER/UPPER like a vanilla tall
+     * flower) with a walkable kneehole underneath — the first placeable prop that gives players
+     * a real "duck and cover" shelter (see {@code DuckCoverHoldManager}). Lining tables up
+     * side by side (NORTH/SOUTH/EAST/WEST connections) merges them into one continuous tabletop.
+     */
+    public static final DeferredBlock<TableBlock> TABLE = BLOCKS.registerBlock("table",
+            TableBlock::new,
+            () -> Block.Properties.of()
+                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .strength(1.5f, 3.0f)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
+    public static final DeferredItem<BlockItem> TABLE_ITEM = ITEMS.registerSimpleBlockItem("table", TABLE);
+
     /** Dark oak classroom/office chair with gray cushion seat and backrest. */
     public static final DeferredBlock<ChairBlock> CHAIR = BLOCKS.registerBlock("chair",
             ChairBlock::new,
@@ -425,6 +441,7 @@ public class BerongSMP {
                 output.accept(FIRE_HOSE_CABINET_ITEM.get());
                 output.accept(BULLETIN_BOARD_ITEM.get());
                 output.accept(COMPUTER_TABLE_ITEM.get());
+                output.accept(TABLE_ITEM.get());
                 output.accept(CHAIR_ITEM.get());
                 output.accept(DRAWERS_ITEM.get());
                 output.accept(FILING_CABINET_ITEM.get());
@@ -664,6 +681,7 @@ public class BerongSMP {
         ALL_ITEM_MAP.put("fire_hose_cabinet", FIRE_HOSE_CABINET_ITEM);
         ALL_ITEM_MAP.put("bulletin_board", BULLETIN_BOARD_ITEM);
         ALL_ITEM_MAP.put("computer_table", COMPUTER_TABLE_ITEM);
+        ALL_ITEM_MAP.put("table", TABLE_ITEM);
         ALL_ITEM_MAP.put("chair", CHAIR_ITEM);
         ALL_ITEM_MAP.put("drawers", DRAWERS_ITEM);
         ALL_ITEM_MAP.put("filing_cabinet", FILING_CABINET_ITEM);

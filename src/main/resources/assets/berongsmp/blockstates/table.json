@@ -1,0 +1,11 @@
+{
+  "multipart": [
+    { "when": { "half": "lower" }, "apply": { "model": "berongsmp:block/table_lower_base" } },
+    { "when": { "half": "upper" }, "apply": { "model": "berongsmp:block/table_upper_base" } },
+
+    { "when": { "half": "upper", "north": "false" }, "apply": { "model": "berongsmp:block/table_apron" } },
+    { "when": { "half": "upper", "east": "false" },  "apply": { "model": "berongsmp:block/table_apron", "y": 90 } },
+    { "when": { "half": "upper", "south": "false" }, "apply": { "model": "berongsmp:block/table_apron", "y": 180 } },
+    { "when": { "half": "upper", "west": "false" },  "apply": { "model": "berongsmp:block/table_apron", "y": 270 } }
+  ]
+}
