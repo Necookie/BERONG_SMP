@@ -91,6 +91,20 @@ public class Config {
             .comment("Fires extinguished required to pass the fire simulation.")
             .defineInRange("passThresholdFire", 5, 1, 100);
 
+    public static final ModConfigSpec.IntValue ACADEMY_IGNITE_DEMO_TICKS = BUILDER
+            .comment("Ticks the player is set on fire for during Sgt. Reyes's scripted drop-and-roll "
+                   + "demo (20 ticks = 1s). Default: 100 = 5s, matching DropAndRollManager's own dropped-window size.")
+            .defineInRange("academyIgniteDemoTicks", 100, 20, 400);
+
+    public static final ModConfigSpec.IntValue ACADEMY_GOSTOP_GRACE_TICKS = BUILDER
+            .comment("Grace period (ticks) after Officer Cruz calls STOP before movement counts as a "
+                   + "violation in the Go/Stop tunnel (20 ticks = 1s).")
+            .defineInRange("academyGoStopGraceTicks", 20, 0, 100);
+
+    public static final ModConfigSpec.IntValue ACADEMY_PASS_THRESHOLD = BUILDER
+            .comment("Minimum score (0-100) Capt. Morfe requires to certify a player after the Academy.")
+            .defineInRange("academyPassThreshold", 70, 0, 100);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean validateItemName(final Object obj) {
