@@ -1,6 +1,16 @@
 {
   "multipart": [
-    { "apply": { "model": "berongsmp:block/table_base" } },
+    { "apply": { "model": "berongsmp:block/table_top" } },
+
+    { "when": { "north": "false", "west": "false" }, "apply": { "model": "berongsmp:block/table_leg" } },
+    { "when": { "north": "false", "east": "false" }, "apply": { "model": "berongsmp:block/table_leg", "y": 90 } },
+    { "when": { "south": "false", "east": "false" }, "apply": { "model": "berongsmp:block/table_leg", "y": 180 } },
+    { "when": { "south": "false", "west": "false" }, "apply": { "model": "berongsmp:block/table_leg", "y": 270 } },
+
+    { "when": { "north": "false" }, "apply": { "model": "berongsmp:block/table_stretcher" } },
+    { "when": { "east": "false" },  "apply": { "model": "berongsmp:block/table_stretcher", "y": 90 } },
+    { "when": { "south": "false" }, "apply": { "model": "berongsmp:block/table_stretcher", "y": 180 } },
+    { "when": { "west": "false" },  "apply": { "model": "berongsmp:block/table_stretcher", "y": 270 } },
 
     { "when": { "north": "false" }, "apply": { "model": "berongsmp:block/table_apron" } },
     { "when": { "east": "false" },  "apply": { "model": "berongsmp:block/table_apron", "y": 90 } },

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "leg": "berongsmp:block/table_leg_wood_dark",
+    "particle": "berongsmp:block/table_leg_wood_dark"
+  },
+  "elements": [
+    {
+      "name": "stretcher_north",
+      "from": [3, 4, 1], "to": [13, 5, 3],
+      "faces": {
+        "north": { "texture": "#leg", "uv": [0, 0, 10, 1] },
+        "south": { "texture": "#leg", "uv": [0, 0, 10, 1] },
+        "east":  { "texture": "#leg", "uv": [0, 0, 2, 1] },
+        "west":  { "texture": "#leg", "uv": [0, 0, 2, 1] },
+        "up":    { "texture": "#leg", "uv": [0, 0, 10, 2] },
+        "down":  { "texture": "#leg", "uv": [0, 0, 10, 2] }
+      }
+    }
+  ]
+}
