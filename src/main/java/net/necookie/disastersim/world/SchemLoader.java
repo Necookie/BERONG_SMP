@@ -34,7 +34,13 @@ import java.io.InputStream;
  * Places a Sponge Schematic v2/v3 (.schem) file into the world at a given origin.
  * Supports 0–3 counter-clockwise 90° rotations; directional block states are
  * also rotated so stairs, doors, etc. face the correct direction.
- * Entities (item frames, paintings) are also spawned from the Entities tag.
+ *
+ * <p>Entities from the Entities tag are spawned too. Item frames/glow item frames get dedicated
+ * handling (see {@link #spawnItemFrame}) because Sponge's stored {@code Pos} for them is the
+ * *entity's own* floating block, not a generic world-space coordinate the vanilla deserializer
+ * expects unassisted. Every other entity type — including modded ones like the mob
+ * {@code berongsmp:custom_npc} — goes through the fully generic {@link EntityType#create} path,
+ * so no special-casing is needed to support new mob/decoration types a schematic might bake in.
  */
 public class SchemLoader implements StructurePlacer {
 
@@ -186,11 +192,16 @@ public class SchemLoader implements StructurePlacer {
         int placedW = (ccwRotations % 2 == 0) ? schemWidth  : schemLength;
         int placedL = (ccwRotations % 2 == 0) ? schemLength : schemWidth;
 
-        // Remove existing item frames in the footprint to prevent duplicates on re-place.
+        // Remove any pre-existing non-player entities in the footprint to prevent duplicates on
+        // re-place — schematics can bake in mobs (e.g. berongsmp:custom_npc) and armor stands now,
+        // not just decoration entities, so this can no longer be scoped to ItemFrame alone.
+        // Players are explicitly excluded so a re-place while someone is standing in the footprint
+        // (e.g. a session restore) never discards them.
         AABB bounds = new AABB(
                 origin.getX(), origin.getY() - 1, origin.getZ(),
                 origin.getX() + placedW, origin.getY() + schemHeight + 1, origin.getZ() + placedL);
-        level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ItemFrame.class, bounds, e -> true)
+        level.getEntitiesOfClass(Entity.class, bounds,
+                e -> !(e instanceof net.minecraft.world.entity.player.Player))
              .forEach(Entity::discard);
 
         int spawned = 0;
@@ -228,24 +239,6 @@ public class SchemLoader implements StructurePlacer {
             double worldX = origin.getX() + rotX;
             double worldY = origin.getY() + relY;
             double worldZ = origin.getZ() + rotZ;
-
-            // Build spawn NBT: copy entity data, fix id casing, and write world-space Pos.
-            CompoundTag spawnNbt = entityTag.copy();
-            spawnNbt.putString("id", entityId);
-
-            ListTag worldPos = new ListTag();
-            worldPos.add(DoubleTag.valueOf(worldX));
-            worldPos.add(DoubleTag.valueOf(worldY));
-            worldPos.add(DoubleTag.valueOf(worldZ));
-            spawnNbt.put("Pos", worldPos);
-
-            // Rotate Facing byte: 0=Down,1=Up,2=North,3=South,4=West,5=East
-            byte rotatedFacing = 2; // default NORTH
-            Tag facingTag = spawnNbt.get("Facing");
-            if (facingTag instanceof net.minecraft.nbt.NumericTag facingNum) {
-                rotatedFacing = rotateFacingByte((byte) facingNum.intValue(), ccwRotations);
-                spawnNbt.putByte("Facing", rotatedFacing);
-            }
 
             BerongSMP.LOGGER.debug("[SchemLoader] Spawning {} at world ({}, {}, {})",
                     entityId, (int) worldX, (int) worldY, (int) worldZ);
@@ -287,6 +280,43 @@ public class SchemLoader implements StructurePlacer {
                     spawned++;
                 }
                 continue;
+            }
+
+            // Sponge v3 nests the entity's *actual* Minecraft save data under "Data" — "Id"/"Pos"
+            // are Sponge-level metadata siblings, not part of it. Deserializing entityTag directly
+            // (as this used to) left every real field (Health, equipment, and critically
+            // CustomNpcEntity's own "NpcType") invisible to EntityType.create, so every custom_npc
+            // silently fell back to its default type instead of the one it was copied as.
+            CompoundTag spawnNbt = entityTag.getCompound("Data").map(CompoundTag::copy).orElseGet(CompoundTag::new);
+            spawnNbt.putString("id", entityId);
+
+            ListTag worldPos = new ListTag();
+            worldPos.add(DoubleTag.valueOf(worldX));
+            worldPos.add(DoubleTag.valueOf(worldY));
+            worldPos.add(DoubleTag.valueOf(worldZ));
+            spawnNbt.put("Pos", worldPos);
+
+            // BlockAttachedEntity subclasses (Painting, leash knots, ...) anchor themselves via a
+            // "block_pos" field independent of "Pos", read with a 16-block sanity check against the
+            // entity's actual position — left un-rotated/un-translated it still points at the
+            // *original* copy location, fails that check, and the entity refuses to attach (logged
+            // by vanilla as "Block-attached entity at invalid position"). The un-rotated outer Pos
+            // is already the same block this represents (both are integer-valued for these types),
+            // so just re-derive it from the already-correct world position rather than duplicating
+            // the rotation math a second time.
+            if (spawnNbt.get("block_pos") != null) {
+                IntArrayTag worldBlockPos = new IntArrayTag(new int[]{
+                        (int) Math.floor(worldX), (int) Math.floor(worldY), (int) Math.floor(worldZ)});
+                spawnNbt.put("block_pos", worldBlockPos);
+            }
+
+            // Rotate a facing byte wherever this entity type stores one (e.g. Painting's lowercase
+            // "facing"; capitalized "Facing" is item-frame-only and item frames never reach here).
+            for (String facingKey : new String[]{"facing", "Facing"}) {
+                Tag facingTag = spawnNbt.get(facingKey);
+                if (facingTag instanceof net.minecraft.nbt.NumericTag facingNum) {
+                    spawnNbt.putByte(facingKey, rotateFacingByte((byte) facingNum.intValue(), ccwRotations));
+                }
             }
 
             try (ProblemReporter.ScopedCollector reporter =
