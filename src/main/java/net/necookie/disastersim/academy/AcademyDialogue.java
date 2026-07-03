@@ -68,10 +68,31 @@ public final class AcademyDialogue {
             new DialogueLine("§6[Sgt. Reyes] §7Go ahead, take them off the wall! Walk up and click on each one.", false)
         ),
         ReyesPhase.LIVE_FIRE_DEMO, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fHere we go — three real hazards, right in front of you! Remember: PULL the pin, AIM low at the base, SQUEEZE the handle, SWEEP side to side. Match the right extinguisher to the right fire!", false)
+            new DialogueLine("§6[Sgt. Reyes] §7Stick with it, trainee — remember PASS: PULL the pin, AIM low at the base, SQUEEZE the handle, SWEEP side to side. Match the right extinguisher to each fire!", false)
         ),
         ReyesPhase.DONE, List.of(
             new DialogueLine("§6[Sgt. Reyes] §fYou've mastered all three fire classes and how to handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — you're doing amazing!", false)
+        )
+    );
+
+    /**
+     * Per-hazard explanation lines for Sgt. Reyes's sequential Room 2 teaching — index 0 = Class A,
+     * 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s fixed order.
+     * Each explains what's on fire, which extinguisher, and why, before that hazard ignites (the
+     * ignition is triggered by this sequence's completion, not by a separate click).
+     */
+    public static final List<List<DialogueLine>> REYES_HAZARD_LINES = List.of(
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fFirst up — that stack of document boxes! Paper and cardboard are Class A materials, ordinary combustibles.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fGrab your §cred ABC extinguisher§f and put it out — aim at the base, sweep side to side!", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fNext — that computer's sparking! This is a Class C electrical fire.", false),
+            new DialogueLine("§6[Sgt. Reyes] §cNever use water or foam here.§f Grab the §aGreen CO2 extinguisher§f — it won't conduct electricity back into you!", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fLast one — that pan of oil is a Class F/K kitchen fire! Regular extinguishers can make grease fires explode.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fGrab the §eyellow wet chemical extinguisher§f — it cools and seals the oil safely!", true)
         )
     );
 

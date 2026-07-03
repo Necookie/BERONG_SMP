@@ -26,37 +26,58 @@ import net.necookie.disastersim.world.HazardManager;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Room 2 — Sgt. Reyes's Fire Safety Drill. Gated on Room 1 ({@link CruzPhase#DONE}).
  *
- * <p>The 3 hazard props aren't part of the schematic — {@link #placeAndIgniteHazards} places them
- * itself once the player has all 3 extinguishers, at placeholder positions inside Room 2's box
- * (see {@code docs/f3_tuning_todo.md}), then forces each straight to its failure/burning state via
- * {@link HazardManager#forceFailure} — the same deterministic, session-nullable entry point
- * {@code HazardWandItem} already uses for manual testing, so no randomness is involved.
+ * <p>Teaches one hazard at a time, in a fixed order (Class A → electrical → kitchen): Reyes
+ * explains what's on fire and why that specific extinguisher before it ignites (the explanation's
+ * completion is what triggers {@link #igniteHazard}, not the player clicking again), then the
+ * player must defuse it with the *correct* tool before moving on — a wrong-tool defuse
+ * re-ignites the same hazard via {@link HazardManager#forceFailure} (the same deterministic,
+ * session-nullable entry point {@code HazardWandItem} uses for manual testing) rather than just a
+ * warning, so getting it right is actually required, without touching the shared
+ * {@code HazardManager}/extinguisher-item code (those still let any tool mechanically succeed on
+ * non-kitchen props — this room's own logic is what enforces "the right one" here).
  *
- * <p>Correct-tool attribution is done by watching each position's active-hazard flag for a
- * true→false transition while this player is nearby holding an item — not by any new signal from
- * {@code HazardManager}/the extinguisher items themselves, since today only the 5 kitchen props
- * get an automatic "wrong tool" warning (the other two hazard classes silently succeed with either
- * extinguisher). This keeps the scoring accurate without touching that shared system.
+ * <p>Once all 3 are correctly handled, Reyes's scripted "you caught fire" demo ignites the player;
+ * the fire is kept topped up every tick (never left to burn down on its own) until
+ * {@link DropAndRollManager#isDropped} is observed true, so the player actually has to drop and
+ * roll rather than the fire just expiring on a timer — {@code Config.ACADEMY_IGNITE_DEMO_TICKS} is
+ * a safety-cap timeout, not the real duration.
  */
 public final class ReyesRoomManager {
 
     /** PLACEHOLDER positions inside Room 2's box; see docs/f3_tuning_todo.md. */
-    private static final BlockPos CLASS_A_POS = new BlockPos(-165, -33, 20);      // ArchiveBoxStack -> ABC
-    private static final BlockPos ELECTRICAL_POS = new BlockPos(-169, -33, 16);  // ComputerBlock -> CO2
-    private static final BlockPos KITCHEN_POS = new BlockPos(-172, -33, 12);     // UnattendedGreasePan -> wet chemical
+    private static final BlockPos CLASS_A_POS = new BlockPos(-165, -33, 20);
+    private static final BlockPos ELECTRICAL_POS = new BlockPos(-169, -33, 16);
+    private static final BlockPos KITCHEN_POS = new BlockPos(-172, -33, 12);
+
+    private record HazardStep(BlockPos pos, Supplier<BlockState> blockState,
+                               Class<? extends AbstractExtinguisherItem> correctTool) {}
+
+    /** Fixed teaching order: Class A -> electrical -> kitchen. */
+    private static final List<HazardStep> HAZARDS = List.of(
+            new HazardStep(CLASS_A_POS, () -> BerongSMP.ARCHIVE_BOX_STACK.get().defaultBlockState(), FireExtinguisherItem.class),
+            new HazardStep(ELECTRICAL_POS, () -> BerongSMP.COMPUTER.get().defaultBlockState(), CO2ExtinguisherItem.class),
+            new HazardStep(KITCHEN_POS, () -> BerongSMP.UNATTENDED_GREASE_PAN.get().defaultBlockState(), WetChemicalExtinguisherItem.class)
+    );
 
     private static final double NEAR_RANGE_SQ = 6.0 * 6.0;
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
+    private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
 
     /** World-shared "was this position an active hazard last tick" snapshot (not per-player — see class doc). */
     private static final Map<BlockPos, Boolean> lastActive = new ConcurrentHashMap<>();
-    /** Per-player countdown for the scripted ignite-demo window; absent when not currently on fire from it. */
+    /** Which hazard index (0-2) each player is currently working on; absent until LIVE_FIRE_DEMO starts. */
+    private static final Map<UUID, Integer> currentHazard = new ConcurrentHashMap<>();
+    /** The hazard index whose explanation dialogue has already been kicked off, so it's only started once. */
+    private static final Map<UUID, Integer> explainedHazard = new ConcurrentHashMap<>();
+    /** Per-player safety-cap countdown for the scripted ignite demo; absent when not currently active. */
     private static final Map<UUID, Integer> igniteWindow = new ConcurrentHashMap<>();
 
     private ReyesRoomManager() {}
@@ -114,11 +135,10 @@ public final class ReyesRoomManager {
             }
             return;
         }
-        data.mutate(player.getUUID(), p -> p.setReyesPhase(ReyesPhase.LIVE_FIRE_DEMO));
-        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fHere we go — three real hazards, right in front of "
-                + "you! Remember: PULL the pin, AIM low, SQUEEZE the handle, SWEEP side to side. "
-                + "Match the right extinguisher to the right fire!");
-        placeAndIgniteHazards(level);
+        UUID id = player.getUUID();
+        data.mutate(id, p -> p.setReyesPhase(ReyesPhase.LIVE_FIRE_DEMO));
+        currentHazard.put(id, 0);
+        explainedHazard.remove(id);
     }
 
     private static boolean hasAllExtinguishers(ServerPlayer player) {
@@ -128,65 +148,41 @@ public final class ReyesRoomManager {
                 && inventory.contains(stack -> stack.is(BerongSMP.WET_CHEMICAL_EXTINGUISHER.get()));
     }
 
-    private static void placeAndIgniteHazards(ServerLevel level) {
-        level.setBlock(CLASS_A_POS, BerongSMP.ARCHIVE_BOX_STACK.get().defaultBlockState(), 3);
-        level.setBlock(ELECTRICAL_POS, BerongSMP.COMPUTER.get().defaultBlockState(), 3);
-        level.setBlock(KITCHEN_POS, BerongSMP.UNATTENDED_GREASE_PAN.get().defaultBlockState(), 3);
-
-        HazardManager.forceFailure(level, null, CLASS_A_POS, null);
-        HazardManager.forceFailure(level, null, ELECTRICAL_POS, null);
-        HazardManager.forceFailure(level, null, KITCHEN_POS, null);
-
-        lastActive.put(CLASS_A_POS, true);
-        lastActive.put(ELECTRICAL_POS, true);
-        lastActive.put(KITCHEN_POS, true);
-    }
-
     private static void tickLiveFireDemo(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
-        checkDefuse(player, data, CLASS_A_POS, FireExtinguisherItem.class);
-        checkDefuse(player, data, ELECTRICAL_POS, CO2ExtinguisherItem.class);
-        boolean kitchenJustDefused = checkDefuse(player, data, KITCHEN_POS, WetChemicalExtinguisherItem.class);
+        int idx = currentHazard.getOrDefault(id, 0);
 
-        if (kitchenJustDefused && !igniteWindow.containsKey(id)) {
-            int ticks = Config.ACADEMY_IGNITE_DEMO_TICKS.get();
-            player.setRemainingFireTicks(ticks);
-            igniteWindow.put(id, ticks);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cWatch out — you caught a spark! Hit Shift, then "
-                    + "press R to Drop and Roll it out — just like we practice!");
+        if (idx >= HAZARDS.size()) {
+            tickIgniteDemo(player, data);
+            return;
         }
 
-        Integer remaining = igniteWindow.get(id);
-        if (remaining != null) {
-            if (DropAndRollManager.isDropped(id)) {
-                data.mutate(id, p -> p.setDropAndRollPerformed(true));
-                igniteWindow.remove(id);
-                AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aThat's it — smothered! You just put "
-                        + "yourself out safely. Great reflexes!");
-            } else if (remaining - 1 <= 0) {
-                igniteWindow.remove(id);
-            } else {
-                igniteWindow.put(id, remaining - 1);
-            }
+        if (!Objects.equals(explainedHazard.get(id), idx)) {
+            explainedHazard.put(id, idx);
+            HazardStep hazard = HAZARDS.get(idx);
+            AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx),
+                    () -> igniteHazard(level, hazard));
+            return; // wait for the explanation to finish before this hazard even ignites
         }
 
-        boolean allHandled = !isActive(level, CLASS_A_POS) && !isActive(level, ELECTRICAL_POS) && !isActive(level, KITCHEN_POS);
-        if (allHandled && !igniteWindow.containsKey(id)) {
-            data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fYou've mastered all three fire classes and how "
-                    + "to handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — "
-                    + "you're doing amazing!");
+        if (checkAndHandleDefuse(player, data, HAZARDS.get(idx))) {
+            currentHazard.put(id, idx + 1);
         }
+    }
+
+    private static void igniteHazard(ServerLevel level, HazardStep hazard) {
+        level.setBlock(hazard.pos(), hazard.blockState().get(), 3);
+        HazardManager.forceFailure(level, null, hazard.pos(), null);
+        lastActive.put(hazard.pos(), true);
     }
 
     /**
-     * Returns true only on the exact tick {@code pos} transitions from active-hazard to safe while
-     * this player is nearby — awards/penalizes scoring based on whether they were holding
-     * {@code correctTool} at that moment.
+     * Returns {@code true} only when this hazard was just correctly defused (advances the
+     * sequence). A wrong-tool defuse re-ignites the same hazard instead of advancing.
      */
-    private static boolean checkDefuse(ServerPlayer player, AcademySavedData data, BlockPos pos,
-                                        Class<? extends AbstractExtinguisherItem> correctTool) {
+    private static boolean checkAndHandleDefuse(ServerPlayer player, AcademySavedData data, HazardStep hazard) {
         ServerLevel level = (ServerLevel) player.level();
+        BlockPos pos = hazard.pos();
         boolean activeNow = isActive(level, pos);
         boolean wasActive = lastActive.getOrDefault(pos, false);
         lastActive.put(pos, activeNow);
@@ -194,15 +190,18 @@ public final class ReyesRoomManager {
         if (!wasActive || activeNow) return false;
         if (player.position().distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5) > NEAR_RANGE_SQ) return false;
 
-        boolean usedCorrectTool = correctTool.isInstance(player.getMainHandItem().getItem());
-        data.mutate(player.getUUID(), p -> {
-            if (usedCorrectTool) p.addFireCorrectUse(); else p.addFireWrongUse();
-        });
-        AcademyManager.sendPrompt(player, usedCorrectTool
-                ? "§6[Sgt. Reyes] §aPerfect! That's exactly the right tool for that fire."
-                : "§6[Sgt. Reyes] §cHold on — that's not the right extinguisher for this one! "
-                  + "Think about what's burning before you spray.");
-        return true;
+        boolean usedCorrectTool = hazard.correctTool().isInstance(player.getMainHandItem().getItem());
+        if (usedCorrectTool) {
+            data.mutate(player.getUUID(), AcademyProgress::addFireCorrectUse);
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aPerfect! That's exactly the right tool for that fire.");
+            return true;
+        }
+
+        data.mutate(player.getUUID(), AcademyProgress::addFireWrongUse);
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cThat's the wrong extinguisher — the fire flares "
+                + "right back up! Think about what's burning and try again.");
+        igniteHazard(level, hazard);
+        return false;
     }
 
     private static boolean isActive(ServerLevel level, BlockPos pos) {
@@ -213,8 +212,62 @@ public final class ReyesRoomManager {
         return HazardManager.isHazardous(state);
     }
 
+    /**
+     * The scripted "you caught fire" demo. The fire is re-topped-up every tick (never left to
+     * naturally count down to 0) until {@link DropAndRollManager#isDropped} is observed true, so
+     * the lesson always requires an actual drop-and-roll instead of the fire just expiring on a
+     * timer; {@code Config.ACADEMY_IGNITE_DEMO_TICKS} is only a safety-cap fallback in case the
+     * player never rolls at all.
+     */
+    private static void tickIgniteDemo(ServerPlayer player, AcademySavedData data) {
+        UUID id = player.getUUID();
+        Integer remaining = igniteWindow.get(id);
+
+        if (remaining == null) {
+            int cap = Config.ACADEMY_IGNITE_DEMO_TICKS.get();
+            igniteWindow.put(id, cap);
+            player.setRemainingFireTicks(cap);
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cWatch out — you caught a spark! Hit Shift, then "
+                    + "press R to Drop and Roll it out — just like we practice!");
+            return;
+        }
+
+        if (DropAndRollManager.isDropped(id)) {
+            player.clearFire();
+            data.mutate(id, p -> p.setDropAndRollPerformed(true));
+            igniteWindow.remove(id);
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aThat's it — smothered! You just put "
+                    + "yourself out safely. Great reflexes!");
+            finishRoom(player, data);
+            return;
+        }
+
+        player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), FIRE_REFRESH_TICKS));
+
+        if (remaining - 1 <= 0) {
+            // Safety-cap timeout — they never rolled. Clear it and move on anyway (forgiving).
+            player.clearFire();
+            igniteWindow.remove(id);
+            finishRoom(player, data);
+        } else {
+            igniteWindow.put(id, remaining - 1);
+        }
+    }
+
+    private static void finishRoom(ServerPlayer player, AcademySavedData data) {
+        UUID id = player.getUUID();
+        data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
+        currentHazard.remove(id);
+        explainedHazard.remove(id);
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fYou've mastered all three fire classes and how to "
+                + "handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — "
+                + "you're doing amazing!");
+    }
+
     /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
     public static void clearPlayer(UUID id) {
         igniteWindow.remove(id);
+        currentHazard.remove(id);
+        explainedHazard.remove(id);
     }
 }
