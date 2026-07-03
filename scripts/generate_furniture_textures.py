@@ -484,6 +484,33 @@ def tex_fire_hose_window():
     save(im, "fire_hose_window")
 
 
+
+# ---------------------------------------------------------------------------
+# TableBlock — extendable classroom/library study table with a walkable
+# kneehole underneath (real duck-and-cover shelter, not just a decorative
+# desk like ComputerTableBlock). Warm wood palette to read as separate
+# furniture from the black-metal computer desk.
+# ---------------------------------------------------------------------------
+
+def tex_table_top_oak():
+    base = (196, 154, 108)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.88)
+    speckle(im, [scale(base, 0.85), scale(base, 1.15)], density=0.05)
+    inset_edges(im, 0, 0, W - 1, H - 1, (222, 184, 138), (140, 104, 68))
+    border(im, (110, 78, 48))
+    save(im, "table_top_oak")
+
+
+def tex_table_leg_wood_dark():
+    base = (66, 45, 32)
+    im = new_canvas(base)
+    vertical_brush(im, 1, 0, 14, 15, base, stripe=1.15)
+    inset_edges(im, 0, 0, W - 1, H - 1, (92, 65, 46), (34, 22, 15))
+    border(im, (24, 15, 10))
+    save(im, "table_leg_wood_dark")
+
+
 ALL = [
     tex_desk_laminate_white, tex_desk_leg_metal_black, tex_desk_cable_panel_dark,
     tex_chair_frame_black, tex_chair_mesh_fabric, tex_chair_cushion_fabric,
@@ -499,6 +526,7 @@ ALL = [
     tex_ceramic_glossy_white, tex_fixture_chrome,
     tex_fan_housing_white, tex_fan_blade_matte,
     tex_hose_cabinet_body_red, tex_fire_hose_window,
+    tex_table_top_oak, tex_table_leg_wood_dark,
 ]
 
 if __name__ == "__main__":
