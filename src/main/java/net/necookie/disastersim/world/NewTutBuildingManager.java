@@ -40,9 +40,17 @@ public final class NewTutBuildingManager {
      *
      * <p>{@code officer_cruz}: F3 reading X=-148.570 Y=-33.00000 Z=32.248, facing west (yaw
      * 88.3°) — the point in the Extinguisher Types section facing Officer Cruz's NPC.
+     *
+     * <p>{@code sgt_reyes}/{@code sgt_santos}/{@code capt_morfe} aren't F3-captured "facing"
+     * shots yet (unlike {@code officer_cruz}) — they're just each NPC's own anchor position (see
+     * {@code academy.room1/2/3/4} for where these same coordinates are used in the actual room
+     * logic), with yaw/pitch left at 0 as a placeholder until a real facing angle is captured.
      */
     public static final Map<String, Viewpoint> VIEWPOINTS = Map.of(
-            "officer_cruz", new Viewpoint(-148.570, -33.0, 32.248, 88.3f, 0f)
+            "officer_cruz", new Viewpoint(-148.570, -33.0, 32.248, 88.3f, 0f),
+            "sgt_reyes", new Viewpoint(-172.5, -33.0, 17.5, 0f, 0f),
+            "sgt_santos", new Viewpoint(-170.5, -33.0, 33.5, 0f, 0f),
+            "capt_morfe", new Viewpoint(-108.5, -33.0, 77.5, 0f, 0f)
     );
 
     /**

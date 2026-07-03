@@ -89,6 +89,34 @@ from `LobbyManager.LOBBY_POS = (0,-33,0)`. Verify each after loading the lobby s
 
 ---
 
+## 6. Academy (New Tutorial Building) — Room 1 Sub-Coordinates
+
+**Why:** `NewTutBuildingManager.POS`, all 4 NPC anchors, and the Room 3 table row are confirmed
+against the schematic's actual placed entity data (see `docs/new_tutorial_script.md`'s coordinate
+table). The finer marks *inside* Room 1 (Officer Cruz's Movement School) were given descriptively
+by the user, not as exact F3 readings, and are currently placeholder positions in
+`academy/room1/CruzRoomManager.java`.
+
+**What to capture:**
+
+| Item | Current placeholder | File to update |
+|---|---|---|
+| 4 green floor marks (Phase 1: Briefing) | `(-150,-33,34)`, `(-146,-33,30)`, `(-142,-33,34)`, `(-139,-33,30)` | `CruzRoomManager.GREEN_MARKS` |
+| Maze exit point (Phase 2, used for the waypoint arrow) | `(-121.5,-33,31.5)` | `CruzRoomManager.MAZE_EXIT_POINT` |
+| Jump obstacle line(s) (Phase 3) — not currently enforced per-obstacle, only "reached the far edge" | none (zone-only gate) | `CruzRoomManager.tickJump` |
+| Jump zone exit point (used for the waypoint arrow) | `(-105.5,-33,31.5)` | `CruzRoomManager.JUMP_EXIT_POINT` |
+
+**What to capture:** Walk each spot with F3 and note the exact `X Y Z`. For the jump obstacles,
+also note whether per-obstacle jump enforcement is worth adding (currently the room only checks
+that the player reached the zone's far edge, not that they actually jumped over anything — a
+deliberate simplification while positions were unverified, matching the old tutorial's forgiving
+style of not punishing imperfect technique on non-critical steps).
+
+**Also verify while there:** `NewTutBuildingManager.VIEWPOINTS`'s `sgt_reyes`/`sgt_santos`/
+`capt_morfe` entries currently reuse each NPC's own anchor position with yaw/pitch left at 0 (no
+captured "facing" shot yet, unlike `officer_cruz`). Capture a proper facing angle for each and
+update those three entries the same way `officer_cruz` was captured.
+
 ## After updating coordinates
 
 1. Rebuild: `./gradlew compileJava`
