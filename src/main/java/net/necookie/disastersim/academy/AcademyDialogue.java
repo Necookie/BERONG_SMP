@@ -4,13 +4,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Dialogue lines for Officer Cruz, Sgt. Reyes, and Sgt. Santos, keyed by the player's current
- * phase in that NPC's room. Pattern-cloned from {@code tutorial/NpcDialogue}'s
+ * Dialogue lines for Officer Cruz, Sgt. Reyes, Sgt. Santos, and Capt. Morfe, keyed by the player's
+ * current phase in that NPC's room. Pattern-cloned from {@code tutorial/NpcDialogue}'s
  * {@code DialogueLine}/{@code Map<Stage, List<DialogueLine>>} shape, but per-room instead of one
  * shared global stage. Full script and voice notes: {@code docs/new_tutorial_script.md}.
  *
- * <p>Capt. Morfe has no entry here — his evaluation line is score-dependent (built at runtime by
- * {@code room4.AcademyScoring}/{@code room4.MorfeRoomManager}), not static canned text.
+ * <p>Voice rules (non-gamer friendly): the exact key/button is named in §e in every instruction
+ * ("hold the §eW key§f", "press and hold §eShift§f"), one clear action per line, warm and
+ * reassuring — many students have never played Minecraft before.
+ *
+ * <p>Capt. Morfe now has static entries too ({@link #MORFE_LINES}, {@link #MORFE_PASS_LINES},
+ * {@link #MORFE_FAIL_LINES}) — only the score number itself is built at runtime by
+ * {@code room4.MorfeRoomManager}/{@code room4.AcademyScoring}.
  *
  * <p>{@code advancesPhase} only applies to the handful of transitions dialogue itself gates (e.g.
  * a room's opening speech ending and sending the player off to do something). Movement/condition
@@ -30,29 +35,29 @@ public final class AcademyDialogue {
 
     public static final Map<CruzPhase, List<DialogueLine>> CRUZ_LINES = Map.of(
         CruzPhase.NOT_STARTED, List.of(
-            new DialogueLine("§a[Officer Cruz] §fWelcome to the Academy, trainee! I'm Officer Cruz, and before we run, jump, or duck for anything — we start with the basics that keep you in control.", false),
-            new DialogueLine("§a[Officer Cruz] §fFirst, your eyes! Move your mouse to look around. Get comfortable turning your head left, right, up, and down — you'll need to spot hazards fast in a real emergency.", false),
-            new DialogueLine("§a[Officer Cruz] §fNow for your feet — §eW-A-S-D§f moves you: W forward, S back, A left, D right. See those four green marks on the floor? Walk to each one. Take your time, there's no rush yet!", false),
-            new DialogueLine("§a[Officer Cruz] §fOnce you've stepped on all four, come find me again and we'll move on to something trickier.", true)
+            new DialogueLine("§a[Officer Cruz] §fHi there, trainee — welcome to the Academy! I'm Officer Cruz, and I'll walk with you every step of the way. First time playing? That's perfectly fine — we'll go slow and easy.", false),
+            new DialogueLine("§a[Officer Cruz] §fLet's start with your eyes. Move your §emouse§f gently to look around — left, right, up, down. Try it right now! Looking around calmly is the very first emergency skill.", false),
+            new DialogueLine("§a[Officer Cruz] §fNow your feet! Hold the §eW key§f to walk forward, the §eS key§f to back up, and §eA§f and §eD§f to step left and right. See the four §abright green tiles§f on the floor? Walk onto each one — I'll come with you!", false),
+            new DialogueLine("§a[Officer Cruz] §fTake all the time you need. Once you've stood on all four green tiles, we'll move on together. Off you go — I'm right behind you!", true)
         ),
         CruzPhase.BRIEFING, List.of(
-            new DialogueLine("§a[Officer Cruz] §7Still looking for the marks? They're glowing green on the floor — follow the arrows if you need a hand!", false)
+            new DialogueLine("§a[Officer Cruz] §7Looking for the green tiles? Watch for the tall beam of green light — that's your next one. Hold the §eW key§f and walk toward it. You've got this!", false)
         ),
         CruzPhase.MAZE, List.of(
-            new DialogueLine("§a[Officer Cruz] §7Bumping into walls slows you down in a real evacuation! Look at the green arrows and turn your camera before you turn your feet.", false)
+            new DialogueLine("§a[Officer Cruz] §7Walls in the way? That's okay! Move your §emouse§7 to look down the open path first, THEN hold §eW§7 to walk. Look first, walk second.", false)
         ),
         CruzPhase.JUMP, List.of(
-            new DialogueLine("§a[Officer Cruz] §7Keep your momentum! Walk straight at it and tap Spacebar right before you'd hit it.", false)
+            new DialogueLine("§a[Officer Cruz] §7To hop a hurdle: keep holding §eW§7 and tap the §eSpacebar§7 just before you reach it. Missed one? No problem — back up and try again!", false)
         ),
         CruzPhase.GOSTOP_STAGE, List.of(
-            new DialogueLine("§a[Officer Cruz] §fLast lesson, and it's the most important one — knowing when to §eGO§f and when to §cSTOP§f. Low slabs ahead mean you'll need to hold §eShift§f to crouch and slip under them.", false),
-            new DialogueLine("§a[Officer Cruz] §fHere's the drill: when I call §a§lGO!§r§f, keep moving forward. The instant I call §c§lSTOP!§r§f, freeze right where you are — real emergencies have moments where rushing forward is exactly the wrong move. Ready? Here we go!", true)
+            new DialogueLine("§a[Officer Cruz] §fLast lesson — my favorite: knowing when to §aGO§f and when to §cSTOP§f. See the low boards in the tunnel ahead? Press and hold §eShift§f to crouch, and you'll slip right under them while you walk.", false),
+            new DialogueLine("§a[Officer Cruz] §fHere's how it works: when I call §a§lGO!§r§f, hold §eW§f and keep walking. When I call §c§lSTOP!§r§f, let go of every key and stand perfectly still. In a real emergency, stopping at the right moment keeps you safe. Ready? Let's go!", true)
         ),
         CruzPhase.GOSTOP_RUN, List.of(
-            new DialogueLine("§a[Officer Cruz] §7Stay sharp — GO when I say go, STOP when I say stop!", false)
+            new DialogueLine("§a[Officer Cruz] §7Listen for my call! §aGO§7 means walk (hold §eW§7). §cSTOP§7 means let go of all the keys and freeze.", false)
         ),
         CruzPhase.DONE, List.of(
-            new DialogueLine("§a[Officer Cruz] §fOutstanding! You've got sharp eyes, steady feet, and you know how to freeze on command. Follow the green floor arrows to Sgt. Reyes for your Fire Safety Drill!", false)
+            new DialogueLine("§a[Officer Cruz] §fYou did it! You can look, walk, jump, crouch, and stop on command — that's everything you need. Now follow the glowing arrow to §6Sgt. Reyes§f for the Fire Safety Drill. She's friendly, I promise!", false)
         )
     );
 
@@ -60,39 +65,39 @@ public final class AcademyDialogue {
 
     public static final Map<ReyesPhase, List<DialogueLine>> REYES_LINES = Map.of(
         ReyesPhase.NOT_STARTED, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fWelcome, trainee! I'm Sergeant Reyes, and fire doesn't care about your feelings — so we're going to learn exactly which tool beats which fire.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fSee those three extinguishers on the wall? §cRed§f is your ABC extinguisher, for ordinary stuff like paper and wood. §aGreen§f is CO2, for electrical fires — never water, never foam, just CO2! §eYellow§f is wet chemical, for kitchen grease and cooking oil fires.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fGrab all three off the wall. You'll need each one in a minute — I'm about to show you three real hazards, and only the right tool will put each one out!", true)
+            new DialogueLine("§6[Sgt. Reyes] §fHello, trainee — great to meet you! I'm Sergeant Reyes. Today you'll learn something that saves real lives: matching the right fire extinguisher to the right fire.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLook at the wall — three extinguishers. §cRED (ABC)§f is for ordinary things like paper and wood. §aGREEN (CO2)§f is for electrical fires — never water on those! §eYELLOW (wet chemical)§f is for kitchen oil and grease fires.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLet's get you equipped: walk up to each extinguisher and hit it with your §eleft mouse button§f — it pops off the wall, then walk over it to pick it up. Grab all three and we'll practice on some safe training fires!", true)
         ),
         ReyesPhase.TOOL_SELECTION, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §7Go ahead, take them off the wall! Walk up and click on each one.", false)
+            new DialogueLine("§6[Sgt. Reyes] §7Walk right up to each extinguisher and click it with your §eleft mouse button§7 — it pops off the wall, then step onto it to pick it up. You need all three!", false)
         ),
         ReyesPhase.LIVE_FIRE_DEMO, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §7Stick with it, trainee — remember PASS: PULL the pin, AIM low at the base, SQUEEZE the handle, SWEEP side to side. Match the right extinguisher to each fire!", false)
+            new DialogueLine("§6[Sgt. Reyes] §7To use an extinguisher: press its §enumber key (1-9)§7 to hold it, aim at the §ebase§7 of the fire, and §ehold the right mouse button§7. Match the color to what's burning — you can do it!", false)
         ),
         ReyesPhase.DONE, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fYou've mastered all three fire classes and how to handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — you're doing amazing!", false)
+            new DialogueLine("§6[Sgt. Reyes] §fThree fires, three perfect matches — and you even put yourself out safely. I'm proud of you! Follow the glowing arrow to §6Sgt. Santos§f for the Earthquake Drill.", false)
         )
     );
 
     /**
      * Per-hazard explanation lines for Sgt. Reyes's sequential Room 2 teaching — index 0 = Class A,
      * 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s fixed order.
-     * Each explains what's on fire, which extinguisher, and why, before that hazard ignites (the
-     * ignition is triggered by this sequence's completion, not by a separate click).
+     * Each explains what's on fire, which extinguisher, and exactly how to use it, before that
+     * hazard ignites (the ignition is triggered by this sequence's completion, not a separate click).
      */
     public static final List<List<DialogueLine>> REYES_HAZARD_LINES = List.of(
         List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fFirst up — that stack of document boxes! Paper and cardboard are Class A materials, ordinary combustibles.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fGrab your §cred ABC extinguisher§f and put it out — aim at the base, sweep side to side!", true)
+            new DialogueLine("§6[Sgt. Reyes] §fFirst practice fire — that stack of paper boxes! Paper and cardboard are \"Class A\": ordinary materials.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fPress your §cRED ABC extinguisher§f's number key to hold it, walk close, aim at the §ebase§f of the fire, and §ehold the right mouse button§f. Sweep side to side!", true)
         ),
         List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fNext — that computer's sparking! This is a Class C electrical fire.", false),
-            new DialogueLine("§6[Sgt. Reyes] §cNever use water or foam here.§f Grab the §aGreen CO2 extinguisher§f — it won't conduct electricity back into you!", true)
+            new DialogueLine("§6[Sgt. Reyes] §fNext — that computer is sparking! That's an electrical fire, \"Class C\".", false),
+            new DialogueLine("§6[Sgt. Reyes] §cNever use water or foam on electrical fires§f — electricity can travel back to you! Hold your §aGREEN CO2 extinguisher§f, get close, and §ehold the right mouse button§f to put it out.", true)
         ),
         List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fLast one — that pan of oil is a Class F/K kitchen fire! Regular extinguishers can make grease fires explode.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fGrab the §eyellow wet chemical extinguisher§f — it cools and seals the oil safely!", true)
+            new DialogueLine("§6[Sgt. Reyes] §fLast one — that pan of cooking oil just caught fire! Grease fires are special: the wrong extinguisher can make them splash and spread.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fHold your §eYELLOW wet chemical extinguisher§f, aim at the pan, and §ehold the right mouse button§f. It cools the oil and seals it safely. Nice and steady!", true)
         )
     );
 
@@ -100,20 +105,44 @@ public final class AcademyDialogue {
 
     public static final Map<SantosPhase, List<DialogueLine>> SANTOS_LINES = Map.of(
         SantosPhase.NOT_STARTED, List.of(
-            new DialogueLine("§6[Sgt. Santos] §fGreat work in there! I'm Sergeant Santos, and earthquakes strike without any warning at all — no countdown, no siren first. That's exactly why we drill for it.", false),
-            new DialogueLine("§6[Sgt. Santos] §fSee that reinforced table glowing green? That's your designated safe zone. When the ground starts shaking, that's exactly where you're headed.", false),
-            new DialogueLine("§6[Sgt. Santos] §fRemember the three words: §e§lDROP — COVER — HOLD ON!§r§f Drop low so you don't fall. Get cover under something solid. Hold on and stay there until the shaking stops completely.", false),
-            new DialogueLine("§6[Sgt. Santos] §fReady? I'm starting the drill now — brace yourself!", true)
+            new DialogueLine("§6[Sgt. Santos] §fWell done getting this far! I'm Sergeant Santos. Earthquakes are different from fires — they give §cno warning at all§f. So we practice until the right move is automatic.", false),
+            new DialogueLine("§6[Sgt. Santos] §fSee that sturdy table glowing green? That's your safe spot. When the shaking starts, walk under it — hold the §eW key§f to move, then press and hold §eShift§f to crouch down low.", false),
+            new DialogueLine("§6[Sgt. Santos] §fRemember three words: §e§lDROP — COVER — HOLD ON!§r§f DROP down low (hold §eShift§f), take COVER under the table, and HOLD ON — stay there until the shaking completely stops.", false),
+            new DialogueLine("§6[Sgt. Santos] §fReady to try? The floor is about to shake — it's only practice, you're completely safe. Head for that glowing table the moment it starts!", true)
         ),
         SantosPhase.PRE_DRILL, List.of(
-            new DialogueLine("§6[Sgt. Santos] §7Get ready — the ground won't stay still much longer!", false)
+            new DialogueLine("§6[Sgt. Santos] §7Any second now — keep your eyes on that glowing green table!", false)
         ),
         SantosPhase.QUAKE_ACTIVE, List.of(
-            new DialogueLine("§6[Sgt. Santos] §7Get back under the table! The ground is still moving!", false)
+            new DialogueLine("§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to walk there, then press and hold §eShift§7 to crouch — and stay put!", false)
         ),
         SantosPhase.DONE, List.of(
-            new DialogueLine("§6[Sgt. Santos] §fThe shaking has stopped. Good composure out there — that's exactly how it's done. Proceed to Captain Morfe for your final debrief.", false)
+            new DialogueLine("§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, covered, and held on like a pro! One last stop: follow the glowing arrow to §cCaptain Morfe§f for your results. Stand tall — you've earned it.", false)
         )
+    );
+
+    // ── Capt. Morfe — Evaluation ─────────────────────────────────────────────
+
+    public static final Map<MorfePhase, List<DialogueLine>> MORFE_LINES = Map.of(
+        MorfePhase.NOT_STARTED, List.of(
+            new DialogueLine("§c[Capt. Morfe] §fWelcome, trainee — I'm Captain Morfe, and it's an honor to meet you. You've walked with Cruz, fought fires with Reyes, and held steady through Santos's earthquake.", false),
+            new DialogueLine("§c[Capt. Morfe] §fEvery instructor sent me their notes, and I've put your full record together. Take a breath — let's see how you did.", false)
+        ),
+        MorfePhase.EVALUATED_PASS, List.of(
+            new DialogueLine("§c[Capt. Morfe] §fYou're already certified, trainee — no need to prove anything twice! Head out and enjoy the simulations. Stay sharp out there!", false)
+        )
+    );
+
+    /** Played after the score printout when the player passes; the certification moment. */
+    public static final List<DialogueLine> MORFE_PASS_LINES = List.of(
+        new DialogueLine("§c[Capt. Morfe] §fSteady feet, the right extinguisher every time, and calm under a shaking roof. That's a passing record — §a§lyou are officially certified!§r", false),
+        new DialogueLine("§c[Capt. Morfe] §fBe proud of yourself — what you practiced today protects real people in real life. You're cleared for the full simulations. Congratulations, trainee!", false)
+    );
+
+    /** Played after the score printout on a fail; the retry reset fires once these finish. */
+    public static final List<DialogueLine> MORFE_FAIL_LINES = List.of(
+        new DialogueLine("§c[Capt. Morfe] §fYou're not quite there yet — and that is completely okay. Even our best firefighters ran these drills more than once.", false),
+        new DialogueLine("§c[Capt. Morfe] §fI'm sending you back to Officer Cruz for another practice run. Take it slow, listen to each instructor, and I'll be waiting right here to certify you. You can do this!", false)
     );
 
     private AcademyDialogue() {}
