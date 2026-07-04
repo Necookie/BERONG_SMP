@@ -3,6 +3,7 @@ package net.necookie.disastersim.world;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
@@ -83,6 +84,7 @@ public final class NewTutBuildingManager {
         if (placed) {
             BerongSMP.LOGGER.info("New tutorial building placed at {}", POS);
             discardDuplicateCruz(level);
+            placeGreenMarks(level);
         } else {
             BerongSMP.LOGGER.error("Failed to place new tutorial building ({}) at {}", SCHEM_PATH, POS);
         }
@@ -98,5 +100,32 @@ public final class NewTutBuildingManager {
         if (!duplicates.isEmpty()) {
             BerongSMP.LOGGER.info("Discarded {} duplicate Officer Cruz entity/entities from the old tunnel-finish spot", duplicates.size());
         }
+    }
+
+    /**
+     * Floor blocks (Y=-34, flush with the surrounding floor) swapped to lime concrete under the
+     * 4 WASD marks — the standing cells one block above these are
+     * {@code CruzRoomManager.GREEN_MARKS}. The schematic itself contains no green blocks in the
+     * briefing zone at all (verified by parsing it), so without this the marks are invisible
+     * trigger points. Lime concrete over green wool: brightest green in vanilla, flat texture
+     * that reads as a painted floor marker, non-flammable (Room 2 spawns real fire in this
+     * building), and the closest match to {@code AcademyVisuals.DEFAULT_HIGHLIGHT_COLOR}.
+     *
+     * <p>Permanent per-placement fixup like {@link #discardDuplicateCruz}: {@link SchemLoader}
+     * re-places the original floor on every server start, so this must re-run after every
+     * placement — never mistake it for a one-time migration.
+     */
+    private static final List<BlockPos> GREEN_MARK_FLOOR = List.of(
+            new BlockPos(-150, -34, 34),
+            new BlockPos(-146, -34, 30),
+            new BlockPos(-142, -34, 34),
+            new BlockPos(-139, -34, 30)
+    );
+
+    private static void placeGreenMarks(ServerLevel level) {
+        for (BlockPos pos : GREEN_MARK_FLOOR) {
+            level.setBlock(pos, Blocks.LIME_CONCRETE.defaultBlockState(), 3);
+        }
+        BerongSMP.LOGGER.info("Placed {} lime concrete WASD marks in the Academy briefing zone", GREEN_MARK_FLOOR.size());
     }
 }

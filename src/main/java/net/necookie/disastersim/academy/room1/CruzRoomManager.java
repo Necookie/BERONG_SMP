@@ -17,7 +17,6 @@ import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -310,15 +309,13 @@ public final class CruzRoomManager {
         Set<Integer> hits = marksHit.computeIfAbsent(id, k -> new HashSet<>());
         Vec3 pos = player.position();
         int nextMark = -1;
-        List<BlockPos> unhitMarks = new ArrayList<>();
         for (int i = 0; i < GREEN_MARKS.size(); i++) {
             if (hits.contains(i)) continue;
             BlockPos mark = GREEN_MARKS.get(i);
             if (pos.distanceToSqr(mark.getX() + 0.5, mark.getY(), mark.getZ() + 0.5) <= MARK_RADIUS_SQ) {
                 hits.add(i);
-            } else {
-                unhitMarks.add(mark);
-                if (nextMark < 0) nextMark = i;
+            } else if (nextMark < 0) {
+                nextMark = i;
             }
         }
         if (hits.size() >= GREEN_MARKS.size()) {
@@ -328,10 +325,12 @@ public final class CruzRoomManager {
                     + "Follow the green arrows through this maze — steer your camera, not just forward!");
             return;
         }
-        if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
-            AcademyVisuals.highlightBlocks(level, unhitMarks);
-        }
+        // Only the NEXT mark gets the particle marker — the physical lime concrete tiles
+        // (NewTutBuildingManager.placeGreenMarks) keep all four permanently visible.
         if (nextMark >= 0) {
+            if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+                AcademyVisuals.highlightBlocks(level, List.of(GREEN_MARKS.get(nextMark)));
+            }
             AcademyVisuals.setCompassTarget(player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
