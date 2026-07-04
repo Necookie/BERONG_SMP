@@ -92,6 +92,9 @@ public final class NewTutBuildingManager {
             BerongSMP.LOGGER.info("New tutorial building placed at {}", POS);
             discardDuplicateCruz(level);
             placeGreenMarks(level);
+            // Self-healing: make sure the Tool Selection Wall's 3 extinguisher frames exist and
+            // are filled, even if the schematic's own copies failed to spawn for any reason.
+            net.necookie.disastersim.academy.room2.ReyesRoomManager.restockExtinguisherFrames(level);
         } else {
             BerongSMP.LOGGER.error("Failed to place new tutorial building ({}) at {}", SCHEM_PATH, POS);
         }

@@ -1,10 +1,16 @@
 package net.necookie.disastersim.academy.room2;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.GlowItemFrame;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
@@ -284,6 +290,42 @@ public final class ReyesRoomManager {
     /** Room 2's box (with ceiling headroom) — the sweep area for leftover vanilla fire. */
     private static final BlockPos ROOM_MIN = new BlockPos(-173, -34, 10);
     private static final BlockPos ROOM_MAX = new BlockPos(-162, -28, 23);
+
+    /** One wall slot on the Tool Selection Wall (Z=10, faces south into the room). */
+    private record FrameSpec(BlockPos pos, Supplier<Item> item) {}
+
+    /** The three extinguisher glow item frames, schematic-verified positions. */
+    private static final List<FrameSpec> EXTINGUISHER_FRAMES = List.of(
+            new FrameSpec(new BlockPos(-170, -32, 10), () -> BerongSMP.FIRE_EXTINGUISHER.get().asItem()),
+            new FrameSpec(new BlockPos(-168, -32, 10), () -> BerongSMP.CO2_EXTINGUISHER.get().asItem()),
+            new FrameSpec(new BlockPos(-166, -32, 10), () -> BerongSMP.WET_CHEMICAL_EXTINGUISHER.get().asItem())
+    );
+
+    /**
+     * Restocks the Tool Selection Wall: refills each of the three glow item frames with its
+     * extinguisher, respawning any frame entity that's gone entirely. The schematic only restores
+     * the wall on a full server reboot ({@code SchemLoader} re-places entities at placement time) —
+     * a mid-session restart via {@code /bfp new_tutorial [reset]} or a Capt. Morfe fail previously
+     * left the frames empty (the previous run took the items) or missing (popped/burned), so the
+     * next trainee couldn't complete TOOL_SELECTION at all. Called from both reset paths and,
+     * self-healingly, right after building placement.
+     */
+    public static void restockExtinguisherFrames(ServerLevel level) {
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            BlockPos pos = spec.pos();
+            AABB cell = new AABB(pos.getX(), pos.getY(), pos.getZ(),
+                    pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+            List<ItemFrame> frames = level.getEntitiesOfClass(ItemFrame.class, cell);
+            ItemFrame frame;
+            if (frames.isEmpty()) {
+                frame = new GlowItemFrame(level, pos, Direction.SOUTH);
+                level.addFreshEntity(frame);
+            } else {
+                frame = frames.get(0);
+            }
+            frame.setItem(new ItemStack(spec.item().get()));
+        }
+    }
 
     /**
      * Removes the 3 code-spawned hazard props and any leftover vanilla fire in Room 2. The props

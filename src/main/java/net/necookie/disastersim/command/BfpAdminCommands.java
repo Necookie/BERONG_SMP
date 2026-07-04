@@ -27,6 +27,7 @@ import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.academy.room1.CruzRoomManager;
+import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
@@ -424,6 +425,9 @@ public class BfpAdminCommands {
         // Snap Officer Cruz back to her briefing anchor so the restarting trainee always finds
         // her right beside them — not stranded wherever the previous run's escort ended.
         CruzRoomManager.resetCruz(level);
+        // Refill the Tool Selection Wall — the previous run took the extinguishers off it, and
+        // the schematic only restores the frames on a full server reboot.
+        ReyesRoomManager.restockExtinguisherFrames(level);
         target.teleportTo(level, startViewpoint.x(), startViewpoint.y(), startViewpoint.z(),
                 java.util.Collections.emptySet(), startViewpoint.yaw(), startViewpoint.pitch(), true);
         ctx.getSource().sendSuccess(() -> Component.literal(

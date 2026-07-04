@@ -81,6 +81,7 @@ public final class MorfeRoomManager {
         AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_FAIL_LINES, () -> {
             data.mutate(player.getUUID(), AcademyProgress::resetAll);
             ReyesRoomManager.cleanupHazardProps(level);
+            ReyesRoomManager.restockExtinguisherFrames(level);
             CruzRoomManager.resetCruz(level);
             player.teleportTo(level, RETRY_X, RETRY_Y, RETRY_Z,
                     Collections.emptySet(), player.getYRot(), player.getXRot(), true);
