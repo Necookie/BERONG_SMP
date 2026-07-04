@@ -69,6 +69,8 @@ public final class CruzRoomManager {
 
     private static final Vec3 MAZE_EXIT_POINT = new Vec3(-121.5, -33.0, 31.5);
     private static final Vec3 JUMP_EXIT_POINT = new Vec3(-105.5, -33.0, 31.5);
+    /** East edge of the jump zone — the hurdles' finish line (last hurdle row is at X=-111). */
+    private static final double JUMP_FINISH_X = -106.0;
 
     /**
      * Schem-verified route through the maze's serpentine (walls at X=-131 open only at Z=25,
@@ -214,7 +216,13 @@ public final class CruzRoomManager {
             case BRIEFING -> nextUnhitMarkFor(escortTarget);
             case MAZE -> currentWaypoint(escortTarget, MAZE_WAYPOINTS);
             case JUMP -> currentWaypoint(escortTarget, JUMP_WAYPOINTS);
-            case GOSTOP_STAGE, GOSTOP_RUN -> STAGING_POS;
+            // Waits at the tunnel entrance while she briefs...
+            case GOSTOP_STAGE -> STAGING_POS;
+            // ...then follows the player THROUGH the slab tunnel during the run. She can't crouch
+            // under the 1.5-block slab lanes, so each lane blocks her path — the stuck-recovery
+            // below then poofs her to the player's side, reading as the instructor keeping pace
+            // barrier by barrier instead of being left behind at the entrance.
+            case GOSTOP_RUN -> escortTarget.position();
             default -> null;
         };
         if (target == null) return;
@@ -425,7 +433,11 @@ public final class CruzRoomManager {
 
     private static void tickJump(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
-        if (!JUMP_ZONE.contains(player.position())) {
+        // Directional finish line: the hurdles are only "cleared" by exiting EAST past the last
+        // one (X=-111). The old any-direction check (!JUMP_ZONE.contains) also fired when the
+        // player stepped backward into the maze, silently skipping them ahead to Go/Stop without
+        // ever jumping a single hurdle.
+        if (player.getX() >= JUMP_FINISH_X) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.GOSTOP_STAGE));
             waypointIdx.remove(id);
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fAll hurdles cleared — you're a natural! "
