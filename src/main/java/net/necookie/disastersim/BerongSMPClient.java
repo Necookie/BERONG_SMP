@@ -50,6 +50,10 @@ public class BerongSMPClient {
         
         // Register client-specific tick listener to the NeoForge event bus
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onClientTick);
+        // Reset every HUD's static caption/shake/compass state on disconnect and reconnect, so
+        // nothing (e.g. earthquake camera shake) can persist across a world exit/rejoin.
+        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onLoggingOut);
+        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onLoggingIn);
         // Drive camera shake for earthquake simulations
         NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
         // Drive camera shake for QUAKE tutorial stages
