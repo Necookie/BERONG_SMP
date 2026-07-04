@@ -104,6 +104,7 @@ public final class AcademyManager {
         ReyesRoomManager.clearPlayer(player);
         SantosRoomManager.clearPlayer(player);
         AcademyVisuals.clearPlayer(id);
+        AcademyGuardrails.clearPlayer(id);
     }
 
     // -----------------------------------------------------------------------
