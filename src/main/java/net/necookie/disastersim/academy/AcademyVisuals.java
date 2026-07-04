@@ -2,6 +2,7 @@ package net.necookie.disastersim.academy;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -14,33 +15,54 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Shared visual helpers for the Academy: a per-block green highlight (Sgt. Santos's safe-zone
- * table row, Officer Cruz's green floor marks — see {@link #highlightBlocks}) and a compass-style
- * waypoint arrow ("follow the green floor arrows" — several dialogue lines say this literally, see
- * {@code client.AcademyCompassHud}). Both used to be traced with {@code ParticleTypes.HAPPY_VILLAGER}
- * (the same idiom {@code world/AssemblyZone.spawnBorderParticles} still uses), which reads as a
- * chaotic swirl of little green notes rather than a clean highlight — {@link #highlightBlocks} now
- * uses {@link DustParticleOptions} instead (the same jitter-free, custom-RGB particle
- * {@code WetChemicalExtinguisherItem}'s foam mist already relies on), which holds still and renders
- * as a crisp glowing dot, plus a soft top-face glow so a highlighted block reads as a lit-up marker
- * tile rather than just an empty wireframe box. The compass needle moved further, off particles
- * entirely, onto a client-rendered HUD ({@code client.AcademyCompassHud}) driven by
- * {@link AcademyCompassPayload}; {@link #setCompassTarget} only sends a packet when the target
- * actually changes, since the needle's rotation itself is recomputed client-side every render
- * frame from the local player's own position/view angle.
+ * Shared visual helpers for the Academy.
+ *
+ * <p><b>Block marker</b> ({@link #highlightBlocks}): a beginner-friendly "go here" beacon —
+ * four corner posts framing the tile, a pulsing ring breathing above it, a beacon-beam column of
+ * fading dust rising ~3 blocks (spottable from across a room), and a bright END_ROD sparkle at the
+ * beam top. Replaced two earlier designs: a {@code HAPPY_VILLAGER} swirl (chaotic green notes) and
+ * a plain 12-edge dust wireframe (clean but flat — invisible past a few blocks and easy to read as
+ * decor rather than an objective). All colored elements are {@link DustParticleOptions} tinted by
+ * the {@code color} parameter, so future markers (red danger, yellow caution, ...) reuse this
+ * exact routine.
+ *
+ * <p><b>Compass needle</b> ({@link #setCompassTarget}): a client-rendered HUD needle
+ * ({@code client.AcademyCompassHud}) driven by {@link AcademyCompassPayload}; only sends a packet
+ * when the target actually changes, since the needle's rotation is recomputed client-side every
+ * render frame from the local player's own position/view angle.
  */
 public final class AcademyVisuals {
 
     /** Default highlight color — a clean, saturated "safe/target" green, chosen for contrast against most floors/walls. */
     public static final int DEFAULT_HIGHLIGHT_COLOR = 0x3CFF6E;
-    private static final float HIGHLIGHT_EDGE_SCALE = 1.15f;
-    private static final float HIGHLIGHT_GLOW_SCALE = 0.9f;
+
+    // ── Marker geometry — corner posts + pulsing ring + beacon beam + END_ROD cap ──
+    /** Corner posts sit this far inside the block edge. */
+    private static final double POST_INSET = 0.1;
+    private static final double POST_HEIGHT = 1.2;
+    /** Dust points per corner post (16 total across the 4 posts). */
+    private static final int POST_POINTS = 4;
+    private static final float POST_SCALE = 1.3f;
+    private static final int RING_POINTS = 8;
+    private static final double RING_BASE_RADIUS = 0.45;
+    private static final double RING_PULSE_AMPLITUDE = 0.15;
+    /** Radians per game tick — one full breath roughly every 1.25 s. */
+    private static final double RING_PULSE_SPEED = 0.25;
+    private static final double RING_Y_OFFSET = 1.05;
+    private static final float RING_SCALE = 1.0f;
+    private static final int BEAM_POINTS = 6;
+    private static final double BEAM_START_Y = 1.2;
+    /** Beam top lands at y0 + 3.2 — tall enough to spot over furniture from across a room. */
+    private static final double BEAM_HEIGHT = 2.0;
+    private static final float BEAM_SCALE_MAX = 1.5f;
+    private static final float BEAM_SCALE_MIN = 0.4f;
+    private static final double CAP_Y_OFFSET = 3.3;
 
     private AcademyVisuals() {}
 
     /**
-     * Traces a clean green wireframe + soft top-face glow around each block in {@code positions}
-     * using the default color. Call periodically (e.g. every 5 ticks).
+     * Draws the full marker (posts + pulsing ring + beam + cap) on each block in {@code positions}
+     * using the default green. Call periodically (e.g. every 5 ticks).
      */
     public static void highlightBlocks(ServerLevel level, Collection<BlockPos> positions) {
         highlightBlocks(level, positions, DEFAULT_HIGHLIGHT_COLOR);
@@ -58,33 +80,37 @@ public final class AcademyVisuals {
     }
 
     private static void highlightBlock(ServerLevel level, BlockPos pos, int color) {
-        double x0 = pos.getX(), x1 = pos.getX() + 1;
-        double y0 = pos.getY(), y1 = pos.getY() + 1;
-        double z0 = pos.getZ(), z1 = pos.getZ() + 1;
+        double x0 = pos.getX(), y0 = pos.getY(), z0 = pos.getZ();
+        double cx = x0 + 0.5, cz = z0 + 0.5;
+        DustParticleOptions dustPost = new DustParticleOptions(color, POST_SCALE);
+        DustParticleOptions dustRing = new DustParticleOptions(color, RING_SCALE);
 
-        // Bottom perimeter
-        edge(level, x0, y0, z0, x1, y0, z0, color);
-        edge(level, x1, y0, z0, x1, y0, z1, color);
-        edge(level, x1, y0, z1, x0, y0, z1, color);
-        edge(level, x0, y0, z1, x0, y0, z0, color);
-        // Top perimeter
-        edge(level, x0, y1, z0, x1, y1, z0, color);
-        edge(level, x1, y1, z0, x1, y1, z1, color);
-        edge(level, x1, y1, z1, x0, y1, z1, color);
-        edge(level, x0, y1, z1, x0, y1, z0, color);
-        // Vertical corners
-        edge(level, x0, y0, z0, x0, y1, z0, color);
-        edge(level, x1, y0, z0, x1, y1, z0, color);
-        edge(level, x1, y0, z1, x1, y1, z1, color);
-        edge(level, x0, y0, z1, x0, y1, z1, color);
-        // Soft glow sprinkled across the top face — reads as a lit-up marker tile, not an empty box.
-        glowTop(level, pos, color);
-    }
-
-    private static void glowTop(ServerLevel level, BlockPos pos, int color) {
-        double cx = pos.getX() + 0.5, cy = pos.getY() + 1.02, cz = pos.getZ() + 0.5;
-        level.sendParticles(new DustParticleOptions(color, HIGHLIGHT_GLOW_SCALE),
-                cx, cy, cz, 3, 0.32, 0.02, 0.32, 0.0);
+        // 1. Four corner posts — a readable "claimed tile" footprint even up close.
+        double[][] corners = {
+                {x0 + POST_INSET, z0 + POST_INSET}, {x0 + 1 - POST_INSET, z0 + POST_INSET},
+                {x0 + 1 - POST_INSET, z0 + 1 - POST_INSET}, {x0 + POST_INSET, z0 + 1 - POST_INSET}};
+        for (double[] c : corners) {
+            for (int i = 0; i < POST_POINTS; i++) {
+                double y = y0 + POST_HEIGHT * i / (POST_POINTS - 1);
+                level.sendParticles(dustPost, c[0], y, c[1], 1, 0, 0, 0, 0);
+            }
+        }
+        // 2. Pulsing top ring — the "this exact spot" cue; radius breathes with game time.
+        double radius = RING_BASE_RADIUS + RING_PULSE_AMPLITUDE * Math.sin(level.getGameTime() * RING_PULSE_SPEED);
+        for (int k = 0; k < RING_POINTS; k++) {
+            double angle = (Math.PI * 2 / RING_POINTS) * k;
+            level.sendParticles(dustRing, cx + radius * Math.cos(angle), y0 + RING_Y_OFFSET,
+                    cz + radius * Math.sin(angle), 1, 0, 0, 0, 0);
+        }
+        // 3. Beacon-beam column — fading dust rising 2 blocks, spottable from across a room.
+        for (int i = 0; i < BEAM_POINTS; i++) {
+            float t = (float) i / (BEAM_POINTS - 1);
+            float scale = BEAM_SCALE_MAX - (BEAM_SCALE_MAX - BEAM_SCALE_MIN) * t;
+            level.sendParticles(new DustParticleOptions(color, scale),
+                    cx, y0 + BEAM_START_Y + BEAM_HEIGHT * t, cz, 1, 0.02, 0, 0.02, 0);
+        }
+        // 4. Bright white END_ROD cap — a color-independent sparkle marking the beam top.
+        level.sendParticles(ParticleTypes.END_ROD, cx, y0 + CAP_Y_OFFSET, cz, 1, 0, 0, 0, 0);
     }
 
     /** Last target actually sent to each player; used to dedupe {@link #setCompassTarget} calls. */
@@ -118,15 +144,5 @@ public final class AcademyVisuals {
     /** Called from {@code AcademyManager}'s logout handler to drop this player's dedupe cache. */
     public static void clearPlayer(UUID id) {
         lastSentTarget.remove(id);
-    }
-
-    private static void edge(ServerLevel level, double x0, double y0, double z0, double x1, double y1, double z1, int color) {
-        int steps = 6;
-        for (int i = 0; i <= steps; i++) {
-            double t = (double) i / steps;
-            level.sendParticles(new DustParticleOptions(color, HIGHLIGHT_EDGE_SCALE),
-                    x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, z0 + (z1 - z0) * t,
-                    1, 0.0, 0.0, 0.0, 0.0);
-        }
     }
 }
