@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
@@ -15,13 +16,16 @@ import net.necookie.disastersim.entity.CustomNpcEntity;
 import java.util.Collections;
 
 /**
- * Room 4 — Capt. Cesar Morfe Jr.'s Evaluation. Gated on Room 3 ({@link SantosPhase#DONE}). Unlike
- * the other three NPCs, Morfe has no static {@code AcademyDialogue} entry — his verdict is
- * score-dependent, computed fresh by {@link AcademyScoring} on every interaction.
+ * Room 4 — Capt. Cesar Morfe Jr.'s Evaluation. Gated on Room 3 ({@link SantosPhase#DONE}).
  *
- * <p>On fail, resets the player's entire {@link AcademyProgress} (phases and scoring counters
- * alike, for a clean retry — no lifetime/historical tracking in this pass) and teleports them back
- * to Room 1's briefing zone.
+ * <p>Morfe's greeting, verdict, and retry send-off are static {@link AcademyDialogue} lines
+ * ({@code MORFE_LINES}/{@code MORFE_PASS_LINES}/{@code MORFE_FAIL_LINES}) played through the
+ * shared timed sequencer, just like the other three instructors — only the score number and the
+ * weak-areas list are built at runtime by {@link AcademyScoring}.
+ *
+ * <p>On fail, the reset (full {@link AcademyProgress} wipe, Room 2 hazard-prop cleanup, teleport
+ * back to Room 1's briefing zone) fires from the fail sequence's {@code onComplete} — i.e. only
+ * once the player has actually read Morfe's send-off where they stand, not mid-sentence.
  */
 public final class MorfeRoomManager {
 
@@ -38,25 +42,31 @@ public final class MorfeRoomManager {
         AcademyProgress progress = data.get(player.getUUID());
 
         if (progress.santosPhase() != SantosPhase.DONE) {
-            AcademyManager.sendPrompt(player, "§c[Capt. Morfe] §7Complete the earthquake drill with Sgt. Santos first.");
+            AcademyManager.sendPrompt(player, "§c[Capt. Morfe] §7Almost there, trainee! Complete Sgt. Santos's "
+                    + "earthquake drill first — then come see me for your results.");
             return;
         }
 
-        AcademyManager.sendPrompt(player, "§c[Capt. Morfe] §fAt ease, trainee. I've reviewed the full record of "
-                + "your run through the Academy — movement discipline with Officer Cruz, fire response with "
-                + "Sergeant Reyes, and your composure with Sergeant Santos. Let's see how you did.");
+        if (progress.morfePhase() == MorfePhase.EVALUATED_PASS) {
+            AcademyManager.startOrAdvanceDialogue(player,
+                    AcademyDialogue.MORFE_LINES.get(MorfePhase.EVALUATED_PASS), () -> { });
+            return;
+        }
 
+        AcademyManager.startOrAdvanceDialogue(player,
+                AcademyDialogue.MORFE_LINES.get(MorfePhase.NOT_STARTED),
+                () -> runEvaluation(level, player, data));
+    }
+
+    private static void runEvaluation(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        AcademyProgress progress = data.get(player.getUUID());
         AcademyScoring.Result result = AcademyScoring.evaluate(progress);
         boolean passed = result.score() >= Config.ACADEMY_PASS_THRESHOLD.get();
+        player.sendSystemMessage(Component.literal("§eYour Academy score: §f" + result.score() + " / 100"));
 
         if (passed) {
-            player.sendSystemMessage(Component.literal("§c[Capt. Morfe] §fYour movement control was sharp, your "
-                    + "fire suppression was accurate, and you held your position through the earthquake drill "
-                    + "without breaking. Congratulations, trainee — you are certified."));
-            player.sendSystemMessage(Component.literal("§eScore: §f" + result.score() + " / 100"));
-            player.sendSystemMessage(Component.literal("§c[Capt. Morfe] §fYou're cleared for the real "
-                    + "simulations. Stay just as sharp out there."));
             data.mutate(player.getUUID(), p -> p.setMorfePhase(MorfePhase.EVALUATED_PASS));
+            AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_PASS_LINES, () -> { });
             return;
         }
 
@@ -65,20 +75,19 @@ public final class MorfeRoomManager {
             if (!gaps.isEmpty()) gaps.append("; ");
             gaps.append(area);
         }
-        player.sendSystemMessage(Component.literal(
-                "§c[Capt. Morfe] §cYour record shows some critical gaps under pressure: " + gaps + "."));
-        player.sendSystemMessage(Component.literal("§eScore: §f" + result.score() + " / 100"));
-        player.sendSystemMessage(Component.literal("§c[Capt. Morfe] §fThat's not a passing mark yet. Return to "
-                + "Room 1 and run the drills again — everyone needs more than one pass sometimes. Dismissed."));
+        player.sendSystemMessage(Component.literal("§eThings to practice: §f" + gaps));
 
-        data.mutate(player.getUUID(), AcademyProgress::resetAll);
-        ReyesRoomManager.cleanupHazardProps(level);
-        AcademyManager.cancelDialogue(player);
-        player.teleportTo(level, RETRY_X, RETRY_Y, RETRY_Z,
-                Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+        AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_FAIL_LINES, () -> {
+            data.mutate(player.getUUID(), AcademyProgress::resetAll);
+            ReyesRoomManager.cleanupHazardProps(level);
+            player.teleportTo(level, RETRY_X, RETRY_Y, RETRY_Z,
+                    Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fWelcome back for round two, trainee! "
+                    + "Same as before — walk onto the four green tiles. You'll fly through it this time!");
+        });
     }
 
-    /** No-op — Room 4 has no ongoing per-tick state, only a one-shot evaluation on interact. */
+    /** No-op — Room 4 has no ongoing per-tick state, only the interact-driven evaluation flow. */
     public static void tick(ServerLevel level) {
     }
 }
