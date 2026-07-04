@@ -1,6 +1,7 @@
 package net.necookie.disastersim.academy.room1;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -81,10 +82,18 @@ public final class CruzRoomManager {
 
     private static final Vec3 BRIEFING_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
     private static final int ESCORT_MOVE_INTERVAL_TICKS = 15;
+    /** Consecutive no-progress re-issue cycles (≈3s at the 15-tick cadence) before poof-recovery. */
+    private static final int ESCORT_STUCK_CYCLES_MAX = 4;
+    /** "Made progress" = Cruz moved more than this per re-issue cycle. */
+    private static final double ESCORT_PROGRESS_EPSILON_SQ = 0.25 * 0.25;
+    /** Within this range of her target Cruz is considered arrived — never counted as stuck. */
+    private static final double ESCORT_ARRIVED_RANGE_SQ = 2.0 * 2.0;
 
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
     private static long nextEscortMoveTick;
+    private static Vec3 lastCruzPos = Vec3.ZERO;
+    private static int stuckCycles;
 
     private CruzRoomManager() {}
 
@@ -167,9 +176,45 @@ public final class CruzRoomManager {
             default -> null;
         };
         if (target == null) return;
-        // Return value intentionally unused: a failed path (e.g. no route found) just means this
-        // cycle's move request was a no-op — the next periodic re-issue tries again automatically.
-        cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
+        boolean issued = cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
+
+        // Stuck detection: count consecutive re-issue cycles where the path couldn't even be
+        // created, the navigator reports stuck, or Cruz made no net progress — unless she's
+        // already essentially at the target.
+        double distToTargetSq = cruz.position().distanceToSqr(target);
+        boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
+        lastCruzPos = cruz.position();
+
+        if (distToTargetSq <= ESCORT_ARRIVED_RANGE_SQ) {
+            stuckCycles = 0;
+        } else if (!issued || cruz.getNavigation().isStuck() || !movedThisCycle) {
+            stuckCycles++;
+        } else {
+            stuckCycles = 0;
+        }
+
+        if (stuckCycles >= ESCORT_STUCK_CYCLES_MAX) {
+            stuckCycles = 0;
+            recoverCruz(level, cruz, escortTarget);
+        }
+    }
+
+    /**
+     * Teleports a lost/stuck Cruz to just beside the escorted player, wrapped in POOF particles at
+     * both ends so it reads as an intentional instructor catch-up rather than a glitch. The offset
+     * keeps her on the side she was already on (or on top of the player if degenerate).
+     */
+    private static void recoverCruz(ServerLevel level, CustomNpcEntity cruz, ServerPlayer player) {
+        Vec3 from = cruz.position();
+        Vec3 toward = from.subtract(player.position());
+        Vec3 offset = toward.horizontalDistanceSqr() < 0.01
+                ? Vec3.ZERO
+                : new Vec3(toward.x, 0, toward.z).normalize().scale(1.5);
+        Vec3 dest = player.position().add(offset);
+        level.sendParticles(ParticleTypes.POOF, from.x, from.y + 0.8, from.z, 10, 0.3, 0.4, 0.3, 0.01);
+        cruz.getNavigation().stop();
+        cruz.teleportTo(dest.x, dest.y, dest.z);
+        level.sendParticles(ParticleTypes.POOF, dest.x, dest.y + 0.8, dest.z, 10, 0.3, 0.4, 0.3, 0.01);
     }
 
     private static Vec3 nextUnhitMarkFor(ServerPlayer player) {
