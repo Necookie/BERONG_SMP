@@ -173,10 +173,17 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with POOF
   particles at both ends. She waits at the Go/Stop staging line rather than entering the tunnel —
   her fixed 0.6×1.8 hitbox can't crouch under the slabs' 1.5-block headroom — and calls
-  GO/STOP/finish from there as a "shout" (`sendPrompt` only, no movement). A leftover duplicate
-  Cruz baked into the schematic at the old two-NPC handoff spot (~(-123.5,-33,49.5)) is discarded
-  every placement by `NewTutBuildingManager.discardDuplicateCruz` — permanent fixup, not a one-time
-  migration, since `SchemLoader` respawns every schematic entity fresh on each server start.
+  GO/STOP/finish from there as a "shout" (`sendPrompt` only, no movement). **She can never strand**:
+  with nobody in an escortable phase, `tickReturnHome` walks her back to the briefing anchor
+  (-153.5,-33,32.5) (stuck → poof-teleport home) and drops escort mode on arrival;
+  `CruzRoomManager.resetCruz` (called by `/bfp new_tutorial [reset]` and Morfe's fail-reset)
+  instantly snaps her there so a restarting trainee always finds her waiting; and a `ROOM1_BOUNDS`
+  safety net poof-recovers her to the escorted player if she's ever outside Room 1's footprint.
+  `NewTutBuildingManager.discardDuplicateCruz` guarantees exactly one Cruz per boot: it scans the
+  whole building and keeps only the one nearest the briefing anchor (not position-based against
+  the old two-NPC handoff spot, so future schematic re-saves can't slip a second Cruz through) —
+  permanent fixup, not a one-time migration, since `SchemLoader` respawns every schematic entity
+  fresh on each server start.
 
 Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (inventory contains all 3
   extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO, taught **sequentially**
