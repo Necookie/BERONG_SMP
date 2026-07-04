@@ -36,15 +36,14 @@ public final class NewTutBuildingManager {
 
     /**
      * The Academy routes all of Room 1's dialogue and escorting through a single Officer Cruz
-     * anchored at the briefing spot — but the schematic still bakes in a second one at the old
-     * tunnel-finish handoff position (~(-123.5,-33,49.5), from the pre-polish two-NPC design).
-     * After every placement, {@link #discardDuplicateCruz} scans the whole building and keeps only
-     * the Cruz nearest {@link #CRUZ_ANCHOR}, discarding every other copy — deliberately not
-     * position-based against the old handoff spot, so any future re-save of the schematic that
-     * moves/duplicates her differently still resolves to exactly one Cruz. This is a permanent
-     * fixup, not a one-time migration: {@link SchemLoader} discards and respawns every schematic
-     * entity fresh on every server start, so without this the duplicate would silently reappear on
-     * each boot.
+     * anchored at the briefing spot. The duplicate second Cruz the schematic used to bake in at
+     * the old tunnel-finish handoff position (~(-123.5,-33,49.5), from the pre-polish two-NPC
+     * design) has been **removed from the .schem file itself** (NBT-edited: 29 → 28 entities, both
+     * the resource copy and the WorldEdit copy) — so nothing needs discarding on a normal boot
+     * anymore. {@link #discardDuplicateCruz} stays as a pure safety net: it scans the whole
+     * building after every placement and, if more than one {@code OFFICER_CRUZ} somehow exists
+     * (a future schematic re-save reintroducing one, an accidental spawner-item copy), keeps only
+     * the one nearest {@link #CRUZ_ANCHOR}. Silent when there's exactly one.
      */
     private static final Vec3 CRUZ_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
     /** Whole-building scan bounds — matches {@code AcademyGuardrails.BUILDING_BOUNDS}. */
