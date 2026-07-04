@@ -204,17 +204,23 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. No static dialogue en
 
 World-space navigation, "compass" style ("follow the green floor arrows", said literally in
   several lines): a real client-rendered HUD needle (`client.AcademyCompassHud`), not particles —
-  a small triangular arrow fixed at the top-center of the screen that continuously rotates to point
-  at the current objective, recomputed from the local player's own exact position/view angle every
-  render frame (so it's perfectly smooth regardless of tick rate, unlike either the original 10-tick
-  dashed particle trail or the 20Hz particle-arrowhead version that replaced it). The server only
-  syncs *where* the target is via `AcademyCompassPayload`; `AcademyVisuals.setCompassTarget`
-  dedupes so a packet is only actually sent when the target changes (safe to call every tick from
-  whichever room is guiding the player) — `target == null` hides the needle, used whenever a room's
-  "point at the next NPC" objective has already been reached so the arrow doesn't linger stale.
-  Cruz's Room 1 also calls `highlightBlocks` (still particle-based) on the 4 unhit WASD green marks
-  every 5 ticks so they're actually visible, not just invisible trigger zones, pairing the highlight
-  with the compass needle pointing at the nearest unhit one.
+  a concave 4-point dart (not a plain triangle — reads as a distinct compass needle) drawn over a
+  fixed, non-rotating dark circular backdrop plate at the top-center of the screen, continuously
+  rotated to point at the current objective, recomputed from the local player's own exact
+  position/view angle every render frame (so it's perfectly smooth regardless of tick rate, unlike
+  the original particle-based versions it replaced — a 10-tick dashed trail, then a 20Hz
+  particle-arrowhead). The server only syncs *where* the target is via `AcademyCompassPayload`;
+  `AcademyVisuals.setCompassTarget` dedupes so a packet is only actually sent when the target
+  changes (safe to call every tick from whichever room is guiding the player) — `target == null`
+  hides the needle, used whenever a room's "point at the next NPC" objective has already been
+  reached so the arrow doesn't linger stale. Cruz's Room 1 also calls `highlightBlocks` on the 4
+  unhit WASD green marks every 5 ticks so they're actually visible, not just invisible trigger
+  zones, pairing the highlight with the compass needle pointing at the nearest unhit one.
+  `highlightBlocks` itself (also used for Santos's safe-zone table row) traces each block with
+  `DustParticleOptions` (jitter-free, custom-RGB — the same particle `WetChemicalExtinguisherItem`'s
+  foam mist uses) plus a soft top-face glow, replacing an earlier `HAPPY_VILLAGER`-based outline
+  that read as a chaotic swirl rather than a clean highlight; takes an optional color argument so
+  future features can reuse the exact same routine.
 
 Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click starts a phase's
   whole line sequence via `AcademyManager.startOrAdvanceDialogue`; each line auto-advances after a
@@ -223,7 +229,23 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   player's in-flight session without firing its `onComplete` — used at the two spots that mutate
   phase state out from under a possibly-active sequence (Cruz's Go/Stop violation revert, Morfe's
   fail-path reset) — plus a `PlayerEvent.PlayerLoggedOutEvent` hook that cancels dialogue and clears
-  every room manager's transient per-player maps.
+  every room manager's transient per-player maps. Each room's periodic "idle nudge" reminders check
+  `AcademyManager.isDialogueActive(uuid)` before firing, so a coincidental idle nudge can no longer
+  stomp an in-progress dialogue line's caption while its voice line may still be playing.
+
+**Logout safety net** — a player who disconnects mid-effect doesn't just lose transient timers, they
+  can end up with the effect itself silently resuming (or literally still burning) on reconnect:
+  `SantosRoomManager.clearPlayer` rolls `PRE_DRILL`/`QUAKE_ACTIVE` back to `NOT_STARTED` on logout
+  (the persisted phase alone would otherwise re-enter the earthquake drill's tick loop the instant
+  they reconnect, with no dialogue re-triggered); `ReyesRoomManager.clearPlayer` clears the player's
+  actual fire if the scripted ignite demo was active (vanilla persists remaining fire ticks in the
+  player's own save data, so without this they'd rejoin still on fire). Separately, every HUD's
+  caption/shake-intensity/compass state (`SimulationHud`/`TutorialHud`/`AcademyHud`/
+  `AcademyCompassHud`) is reset client-side on `ClientPlayerNetworkEvent.LoggingOut`/`LoggingIn`
+  (`client.ClientEvents`) — those are plain static fields that otherwise survive for the life of the
+  client JVM across a "Save and Quit to Title", which was the actual root cause of "the earthquake
+  is still going after exiting and reloading the world" (a stale nonzero shake intensity with
+  nothing left to overwrite it).
 ```
 
 **Key classes**: `AcademyManager` (the single `PlayerInteractEvent.EntityInteract` handler for
@@ -423,8 +445,9 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/bfp checkout` | Finalise and save the caller's session |
 | `/bfp reset [player]` | Wipe tutorial + delete DB row (no record kept) |
 | `/bfp tutorial [player]` | Reset tutorial + teleport to lobby + re-init NPCs |
-| `/bfp new_tutorial [player]` | Bare no-argument quick-test form, mirroring `/bfp tutorial` — teleports straight to `NewTutBuildingManager.DEFAULT_VIEWPOINT` (currently `officer_cruz`). |
-| `/bfp new_tutorial <section> [player]` | Teleport to a named F3-captured reference viewpoint inside the new tutorial building (`NewTutBuildingManager.VIEWPOINTS`) — plain teleport, no tutorial/session reset. One literal subcommand per map entry; currently only `officer_cruz`. Dev/admin tool for tuning NPC placement in-game (see `docs/major_plan.md`-style "needs in-game F3 tuning" tasks). |
+| `/bfp new_tutorial [player]` | **Activates** the Academy exactly like `/bfp tutorial` activates the old tutorial — wipes `AcademyProgress` back to a fresh start, clears every room manager's transient state, teleports to `NewTutBuildingManager.DEFAULT_VIEWPOINT` (Room 1, currently `officer_cruz`). Previously teleport-only; fixed so it actually "starts" a clean run instead of dropping the player back into their last phase. |
+| `/bfp new_tutorial reset [player]` | Explicit, discoverable alias for the same reset-and-teleport the bare command above performs. |
+| `/bfp new_tutorial <section> [player]` | Teleport to a named F3-captured reference viewpoint inside the new tutorial building (`NewTutBuildingManager.VIEWPOINTS`) — plain dev-navigation teleport, no reset. One literal subcommand per map entry; currently only `officer_cruz`. For tuning NPC placement in-game (see `docs/major_plan.md`-style "needs in-game F3 tuning" tasks). |
 | `/bfp note <text>` | Append instructor observation to active session (bfp_notes column) |
 | `/bfp confidence <1-5>` | Set instructor confidence rating 1.0–5.0 (confidence column) |
 | `/bfp prep_level <none|low|moderate|high>` | Set prep-level assessment (prep_level column) |
