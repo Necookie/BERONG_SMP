@@ -70,6 +70,32 @@ public final class CruzRoomManager {
 
     private static final Vec3 MAZE_EXIT_POINT = new Vec3(-121.5, -33.0, 31.5);
     private static final Vec3 JUMP_EXIT_POINT = new Vec3(-105.5, -33.0, 31.5);
+
+    /**
+     * Schem-verified route through the maze's serpentine (walls at X=-131 open only at Z=25,
+     * X=-127 open only at Z=38, X=-124 open only at Z=25). The compass and Cruz's escort both
+     * target the next unpassed waypoint rather than the far exit, so neither points/paths
+     * straight into a wall.
+     */
+    private static final List<Vec3> MAZE_WAYPOINTS = List.of(
+            new Vec3(-131.5, -33.0, 25.5),
+            new Vec3(-127.5, -33.0, 38.5),
+            new Vec3(-124.5, -33.0, 25.5),
+            MAZE_EXIT_POINT
+    );
+
+    /** One waypoint just past each 1-block hurdle row (X=-117, -114, -111), then the exit. */
+    private static final List<Vec3> JUMP_WAYPOINTS = List.of(
+            new Vec3(-116.5, -33.0, 31.5),
+            new Vec3(-113.5, -33.0, 31.5),
+            new Vec3(-110.5, -33.0, 31.5),
+            JUMP_EXIT_POINT
+    );
+
+    private static final double WAYPOINT_ADVANCE_RANGE_SQ = 2.0 * 2.0;
+
+    /** Per-player progress along the current phase's waypoint chain; reset on phase transitions. */
+    private static final Map<UUID, Integer> waypointIdx = new ConcurrentHashMap<>();
     /** Sgt. Reyes's anchor — where Room 1 points once it's done and Room 2 hasn't started yet. */
     private static final Vec3 REYES_ANCHOR = new Vec3(-172.5, -33.0, 17.5);
 
@@ -130,7 +156,8 @@ public final class CruzRoomManager {
                 case JUMP -> tickJump(level, player, data);
                 case GOSTOP_RUN -> tickGoStopRun(level, player, data);
                 case DONE -> tickDone(level, player, data);
-                default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED, GOSTOP_STAGE
+                case GOSTOP_STAGE -> AcademyVisuals.setCompassTarget(player, STAGING_POS);
+                default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED
             }
             if (escortTarget == null && isEscortablePhase(phase)) {
                 escortTarget = player;
@@ -170,8 +197,8 @@ public final class CruzRoomManager {
         CruzPhase phase = data.get(escortTarget.getUUID()).cruzPhase();
         Vec3 target = switch (phase) {
             case BRIEFING -> nextUnhitMarkFor(escortTarget);
-            case MAZE -> MAZE_EXIT_POINT;
-            case JUMP -> JUMP_EXIT_POINT;
+            case MAZE -> currentWaypoint(escortTarget, MAZE_WAYPOINTS);
+            case JUMP -> currentWaypoint(escortTarget, JUMP_WAYPOINTS);
             case GOSTOP_STAGE, GOSTOP_RUN -> STAGING_POS;
             default -> null;
         };
@@ -223,6 +250,21 @@ public final class CruzRoomManager {
             if (!hits.contains(i)) return Vec3.atCenterOf(GREEN_MARKS.get(i));
         }
         return Vec3.atCenterOf(GREEN_MARKS.get(GREEN_MARKS.size() - 1));
+    }
+
+    /**
+     * The player's current waypoint along {@code chain}, advancing the stored index while they're
+     * within {@link #WAYPOINT_ADVANCE_RANGE_SQ} of it (never past the last entry).
+     */
+    private static Vec3 currentWaypoint(ServerPlayer player, List<Vec3> chain) {
+        UUID id = player.getUUID();
+        int idx = waypointIdx.getOrDefault(id, 0);
+        while (idx < chain.size() - 1
+                && player.position().distanceToSqr(chain.get(idx)) <= WAYPOINT_ADVANCE_RANGE_SQ) {
+            idx++;
+        }
+        waypointIdx.put(id, idx);
+        return chain.get(idx);
     }
 
     /**
@@ -302,11 +344,12 @@ public final class CruzRoomManager {
         UUID id = player.getUUID();
         if (JUMP_ZONE.contains(player.position())) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.JUMP));
+            waypointIdx.remove(id);
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fObstacles ahead! Keep walking forward and "
                     + "hit Spacebar to hop right over them. Don't stop moving!");
             return;
         }
-        AcademyVisuals.setCompassTarget(player, MAZE_EXIT_POINT);
+        AcademyVisuals.setCompassTarget(player, currentWaypoint(player, MAZE_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Bumping into walls slows you down! "
                     + "Look at the green arrows and turn your camera before your feet.");
@@ -317,11 +360,12 @@ public final class CruzRoomManager {
         UUID id = player.getUUID();
         if (!JUMP_ZONE.contains(player.position())) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.GOSTOP_STAGE));
+            waypointIdx.remove(id);
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fGreat job clearing the obstacles! "
                     + "Come find me at the tunnel entrance for the last lesson.");
             return;
         }
-        AcademyVisuals.setCompassTarget(player, JUMP_EXIT_POINT);
+        AcademyVisuals.setCompassTarget(player, currentWaypoint(player, JUMP_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Keep your momentum! "
                     + "Walk straight at it and tap Spacebar right before you'd hit it.");
@@ -412,5 +456,6 @@ public final class CruzRoomManager {
     public static void clearPlayer(UUID id) {
         marksHit.remove(id);
         goStopStates.remove(id);
+        waypointIdx.remove(id);
     }
 }
