@@ -171,9 +171,13 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   FloatGoal, door passage + explicit path budget set on escort start. **Stuck recovery**: 4
   consecutive no-progress escort cycles (~3s — path not created, isStuck(), or <0.25 blocks moved
   while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with POOF
-  particles at both ends. She waits at the Go/Stop staging line rather than entering the tunnel —
-  her fixed 0.6×1.8 hitbox can't crouch under the slabs' 1.5-block headroom — and calls
-  GO/STOP/finish from there as a "shout" (`sendPrompt` only, no movement). **She can never strand**:
+  particles at both ends. The jump phase's finish line is **directional** (`X >= JUMP_FINISH_X`
+  (-106), east past the last hurdle) — leaving the zone backward into the maze no longer skips the
+  player ahead. During GOSTOP_STAGE (the briefing) she waits at the staging line — her fixed
+  0.6×1.8 hitbox can't crouch under the slabs' 1.5-block headroom — but during GOSTOP_RUN her
+  escort target is **the player themselves**: each slab lane blocks her path and the stuck-recovery
+  poofs her to the player's side, so she visibly keeps pace through the tunnel barrier by barrier.
+  **She can never strand**:
   with nobody in an escortable phase, `tickReturnHome` walks her back to the briefing anchor
   (-153.5,-33,32.5) (stuck → poof-teleport home) and drops escort mode on arrival;
   `CruzRoomManager.resetCruz` (called by `/bfp new_tutorial [reset]` and Morfe's fail-reset)
@@ -204,7 +208,11 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (invento
   hazards are correctly defused and the ignite window resolves. **Prop cleanup**
   (`cleanupHazardProps`): the 3 code-spawned props + any leftover vanilla fire in Room 2's box are
   removed on room finish, on a mid-demo logout/death (which also rolls LIVE_FIRE_DEMO back to
-  TOOL_SELECTION for a clean re-run), and on a Capt. Morfe fail-reset.
+  TOOL_SELECTION for a clean re-run), and on a Capt. Morfe fail-reset. **Frame restock**
+  (`restockExtinguisherFrames`): the 3 glow item frames on the Tool Selection Wall are refilled
+  (and respawned if missing) on both reset paths and after building placement — the schematic only
+  restores them on a full reboot, so a mid-session reset previously left them empty and made
+  TOOL_SELECTION uncompletable.
 
 Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
   TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
