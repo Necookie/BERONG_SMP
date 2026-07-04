@@ -362,18 +362,20 @@ public class BfpAdminCommands {
     }
 
     /**
-     * {@code /bfp new_tutorial [player]} — like {@code /bfp tutorial}, a bare no-argument form for
-     * quick testing: teleports straight to {@link NewTutBuildingManager#DEFAULT_VIEWPOINT}.
-     * {@code /bfp new_tutorial <section> [player]} teleports to any other named F3-captured
-     * reference viewpoint ({@link NewTutBuildingManager#VIEWPOINTS}). One literal subcommand per
-     * map entry, so adding a new named viewpoint there (e.g. once the fire-practice or
-     * earthquake-drill spots are captured) automatically adds its own
-     * {@code /bfp new_tutorial <name>} subcommand here.
+     * {@code /bfp new_tutorial [player]} — mirrors {@code /bfp tutorial}'s "activate" behavior for
+     * the old tutorial exactly: wipes the player's {@link AcademyProgress} back to a fresh start,
+     * clears every room manager's transient state, and teleports to
+     * {@link NewTutBuildingManager#DEFAULT_VIEWPOINT} (Room 1). Previously this bare form only
+     * teleported without resetting anything, which didn't actually "start" the Academy the way
+     * {@code /bfp tutorial} starts the old one — a player already mid-progress would just get
+     * dropped back into whatever phase they were last in instead of a clean run.
      *
-     * <p>{@code /bfp new_tutorial reset [player]} wipes the player's {@link AcademyProgress} back
-     * to a fresh start (mirrors {@code /bfp tutorial}'s reset-and-teleport behavior for the old
-     * tutorial) and clears every room manager's transient per-player state — the same cleanup
-     * {@link AcademyManager}'s logout hook does, reused here since the player stays connected.
+     * <p>{@code /bfp new_tutorial <section> [player]} teleports to any other named F3-captured
+     * reference viewpoint ({@link NewTutBuildingManager#VIEWPOINTS}) as a pure dev-navigation jump
+     * — no reset — for eyeballing NPC placement. One literal subcommand per map entry, so adding a
+     * new named viewpoint there automatically adds its own {@code /bfp new_tutorial <name>}
+     * subcommand here. {@code /bfp new_tutorial reset [player]} is kept as an explicit, discoverable
+     * alias for the same reset-and-teleport the bare command now performs.
      */
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
         NewTutBuildingManager.Viewpoint defaultViewpoint =
@@ -382,10 +384,10 @@ public class BfpAdminCommands {
         var root = Commands.literal("new_tutorial")
                 .executes(ctx -> {
                     if (!ctx.getSource().isPlayer()) return 0;
-                    return teleportToViewpoint(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
+                    return academyReset(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
                 })
                 .then(Commands.argument("player", EntityArgument.player())
-                        .executes(ctx -> teleportToViewpoint(
+                        .executes(ctx -> academyReset(
                                 ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint)));
 
         for (Map.Entry<String, NewTutBuildingManager.Viewpoint> entry : NewTutBuildingManager.VIEWPOINTS.entrySet()) {
@@ -417,7 +419,7 @@ public class BfpAdminCommands {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
         AcademySavedData.get(level).reset(target.getUUID());
         AcademyManager.cancelDialogue(target);
-        AcademyManager.clearTransientState(target.getUUID());
+        AcademyManager.clearTransientState(target);
         target.teleportTo(level, startViewpoint.x(), startViewpoint.y(), startViewpoint.z(),
                 java.util.Collections.emptySet(), startViewpoint.yaw(), startViewpoint.pitch(), true);
         ctx.getSource().sendSuccess(() -> Component.literal(
