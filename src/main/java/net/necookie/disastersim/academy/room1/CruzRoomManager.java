@@ -247,7 +247,7 @@ public final class CruzRoomManager {
         if (nextMark >= 0) {
             AcademyVisuals.setCompassTarget(player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
-        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
+        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Still looking for the marks? "
                     + "They're glowing green on the floor!");
         }
@@ -262,7 +262,7 @@ public final class CruzRoomManager {
             return;
         }
         AcademyVisuals.setCompassTarget(player, MAZE_EXIT_POINT);
-        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
+        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Bumping into walls slows you down! "
                     + "Look at the green arrows and turn your camera before your feet.");
         }
@@ -277,7 +277,7 @@ public final class CruzRoomManager {
             return;
         }
         AcademyVisuals.setCompassTarget(player, JUMP_EXIT_POINT);
-        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
+        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Keep your momentum! "
                     + "Walk straight at it and tap Spacebar right before you'd hit it.");
         }

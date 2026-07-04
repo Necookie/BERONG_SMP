@@ -132,7 +132,8 @@ public final class ReyesRoomManager {
 
     private static void tickToolSelection(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         if (!hasAllExtinguishers(player)) {
-            if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
+            if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
+                    && !AcademyManager.isDialogueActive(player.getUUID())) {
                 AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Go ahead, take them off the wall! "
                         + "Walk up and click on each one.");
             }
@@ -267,9 +268,18 @@ public final class ReyesRoomManager {
                 + "you're doing amazing!");
     }
 
-    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
-    public static void clearPlayer(UUID id) {
-        igniteWindow.remove(id);
+    /**
+     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp new_tutorial reset}) to
+     * drop this room's per-player state. If the scripted ignite demo was active, also clears the
+     * player's actual fire: vanilla persists remaining fire ticks in the player's own save data, so
+     * without this a player who quits mid-demo would rejoin still visibly on fire and taking damage
+     * from a "lesson" that has no way to resume properly (its window countdown is gone).
+     */
+    public static void clearPlayer(ServerPlayer player) {
+        UUID id = player.getUUID();
+        if (igniteWindow.remove(id) != null) {
+            player.clearFire();
+        }
         currentHazard.remove(id);
         explainedHazard.remove(id);
     }

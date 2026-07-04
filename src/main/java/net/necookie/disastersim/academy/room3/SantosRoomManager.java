@@ -123,7 +123,8 @@ public final class SantosRoomManager {
             return;
         }
 
-        if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
+        if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
+                && !AcademyManager.isDialogueActive(id)) {
             AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Get back under the table! "
                     + "The ground is still moving!", QUAKE_SHAKE_INTENSITY);
         }
@@ -147,8 +148,24 @@ public final class SantosRoomManager {
         return false;
     }
 
-    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
-    public static void clearPlayer(UUID id) {
+    /**
+     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp new_tutorial reset}) to
+     * drop this room's per-player state. If the player quit mid-drill (PRE_DRILL or QUAKE_ACTIVE),
+     * also rolls their phase back to NOT_STARTED: {@code preDrillStartTick} is gone the instant it's
+     * removed below, but the persisted phase alone is enough for {@link #tick} to re-enter
+     * {@link #tickQuakeActive}/{@link #tickPreDrill} on the very next tick after they reconnect —
+     * with no dialogue re-triggered, no clear reason given, and shake prompts firing again as if the
+     * earthquake had simply kept running while they were offline.
+     */
+    public static void clearPlayer(ServerPlayer player) {
+        UUID id = player.getUUID();
         preDrillStartTick.remove(id);
+
+        ServerLevel level = (ServerLevel) player.level();
+        AcademySavedData data = AcademySavedData.get(level);
+        SantosPhase phase = data.get(id).santosPhase();
+        if (phase == SantosPhase.PRE_DRILL || phase == SantosPhase.QUAKE_ACTIVE) {
+            data.mutate(id, p -> p.setSantosPhase(SantosPhase.NOT_STARTED));
+        }
     }
 }

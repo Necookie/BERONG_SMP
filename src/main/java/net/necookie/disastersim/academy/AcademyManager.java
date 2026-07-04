@@ -80,20 +80,29 @@ public final class AcademyManager {
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             cancelDialogue(player);
-            clearTransientState(player.getUUID());
+            clearTransientState(player);
         }
     }
 
     /**
      * Drops every room manager's leak-prone per-player transient state (marks hit, Go/Stop
      * timers, ignite windows, the compass dedupe cache, ...) without touching persisted
-     * {@link AcademyProgress}. Shared by the logout hook above and {@code /bfp new_tutorial reset},
-     * which needs the same cleanup while the player stays connected.
+     * {@link AcademyProgress} phases in general — except the two specific "mid-effect" phases
+     * ({@link ReyesRoomManager}'s scripted ignite demo, {@link SantosRoomManager}'s earthquake
+     * drill) that would otherwise silently resume the instant the player reconnects: their driving
+     * transient timer is gone (cleared right here), but the *persisted* phase alone is enough for
+     * the room's tick loop to re-enter that phase's effect on the very next tick, with no dialogue
+     * re-triggered and no clear sign to the player of why it's happening again — reported as "the
+     * earthquake is still going after exiting and reloading the world." Both room managers roll
+     * their own phase back to a safe re-enterable point internally; see their {@code clearPlayer}.
+     * Shared by the logout hook above and {@code /bfp new_tutorial reset}, which needs the same
+     * cleanup while the player stays connected.
      */
-    public static void clearTransientState(UUID id) {
+    public static void clearTransientState(ServerPlayer player) {
+        UUID id = player.getUUID();
         CruzRoomManager.clearPlayer(id);
-        ReyesRoomManager.clearPlayer(id);
-        SantosRoomManager.clearPlayer(id);
+        ReyesRoomManager.clearPlayer(player);
+        SantosRoomManager.clearPlayer(player);
         AcademyVisuals.clearPlayer(id);
     }
 
@@ -174,6 +183,17 @@ public final class AcademyManager {
         session = new DialogueSession(lines, onComplete);
         activeSessions.put(id, session);
         playCurrentLine(player, session);
+    }
+
+    /**
+     * True while a timed dialogue sequence is actively playing for this player. Room managers'
+     * periodic idle-nudge reminders should check this before calling {@link #sendPrompt} directly —
+     * otherwise an unrelated nudge fired from a room's own tick loop can stomp the caption of a
+     * dialogue line that's still "on screen" (its voice line may still be playing), which reads as
+     * the caption and voice falling out of sync with each other.
+     */
+    public static boolean isDialogueActive(UUID id) {
+        return activeSessions.containsKey(id);
     }
 
     /** Drops a player's active session without firing its completion callback. */
