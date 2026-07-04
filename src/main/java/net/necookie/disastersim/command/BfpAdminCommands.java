@@ -23,6 +23,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.academy.AcademyManager;
+import net.necookie.disastersim.academy.AcademyProgress;
+import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
@@ -366,6 +369,11 @@ public class BfpAdminCommands {
      * map entry, so adding a new named viewpoint there (e.g. once the fire-practice or
      * earthquake-drill spots are captured) automatically adds its own
      * {@code /bfp new_tutorial <name>} subcommand here.
+     *
+     * <p>{@code /bfp new_tutorial reset [player]} wipes the player's {@link AcademyProgress} back
+     * to a fresh start (mirrors {@code /bfp tutorial}'s reset-and-teleport behavior for the old
+     * tutorial) and clears every room manager's transient per-player state — the same cleanup
+     * {@link AcademyManager}'s logout hook does, reused here since the player stays connected.
      */
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
         NewTutBuildingManager.Viewpoint defaultViewpoint =
@@ -391,7 +399,31 @@ public class BfpAdminCommands {
                             .executes(ctx -> teleportToViewpoint(
                                     ctx, EntityArgument.getPlayer(ctx, "player"), viewpoint))));
         }
+
+        root.then(Commands.literal("reset")
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return academyReset(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> academyReset(
+                                ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint))));
+
         return root;
+    }
+
+    private static int academyReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
+                                     NewTutBuildingManager.Viewpoint startViewpoint) {
+        net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
+        AcademySavedData.get(level).reset(target.getUUID());
+        AcademyManager.cancelDialogue(target);
+        AcademyManager.clearTransientState(target.getUUID());
+        target.teleportTo(level, startViewpoint.x(), startViewpoint.y(), startViewpoint.z(),
+                java.util.Collections.emptySet(), startViewpoint.yaw(), startViewpoint.pitch(), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§eAcademy progress reset for §f" + target.getName().getString()
+                        + "§e — teleported back to Room 1."), true);
+        return 1;
     }
 
     private static int teleportToViewpoint(CommandContext<CommandSourceStack> ctx, ServerPlayer target,

@@ -79,13 +79,22 @@ public final class AcademyManager {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            UUID id = player.getUUID();
             cancelDialogue(player);
-            CruzRoomManager.clearPlayer(id);
-            ReyesRoomManager.clearPlayer(id);
-            SantosRoomManager.clearPlayer(id);
-            AcademyVisuals.clearPlayer(id);
+            clearTransientState(player.getUUID());
         }
+    }
+
+    /**
+     * Drops every room manager's leak-prone per-player transient state (marks hit, Go/Stop
+     * timers, ignite windows, the compass dedupe cache, ...) without touching persisted
+     * {@link AcademyProgress}. Shared by the logout hook above and {@code /bfp new_tutorial reset},
+     * which needs the same cleanup while the player stays connected.
+     */
+    public static void clearTransientState(UUID id) {
+        CruzRoomManager.clearPlayer(id);
+        ReyesRoomManager.clearPlayer(id);
+        SantosRoomManager.clearPlayer(id);
+        AcademyVisuals.clearPlayer(id);
     }
 
     // -----------------------------------------------------------------------
