@@ -321,8 +321,9 @@ public final class CruzRoomManager {
         if (hits.size() >= GREEN_MARKS.size()) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.MAZE));
             marksHit.remove(id);
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fNice work! Now let's put those turns to use. "
-                    + "Follow the green arrows through this maze — steer your camera, not just forward!");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fThat's all four — wonderful! Now for the maze: "
+                    + "move your §emouse§f to look down the open path, then hold §eW§f to walk it. "
+                    + "Follow the glowing arrow — I'm right beside you!");
             return;
         }
         // Only the NEXT mark gets the particle marker — the physical lime concrete tiles
@@ -334,8 +335,8 @@ public final class CruzRoomManager {
             AcademyVisuals.setCompassTarget(player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Still looking for the marks? "
-                    + "They're glowing green on the floor!");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7See the tall beam of green light? "
+                    + "That's your next tile — hold the §eW key§7 and walk to it!");
         }
     }
 
@@ -344,14 +345,15 @@ public final class CruzRoomManager {
         if (JUMP_ZONE.contains(player.position())) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.JUMP));
             waypointIdx.remove(id);
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fObstacles ahead! Keep walking forward and "
-                    + "hit Spacebar to hop right over them. Don't stop moving!");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fYou found the way through — great navigating! "
+                    + "Now some low hurdles: keep holding §eW§f and tap the §eSpacebar§f just before each one "
+                    + "to hop over. Ready? Jump!");
             return;
         }
         AcademyVisuals.setCompassTarget(player, currentWaypoint(player, MAZE_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Bumping into walls slows you down! "
-                    + "Look at the green arrows and turn your camera before your feet.");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Hit a wall? No worries! Turn with your "
+                    + "§emouse§7 first, spot the opening, then walk with §eW§7. The glowing arrow shows the way.");
         }
     }
 
@@ -360,14 +362,15 @@ public final class CruzRoomManager {
         if (!JUMP_ZONE.contains(player.position())) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.GOSTOP_STAGE));
             waypointIdx.remove(id);
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fGreat job clearing the obstacles! "
-                    + "Come find me at the tunnel entrance for the last lesson.");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fAll hurdles cleared — you're a natural! "
+                    + "Now come meet me at the tunnel entrance — just follow the glowing arrow — for our "
+                    + "very last lesson.");
             return;
         }
         AcademyVisuals.setCompassTarget(player, currentWaypoint(player, JUMP_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Keep your momentum! "
-                    + "Walk straight at it and tap Spacebar right before you'd hit it.");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Hold §eW§7 to keep walking and tap the "
+                    + "§eSpacebar§7 just before each hurdle. Bumped one? Back up a step and try again!");
         }
     }
 
@@ -395,7 +398,7 @@ public final class CruzRoomManager {
         GoStopState state = new GoStopState();
         state.nextFlipTick = level.getGameTime() + randomInterval(level);
         goStopStates.put(player.getUUID(), state);
-        AcademyManager.sendPrompt(player, "§a▶ GO! Keep moving forward!");
+        AcademyManager.sendPrompt(player, "§a▶ GO! Hold the W key and keep walking!");
     }
 
     private static long randomInterval(ServerLevel level) {
@@ -419,11 +422,11 @@ public final class CruzRoomManager {
             state.nextFlipTick = gameTime + randomInterval(level);
             if (state.isGo) {
                 state.stopStartTick = -1;
-                AcademyManager.sendPrompt(player, "§a▶ GO! Keep moving forward!");
+                AcademyManager.sendPrompt(player, "§a▶ GO! Hold the W key and keep walking!");
             } else {
                 state.stopStartTick = gameTime;
                 state.posAtStop = player.position();
-                AcademyManager.sendPrompt(player, "§c■ STOP! Freeze right there!");
+                AcademyManager.sendPrompt(player, "§c■ STOP! Let go of every key and freeze!");
             }
         }
 
@@ -436,8 +439,9 @@ public final class CruzRoomManager {
                 data.mutate(id, p -> { p.setCruzPhase(CruzPhase.GOSTOP_STAGE); p.addMovementMistake(); });
                 goStopStates.remove(id);
                 AcademyManager.cancelDialogue(player);
-                AcademyManager.sendPrompt(player, "§c[Officer Cruz] §7Whoa — you moved after STOP! Back to the "
-                        + "staging line. Watch for my call and freeze the instant you hear it.");
+                AcademyManager.sendPrompt(player, "§c[Officer Cruz] §7Oops — you moved after STOP! That's okay, "
+                        + "everyone does it once. Back to the start line: walk on §aGO§7, and when you hear "
+                        + "§cSTOP§7, let go of all the keys right away.");
                 return;
             }
         }
@@ -445,9 +449,9 @@ public final class CruzRoomManager {
         if (player.getX() <= GOSTOP_FINISH_X) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.DONE));
             goStopStates.remove(id);
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fOutstanding! You've got sharp eyes, steady feet, "
-                    + "and you know how to freeze on command. Follow the green floor arrows to Sgt. Reyes "
-                    + "for your Fire Safety Drill!");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fYou did it! You can look, walk, jump, crouch, "
+                    + "and stop on command — that's everything you need. Now follow the glowing arrow to "
+                    + "§6Sgt. Reyes§f for the Fire Safety Drill. She's friendly, I promise!");
         }
     }
 

@@ -56,7 +56,8 @@ public final class SantosRoomManager {
         AcademyProgress progress = data.get(player.getUUID());
 
         if (progress.reyesPhase() != ReyesPhase.DONE) {
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Finish the fire drill with Sgt. Reyes first!");
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Hello trainee! Finish the fire drill with "
+                    + "Sgt. Reyes first — she's just next door. Come right back after!");
             return;
         }
 
@@ -99,8 +100,8 @@ public final class SantosRoomManager {
         if (level.getGameTime() - start >= PRE_DRILL_DELAY_TICKS) {
             data.mutate(id, p -> p.setSantosPhase(SantosPhase.QUAKE_ACTIVE));
             preDrillStartTick.remove(id);
-            AcademyManager.sendPrompt(player, "§c⚠ EARTHQUAKE! Drop, Cover, and Hold On — get under the table "
-                    + "and brace yourself!", QUAKE_SHAKE_INTENSITY);
+            AcademyManager.sendPrompt(player, "§c⚠ EARTHQUAKE! §fWalk to the glowing table (hold §eW§f), get "
+                    + "under it, and press and hold §eShift§f — DROP, COVER, HOLD ON!", QUAKE_SHAKE_INTENSITY);
         }
     }
 
@@ -118,15 +119,16 @@ public final class SantosRoomManager {
                 p.setSantosPhase(SantosPhase.DONE);
                 p.setQuakeCompliant(true);
             });
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fThe shaking has stopped. Good composure out "
-                    + "there — that's exactly how it's done. Proceed to Captain Morfe for your final debrief.", 0f);
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
+                    + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
+                    + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.", 0f);
             return;
         }
 
         if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Get back under the table! "
-                    + "The ground is still moving!", QUAKE_SHAKE_INTENSITY);
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to "
+                    + "walk there, then press and hold §eShift§7 to crouch — and stay put!", QUAKE_SHAKE_INTENSITY);
         }
     }
 

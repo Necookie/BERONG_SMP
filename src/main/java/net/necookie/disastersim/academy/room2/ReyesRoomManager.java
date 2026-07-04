@@ -93,7 +93,8 @@ public final class ReyesRoomManager {
         AcademyProgress progress = data.get(player.getUUID());
 
         if (progress.cruzPhase() != CruzPhase.DONE) {
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Finish up with Officer Cruz first — come back once you're done!");
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Hi trainee! Finish Officer Cruz's movement "
+                    + "lessons first — follow the glowing arrow back to her, then come see me!");
             return;
         }
 
@@ -139,8 +140,9 @@ public final class ReyesRoomManager {
         if (!hasAllExtinguishers(player)) {
             if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                     && !AcademyManager.isDialogueActive(player.getUUID())) {
-                AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Go ahead, take them off the wall! "
-                        + "Walk up and click on each one.");
+                AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Walk right up to each extinguisher and click "
+                        + "it with your §eleft mouse button§7 — it pops off the wall, then step onto it to "
+                        + "pick it up. You need all three!");
             }
             return;
         }
@@ -203,13 +205,15 @@ public final class ReyesRoomManager {
         boolean usedCorrectTool = hazard.correctTool().isInstance(player.getMainHandItem().getItem());
         if (usedCorrectTool) {
             data.mutate(player.getUUID(), AcademyProgress::addFireCorrectUse);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aPerfect! That's exactly the right tool for that fire.");
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aPerfect match! That's exactly the right "
+                    + "extinguisher for that fire. Well done!");
             return true;
         }
 
         data.mutate(player.getUUID(), AcademyProgress::addFireWrongUse);
-        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cThat's the wrong extinguisher — the fire flares "
-                + "right back up! Think about what's burning and try again.");
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cNot that one — the fire flared back up! §7No harm "
+                + "done. Look at what's burning, press the matching extinguisher's §enumber key§7, and "
+                + "§ehold the right mouse button§7 to try again.");
         igniteHazard(level, player.getUUID(), hazard);
         return false;
     }
@@ -237,8 +241,9 @@ public final class ReyesRoomManager {
             int cap = Config.ACADEMY_IGNITE_DEMO_TICKS.get();
             igniteWindow.put(id, cap);
             player.setRemainingFireTicks(cap);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cWatch out — you caught a spark! Hit Shift, then "
-                    + "press R to Drop and Roll it out — just like we practice!");
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cOh! A spark caught your uniform — don't panic! "
+                    + "§fPress and hold §eShift§f, then press §eR§f to Drop and Roll. Roll until the flames "
+                    + "are out!");
             return;
         }
 
@@ -246,8 +251,8 @@ public final class ReyesRoomManager {
             player.clearFire();
             data.mutate(id, p -> p.setDropAndRollPerformed(true));
             igniteWindow.remove(id);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aThat's it — smothered! You just put "
-                    + "yourself out safely. Great reflexes!");
+            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aFlames out — beautifully done! §fYou just "
+                    + "learned how to keep yourself safe. Take a breath.");
             finishRoom(player, data);
             return;
         }
@@ -271,9 +276,9 @@ public final class ReyesRoomManager {
         currentHazard.remove(id);
         explainedHazard.remove(id);
         lastActive.remove(id);
-        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fYou've mastered all three fire classes and how to "
-                + "handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — "
-                + "you're doing amazing!");
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fThree fires, three perfect matches — and you even "
+                + "put yourself out safely. I'm proud of you! Follow the glowing arrow to §6Sgt. Santos§f "
+                + "for the Earthquake Drill.");
     }
 
     /** Room 2's box (with ceiling headroom) — the sweep area for leftover vanilla fire. */
