@@ -26,6 +26,7 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
@@ -420,6 +421,9 @@ public class BfpAdminCommands {
         AcademySavedData.get(level).reset(target.getUUID());
         AcademyManager.cancelDialogue(target);
         AcademyManager.clearTransientState(target);
+        // Snap Officer Cruz back to her briefing anchor so the restarting trainee always finds
+        // her right beside them — not stranded wherever the previous run's escort ended.
+        CruzRoomManager.resetCruz(level);
         target.teleportTo(level, startViewpoint.x(), startViewpoint.y(), startViewpoint.z(),
                 java.util.Collections.emptySet(), startViewpoint.yaw(), startViewpoint.pitch(), true);
         ctx.getSource().sendSuccess(() -> Component.literal(

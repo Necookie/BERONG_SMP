@@ -106,6 +106,12 @@ public final class CruzRoomManager {
     // -----------------------------------------------------------------------
 
     private static final Vec3 BRIEFING_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
+    /**
+     * Room 1's full footprint (briefing + maze + jump + Go/Stop tunnel, with margin). Cruz must
+     * never end up outside this — it's a beginner tutorial and she has to stay reachable. If she
+     * somehow escapes (bad path, shove, glitch), the next escort cycle poof-recovers her.
+     */
+    private static final AABB ROOM1_BOUNDS = new AABB(-156, -36, 23, -95, -28, 64);
     private static final int ESCORT_MOVE_INTERVAL_TICKS = 15;
     /** Consecutive no-progress re-issue cycles (≈3s at the 15-tick cadence) before poof-recovery. */
     private static final int ESCORT_STUCK_CYCLES_MAX = 4;
@@ -183,7 +189,10 @@ public final class CruzRoomManager {
         if (cruz == null) return;
 
         if (escortTarget == null) {
-            cruz.setEscorting(false);
+            // Nobody to escort (nobody online in Room 1, everyone reset/finished): walk back to
+            // the briefing anchor instead of freezing wherever the last escort leg ended — she
+            // must always be waiting beside her spot at (-153.5,-33,32.5) for the next trainee.
+            tickReturnHome(level, cruz);
             return;
         }
         cruz.setEscorting(true);
@@ -191,6 +200,13 @@ public final class CruzRoomManager {
         long now = level.getGameTime();
         if (now < nextEscortMoveTick) return;
         nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
+
+        // Safety net: if she somehow ended up outside Room 1 entirely, don't bother pathing —
+        // poof her straight back to the escorted player.
+        if (!ROOM1_BOUNDS.contains(cruz.position())) {
+            recoverCruz(level, cruz, escortTarget);
+            return;
+        }
 
         AcademySavedData data = AcademySavedData.get(level);
         CruzPhase phase = data.get(escortTarget.getUUID()).cruzPhase();
@@ -226,6 +242,51 @@ public final class CruzRoomManager {
     }
 
     /**
+     * With no one to escort, Cruz walks back to {@link #BRIEFING_ANCHOR} (same cadence and stuck
+     * handling as an escort leg; a return route blocked by the crouch-only tunnel just times out
+     * into a poof-teleport home after ~3s) and drops escort mode once she's arrived.
+     */
+    private static void tickReturnHome(ServerLevel level, CustomNpcEntity cruz) {
+        if (cruz.position().distanceToSqr(BRIEFING_ANCHOR) <= ESCORT_ARRIVED_RANGE_SQ) {
+            cruz.setEscorting(false);
+            return;
+        }
+        cruz.setEscorting(true);
+
+        long now = level.getGameTime();
+        if (now < nextEscortMoveTick) return;
+        nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
+
+        boolean issued = cruz.getNavigation().moveTo(BRIEFING_ANCHOR.x, BRIEFING_ANCHOR.y, BRIEFING_ANCHOR.z, 1.0);
+        boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
+        lastCruzPos = cruz.position();
+
+        if (!issued || cruz.getNavigation().isStuck() || !movedThisCycle) {
+            stuckCycles++;
+        } else {
+            stuckCycles = 0;
+        }
+        if (stuckCycles >= ESCORT_STUCK_CYCLES_MAX) {
+            stuckCycles = 0;
+            teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
+            cruz.setEscorting(false);
+        }
+    }
+
+    /**
+     * Instantly returns Cruz to her briefing anchor. Called by {@code /bfp new_tutorial [reset]}
+     * and Capt. Morfe's fail-reset so a restarting trainee always finds her waiting beside them at
+     * (-153.5,-33,32.5) — never stranded across the building where the last run left her.
+     */
+    public static void resetCruz(ServerLevel level) {
+        CustomNpcEntity cruz = findCruz(level);
+        if (cruz == null) return;
+        stuckCycles = 0;
+        teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
+        cruz.setEscorting(false);
+    }
+
+    /**
      * Teleports a lost/stuck Cruz to just beside the escorted player, wrapped in POOF particles at
      * both ends so it reads as an intentional instructor catch-up rather than a glitch. The offset
      * keeps her on the side she was already on (or on top of the player if degenerate).
@@ -236,7 +297,12 @@ public final class CruzRoomManager {
         Vec3 offset = toward.horizontalDistanceSqr() < 0.01
                 ? Vec3.ZERO
                 : new Vec3(toward.x, 0, toward.z).normalize().scale(1.5);
-        Vec3 dest = player.position().add(offset);
+        teleportCruzTo(level, cruz, player.position().add(offset));
+    }
+
+    /** POOF at both ends + navigation stop + teleport — the shared "Cruz jumps somewhere" visual. */
+    private static void teleportCruzTo(ServerLevel level, CustomNpcEntity cruz, Vec3 dest) {
+        Vec3 from = cruz.position();
         level.sendParticles(ParticleTypes.POOF, from.x, from.y + 0.8, from.z, 10, 0.3, 0.4, 0.3, 0.01);
         cruz.getNavigation().stop();
         cruz.teleportTo(dest.x, dest.y, dest.z);

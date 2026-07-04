@@ -10,6 +10,7 @@ import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.SantosPhase;
+import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 
@@ -80,6 +81,7 @@ public final class MorfeRoomManager {
         AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_FAIL_LINES, () -> {
             data.mutate(player.getUUID(), AcademyProgress::resetAll);
             ReyesRoomManager.cleanupHazardProps(level);
+            CruzRoomManager.resetCruz(level);
             player.teleportTo(level, RETRY_X, RETRY_Y, RETRY_Z,
                     Collections.emptySet(), player.getYRot(), player.getXRot(), true);
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fWelcome back for round two, trainee! "
