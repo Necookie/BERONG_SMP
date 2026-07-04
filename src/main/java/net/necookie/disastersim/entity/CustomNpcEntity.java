@@ -8,6 +8,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -35,7 +37,15 @@ public class CustomNpcEntity extends Mob {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.0);
+                .add(Attributes.MOVEMENT_SPEED, 0.0)
+                // Default FOLLOW_RANGE (16) also caps the pathfinding node budget — too small for
+                // an escort route spanning the Academy's Movement School, and the root cause of
+                // Cruz "getting lost" on longer legs.
+                .add(Attributes.FOLLOW_RANGE, 48.0)
+                // The jump zone's hurdles are 1 block tall; 1.1 lets an escorting NPC walk them
+                // without needing a jump. Only escorting NPCs ever move, and Cruz never targets
+                // past the Go/Stop staging line, so this can't carry her over the tunnel walls.
+                .add(Attributes.STEP_HEIGHT, 1.1);
     }
 
     @Override
@@ -59,6 +69,10 @@ public class CustomNpcEntity extends Mob {
 
     @Override
     protected void registerGoals() {
+        // Keeps a moving NPC afloat instead of sinking/drowning if an escort route ever crosses
+        // water. Only ticks while noAi=false (escorting or minimalWander), so static NPCs pay
+        // nothing for it.
+        this.goalSelector.addGoal(0, new FloatGoal(this));
         // No vanilla AI beyond this — the gaze is driven manually in tick(). This goal only
         // ever runs for NpcTypes with minimalWander=true, since setNpcType() is the sole place
         // that flips setNoAi(false) for those, and noAi mobs never tick their goal selector.
@@ -143,6 +157,15 @@ public class CustomNpcEntity extends Mob {
         var movementSpeed = this.getAttribute(Attributes.MOVEMENT_SPEED);
         if (movementSpeed != null) {
             movementSpeed.setBaseValue(escorting ? ESCORT_SPEED : (getNpcType().minimalWander ? 0.05 : 0.0));
+        }
+        // Configure navigation for indoor escort routes each time escort mode turns on: door
+        // passage and an explicit path budget matching FOLLOW_RANGE (createAttributes) so long
+        // legs through the building don't get truncated mid-route.
+        if (escorting && this.getNavigation() instanceof GroundPathNavigation nav) {
+            nav.setCanOpenDoors(true);
+            nav.getNodeEvaluator().setCanPassDoors(true);
+            nav.setRequiredPathLength(48.0f);
+            nav.setMaxVisitedNodesMultiplier(4.0f);
         }
     }
 
