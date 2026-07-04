@@ -18,6 +18,9 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.world.LobbyManager;
 import net.necookie.disastersim.world.TutorialLobbyManager;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collections;
@@ -34,9 +37,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * → COMPLETED (teleports to main lobby).
  *
  * <p>Progress is persisted to disk via {@link TutorialSavedData}. Transient per-player maps
- * (hold-on timers, extinguish counts, dialogue steps) reset if the server restarts mid-stage —
- * acceptable for a tutorial flow since stages re-prompt on next login.
+ * (hold-on timers, extinguish counts, dialogue steps) are cleared on logout via
+ * {@link #onPlayerLogout} — they do <em>not</em> survive a same-session "Save and Quit to Title"
+ * the way the class comment here used to claim (that's only true of an actual JVM restart); the
+ * integrated server's Java classes, including this one's static maps, stay loaded for the life of
+ * the client. {@link #onPlayerLogout} also rolls {@code QUAKE_DROP}/{@code QUAKE_COVER}/
+ * {@code QUAKE_HOLDON} back to {@code QUAKE_INTRO} on logout — without that, {@link #tick} (which
+ * runs unconditionally for every online player, every tick, based purely on the *persisted*
+ * {@link TutorialStage}) would resume sending {@code sendPrompt(..., 1.5f)} every 10 ticks the
+ * instant the player reconnects, with no dialogue re-triggered — this, not the separate (and
+ * already-fixed) Academy earthquake drill in {@code academy.room3.SantosRoomManager}, was the
+ * actual cause of "the earthquake is still going after exiting and reloading the world": the old
+ * tutorial's drill kept re-arming itself on its own 10-tick clock regardless of what the client's
+ * HUD static fields were reset to.
  */
+@EventBusSubscriber(modid = BerongSMP.MODID)
 public class TutorialManager {
 
     /** Center of the practice fire cluster in the BFP tutorial lobby. */
@@ -243,6 +258,27 @@ public class TutorialManager {
     /** Gives the player a fire extinguisher in hotbar slot 0. */
     public static void giveExtinguisher(ServerPlayer player) {
         player.getInventory().setItem(0, new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get()));
+    }
+
+    /**
+     * Drops this player's transient maps and, if they quit mid-earthquake-drill, rolls
+     * {@code TutorialStage} back to {@code QUAKE_INTRO} so reconnecting re-triggers Capt. Santos's
+     * dialogue instead of {@link #tick} silently resuming the shake prompt loop on its own 10-tick
+     * clock. See the class doc for why this was the actual "earthquake never stops" bug.
+     */
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        UUID id = player.getUUID();
+        holdOnTimers.remove(id);
+        extinguishCounts.remove(id);
+        dialogueSteps.remove(id);
+
+        TutorialStage stage = getStage(player);
+        if (stage == TutorialStage.QUAKE_DROP || stage == TutorialStage.QUAKE_COVER
+                || stage == TutorialStage.QUAKE_HOLDON) {
+            advanceTo(player, TutorialStage.QUAKE_INTRO);
+        }
     }
 
     // -----------------------------------------------------------------------
