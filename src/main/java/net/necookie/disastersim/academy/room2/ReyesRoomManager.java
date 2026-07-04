@@ -3,6 +3,7 @@ package net.necookie.disastersim.academy.room2;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
@@ -71,8 +72,12 @@ public final class ReyesRoomManager {
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
 
-    /** World-shared "was this position an active hazard last tick" snapshot (not per-player — see class doc). */
-    private static final Map<BlockPos, Boolean> lastActive = new ConcurrentHashMap<>();
+    /**
+     * Per-player "was this position an active hazard last tick" snapshot, keyed by player UUID
+     * first so two concurrent Room-2 players don't corrupt each other's hazardous→safe edge
+     * detection (the hazard positions themselves are fixed world coordinates shared by everyone).
+     */
+    private static final Map<UUID, Map<BlockPos, Boolean>> lastActive = new ConcurrentHashMap<>();
     /** Which hazard index (0-2) each player is currently working on; absent until LIVE_FIRE_DEMO starts. */
     private static final Map<UUID, Integer> currentHazard = new ConcurrentHashMap<>();
     /** The hazard index whose explanation dialogue has already been kicked off, so it's only started once. */
@@ -165,7 +170,7 @@ public final class ReyesRoomManager {
             explainedHazard.put(id, idx);
             HazardStep hazard = HAZARDS.get(idx);
             AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx),
-                    () -> igniteHazard(level, hazard));
+                    () -> igniteHazard(level, id, hazard));
             return; // wait for the explanation to finish before this hazard even ignites
         }
 
@@ -174,10 +179,10 @@ public final class ReyesRoomManager {
         }
     }
 
-    private static void igniteHazard(ServerLevel level, HazardStep hazard) {
+    private static void igniteHazard(ServerLevel level, UUID playerId, HazardStep hazard) {
         level.setBlock(hazard.pos(), hazard.blockState().get(), 3);
         HazardManager.forceFailure(level, null, hazard.pos(), null);
-        lastActive.put(hazard.pos(), true);
+        lastActive.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(hazard.pos(), true);
     }
 
     /**
@@ -187,9 +192,10 @@ public final class ReyesRoomManager {
     private static boolean checkAndHandleDefuse(ServerPlayer player, AcademySavedData data, HazardStep hazard) {
         ServerLevel level = (ServerLevel) player.level();
         BlockPos pos = hazard.pos();
+        Map<BlockPos, Boolean> mine = lastActive.computeIfAbsent(player.getUUID(), k -> new ConcurrentHashMap<>());
         boolean activeNow = isActive(level, pos);
-        boolean wasActive = lastActive.getOrDefault(pos, false);
-        lastActive.put(pos, activeNow);
+        boolean wasActive = mine.getOrDefault(pos, false);
+        mine.put(pos, activeNow);
 
         if (!wasActive || activeNow) return false;
         if (player.position().distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5) > NEAR_RANGE_SQ) return false;
@@ -204,7 +210,7 @@ public final class ReyesRoomManager {
         data.mutate(player.getUUID(), AcademyProgress::addFireWrongUse);
         AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cThat's the wrong extinguisher — the fire flares "
                 + "right back up! Think about what's burning and try again.");
-        igniteHazard(level, hazard);
+        igniteHazard(level, player.getUUID(), hazard);
         return false;
     }
 
@@ -260,12 +266,36 @@ public final class ReyesRoomManager {
 
     private static void finishRoom(ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
+        cleanupHazardProps((ServerLevel) player.level());
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
         currentHazard.remove(id);
         explainedHazard.remove(id);
+        lastActive.remove(id);
         AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fYou've mastered all three fire classes and how to "
                 + "handle catching fire yourself. Head over to Sgt. Santos for the earthquake drill — "
                 + "you're doing amazing!");
+    }
+
+    /** Room 2's box (with ceiling headroom) — the sweep area for leftover vanilla fire. */
+    private static final BlockPos ROOM_MIN = new BlockPos(-173, -34, 10);
+    private static final BlockPos ROOM_MAX = new BlockPos(-162, -28, 23);
+
+    /**
+     * Removes the 3 code-spawned hazard props and any leftover vanilla fire in Room 2. The props
+     * only ever exist because {@link #igniteHazard} places them, and their forced failure spreads
+     * real fire — without this sweep both would persist in the world forever after the drill.
+     * Called on room finish, on a mid-demo logout/death, and on a Capt. Morfe fail-reset.
+     */
+    public static void cleanupHazardProps(ServerLevel level) {
+        for (HazardStep hazard : HAZARDS) {
+            level.setBlock(hazard.pos(), Blocks.AIR.defaultBlockState(), 3);
+        }
+        for (BlockPos pos : BlockPos.betweenClosed(ROOM_MIN, ROOM_MAX)) {
+            BlockState state = level.getBlockState(pos);
+            if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+                level.setBlock(pos.immutable(), Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
     }
 
     /**
@@ -273,7 +303,10 @@ public final class ReyesRoomManager {
      * drop this room's per-player state. If the scripted ignite demo was active, also clears the
      * player's actual fire: vanilla persists remaining fire ticks in the player's own save data, so
      * without this a player who quits mid-demo would rejoin still visibly on fire and taking damage
-     * from a "lesson" that has no way to resume properly (its window countdown is gone).
+     * from a "lesson" that has no way to resume properly (its window countdown is gone). A player
+     * who quits anywhere in LIVE_FIRE_DEMO also gets the room's spawned props/fire cleaned up and
+     * the phase rolled back to TOOL_SELECTION, so a re-login re-runs the hazard sequence cleanly
+     * from its explanation dialogue instead of resuming into missing props.
      */
     public static void clearPlayer(ServerPlayer player) {
         UUID id = player.getUUID();
@@ -282,5 +315,13 @@ public final class ReyesRoomManager {
         }
         currentHazard.remove(id);
         explainedHazard.remove(id);
+        lastActive.remove(id);
+
+        ServerLevel level = (ServerLevel) player.level();
+        AcademySavedData data = AcademySavedData.get(level);
+        if (data.get(id).reyesPhase() == ReyesPhase.LIVE_FIRE_DEMO) {
+            cleanupHazardProps(level);
+            data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
+        }
     }
 }
