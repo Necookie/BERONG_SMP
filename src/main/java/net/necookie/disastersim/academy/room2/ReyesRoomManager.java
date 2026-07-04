@@ -146,9 +146,14 @@ public final class ReyesRoomManager {
         if (!hasAllExtinguishers(player)) {
             if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                     && !AcademyManager.isDialogueActive(player.getUUID())) {
-                AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §7Walk right up to each extinguisher and click "
-                        + "it with your §eleft mouse button§7 — it pops off the wall, then step onto it to "
-                        + "pick it up. You need all three!");
+                AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                        "§6[Sgt. Reyes] §7Walk right up to each extinguisher and click it with your "
+                                + "§eleft mouse button§7 — it pops off the wall, then step onto it to "
+                                + "pick it up. You need all three!",
+                        "§6[Sgt. Reyes] §7Red, green, yellow — collect all three! §eLeft-click§7 a "
+                                + "frame on the wall and walk over what drops.",
+                        "§6[Sgt. Reyes] §7Each frame on the wall holds one extinguisher. Hit it with "
+                                + "your §eleft mouse button§7, then scoop it up off the floor!"));
             }
             return;
         }
@@ -211,15 +216,21 @@ public final class ReyesRoomManager {
         boolean usedCorrectTool = hazard.correctTool().isInstance(player.getMainHandItem().getItem());
         if (usedCorrectTool) {
             data.mutate(player.getUUID(), AcademyProgress::addFireCorrectUse);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aPerfect match! That's exactly the right "
-                    + "extinguisher for that fire. Well done!");
+            AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                    "§6[Sgt. Reyes] §aPerfect match! That's exactly the right extinguisher for "
+                            + "that fire. Well done!",
+                    "§6[Sgt. Reyes] §aBeautiful work — right tool, right fire!",
+                    "§6[Sgt. Reyes] §aThat's how it's done! Textbook extinguisher choice, trainee."));
             return true;
         }
 
         data.mutate(player.getUUID(), AcademyProgress::addFireWrongUse);
-        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cNot that one — the fire flared back up! §7No harm "
-                + "done. Look at what's burning, press the matching extinguisher's §enumber key§7, and "
-                + "§ehold the right mouse button§7 to try again.");
+        AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                "§6[Sgt. Reyes] §cNot that one — the fire flared back up! §7No harm done. Look at "
+                        + "what's burning, press the matching extinguisher's §enumber key§7, and "
+                        + "§ehold the right mouse button§7 to try again.",
+                "§6[Sgt. Reyes] §cWhoops — wrong extinguisher, and the fire came right back! §7Match "
+                        + "the color to what's burning and give it another go — you've got this."));
         igniteHazard(level, player.getUUID(), hazard);
         return false;
     }

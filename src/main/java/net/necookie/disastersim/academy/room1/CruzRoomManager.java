@@ -409,8 +409,13 @@ public final class CruzRoomManager {
             AcademyVisuals.setCompassTarget(player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7See the tall beam of green light? "
-                    + "That's your next tile — hold the §eW key§7 and walk to it!");
+            AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                    "§a[Officer Cruz] §7See the tall beam of green light? That's your next tile — "
+                            + "hold the §eW key§7 and walk to it!",
+                    "§a[Officer Cruz] §7You're doing great — one green tile at a time! The glowing "
+                            + "arrow at the top of your screen points right at the next one.",
+                    "§a[Officer Cruz] §7No rush at all! Spot the green glow, then hold §eW§7 and "
+                            + "stroll right onto it."));
         }
     }
 
@@ -426,8 +431,13 @@ public final class CruzRoomManager {
         }
         AcademyVisuals.setCompassTarget(player, currentWaypoint(player, MAZE_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Hit a wall? No worries! Turn with your "
-                    + "§emouse§7 first, spot the opening, then walk with §eW§7. The glowing arrow shows the way.");
+            AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                    "§a[Officer Cruz] §7Hit a wall? No worries! Turn with your §emouse§7 first, "
+                            + "spot the opening, then walk with §eW§7. The glowing arrow shows the way.",
+                    "§a[Officer Cruz] §7Take it slow — look around with your §emouse§7 until you "
+                            + "see the gap, then walk on through with §eW§7.",
+                    "§a[Officer Cruz] §7Trust the arrow up top! It always points at your next "
+                            + "opening in the maze. Look first, walk second."));
         }
     }
 
@@ -447,8 +457,13 @@ public final class CruzRoomManager {
         }
         AcademyVisuals.setCompassTarget(player, currentWaypoint(player, JUMP_WAYPOINTS));
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Hold §eW§7 to keep walking and tap the "
-                    + "§eSpacebar§7 just before each hurdle. Bumped one? Back up a step and try again!");
+            AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                    "§a[Officer Cruz] §7Hold §eW§7 to keep walking and tap the §eSpacebar§7 just "
+                            + "before each hurdle. Bumped one? Back up a step and try again!",
+                    "§a[Officer Cruz] §7Timing is everything — walk straight at the hurdle and tap "
+                            + "§eSpacebar§7 right at its edge!",
+                    "§a[Officer Cruz] §7Almost there! Keep moving with §eW§7 and hop each hurdle "
+                            + "with a quick §eSpacebar§7 tap."));
         }
     }
 
@@ -476,7 +491,10 @@ public final class CruzRoomManager {
         GoStopState state = new GoStopState();
         state.nextFlipTick = level.getGameTime() + randomInterval(level);
         goStopStates.put(player.getUUID(), state);
-        AcademyManager.sendPrompt(player, "§a▶ GO! Hold the W key and keep walking!");
+        AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                "§a▶ GO! Hold the W key and keep walking!",
+                "§a▶ GO! Move move move — keep that W key down!",
+                "§a▶ GO! Forward, trainee — hold W and go!"));
     }
 
     private static long randomInterval(ServerLevel level) {
@@ -500,11 +518,17 @@ public final class CruzRoomManager {
             state.nextFlipTick = gameTime + randomInterval(level);
             if (state.isGo) {
                 state.stopStartTick = -1;
-                AcademyManager.sendPrompt(player, "§a▶ GO! Hold the W key and keep walking!");
+                AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                "§a▶ GO! Hold the W key and keep walking!",
+                "§a▶ GO! Move move move — keep that W key down!",
+                "§a▶ GO! Forward, trainee — hold W and go!"));
             } else {
                 state.stopStartTick = gameTime;
                 state.posAtStop = player.position();
-                AcademyManager.sendPrompt(player, "§c■ STOP! Let go of every key and freeze!");
+                AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                        "§c■ STOP! Let go of every key and freeze!",
+                        "§c■ STOP! Hands off the keys — statue still!",
+                        "§c■ STOP! Freeze right where you are!"));
             }
         }
 

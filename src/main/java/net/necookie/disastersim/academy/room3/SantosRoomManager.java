@@ -127,8 +127,13 @@ public final class SantosRoomManager {
 
         if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                 && !AcademyManager.isDialogueActive(id)) {
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to "
-                    + "walk there, then press and hold §eShift§7 to crouch — and stay put!", QUAKE_SHAKE_INTENSITY);
+            AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                    "§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to walk there, then "
+                            + "press and hold §eShift§7 to crouch — and stay put!",
+                    "§6[Sgt. Santos] §7The table is your safe spot — hurry back under it and hold "
+                            + "§eShift§7 until the shaking stops!",
+                    "§6[Sgt. Santos] §7Stay low, stay covered! Under the glowing table, hold "
+                            + "§eShift§7, and don't let go!"), QUAKE_SHAKE_INTENSITY);
         }
     }
 

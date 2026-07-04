@@ -116,6 +116,16 @@ public final class AcademyManager {
         sendPrompt(player, text, 0f);
     }
 
+    /**
+     * Picks one of several phrasings at random — used for every message a player hears more than
+     * once per run (idle nudges, GO/STOP calls, correct/wrong feedback), so repeated coaching
+     * doesn't sound like a broken record. All variants of a message must teach the same thing
+     * with the same key names; only the wording varies.
+     */
+    public static String pick(ServerPlayer player, String... variants) {
+        return variants[player.level().getRandom().nextInt(variants.length)];
+    }
+
     public static void sendPrompt(ServerPlayer player, String text, float intensity) {
         PacketDistributor.sendToPlayer(player, new AcademyStatusPayload(text, intensity));
     }
