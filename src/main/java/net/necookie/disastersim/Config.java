@@ -98,9 +98,11 @@ public class Config {
             .defineInRange("academyIgniteDemoTicks", 200, 20, 400);
 
     public static final ModConfigSpec.IntValue ACADEMY_GOSTOP_GRACE_TICKS = BUILDER
-            .comment("Grace period (ticks) after Officer Cruz calls STOP before movement counts as a "
-                   + "violation in the Go/Stop tunnel (20 ticks = 1s).")
-            .defineInRange("academyGoStopGraceTicks", 20, 0, 100);
+            .comment("Reaction window (ticks) after Officer Cruz calls STOP: movement during this "
+                   + "window is never punished (the reference position keeps re-anchoring while the "
+                   + "player slides to a halt); only movement after it counts as a violation. "
+                   + "Default: 30 = 1.5s (20 ticks = 1s).")
+            .defineInRange("academyGoStopGraceTicks", 30, 0, 100);
 
     public static final ModConfigSpec.IntValue ACADEMY_PASS_THRESHOLD = BUILDER
             .comment("Minimum score (0-100) Capt. Morfe requires to certify a player after the Academy.")

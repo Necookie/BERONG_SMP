@@ -510,8 +510,12 @@ public final class CruzRoomManager {
 
         if (!state.isGo && state.stopStartTick >= 0) {
             long grace = Config.ACADEMY_GOSTOP_GRACE_TICKS.get();
-            if (gameTime - state.stopStartTick > grace
-                    && player.position().distanceToSqr(state.posAtStop) > GOSTOP_MOVE_EPSILON_SQ) {
+            if (gameTime - state.stopStartTick <= grace) {
+                // Reaction window (default 1.5s): keep re-anchoring the reference position, so
+                // sliding to a halt during the window is never punished — only movement AFTER the
+                // window (measured from wherever they actually came to rest) counts.
+                state.posAtStop = player.position();
+            } else if (player.position().distanceToSqr(state.posAtStop) > GOSTOP_MOVE_EPSILON_SQ) {
                 player.teleportTo(level, STAGING_POS.x, STAGING_POS.y, STAGING_POS.z,
                         Collections.emptySet(), player.getYRot(), player.getXRot(), true);
                 data.mutate(id, p -> { p.setCruzPhase(CruzPhase.GOSTOP_STAGE); p.addMovementMistake(); });
