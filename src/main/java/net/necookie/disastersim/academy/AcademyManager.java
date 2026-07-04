@@ -70,6 +70,7 @@ public final class AcademyManager {
     /** Called once per server tick from {@code SimulationManager.onServerTick}. */
     public static void tick(ServerLevel level) {
         tickDialogues(level);
+        AcademyGuardrails.tickRescue(level);
         CruzRoomManager.tick(level);
         ReyesRoomManager.tick(level);
         SantosRoomManager.tick(level);
