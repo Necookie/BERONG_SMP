@@ -5,6 +5,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
@@ -34,14 +35,20 @@ public final class NewTutBuildingManager {
     private static final String SCHEM_PATH = "structure/new_tut_building1.0.schem";
 
     /**
-     * Old tunnel-finish handoff spot from the two-NPC Cruz design (pre-Academy-polish-pass) — the
-     * schematic still bakes in a second {@code OFFICER_CRUZ} here. The Academy now routes all of
-     * Room 1's dialogue through a single escorting Cruz, so this duplicate is discarded right after
-     * every placement. This is a permanent fixup, not a one-time migration: {@link SchemLoader}
-     * discards and respawns every schematic entity fresh on every server start, so without this the
-     * duplicate would silently reappear on each boot.
+     * The Academy routes all of Room 1's dialogue and escorting through a single Officer Cruz
+     * anchored at the briefing spot — but the schematic still bakes in a second one at the old
+     * tunnel-finish handoff position (~(-123.5,-33,49.5), from the pre-polish two-NPC design).
+     * After every placement, {@link #discardDuplicateCruz} scans the whole building and keeps only
+     * the Cruz nearest {@link #CRUZ_ANCHOR}, discarding every other copy — deliberately not
+     * position-based against the old handoff spot, so any future re-save of the schematic that
+     * moves/duplicates her differently still resolves to exactly one Cruz. This is a permanent
+     * fixup, not a one-time migration: {@link SchemLoader} discards and respawns every schematic
+     * entity fresh on every server start, so without this the duplicate would silently reappear on
+     * each boot.
      */
-    private static final AABB DUPLICATE_CRUZ_BOUNDS = new AABB(-123.5, -33, 49.5, -123.5, -33, 49.5).inflate(2);
+    private static final Vec3 CRUZ_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
+    /** Whole-building scan bounds — matches {@code AcademyGuardrails.BUILDING_BOUNDS}. */
+    private static final AABB BUILDING_SCAN_BOUNDS = new AABB(-178, -40, 7, -94, -20, 86);
 
     /** A named F3-captured reference viewpoint inside the building, for {@code /bfp new_tutorial}. */
     public record Viewpoint(double x, double y, double z, float yaw, float pitch) {}
@@ -90,16 +97,29 @@ public final class NewTutBuildingManager {
         }
     }
 
-    /** See {@link #DUPLICATE_CRUZ_BOUNDS}. Runs after every placement, not just once. */
+    /** See {@link #CRUZ_ANCHOR}. Runs after every placement, not just once. */
     private static void discardDuplicateCruz(ServerLevel level) {
-        List<CustomNpcEntity> duplicates = level.getEntitiesOfClass(CustomNpcEntity.class, DUPLICATE_CRUZ_BOUNDS,
+        List<CustomNpcEntity> all = level.getEntitiesOfClass(CustomNpcEntity.class, BUILDING_SCAN_BOUNDS,
                 npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ);
-        for (CustomNpcEntity npc : duplicates) {
-            npc.discard();
+        if (all.size() <= 1) return;
+
+        CustomNpcEntity keep = all.get(0);
+        double bestDistSq = keep.position().distanceToSqr(CRUZ_ANCHOR);
+        for (CustomNpcEntity npc : all) {
+            double distSq = npc.position().distanceToSqr(CRUZ_ANCHOR);
+            if (distSq < bestDistSq) {
+                keep = npc;
+                bestDistSq = distSq;
+            }
         }
-        if (!duplicates.isEmpty()) {
-            BerongSMP.LOGGER.info("Discarded {} duplicate Officer Cruz entity/entities from the old tunnel-finish spot", duplicates.size());
+        int discarded = 0;
+        for (CustomNpcEntity npc : all) {
+            if (npc != keep) {
+                npc.discard();
+                discarded++;
+            }
         }
+        BerongSMP.LOGGER.info("Discarded {} duplicate Officer Cruz entity/entities; kept the one nearest the briefing anchor", discarded);
     }
 
     /**
