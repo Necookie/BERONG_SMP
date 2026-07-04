@@ -84,6 +84,7 @@ public final class AcademyManager {
             CruzRoomManager.clearPlayer(id);
             ReyesRoomManager.clearPlayer(id);
             SantosRoomManager.clearPlayer(id);
+            AcademyVisuals.clearPlayer(id);
         }
     }
 

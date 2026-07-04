@@ -203,12 +203,18 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. No static dialogue en
   + scoring counters, clean slate) and teleports them back to Room 1's briefing zone.
 
 World-space navigation, "compass" style ("follow the green floor arrows", said literally in
-  several lines): `AcademyVisuals.spawnCompassArrow` floats a small 7-point arrowhead ~1.8 blocks in
-  front of the player, continuously re-oriented toward the current objective — called **every
-  tick** (20Hz) for smooth rotation rather than the old 10-tick dashed-trail version, from every
-  room's "go find the next NPC"/in-phase nudge. Cruz's Room 1 also calls `highlightBlocks` on the
-  4 unhit WASD green marks every 5 ticks so they're actually visible, not just invisible trigger
-  zones, pairing the glow with the compass arrow pointing at the nearest unhit one.
+  several lines): a real client-rendered HUD needle (`client.AcademyCompassHud`), not particles —
+  a small triangular arrow fixed at the top-center of the screen that continuously rotates to point
+  at the current objective, recomputed from the local player's own exact position/view angle every
+  render frame (so it's perfectly smooth regardless of tick rate, unlike either the original 10-tick
+  dashed particle trail or the 20Hz particle-arrowhead version that replaced it). The server only
+  syncs *where* the target is via `AcademyCompassPayload`; `AcademyVisuals.setCompassTarget`
+  dedupes so a packet is only actually sent when the target changes (safe to call every tick from
+  whichever room is guiding the player) — `target == null` hides the needle, used whenever a room's
+  "point at the next NPC" objective has already been reached so the arrow doesn't linger stale.
+  Cruz's Room 1 also calls `highlightBlocks` (still particle-based) on the 4 unhit WASD green marks
+  every 5 ticks so they're actually visible, not just invisible trigger zones, pairing the highlight
+  with the compass needle pointing at the nearest unhit one.
 
 Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click starts a phase's
   whole line sequence via `AcademyManager.startOrAdvanceDialogue`; each line auto-advances after a
@@ -231,6 +237,8 @@ state — 4 phases + Capt. Morfe's scoring inputs, `SavedData`+`Codec` pattern-c
 static line content plus `REYES_HAZARD_LINES` per-hazard explanations, transcribed from
 `docs/new_tutorial_script.md`); `AcademyStatusPayload`/`AcademyHud` (own caption channel,
 pattern-cloned from `TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing);
+`AcademyCompassPayload`/`client.AcademyCompassHud` (own channel/HUD pair for the client-rendered
+compass needle — see "World-space navigation" above);
 `room1.CruzRoomManager`/`room2.ReyesRoomManager`/`room3.SantosRoomManager`/`room4.MorfeRoomManager`
 + `room4.AcademyScoring`. `AcademyManager.tick` is hooked into `SimulationManager.onServerTick`
 alongside the existing `TutorialManager`/`DropAndRollManager`/`DuckCoverHoldManager` calls.

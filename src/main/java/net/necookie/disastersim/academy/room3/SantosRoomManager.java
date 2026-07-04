@@ -131,8 +131,11 @@ public final class SantosRoomManager {
 
     /** Points toward Capt. Morfe until the player has actually started Room 4. */
     private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
-        if (data.get(player.getUUID()).morfePhase() != MorfePhase.NOT_STARTED) return;
-        AcademyVisuals.spawnCompassArrow(level, player, MORFE_ANCHOR);
+        if (data.get(player.getUUID()).morfePhase() != MorfePhase.NOT_STARTED) {
+            AcademyVisuals.setCompassTarget(player, null);
+            return;
+        }
+        AcademyVisuals.setCompassTarget(player, MORFE_ANCHOR);
     }
 
     private static boolean isNearTableRow(ServerPlayer player) {

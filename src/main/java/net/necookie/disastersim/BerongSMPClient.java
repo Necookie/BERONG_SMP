@@ -77,6 +77,7 @@ public class BerongSMPClient {
         SimulationHud.registerGuiLayers(event);
         net.necookie.disastersim.client.TutorialHud.registerGuiLayers(event);
         net.necookie.disastersim.client.AcademyHud.registerGuiLayers(event);
+        net.necookie.disastersim.client.AcademyCompassHud.registerGuiLayers(event);
     }
 
     /** Drives the purely cosmetic drop-and-roll crouch/tilt — see {@link DropAndRollRenderModifier}. */

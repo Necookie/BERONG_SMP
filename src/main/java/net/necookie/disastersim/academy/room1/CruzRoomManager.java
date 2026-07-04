@@ -121,7 +121,7 @@ public final class CruzRoomManager {
                 case JUMP -> tickJump(level, player, data);
                 case GOSTOP_RUN -> tickGoStopRun(level, player, data);
                 case DONE -> tickDone(level, player, data);
-                default -> { }
+                default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED, GOSTOP_STAGE
             }
             if (escortTarget == null && isEscortablePhase(phase)) {
                 escortTarget = player;
@@ -245,7 +245,7 @@ public final class CruzRoomManager {
             AcademyVisuals.highlightBlocks(level, unhitMarks);
         }
         if (nextMark >= 0) {
-            AcademyVisuals.spawnCompassArrow(level, player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
+            AcademyVisuals.setCompassTarget(player, Vec3.atCenterOf(GREEN_MARKS.get(nextMark)));
         }
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Still looking for the marks? "
@@ -261,7 +261,7 @@ public final class CruzRoomManager {
                     + "hit Spacebar to hop right over them. Don't stop moving!");
             return;
         }
-        AcademyVisuals.spawnCompassArrow(level, player, MAZE_EXIT_POINT);
+        AcademyVisuals.setCompassTarget(player, MAZE_EXIT_POINT);
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Bumping into walls slows you down! "
                     + "Look at the green arrows and turn your camera before your feet.");
@@ -276,7 +276,7 @@ public final class CruzRoomManager {
                     + "Come find me at the tunnel entrance for the last lesson.");
             return;
         }
-        AcademyVisuals.spawnCompassArrow(level, player, JUMP_EXIT_POINT);
+        AcademyVisuals.setCompassTarget(player, JUMP_EXIT_POINT);
         if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0) {
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Keep your momentum! "
                     + "Walk straight at it and tap Spacebar right before you'd hit it.");
@@ -285,8 +285,11 @@ public final class CruzRoomManager {
 
     /** Points toward Sgt. Reyes until the player has actually started Room 2. */
     private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
-        if (data.get(player.getUUID()).reyesPhase() != ReyesPhase.NOT_STARTED) return;
-        AcademyVisuals.spawnCompassArrow(level, player, REYES_ANCHOR);
+        if (data.get(player.getUUID()).reyesPhase() != ReyesPhase.NOT_STARTED) {
+            AcademyVisuals.setCompassTarget(player, null);
+            return;
+        }
+        AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
     }
 
     // -----------------------------------------------------------------------
@@ -313,6 +316,7 @@ public final class CruzRoomManager {
     }
 
     private static void tickGoStopRun(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        AcademyVisuals.setCompassTarget(player, null); // Cruz shouts GO/STOP from the staging line, no arrow needed
         UUID id = player.getUUID();
         GoStopState state = goStopStates.get(id);
         if (state == null) {

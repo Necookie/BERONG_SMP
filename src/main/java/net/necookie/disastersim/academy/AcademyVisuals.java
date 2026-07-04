@@ -5,16 +5,25 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.network.AcademyCompassPayload;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Shared visual helpers for the Academy: a per-block green highlight (Sgt. Santos's safe-zone
- * table row, Officer Cruz's green floor marks) and a compass-style waypoint arrow ("follow the
- * green floor arrows" — several dialogue lines say this literally). Both extend
- * {@code world/AssemblyZone.spawnBorderParticles}'s periodic particle-loop idiom (green
- * {@code HAPPY_VILLAGER} particles, matching the mod's existing "green = safe/target" visual
- * language) — there's no glow/highlight/waypoint system anywhere else in the mod to build on.
+ * table row, Officer Cruz's green floor marks — still particle-based, see {@link #highlightBlocks})
+ * and a compass-style waypoint arrow ("follow the green floor arrows" — several dialogue lines say
+ * this literally). The highlight extends {@code world/AssemblyZone.spawnBorderParticles}'s periodic
+ * particle-loop idiom (green {@code HAPPY_VILLAGER} particles). The compass arrow used to be
+ * particles too, but those read as messy/laggy and can't rotate faster than the tick rate they're
+ * spawned at — it's now a client-rendered HUD needle ({@code client.AcademyCompassHud}) driven by
+ * {@link AcademyCompassPayload}; {@link #setCompassTarget} only sends a packet when the target
+ * actually changes, since the needle's rotation itself is recomputed client-side every render
+ * frame from the local player's own position/view angle.
  */
 public final class AcademyVisuals {
 
@@ -49,46 +58,37 @@ public final class AcademyVisuals {
         edge(level, x0, y0, z1, x0, y1, z1);
     }
 
-    /** How far ahead of the player the compass arrow floats. */
-    private static final double ARROW_DISTANCE = 1.8;
-    private static final double ARROW_SEGMENT_LENGTH = 0.35;
+    /** Last target actually sent to each player; used to dedupe {@link #setCompassTarget} calls. */
+    private static final Map<UUID, Vec3> lastSentTarget = new ConcurrentHashMap<>();
+    /** Skip re-sending when the target hasn't moved more than this since the last packet. */
+    private static final double RESEND_EPSILON_SQ = 0.25 * 0.25;
 
     /**
-     * Floats a small green arrowhead ~{@link #ARROW_DISTANCE} blocks in front of the player,
-     * oriented toward {@code target} — a compass, not a breadcrumb trail: call this **every tick**
-     * (20 Hz) from whichever room is guiding the player, so it stays smoothly oriented as they move
-     * and turn, unlike the old dashed-trail-from-a-fixed-point approach it replaces. Does nothing
-     * if the player is already essentially at the target.
+     * Shows (or updates) the client-rendered compass needle pointing toward {@code target}, or
+     * hides it when {@code target} is {@code null}. Safe to call every tick from whichever room is
+     * guiding the player — a network packet is only actually sent when the shown/hidden state or
+     * the target position changes, since {@code AcademyCompassHud} recomputes the needle's screen
+     * rotation itself every render frame and doesn't need a fresh packet to stay smooth.
      */
-    public static void spawnCompassArrow(ServerLevel level, ServerPlayer player, Vec3 target) {
-        Vec3 eye = player.position().add(0, 1.2, 0);
-        Vec3 diff = target.subtract(eye);
-        double dist = diff.length();
-        if (dist < 1.5) return;
+    public static void setCompassTarget(ServerPlayer player, Vec3 target) {
+        UUID id = player.getUUID();
+        Vec3 last = lastSentTarget.get(id);
 
-        Vec3 dir = diff.scale(1.0 / dist);
-        Vec3 center = eye.add(dir.scale(ARROW_DISTANCE));
+        if (target == null) {
+            if (last == null) return;
+            lastSentTarget.remove(id);
+            PacketDistributor.sendToPlayer(player, new AcademyCompassPayload(false, 0, 0, 0));
+            return;
+        }
 
-        double angle = Math.atan2(dir.z, dir.x);
-        double backLeft = angle + Math.toRadians(150);
-        double backRight = angle - Math.toRadians(150);
-
-        Vec3 tail = center.subtract(dir.scale(ARROW_SEGMENT_LENGTH));
-        Vec3 tip = center.add(dir.scale(ARROW_SEGMENT_LENGTH));
-        Vec3 wingLeft = tip.add(Math.cos(backLeft) * ARROW_SEGMENT_LENGTH, 0, Math.sin(backLeft) * ARROW_SEGMENT_LENGTH);
-        Vec3 wingRight = tip.add(Math.cos(backRight) * ARROW_SEGMENT_LENGTH, 0, Math.sin(backRight) * ARROW_SEGMENT_LENGTH);
-
-        spawnPoint(level, tail);
-        spawnPoint(level, center);
-        spawnPoint(level, tip);
-        spawnPoint(level, wingLeft);
-        spawnPoint(level, wingRight);
-        spawnPoint(level, tip.add(wingLeft).scale(0.5));
-        spawnPoint(level, tip.add(wingRight).scale(0.5));
+        if (last != null && last.distanceToSqr(target) < RESEND_EPSILON_SQ) return;
+        lastSentTarget.put(id, target);
+        PacketDistributor.sendToPlayer(player, new AcademyCompassPayload(true, target.x, target.y, target.z));
     }
 
-    private static void spawnPoint(ServerLevel level, Vec3 pos) {
-        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.x, pos.y, pos.z, 1, 0.0, 0.0, 0.0, 0.0);
+    /** Called from {@code AcademyManager}'s logout handler to drop this player's dedupe cache. */
+    public static void clearPlayer(UUID id) {
+        lastSentTarget.remove(id);
     }
 
     private static void edge(ServerLevel level, double x0, double y0, double z0, double x1, double y1, double z1) {

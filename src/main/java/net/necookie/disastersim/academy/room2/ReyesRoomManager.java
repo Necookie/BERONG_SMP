@@ -123,8 +123,11 @@ public final class ReyesRoomManager {
     private static final Vec3 SANTOS_ANCHOR = new Vec3(-170.5, -33.0, 33.5);
 
     private static void tickDone(ServerLevel level, ServerPlayer player, AcademySavedData data) {
-        if (data.get(player.getUUID()).santosPhase() != SantosPhase.NOT_STARTED) return;
-        AcademyVisuals.spawnCompassArrow(level, player, SANTOS_ANCHOR);
+        if (data.get(player.getUUID()).santosPhase() != SantosPhase.NOT_STARTED) {
+            AcademyVisuals.setCompassTarget(player, null);
+            return;
+        }
+        AcademyVisuals.setCompassTarget(player, SANTOS_ANCHOR);
     }
 
     private static void tickToolSelection(ServerLevel level, ServerPlayer player, AcademySavedData data) {
