@@ -63,6 +63,9 @@ public class CustomNpcEntity extends Mob {
     private static final float MAX_HEAD_YAW = 60.0f;
     /** Max up/down head pitch in degrees. */
     private static final float MAX_HEAD_PITCH = 40.0f;
+    /** Degrees per tick the body swings once the desired gaze exceeds the head cone — slower than
+     *  the head so the turn reads as a natural "head leads, body follows". */
+    private static final float BODY_TURN_SPEED = 6.0f;
 
     /** Speed used for the occasional tiny idle step on NpcTypes with minimalWander=true. */
     private static final double WANDER_SPEED = 0.35;
@@ -98,6 +101,18 @@ public class CustomNpcEntity extends Mob {
             double dy = target.getEyeY() - this.getEyeY();
             double horizontal = Math.sqrt(dx * dx + dz * dz);
             float rawYaw = (float) (Mth.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0f;
+            // When the player is beyond the head cone (e.g. standing behind), swing the whole body
+            // around toward them — head tracks first, body follows, so a static instructor turns
+            // to face whoever they're talking to instead of side-eyeing at a 60° clamp. Never
+            // while escorting: MoveControl owns body yaw during pathfinding.
+            if (!escorting) {
+                float bodyDelta = Mth.wrapDegrees(rawYaw - this.yBodyRot);
+                if (Math.abs(bodyDelta) > MAX_HEAD_YAW) {
+                    float newBody = approachDegrees(this.yBodyRot, rawYaw, BODY_TURN_SPEED);
+                    this.setYBodyRot(newBody);
+                    this.setYRot(newBody); // keep entity yaw in sync so the turn syncs/persists
+                }
+            }
             // Keep the head within a natural cone of the body so it never snaps fully around.
             desiredYaw = this.yBodyRot
                     + Mth.clamp(Mth.wrapDegrees(rawYaw - this.yBodyRot), -MAX_HEAD_YAW, MAX_HEAD_YAW);
