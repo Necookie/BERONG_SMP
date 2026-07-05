@@ -208,14 +208,19 @@ public final class CruzRoomManager {
                 default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED
             }
             // DONE keeps counting as escortable, but only while the player is still physically
-            // inside Room 1's (now door-inclusive) footprint — she walks them right up to the
-            // doorway into Reyes's room instead of cutting the escort the instant the Go/Stop
-            // finish line is crossed, which used to happen well before the player was anywhere
-            // near actually leaving. The moment they step through the door and out of
-            // ROOM1_BOUNDS, this stops matching and updateCruzEscort's null branch sends her
-            // walking gradually back home instead.
+            // inside Room 1's (now door-inclusive) footprint AND Sgt. Reyes hasn't actually started
+            // instructing them yet — she walks them right up to the doorway into Reyes's room
+            // instead of cutting the escort the instant the Go/Stop finish line is crossed, which
+            // used to happen well before the player was anywhere near actually leaving. The moment
+            // they step through the door (out of ROOM1_BOUNDS) OR Reyes's dialogue actually begins
+            // (reyesPhase advances past NOT_STARTED, whichever happens first), this stops matching
+            // and updateCruzEscort's null branch sends her walking gradually back home instead —
+            // she only ever follows during her own turn of the tutorial, never once Reyes is
+            // teaching, regardless of whether the player is still technically inside the bounds.
             boolean stillEscortable = isEscortablePhase(phase)
-                    || (phase == CruzPhase.DONE && ROOM1_BOUNDS.contains(player.position()));
+                    || (phase == CruzPhase.DONE
+                        && ROOM1_BOUNDS.contains(player.position())
+                        && data.get(player.getUUID()).reyesPhase() == ReyesPhase.NOT_STARTED);
             if (escortTarget == null && stillEscortable) {
                 escortTarget = player;
             }
