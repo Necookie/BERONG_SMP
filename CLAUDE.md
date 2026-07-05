@@ -168,10 +168,22 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   player via `CustomNpcEntity.setEscorting(true)` + a periodic `getNavigation().moveTo(...)`
   re-issued every ~15 ticks. Navigation hardening: FOLLOW_RANGE 48 (default 16 also caps the
   pathfinding node budget — the old "gets lost" root cause), STEP_HEIGHT 1.1 (walks the hurdles),
-  FloatGoal, door passage + explicit path budget set on escort start. **Stuck recovery**: 4
-  consecutive no-progress escort cycles (~3s — path not created, isStuck(), or <0.25 blocks moved
-  while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with POOF
-  particles at both ends. **Wandered-too-far chase (2026-07-05, retuned twice same day)**: if the
+  FloatGoal, door passage + explicit path budget set on escort start. **Stuck recovery**: 6
+  consecutive no-progress escort cycles (~4.5s at the 15-tick cadence — `isStuck()`, or <0.25 blocks
+  moved, while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with
+  POOF particles at both ends. **Path-aware stuck detection (2026-07-05, per a Fable-5 architectural
+  review — see "Cruz Pathfinding Recommendations" below):** a provably unreachable target
+  (`Path == null || !Path.canReach()`, read directly off `getNavigation().getPath()`) now counts for
+  `UNREACHABLE_STUCK_STEP` (3) cycles instead of 1 — recovers in ~1-2 cycles instead of waiting out
+  the full ~4.5s budget, which is what actually fixed her lagging visibly behind at every Go/Stop
+  tunnel barrier (a genuinely unreachable target every time, since she can't crouch under the
+  slabs). `stuckCycles`/`lastCruzPos` also reset on every real target change (`lastTarget`,
+  `TARGET_CHANGE_EPSILON_SQ`) — including the escort↔`tickReturnHome` handoff — so stall history
+  from one target never counts against a different one. `GOSTOP_RUN`/`DONE` now route through the
+  same `nearPlayerTarget` 2-block-short offset the too-far chase already used, so she never
+  shoulders into the player at those hand-offs either; `CustomNpcEntity.setEscorting(false)` now
+  also calls `getNavigation().stop()` so a stale in-progress path can't silently resume next time
+  escorting turns back on. **Wandered-too-far chase (2026-07-05, retuned twice same day)**: if the
   escorted player strays more than `PLAYER_TOO_FAR_DISTANCE_SQ` blocks (tuning history: 14 → 7 for
   quicker reaction → 20, the current value, per explicit follow-up feedback wanting a larger
   chasing radius — she should let the player roam a bit before reeling them in) from Cruz's current
@@ -205,7 +217,11 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   inside that footprint, so Cruz walks them right up to the doorway before the normal gradual
   `tickReturnHome` walk-back takes over the instant they actually step through. `ESCORT_STUCK_
   CYCLES_MAX` bumped 4→6 so a normal walk across the wider corridor doesn't spuriously trip the
-  stuck-recovery poof. **Faster idle look (2026-07-05)**:
+  stuck-recovery poof. **Own-turn-only gating (2026-07-05):** that same `DONE`-escortable check now
+  *also* requires `reyesPhase() == ReyesPhase.NOT_STARTED` — the instant the player clicks Reyes and
+  her dialogue actually begins, Cruz stops following that same tick regardless of whether they're
+  still technically inside `ROOM1_BOUNDS`. She only ever follows during her own turn of the
+  tutorial, never once Reyes is teaching. **Faster idle look (2026-07-05)**:
   `CustomNpcEntity.updateGaze` now turns her head/body noticeably faster whenever she isn't
   escorting (`HEAD_TURN_SPEED_IDLE`/`BODY_TURN_SPEED_IDLE`, applies to every `CustomNpcEntity`, not
   just Cruz) — a stationary NPC reacts to the player right away instead of the slower ease used
@@ -316,7 +332,8 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     safety-cap timeout) can resolve before `MIN_REACTION_TICKS` (100 ticks/5s) has genuinely
     elapsed — previously nothing enforced a floor, so the demo could resolve almost instantly with
     no real chance to shift+R; the ignite window itself is also clamped to never be shorter than
-    this minimum even if the config value is set lower.
+    this minimum even if the config value is set lower. A once-per-second caption ("Drop and roll!
+    5s/4s/3s/2s/1s") makes the window visible, matching Santos's table-hold countdown style.
   - `ALARM_CHECKPOINT`: Reyes explicitly teaches "the moment a fire starts, always ring the alarm
     first" and points the compass at the fire alarm at `ALARM_POS = (-143,-32,40)`. **Duplicate
     alarm fix (2026-07-05):** the schematic actually already bakes a
@@ -843,6 +860,32 @@ python3 scripts/generate_furniture_textures.py
 ```
 
 ---
+
+## Cruz Pathfinding Recommendations (2026-07-05, Fable-5 architectural review)
+
+A dedicated Plan-agent review (model `claude-fable-5`) of `CruzRoomManager.java`'s escort logic and
+`CustomNpcEntity.java`'s navigation setup, requested explicitly as a standalone deliverable rather
+than another one-line tweak. The small/trivial items (path-aware stuck detection, target-change
+resets, `nearPlayerTarget` on `GOSTOP_RUN`/`DONE`, `getNavigation().stop()` on escort-off, stale
+comment fixes) were implemented the same day — see the Room 1 section above. **Not implemented**,
+kept as a documented recommendation for a future dedicated pass:
+
+- **Move the escort mechanics into a proper `Goal`** (`EscortGoal`/`setEscortTarget(...)` API on
+  `CustomNpcEntity`) instead of `CruzRoomManager` externally calling `getNavigation().moveTo(...)`
+  every 15 ticks. `CruzRoomManager` would keep 100% of the "where should she go" phase/waypoint
+  logic; the goal would own "how does she get there" — ticking every server tick (not every 15),
+  able to watch `Path` node advancement directly, with a guaranteed `start()`/`stop()` lifecycle.
+  This is the highest long-term-value change (and would also move `lastCruzPos`/`stuckCycles`/
+  `nextEscortMoveTick`/`lastTarget` from static manager fields into per-entity instance state,
+  closing a latent multiplayer-safety gap), but it's a real refactor deserving its own dedicated
+  pass rather than folding into a round of targeted fixes.
+- **Issue `moveTo` once per target change for the *fixed* waypoints** (briefing marks, maze/jump
+  waypoints, the Go/Stop staging line, the briefing-anchor walk-home) instead of blindly recomputing
+  an identical path every 15 ticks — re-issue only on `isDone()`-not-arrived, not on a fixed clock.
+  The *moving* targets (`GOSTOP_RUN`, `DONE`, the too-far chase) are fine re-issuing on the existing
+  cadence, matching vanilla follow-goal idiom. Worth revisiting `FOLLOW_RANGE`/
+  `setRequiredPathLength` (currently 48, Room 1's longest leg is close to that) if this cadence
+  change lands, since issue-once makes path-length headroom matter more.
 
 ## Hazard Prop 3-State Log (2026-07-05)
 
