@@ -58,6 +58,9 @@ public final class NewTutBuildingManager {
      */
     private static final Vec3 STRAY_CRUZ_POS = new Vec3(-122, -33, 49);
     private static final double STRAY_CRUZ_RADIUS = 3.0;
+    private static final AABB STRAY_CRUZ_BOUNDS = new AABB(
+            STRAY_CRUZ_POS.x - STRAY_CRUZ_RADIUS, STRAY_CRUZ_POS.y - STRAY_CRUZ_RADIUS, STRAY_CRUZ_POS.z - STRAY_CRUZ_RADIUS,
+            STRAY_CRUZ_POS.x + STRAY_CRUZ_RADIUS, STRAY_CRUZ_POS.y + STRAY_CRUZ_RADIUS, STRAY_CRUZ_POS.z + STRAY_CRUZ_RADIUS);
     /**
      * Deliberately much wider than the building itself: a Cruz saved to disk from a session
      * predating either the schem-level fix or the escort stuck-recovery logic could have drifted
@@ -120,24 +123,32 @@ public final class NewTutBuildingManager {
         }
     }
 
+    /**
+     * The stray Officer Cruz at {@link #STRAY_CRUZ_POS} is a disk-persisted leftover sitting in a
+     * chunk that's merely block-loaded (from schematic placement), not entity-ticking — Minecraft
+     * only attaches a chunk's persisted entities to the level once it's promoted to the
+     * entity-ticking ring (in range of an online player), which the boot-time scan in
+     * {@link #discardDuplicateCruz} runs long before any player is near. That's why a one-shot
+     * boot scan alone could never actually find and discard her: she simply isn't loaded into the
+     * level yet at that point. Calling this repeatedly (from {@code AcademyManager.tick()}, every
+     * tick, since it's a tiny single-chunk-sized AABB query) guarantees she's discarded the very
+     * tick her chunk activates — which only ever happens because a player walked close enough to
+     * see her, so in practice she's removed before becoming visible.
+     */
+    public static void sweepStrayCruz(ServerLevel level) {
+        for (CustomNpcEntity npc : level.getEntitiesOfClass(CustomNpcEntity.class, STRAY_CRUZ_BOUNDS,
+                npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ)) {
+            npc.discard();
+            BerongSMP.LOGGER.info("Discarded a stray Officer Cruz entity at the old tunnel-finish handoff spot");
+        }
+    }
+
     /** See {@link #CRUZ_ANCHOR}. Runs after every placement, not just once. */
     private static void discardDuplicateCruz(ServerLevel level) {
-        List<CustomNpcEntity> found = level.getEntitiesOfClass(CustomNpcEntity.class, BUILDING_SCAN_BOUNDS,
-                npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ);
+        sweepStrayCruz(level);
 
-        int strayDiscarded = 0;
-        List<CustomNpcEntity> all = new java.util.ArrayList<>();
-        for (CustomNpcEntity npc : found) {
-            if (npc.position().distanceToSqr(STRAY_CRUZ_POS) <= STRAY_CRUZ_RADIUS * STRAY_CRUZ_RADIUS) {
-                npc.discard();
-                strayDiscarded++;
-            } else {
-                all.add(npc);
-            }
-        }
-        if (strayDiscarded > 0) {
-            BerongSMP.LOGGER.info("Discarded {} stray Officer Cruz entity/entities at the old tunnel-finish handoff spot", strayDiscarded);
-        }
+        List<CustomNpcEntity> all = level.getEntitiesOfClass(CustomNpcEntity.class, BUILDING_SCAN_BOUNDS,
+                npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ);
 
         // Only apply the keep-nearest-anchor tie-break when more than one legitimate Cruz remains —
         // a lone survivor (the common case) must never be touched by this pass.
