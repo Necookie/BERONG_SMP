@@ -156,11 +156,19 @@ public final class DuckCoverHoldManager {
         return ticksHeld.getOrDefault(id, 0);
     }
 
+    /**
+     * The chat message and telemetry are only relevant to a real earthquake simulation session --
+     * this method runs unconditionally for every crouching-with-cover player in the world (see the
+     * class javadoc), so without this guard it used to fire the "Duck, Cover, and Hold maintained"
+     * message during completely unrelated activity, e.g. crouching under Officer Cruz's Go/Stop
+     * tunnel slabs mid-tutorial, or under Sgt. Santos's own table (which already sends its own
+     * tailored completion message via SantosRoomManager -- this would have doubled up there too).
+     */
     private static void onHoldAchieved(ServerLevel level, ServerPlayer player) {
-        player.sendSystemMessage(Component.literal("§a✓ Duck, Cover, and Hold maintained — well done!"));
-
         SimulationSession session = SimulationManager.getSession(player.getUUID());
         if (session == null || !session.getState().isQuake()) return;
+
+        player.sendSystemMessage(Component.literal("§a✓ Duck, Cover, and Hold maintained — well done!"));
 
         session.logger.log("duck_cover_hold", Map.of(
                 "x", player.getX(), "y", player.getY(), "z", player.getZ()));
