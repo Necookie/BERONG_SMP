@@ -175,10 +175,13 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   escorted player strays more than `PLAYER_TOO_FAR_DISTANCE_SQ` blocks (tuning history: 14 → 7 for
   quicker reaction → 20, the current value, per explicit follow-up feedback wanting a larger
   chasing radius — she should let the player roam a bit before reeling them in) from Cruz's current
-  position, `updateCruzEscort` abandons the phase's waypoint for that re-issue and walks straight
-  toward the player instead (`clampToRoom1Bounds` keeps the chase target inside `ROOM1_BOUNDS` so it
-  can never pull her outside the building), resuming the normal waypoint once they're close again.
-  The first time this triggers she also speaks up — a throttled (`TOO_FAR_NUDGE_COOLDOWN_TICKS`,
+  position, `updateCruzEscort` abandons the phase's waypoint for that re-issue and walks toward the
+  player instead — stopping about `CHASE_STOP_DISTANCE` (2) blocks short via `nearPlayerTarget`
+  (same offset-toward-approach-side idiom as `recoverCruz`), so she reads as catching up to the
+  player rather than walking through them (`clampToRoom1Bounds` keeps the chase target inside
+  `ROOM1_BOUNDS` so it can never pull her outside the building) — resuming the normal waypoint once
+  they're close again. The first time this triggers she also speaks up — a throttled
+  (`TOO_FAR_NUDGE_COOLDOWN_TICKS`,
   once per 10s) "come back this way, trainee!" line — instead of silently repositioning with no
   in-character acknowledgment. **No teleports at the finish line or on the walk home
   (2026-07-05):** at the Go/Stop finish line, `tickGoStopRun` no longer snaps her beside the player
@@ -308,7 +311,12 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     only clears the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player
     actually performed drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a
     safety-cap timeout for a player who never rolls, not the real burn duration →
-    `advanceToAlarmCheckpoint` (prop/fire cleanup, phase → `ALARM_CHECKPOINT`).
+    `advanceToAlarmCheckpoint` (prop/fire cleanup, phase → `ALARM_CHECKPOINT`). **Guaranteed 5s
+    reaction window (2026-07-05):** neither completion path (drop-and-roll detected, or the
+    safety-cap timeout) can resolve before `MIN_REACTION_TICKS` (100 ticks/5s) has genuinely
+    elapsed — previously nothing enforced a floor, so the demo could resolve almost instantly with
+    no real chance to shift+R; the ignite window itself is also clamped to never be shorter than
+    this minimum even if the config value is set lower.
   - `ALARM_CHECKPOINT`: Reyes explicitly teaches "the moment a fire starts, always ring the alarm
     first" and points the compass at the fire alarm at `ALARM_POS = (-143,-32,40)`. **Duplicate
     alarm fix (2026-07-05):** the schematic actually already bakes a
@@ -359,7 +367,9 @@ Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highli
   each cell, which let a player pass the drill just by crouching somewhere in the open room near
   the table without ever taking cover under it — tightened to a 1-block XZ/Y tolerance, matching
   `DuckCoverHoldManager.hasNearbyTable`'s own radius exactly, so the earthquake now only stops once
-  the player is genuinely under the table and holds there for the same 5 seconds as before.
+  the player is genuinely under the table and holds there for the same 5 seconds as before. A live
+  countdown caption (once per second — "Under cover — hold there... 4s/3s/2s/1s") confirms the
+  detection actually fired instead of the hold silently accumulating with no feedback.
   `tickPreDrill`
   also seeds `preDrillStartTick` via `computeIfAbsent` (previously `getOrDefault`, which never wrote
   the fallback back — a stale/missing entry after an ungraceful shutdown mid-drill could never
