@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
@@ -135,13 +136,13 @@ public final class CruzRoomManager {
      */
     private static final int ESCORT_STUCK_CYCLES_MAX = 6;
     /**
-     * Stuck-recovery threshold used only by {@link #tickReturnHome}'s walk back to
-     * {@link #BRIEFING_ANCHOR} — much more generous than a normal escort leg (~30s at the 15-tick
-     * cadence) since it's a straightforward walk with no real obstacles, and the user specifically
-     * wants a realistic walk-back instead of a poof for this leg. Still teleports as an absolute
-     * last resort so she's never permanently stranded if the path is ever genuinely broken.
+     * Purely diagnostic threshold for {@link #tickReturnHome}'s walk back to
+     * {@link #BRIEFING_ANCHOR} (~30s at the 15-tick cadence) — logs a warning if she's made no
+     * progress for this long, but never teleports her: the walk home is a straightforward,
+     * verified-open route, and the user specifically wants a realistic walk-back with no poof,
+     * ever, for this leg.
      */
-    private static final int RETURN_HOME_STUCK_CYCLES_MAX = 40;
+    private static final int RETURN_HOME_STALL_WARNING_CYCLES = 40;
     /** "Made progress" = Cruz moved more than this per re-issue cycle. */
     private static final double ESCORT_PROGRESS_EPSILON_SQ = 0.25 * 0.25;
     /** Within this range of her target Cruz is considered arrived — never counted as stuck. */
@@ -341,24 +342,21 @@ public final class CruzRoomManager {
         if (now < nextEscortMoveTick) return;
         nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
 
-        boolean issued = cruz.getNavigation().moveTo(BRIEFING_ANCHOR.x, BRIEFING_ANCHOR.y, BRIEFING_ANCHOR.z, 1.0);
+        cruz.getNavigation().moveTo(BRIEFING_ANCHOR.x, BRIEFING_ANCHOR.y, BRIEFING_ANCHOR.z, 1.0);
         boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
         lastCruzPos = cruz.position();
 
-        if (!issued || cruz.getNavigation().isStuck() || !movedThisCycle) {
-            stuckCycles++;
-        } else {
+        // Deliberately never teleports on this leg: it's a straightforward, verified-open walk
+        // back to a fixed point, so she should always just walk it for realism. Simply re-issuing
+        // moveTo every cycle (rather than giving up after N stalls) means a temporary blip just
+        // resolves itself on the next attempt instead of triggering a poof. A one-time log line
+        // flags the rare case where she's made no progress for an unusually long stretch, purely
+        // for debugging -- it takes no action and never falls back to a teleport.
+        if (movedThisCycle) {
             stuckCycles = 0;
-        }
-        // Much more generous than a normal escort leg's stuck threshold: this is a straightforward
-        // walk back to a fixed point with no obstacles she can't path around, so it should always
-        // just walk there for realism rather than reaching for the poof-teleport fallback the
-        // instant a single re-issue cycle stalls. The fallback still exists (never leave her
-        // stranded forever in a genuinely broken case), just at a far higher threshold.
-        if (stuckCycles >= RETURN_HOME_STUCK_CYCLES_MAX) {
-            stuckCycles = 0;
-            teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
-            cruz.setEscorting(false);
+        } else if (++stuckCycles == RETURN_HOME_STALL_WARNING_CYCLES) {
+            BerongSMP.LOGGER.warn("Officer Cruz has made no progress walking back to her anchor for {} cycles",
+                    stuckCycles);
         }
     }
 
@@ -636,15 +634,14 @@ public final class CruzRoomManager {
         if (player.getX() <= GOSTOP_FINISH_X) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.DONE));
             goStopStates.remove(id);
-            // Make sure she's actually standing right beside the player for this beat, rather than
-            // wherever the last 15-tick escort re-issue happened to leave her — a snap-to-side poof
-            // if she isn't already close (the same idiom recoverCruz already uses elsewhere), then
-            // the "you did it, go find Reyes" line delivered as a real spoken Cruz line through the
-            // dialogue sequencer instead of a bare caption.
-            CustomNpcEntity cruz = findCruz(level);
-            if (cruz != null && cruz.position().distanceToSqr(player.position()) > ESCORT_ARRIVED_RANGE_SQ) {
-                recoverCruz(level, cruz, player);
-            }
+            // No teleport here on purpose: DONE keeps counting as escortable (see tick()/
+            // updateCruzEscort), targeting the player's own live position every re-issue, exactly
+            // like GOSTOP_RUN already did throughout the run -- so she just naturally walks up and
+            // ends up in front of the player over the next couple of seconds instead of snapping
+            // to their side. The "you did it, go find Reyes" line is delivered as a real spoken
+            // Cruz line through the dialogue sequencer instead of a bare caption; she keeps
+            // escorting/standing with the player for its whole duration (and beyond, until they
+            // actually leave through the door), so she's never rushing off mid-sentence.
             AcademyManager.forceStartDialogue(player, AcademyDialogue.CRUZ_LINES.get(CruzPhase.DONE), () -> {});
         }
     }
