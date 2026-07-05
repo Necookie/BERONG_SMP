@@ -411,30 +411,37 @@ Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highli
   a per-block wireframe adaptation of AssemblyZone.spawnBorderParticles's particle-loop idiom —
   there's no glow/highlight system elsewhere in the mod) and, since 2026-07-05, also points the
   compass at `TABLE_ROW_CENTER` (`setCompassTarget` — previously beacon-only, unlike every other
-  guided objective in the Academy). After a short delay, triggers the quake
-  (own shake-intensity caption, same CameraShake mechanism TutorialHud already uses) → QUAKE_ACTIVE
+  guided objective in the Academy). After a short delay, triggers the quake → QUAKE_ACTIVE
   reads compliance from a **room-local, table-scoped streak** (`SantosRoomManager.tableHoldTicks`)
-  instead of `DuckCoverHoldManager.ticksHeld` directly: the latter is a *global* crouch+cover
-  streak that accumulates anywhere in the world, so reading it directly previously let a player
-  build the full streak elsewhere and merely step near the table row for one tick to pass
-  instantly. `tableHoldTicks` only increments on ticks where the player is genuinely at
-  `TABLE_ROW` *and* `DuckCoverHoldManager.isCompliant` is true that tick (resets to zero
-  otherwise), so completion can only be earned by actually holding at Santos's table.
-  **"Actually under the table" fix (2026-07-05):** `isNearTableRow` used a 3-block sphere around
-  each cell, which let a player pass the drill just by crouching somewhere in the open room near
-  the table without ever taking cover under it — tightened to a 1-block XZ/Y tolerance, matching
-  `DuckCoverHoldManager.hasNearbyTable`'s own radius exactly, so the earthquake now only stops once
-  the player is genuinely under the table and holds there for the same 5 seconds as before. A live
-  countdown caption (once per second — "Under cover — hold there... 4s/3s/2s/1s") confirms the
-  detection actually fired instead of the hold silently accumulating with no feedback.
-  **Shake-persistence fix (2026-07-06):** that countdown used to send `intensity=0f`, zeroing the
-  client's camera shake the instant the player started holding — the earthquake visually "stopped"
-  seconds before the drill was complete. It now sends a **fading** intensity (1.5 → 0 across the
-  hold, mirroring the old tutorial's `QUAKE_HOLDON` fade); only the true completion message ends the
-  shaking. Breaking cover mid-hold announces the reset and snaps the shake back to full strength
-  (same break-cover-resets-the-timer behavior as the old tutorial), and being at the table without
-  crouching gets its own periodic reminder that keeps the quake at full intensity.
-  `tickPreDrill`
+  — completion requires 5 *consecutive* seconds (`HOLD_REQUIRED_TICKS`); any non-compliant tick
+  resets the countdown to zero with an explicit "the countdown reset!" message.
+  **Room-owned detection (2026-07-06, superseding both the ±1-tolerance and the
+  `DuckCoverHoldManager.isCompliant` versions):** compliance is now `isUnderTable` (feet literally
+  inside one of the 4 `TABLE_ROW` block cells — crouching *beside* the table no longer counts)
+  **and** `isDucking` (`isShiftKeyDown() || isCrouching()`). The `isCompliant` gate this used to
+  lean on was actively backwards under the table: the kneehole's sub-1-block clearance forces
+  vanilla's `Pose.SWIMMING` (crawl), where `isCrouching()` is false — so the exact player who had
+  correctly crawled underneath could **never** accumulate hold time, while someone merely crouching
+  beside the table could. The sneak key stays true while crawling, hence it's the primary signal.
+  `isNearTableRow` (the old ±1 tolerance) survives only to pick the right coaching nudge — three
+  distinct tiers: under-but-not-sneaking, beside-but-not-under ("being beside the table isn't
+  cover — walk INTO it"), and away-from-the-table. A live countdown caption (once per second —
+  "Under cover — hold there... 4s/3s/2s/1s") confirms the detection actually fired.
+  **Dedicated shake channel (2026-07-06, superseding the fading-caption-intensity fix):** camera
+  shake used to ride along on `AcademyStatusPayload`, so *every* caption in the Academy (dialogue
+  lines, the sequencer's end-of-sequence clear, Cruz banners, guardrail nudges) implicitly sent
+  `intensity=0` and silently stopped the quake — while a stray 1.5f from a Santos nudge could stick
+  around with nothing to overwrite it. Seen as "a random earthquake showing up even though it's not
+  for the simulation yet". Shake now travels on its own `AcademyShakePayload` (registrar "6",
+  server-side deduped via `AcademyVisuals.setShake`), asserted **every tick** during QUAKE_ACTIVE:
+  full 1.5 while not holding (the quake genuinely never stops on its own, wherever the player
+  goes), fading 1.5 → 0 across the 5-second hold (mirroring the old tutorial's `QUAKE_HOLDON`), 0
+  only on true completion and on `clearPlayer` (so a `/bfp` reset can't strand a shaking client).
+  Captions no longer carry an intensity field at all.
+  **Quake starts only with the player present (2026-07-06):** `tickPreDrill` holds the trigger
+  until the player is within `QUAKE_START_RANGE` (20 blocks) of the table row — the fixed 3-second
+  timer used to elapse wherever the player had wandered mid-briefing and hit them with a seemingly
+  random earthquake far from the drill. `tickPreDrill`
   also seeds `preDrillStartTick` via `computeIfAbsent` (previously `getOrDefault`, which never wrote
   the fallback back — a stale/missing entry after an ungraceful shutdown mid-drill could never
   reach the 60-tick threshold and stalled the drill forever) → DONE, pointing at Capt. Morfe.
@@ -517,7 +524,12 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   (the persisted phase alone would otherwise re-enter the earthquake drill's tick loop the instant
   they reconnect, with no dialogue re-triggered); `ReyesRoomManager.clearPlayer` clears the player's
   actual fire if the scripted ignite demo was active (vanilla persists remaining fire ticks in the
-  player's own save data, so without this they'd rejoin still on fire). Separately, every HUD's
+  player's own save data, so without this they'd rejoin still on fire). **The same rollback also
+  runs on login (2026-07-06, `AcademyManager.onPlayerLogin` → `clearTransientState`)**: the logout
+  hook never runs after a server crash/force-kill, leaving the mid-drill phase persisted in
+  `AcademySavedData` — the room tick loop would re-enter a full-strength, context-free earthquake
+  the moment the player rejoined. Every `clearPlayer` step is idempotent and phase-gated, so on a
+  clean rejoin the login pass is a no-op. Separately, every HUD's
   caption/shake-intensity/compass state (`SimulationHud`/`TutorialHud`/`AcademyHud`/
   `AcademyCompassHud`) is reset client-side on `ClientPlayerNetworkEvent.LoggingOut`/`LoggingIn`
   (`client.ClientEvents`) — those are plain static fields that otherwise survive for the life of the
@@ -549,7 +561,10 @@ state — 4 phases + Capt. Morfe's scoring inputs, `SavedData`+`Codec` pattern-c
 `MORFE_FAIL_LINES`, transcribed from `docs/new_tutorial_script.md`);
 `AcademyGuardrails` (block protection + out-of-bounds rescue + death/respawn recovery — see
 Guardrails above); `AcademyStatusPayload`/`AcademyHud` (own caption channel, pattern-cloned from
-`TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing);
+`TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing — carries **no**
+shake intensity anymore); `AcademyShakePayload` + `AcademyVisuals.setShake` (dedicated
+caption-independent camera-shake channel, deduped server-side, asserted every tick by
+`SantosRoomManager` during the drill — see Room 3 above);
 `AcademyCompassPayload`/`client.AcademyCompassHud` (own channel/HUD pair for the client-rendered
 compass needle — see "World-space navigation" above);
 `room1.CruzRoomManager`/`room2.ReyesRoomManager`/`room3.SantosRoomManager`/`room4.MorfeRoomManager`
