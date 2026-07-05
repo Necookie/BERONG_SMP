@@ -207,9 +207,23 @@ public final class ReyesRoomManager {
     }
 
     private static void armPreventionHazard(ServerLevel level, UUID playerId, HazardStep hazard) {
-        level.setBlock(hazard.pos(), hazard.blockState().get(), 3);
-        HazardManager.activate(level, null, hazard.pos());
-        lastActive.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(hazard.pos(), true);
+        BlockPos pos = hazard.pos();
+        BlockState state = hazard.blockState().get();
+        level.setBlock(pos, state, 3);
+        if (state.getBlock() instanceof ComputerBlock) {
+            // ComputerBlock never goes through HazardManager.activate (it uses its own LIT/BURNING
+            // properties instead of the shared HAZARDOUS flag), so without this special case the
+            // electrical step of the prevention drill did nothing at all -- the computer just sat
+            // there in its default off state with nothing to prevent. LIT=true reuses the
+            // computer's existing "sparking" visual (the ELECTRIC_SPARK bursts its own animateTick
+            // already emits while LIT) as the hazard cue -- a genuine 3-state progression
+            // (off -> sparking/LIT -> fire) for the sake of the lesson, with zero new block
+            // properties or art needed.
+            level.setBlock(pos, level.getBlockState(pos).setValue(ComputerBlock.LIT, true), 3);
+        } else {
+            HazardManager.activate(level, null, pos);
+        }
+        lastActive.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(pos, true);
     }
 
     /** Beacon + compass pointed at a hazard's position, throttled to the shared highlight cadence. */
@@ -226,7 +240,7 @@ public final class ReyesRoomManager {
         ServerLevel level = (ServerLevel) player.level();
         BlockPos pos = hazard.pos();
         Map<BlockPos, Boolean> mine = lastActive.computeIfAbsent(player.getUUID(), k -> new ConcurrentHashMap<>());
-        boolean activeNow = isActive(level, pos);
+        boolean activeNow = isPreventionActive(level, pos);
         boolean wasActive = mine.getOrDefault(pos, false);
         mine.put(pos, activeNow);
         if (!wasActive || activeNow) return false;
@@ -421,6 +435,19 @@ public final class ReyesRoomManager {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof ComputerBlock) {
             return state.hasProperty(ComputerBlock.BURNING) && state.getValue(ComputerBlock.BURNING);
+        }
+        return HazardManager.isHazardous(state);
+    }
+
+    /**
+     * Like {@link #isActive}, but for the PREVENTION_DEMO drill specifically: a ComputerBlock never
+     * actually catches fire during prevention (there's nothing to intervene on yet), so its hazard
+     * signal there is {@code LIT}, not {@code BURNING} — see {@link #armPreventionHazard}.
+     */
+    private static boolean isPreventionActive(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof ComputerBlock) {
+            return state.hasProperty(ComputerBlock.LIT) && state.getValue(ComputerBlock.LIT);
         }
         return HazardManager.isHazardous(state);
     }
