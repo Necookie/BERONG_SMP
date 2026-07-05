@@ -179,6 +179,14 @@ public final class ReyesRoomManager {
             explainedHazard.remove(id);
             lastActive.remove(id);
             AcademyVisuals.setCompassTarget(player, null);
+            // Guarantees the pickup lesson always actually happens: a player who already had one or
+            // more extinguishers (a returning trainee, or -- in practice, the most common case --
+            // a dev who'd used /item kit earlier in the same session) would otherwise skip straight
+            // past TOOL_SELECTION the instant it began, since hasAllExtinguishers only checks
+            // whether the items are already in the inventory. Reyes is never handing these out
+            // herself; taking away any pre-existing copies here forces every player to genuinely
+            // retrieve all 3 from their wall frames, every time.
+            stripExistingExtinguishers(player);
             data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
             // TOOL_SELECTION's "walk up to each extinguisher..." line is otherwise only ever heard
             // if the player happens to right-click Reyes again on their own -- this phase entry is
@@ -348,8 +356,17 @@ public final class ReyesRoomManager {
         AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_LINES.get(ReyesPhase.LIVE_FIRE_DEMO), () -> {});
     }
 
-    private static boolean hasAllExtinguishers(ServerPlayer player) {
-        return nextUncollectedFrame(player) == null;
+    /** Removes any of the 3 extinguisher items the player already holds — see {@link #tickPreventionDemo}. */
+    private static void stripExistingExtinguishers(ServerPlayer player) {
+        var inventory = player.getInventory();
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            Item item = spec.item().get();
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                if (inventory.getItem(i).is(item)) {
+                    inventory.setItem(i, ItemStack.EMPTY);
+                }
+            }
+        }
     }
 
     /** First extinguisher frame whose item the player doesn't have yet, or null once all 3 are collected. */
