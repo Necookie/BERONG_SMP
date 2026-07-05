@@ -171,16 +171,24 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   FloatGoal, door passage + explicit path budget set on escort start. **Stuck recovery**: 4
   consecutive no-progress escort cycles (~3s — path not created, isStuck(), or <0.25 blocks moved
   while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with POOF
-  particles at both ends. **Wandered-too-far chase (2026-07-05, retuned same day)**: if the
-  escorted player strays more than 7 blocks (halved from an original 14 — felt unresponsive in
-  practice) from Cruz's current position, `updateCruzEscort` abandons the phase's waypoint for that
-  re-issue and walks straight toward the player instead (`clampToRoom1Bounds` keeps the chase
-  target inside `ROOM1_BOUNDS` so it can never pull her outside the building), resuming the normal
-  waypoint once they're close again. At the Go/Stop finish line specifically, `tickGoStopRun` also
+  particles at both ends. **Wandered-too-far chase (2026-07-05, retuned twice same day)**: if the
+  escorted player strays more than `PLAYER_TOO_FAR_DISTANCE_SQ` blocks (tuning history: 14 → 7 for
+  quicker reaction → 20, the current value, per explicit follow-up feedback wanting a larger
+  chasing radius — she should let the player roam a bit before reeling them in) from Cruz's current
+  position, `updateCruzEscort` abandons the phase's waypoint for that re-issue and walks straight
+  toward the player instead (`clampToRoom1Bounds` keeps the chase target inside `ROOM1_BOUNDS` so it
+  can never pull her outside the building), resuming the normal waypoint once they're close again.
+  The first time this triggers she also speaks up — a throttled (`TOO_FAR_NUDGE_COOLDOWN_TICKS`,
+  once per 10s) "come back this way, trainee!" line — instead of silently repositioning with no
+  in-character acknowledgment. At the Go/Stop finish line specifically, `tickGoStopRun` also
   guarantees she's actually standing beside the player for the "you did it, go find Reyes" beat
   (`recoverCruz`'s snap-to-side poof if she isn't already close, rather than wherever the last
   15-tick escort re-issue left her), delivered as a real spoken Cruz line via `forceStartDialogue`
-  (reusing `CRUZ_LINES.get(DONE)`) instead of a bare caption. **Escort-through-the-door hand-off
+  (reusing `CRUZ_LINES.get(DONE)`) instead of a bare caption. **Realistic walk home**: `tickReturnHome`
+  now uses a far more generous stuck threshold (`RETURN_HOME_STUCK_CYCLES_MAX`, ~30s vs. a normal
+  escort leg's ~4.5s) before ever falling back to a poof-teleport — that walk is a simple,
+  obstacle-free route, so she should just walk it for realism; the poof still exists as an absolute
+  last resort so she's never permanently stranded. **Escort-through-the-door hand-off
   (2026-07-05)**: `CruzPhase.DONE` used to immediately drop the player from escort selection the
   instant the Go/Stop finish line was crossed — well inside Room 1 — sending Cruz into
   `tickReturnHome` before the player had gone anywhere near actually leaving (read by the user as
@@ -252,15 +260,29 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     tick-driven (`tickPreventionDemo`/`tickToolSelection`), not `onInteract`-driven, so nothing ever
     played them unless the player happened to re-click Reyes on their own. Both transitions now
     `forceStartDialogue` their phase's instructional line the instant the phase begins.
+  - **Computer hazard state (2026-07-05):** `ComputerBlock` never went through `HazardManager.activate`
+    (its own `LIT`/`BURNING` properties, not the shared `HAZARDOUS` flag) — so the electrical step of
+    `PREVENTION_DEMO` used to do nothing at all: the computer sat in its default off state with
+    nothing to prevent. `armPreventionHazard` now special-cases `ComputerBlock` by setting
+    `LIT=true`, reusing its existing "sparking" `ELECTRIC_SPARK` visual as the hazard cue — no new
+    block property or art needed, since the existing bare-hand right-click already toggles `LIT`
+    back off. `isPreventionActive` (LIT-based) sits alongside the unchanged `isActive` (BURNING-based,
+    still used by the later intervention/`LIVE_FIRE_DEMO` step).
   - `PREVENTION_DEMO`: the same 3 demo-hazard positions used later (`ReyesRoomManager.HAZARDS`:
     Class A archive boxes → electrical computer → kitchen grease pan) are set merely
-    `HAZARDOUS=true` via `HazardManager.activate` (never actually ignited). Each hazard's turn
-    plays `AcademyDialogue.REYES_PREVENTION_LINES[idx]` (the everyday habit that prevents it),
+    `HAZARDOUS=true` via `HazardManager.activate` (never actually ignited; the computer uses `LIT`
+    instead, per above). Each hazard's turn plays `AcademyDialogue.REYES_PREVENTION_LINES[idx]` (the everyday habit that prevents it),
     then the player fixes it with a bare-hand right-click — `HazardBlock`/`HazardFacingBlock`'s new
     prevention interaction (see Hazard Prop 3-State Log below) — before the sequence advances to
     the next hazard, then to `TOOL_SELECTION`.
   - `TOOL_SELECTION` (inventory contains all 3 extinguisher items, picked up from wall item
-    frames) → `LIVE_FIRE_DEMO`, the "intervention" phase, taught **sequentially** one hazard at a
+    frames) → `LIVE_FIRE_DEMO`. **Point-then-teach per frame (2026-07-05):** rather than one generic
+    "collect all three" line, `AcademyDialogue.REYES_TOOL_LINES[idx]` (indexed like
+    `EXTINGUISHER_FRAMES`) gives each extinguisher its own two-beat introduction — pointing at that
+    specific frame (compass+beacon, via `nextUncollectedFrame`), then teaching the pop-off-the-wall
+    pickup mechanic — played once per frame (`explainedFrame`) the instant it becomes the player's
+    target, instead of everything being explained at once regardless of which frame is next.
+    `LIVE_FIRE_DEMO`, the "intervention" phase, taught **sequentially** one hazard at a
     time in the same fixed order. Entering a hazard's turn plays its
     `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
     through the shared dialogue sequencer, alongside the now-already-armed prop; `igniteHazard`
@@ -319,9 +341,15 @@ Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highli
   instead of `DuckCoverHoldManager.ticksHeld` directly: the latter is a *global* crouch+cover
   streak that accumulates anywhere in the world, so reading it directly previously let a player
   build the full streak elsewhere and merely step near the table row for one tick to pass
-  instantly. `tableHoldTicks` only increments on ticks where the player is genuinely near
+  instantly. `tableHoldTicks` only increments on ticks where the player is genuinely at
   `TABLE_ROW` *and* `DuckCoverHoldManager.isCompliant` is true that tick (resets to zero
-  otherwise), so completion can only be earned by actually holding at Santos's table. `tickPreDrill`
+  otherwise), so completion can only be earned by actually holding at Santos's table.
+  **"Actually under the table" fix (2026-07-05):** `isNearTableRow` used a 3-block sphere around
+  each cell, which let a player pass the drill just by crouching somewhere in the open room near
+  the table without ever taking cover under it — tightened to a 1-block XZ/Y tolerance, matching
+  `DuckCoverHoldManager.hasNearbyTable`'s own radius exactly, so the earthquake now only stops once
+  the player is genuinely under the table and holds there for the same 5 seconds as before.
+  `tickPreDrill`
   also seeds `preDrillStartTick` via `computeIfAbsent` (previously `getOrDefault`, which never wrote
   the fallback back — a stale/missing entry after an ungraceful shutdown mid-drill could never
   reach the 60-tick threshold and stalled the drill forever) → DONE, pointing at Capt. Morfe.
