@@ -134,6 +134,14 @@ public final class CruzRoomManager {
      * look exactly like the "instant banishing" this system is meant to avoid.
      */
     private static final int ESCORT_STUCK_CYCLES_MAX = 6;
+    /**
+     * Stuck-recovery threshold used only by {@link #tickReturnHome}'s walk back to
+     * {@link #BRIEFING_ANCHOR} — much more generous than a normal escort leg (~30s at the 15-tick
+     * cadence) since it's a straightforward walk with no real obstacles, and the user specifically
+     * wants a realistic walk-back instead of a poof for this leg. Still teleports as an absolute
+     * last resort so she's never permanently stranded if the path is ever genuinely broken.
+     */
+    private static final int RETURN_HOME_STUCK_CYCLES_MAX = 40;
     /** "Made progress" = Cruz moved more than this per re-issue cycle. */
     private static final double ESCORT_PROGRESS_EPSILON_SQ = 0.25 * 0.25;
     /** Within this range of her target Cruz is considered arrived — never counted as stuck. */
@@ -145,17 +153,20 @@ public final class CruzRoomManager {
      * waypoint target on the next re-issue once they're close again. Always bounds-clamped to
      * {@link #ROOM1_BOUNDS} so she never leaves the building chasing someone through a wall gap.
      *
-     * <p>Halved from the original 14 blocks (2026-07-05) — she reacts to a much smaller wander
-     * now, since 14 blocks felt unresponsive in practice (by the time she reacted, the player was
-     * already most of the way across a zone).
+     * <p>Tuning history (2026-07-05): started at 14, halved to 7 for quicker reaction, then widened
+     * to 20 per explicit follow-up feedback asking for a larger chasing radius — she should be
+     * willing to let the player roam a bit before reeling them in, not react to every small step.
      */
-    private static final double PLAYER_TOO_FAR_DISTANCE_SQ = 7.0 * 7.0;
+    private static final double PLAYER_TOO_FAR_DISTANCE_SQ = 20.0 * 20.0;
+    /** Throttle for the "come back" nudge below — spoken once per wander, not every re-issue tick. */
+    private static final long TOO_FAR_NUDGE_COOLDOWN_TICKS = 200; // 10s
 
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
     private static long nextEscortMoveTick;
     private static Vec3 lastCruzPos = Vec3.ZERO;
     private static int stuckCycles;
+    private static long lastTooFarNudgeTick = Long.MIN_VALUE;
 
     private CruzRoomManager() {}
 
@@ -253,6 +264,15 @@ public final class CruzRoomManager {
         Vec3 target;
         if (cruz.position().distanceToSqr(escortTarget.position()) > PLAYER_TOO_FAR_DISTANCE_SQ) {
             target = clampToRoom1Bounds(escortTarget.position());
+            long gameTime = level.getGameTime();
+            if (gameTime - lastTooFarNudgeTick >= TOO_FAR_NUDGE_COOLDOWN_TICKS
+                    && !AcademyManager.isDialogueActive(escortTarget.getUUID())) {
+                lastTooFarNudgeTick = gameTime;
+                AcademyManager.sendPrompt(escortTarget, AcademyManager.pick(escortTarget,
+                        "§a[Officer Cruz] §7Hey, don't wander off! Come back this way, trainee!",
+                        "§a[Officer Cruz] §7Whoa there — come on back, we're not done yet!",
+                        "§a[Officer Cruz] §7Stay close, trainee! Follow me back over here."));
+            }
         } else {
             target = switch (phase) {
                 case BRIEFING -> nextUnhitMarkFor(escortTarget);
@@ -330,7 +350,12 @@ public final class CruzRoomManager {
         } else {
             stuckCycles = 0;
         }
-        if (stuckCycles >= ESCORT_STUCK_CYCLES_MAX) {
+        // Much more generous than a normal escort leg's stuck threshold: this is a straightforward
+        // walk back to a fixed point with no obstacles she can't path around, so it should always
+        // just walk there for realism rather than reaching for the poof-teleport fallback the
+        // instant a single re-issue cycle stalls. The fallback still exists (never leave her
+        // stranded forever in a genuinely broken case), just at a far higher threshold.
+        if (stuckCycles >= RETURN_HOME_STUCK_CYCLES_MAX) {
             stuckCycles = 0;
             teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
             cruz.setEscorting(false);
