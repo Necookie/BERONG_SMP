@@ -187,34 +187,62 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   instantly snaps her there so a restarting trainee always finds her waiting; and a `ROOM1_BOUNDS`
   safety net poof-recovers her to the escorted player if she's ever outside Room 1's footprint.
   The duplicate second Cruz from the old two-NPC handoff design was **removed from the .schem file
-  itself** (NBT-edited, 29 → 28 entities) — `NewTutBuildingManager.discardDuplicateCruz` remains
-  only as a silent safety net that keeps the Cruz nearest the briefing anchor if more than one
-  ever exists again (future schematic re-save, accidental spawner copy, or — the actual reason this
-  stays wide — a Cruz saved to disk from a session predating either this fix or the stuck-recovery
-  logic, which could have drifted anywhere reachable on the map since `SchemLoader`'s
-  discard-before-place only clears entities inside the schematic's own footprint; its scan bounds
-  cover the whole map, not just this building, for exactly that reason).
+  itself** (NBT-edited, 29 → 28 entities), but a stray copy kept reappearing at the old handoff spot
+  `(-122,-33,49)` anyway (a disk-persisted leftover from a session predating that fix).
+  `NewTutBuildingManager.discardDuplicateCruz` now runs a **position-targeted pass first**: any
+  `OFFICER_CRUZ` within a small radius of `(-122,-33,49)` is discarded unconditionally on every
+  boot, before anything else runs. Only *after* that does the original keep-nearest-anchor
+  tie-break apply, and only when more than one Cruz still remains — a lone legitimate Cruz is never
+  touched by it. The whole-map scan bounds remain wide for the same reason as before (future
+  schematic re-save, accidental spawner copy, or a Cruz saved to disk from a session predating
+  either fix, which could have drifted anywhere reachable on the map since `SchemLoader`'s
+  discard-before-place only clears entities inside the schematic's own footprint).
 
-Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (inventory contains all 3
-  extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO, taught **sequentially**
-  one hazard at a time in a fixed order (`ReyesRoomManager.HAZARDS`: Class A archive boxes →
-  electrical computer → kitchen grease pan). Entering a hazard's turn plays its
-  `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
-  through the shared dialogue sequencer; only once that finishes does `igniteHazard` actually call
-  `HazardManager.forceFailure(level, null, pos, null)` (the same session-nullable entry point
-  `HazardWandItem` uses). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
-  re-ignites the same prop immediately, so the player must get it right before the sequence
-  advances (edge detection is per-player: `lastActive` is `Map<UUID, Map<BlockPos, Boolean>>` so
-  two concurrent Room-2 players don't corrupt each other). After all 3, the scripted ignite-demo
-  fires: the player is set alight and `tickIgniteDemo` continuously refreshes their fire ticks
-  every tick (`Math.max(current, FIRE_REFRESH_TICKS)`) so the fire never burns out on its own — it
-  only clears the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player
-  actually performed drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a
-  safety-cap timeout for a player who never rolls, not the real burn duration. → DONE once all 3
-  hazards are correctly defused and the ignite window resolves. **Prop cleanup**
-  (`cleanupHazardProps`): the 3 code-spawned props + any leftover vanilla fire in Room 2's box are
-  removed on room finish, on a mid-demo logout/death (which also rolls LIVE_FIRE_DEMO back to
-  TOOL_SELECTION for a clean re-run), and on a Capt. Morfe fail-reset. **Frame restock**
+Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full response ladder in order —
+  **prevention → intervention → alarm → evacuation** — via `ReyesPhase`:
+  `NOT_STARTED → PREVENTION_DEMO → TOOL_SELECTION → LIVE_FIRE_DEMO → ALARM_CHECKPOINT →
+  EVACUATION_BRIEF → DONE`.
+  - `PREVENTION_DEMO`: the same 3 demo-hazard positions used later (`ReyesRoomManager.HAZARDS`:
+    Class A archive boxes → electrical computer → kitchen grease pan) are set merely
+    `HAZARDOUS=true` via `HazardManager.activate` (never actually ignited). Each hazard's turn
+    plays `AcademyDialogue.REYES_PREVENTION_LINES[idx]` (the everyday habit that prevents it),
+    then the player fixes it with a bare-hand right-click — `HazardBlock`/`HazardFacingBlock`'s new
+    prevention interaction (see Hazard Prop 3-State Log below) — before the sequence advances to
+    the next hazard, then to `TOOL_SELECTION`.
+  - `TOOL_SELECTION` (inventory contains all 3 extinguisher items, picked up from wall item
+    frames) → `LIVE_FIRE_DEMO`, the "intervention" phase, taught **sequentially** one hazard at a
+    time in the same fixed order. Entering a hazard's turn plays its
+    `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
+    through the shared dialogue sequencer; only once that finishes does `igniteHazard` actually call
+    `HazardManager.forceFailure(level, null, pos, null)` (the same session-nullable entry point
+    `HazardWandItem` uses — this now also flips the prop's new `ON_FIRE` state true, per the Hazard
+    Prop 3-State Log). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
+    re-ignites the same prop immediately, so the player must get it right before the sequence
+    advances (edge detection is per-player: `lastActive` is `Map<UUID, Map<BlockPos, Boolean>>` so
+    two concurrent Room-2 players don't corrupt each other). After all 3, the scripted ignite-demo
+    fires: the player is set alight and `tickIgniteDemo` continuously refreshes their fire ticks
+    every tick (`Math.max(current, FIRE_REFRESH_TICKS)`) so the fire never burns out on its own — it
+    only clears the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player
+    actually performed drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a
+    safety-cap timeout for a player who never rolls, not the real burn duration →
+    `advanceToAlarmCheckpoint` (prop/fire cleanup, phase → `ALARM_CHECKPOINT`).
+  - `ALARM_CHECKPOINT`: Reyes explicitly teaches "the moment a fire starts, always ring the alarm
+    first" and points the compass at a fire alarm placed at `(-143,-33,40)`
+    (`NewTutBuildingManager.placeFireAlarm`, same per-boot-fixup idiom as `placeGreenMarks` — the
+    schematic doesn't bake one in near Room 2). `FireAlarmBlock.useWithoutItem` calls
+    `ReyesRoomManager.tryHandleAlarmPress` first (returns true/short-circuits if handled), so the
+    Academy's own alarm-ringing logic works there without touching the block's existing
+    `SimulationSession`-gated old-tutorial behavior at all. Returning to Reyes while it's ringing
+    (`onInteract`'s special-cased branch, not the generic dialogue dispatch) stops the alarm and
+    advances straight into `EVACUATION_BRIEF`'s dialogue.
+  - `EVACUATION_BRIEF`: a short final "once that alarm rings, you evacuate — don't go back for
+    anything" briefing; its completion (`finishRoom`) is the room's true end → `DONE`, pointing at
+    Sgt. Santos.
+  **Prop cleanup** (`cleanupHazardProps`): the 3 code-spawned props + any leftover vanilla fire in
+  Room 2's box are removed when `LIVE_FIRE_DEMO` finishes, on a mid-demo logout/death (which also
+  rolls the phase back to a clean re-entry point — `TOOL_SELECTION` from `LIVE_FIRE_DEMO`,
+  `NOT_STARTED` from `PREVENTION_DEMO`), and on a Capt. Morfe fail-reset. A mid-`ALARM_CHECKPOINT`
+  logout with the alarm already ringing turns it back off. **Frame restock**
   (`restockExtinguisherFrames`): the 3 glow item frames on the Tool Selection Wall are refilled
   (and respawned if missing) on both reset paths and after building placement — the schematic only
   restores them on a full reboot, so a mid-session reset previously left them empty and made
@@ -225,9 +253,19 @@ Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highli
   a per-block wireframe adaptation of AssemblyZone.spawnBorderParticles's particle-loop idiom —
   there's no glow/highlight system elsewhere in the mod). After a short delay, triggers the quake
   (own shake-intensity caption, same CameraShake mechanism TutorialHud already uses) → QUAKE_ACTIVE
-  reads compliance entirely from DuckCoverHoldManager.isCompliant/ticksHeld (new public accessors,
-  zero new duck/cover/hold logic) plus a proximity check against this room's specific table row →
-  DONE.
+  reads compliance from a **room-local, table-scoped streak** (`SantosRoomManager.tableHoldTicks`)
+  instead of `DuckCoverHoldManager.ticksHeld` directly: the latter is a *global* crouch+cover
+  streak that accumulates anywhere in the world, so reading it directly previously let a player
+  build the full streak elsewhere and merely step near the table row for one tick to pass
+  instantly. `tableHoldTicks` only increments on ticks where the player is genuinely near
+  `TABLE_ROW` *and* `DuckCoverHoldManager.isCompliant` is true that tick (resets to zero
+  otherwise), so completion can only be earned by actually holding at Santos's table. `tickPreDrill`
+  also seeds `preDrillStartTick` via `computeIfAbsent` (previously `getOrDefault`, which never wrote
+  the fallback back — a stale/missing entry after an ungraceful shutdown mid-drill could never
+  reach the 60-tick threshold and stalled the drill forever) → DONE, pointing at Capt. Morfe.
+  `SANTOS_LINES` now also teaches real earthquake safety measures (stay clear of windows/glass and
+  unsecured heavy furniture, no running outside mid-shake, no elevators, expect aftershocks)
+  alongside the Drop-Cover-Hold-On core.
 
 Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. Morfe speaks through the same timed
   sequencer as the other instructors now — static `AcademyDialogue.MORFE_LINES` (greeting +
@@ -347,7 +385,7 @@ Go/Stop tunnel slabs, and the 4 WASD mark cells (which had no green blocks in th
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
 | `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), places blocks, and spawns entities from the `Entities` tag — including modded mobs like `berongsmp:custom_npc`, not just vanilla decoration entities. Any pre-existing non-player entity in the placement footprint is discarded before re-placing to prevent duplicates (broadened from an item-frame-only check once schematics started baking in mobs/armor stands too — session restores never touch players, since they're explicitly excluded). **Item frame placement invariant (MC 26.x):** Sponge v3 top-level `Pos` = the entity's own AIR block (not the wall). `Data.Facing` = OUTWARD direction (frame face toward viewer, no `.getOpposite()` needed). `ItemFrame(level, pos, direction)` takes the entity's own block as `pos`; the wall is `pos.relative(direction.getOpposite())` — handled by a dedicated `spawnItemFrame` path since item frames need this wall-relative math the generic path doesn't do. **Generic entity deserialization gotcha (found while loading `new_tut_building1.0.schem`):** Sponge v3 nests an entity's *real* Minecraft save data under a `Data` sub-compound — `Id`/`Pos` are Sponge-level siblings, not part of it. Deserializing the raw entity tag directly (as this used to) left every actual field invisible to `EntityType.create`, so `CustomNpcEntity` silently read a missing `NpcType` and fell back to its default role for every copy. Fixed by merging `Data` into a fresh root before deserializing. That same root also needs `block_pos` (used by `BlockAttachedEntity` subclasses like `Painting`, checked with a 16-block sanity radius against the entity's real position) and any `facing`/`Facing` byte re-derived/rotated — left stale, `block_pos` still pointed at the original copy location, failed the sanity check, and vanilla logged "Block-attached entity at invalid position" while the entity failed to attach. |
-| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 10 `berongsmp:custom_npc` NPCs (the duplicate second Officer Cruz at the old two-NPC-handoff spot was NBT-edited out of the .schem itself — 29 → 28 entities), 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. `discardDuplicateCruz` remains as a silent safety net after every placement: if more than one `OFFICER_CRUZ` somehow exists (future schematic re-save, accidental spawner copy), it keeps only the one nearest the briefing anchor. `placeGreenMarks` is a permanent per-placement fixup: swaps the 4 floor blocks under `CruzRoomManager.GREEN_MARKS` to lime concrete (the schematic has no green blocks in the briefing zone), re-run after every placement since `SchemLoader` restores the original floor each boot. |
+| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 10 `berongsmp:custom_npc` NPCs (the duplicate second Officer Cruz at the old two-NPC-handoff spot was NBT-edited out of the .schem itself — 29 → 28 entities), 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. `discardDuplicateCruz` always discards any `OFFICER_CRUZ` found near the old handoff spot `(-122,-33,49)` first, then — only if more than one legitimate copy still remains — keeps the one nearest the briefing anchor (a lone survivor is never touched). `placeGreenMarks` is a permanent per-placement fixup: swaps the 4 floor blocks under `CruzRoomManager.GREEN_MARKS` to lime concrete (the schematic has no green blocks in the briefing zone), re-run after every placement since `SchemLoader` restores the original floor each boot. `placeFireAlarm` places a `FireAlarmBlock` at `ReyesRoomManager.ALARM_POS` (-143,-33,40) every boot for Sgt. Reyes's alarm checkpoint — same idiom as `placeGreenMarks`. |
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `DropAndRollPayload` | Client→server packet (channel v3) — the mod's first serverbound payload; empty record, `StreamCodec.unit(...)`, sent when the player presses the "Drop and Roll" key. Handler calls `DropAndRollManager.onDropAndRollRequest`. |
 | `DropAndRollManager` | Static per-UUID transient state (`droppedTicksRemaining`, same idiom as `TutorialManager.holdOnTimers`) driving the "stop, drop, and roll" fire response: reduces the requester's remaining fire ticks by 30/press if on fire, opens/extends a 100-tick "dropped" window during which `MobEffects.SLOWNESS` is continuously refreshed (crawl stand-in). `tick()` runs from `SimulationManager.onServerTick`. |
@@ -388,9 +426,9 @@ Go/Stop tunnel slabs, and the 4 WASD mark cells (which had no green blocks in th
 | `BulletinBoardBlock` | Felt pinboard with modern sticky notes; FACING only. Model: `board_felt_charcoal` (not note_block cork) + `note_paper_yellow`/`note_paper_blue` + `pin_metal_red`/`pin_metal_teal`, reuses `whiteboard_frame_metal` for the frame. Flammable. |
 | `CeilingFanBlock` | Matte modern ceiling fan; no FACING (symmetric). Model: `fan_housing_white` + `fan_blade_matte` (flat matte blades, no wood grain) + reused `handle_bar_black` (mounting rod) + `light_bulb`'s `led_diffuser_glow` for the light bowl (light level 5) — shares its cool-white glow with `LightBulbBlock` for a consistent fixture look. |
 | `LightBulbBlock` | Full-cube glowing ceiling tile (plain `extends Block`, default full-cube shape, no custom `getShape`/FACING). Single seamless near-pure-white texture (`led_diffuser_glow.png`, generated by `scripts/generate_light_bulb_textures.py` — deliberately flat with no border/bevel/grid so tiles read as one continuous glowing surface with zero visible seams when placed edge-to-edge, e.g. as ceiling material). `lightLevel=15`, which **is vanilla's hard cap** (block light is a 4-bit value, 0–15 — no block can go brighter than this; "20x brighter" isn't achievable without rewriting the core lighting engine). Vanilla light still decays 1 level per block from any source — to evenly flood a large room, tile several across the ceiling rather than relying on one. |
-| `HazardBlock` | Abstract base for hazard blocks without FACING (symmetric). Adds `HAZARDOUS` `BooleanProperty`; subclasses implement `spawnHazardParticles`. `animateTick` calls subclass only when `HAZARDOUS=true`. Also declares the failure-consequence hooks (`failureDelayTicks`, `failureMessage`, `onHazardFailure`, plus `igniteAdjacent`/`igniteRadius` helpers) driven by `HazardManager`. |
-| `HazardFacingBlock` | Abstract base for hazard blocks with FACING. Combines `HazardBlock`'s HAZARDOUS property with `HorizontalFacingBlock`'s FACING logic. Subclasses implement `shapeFor(Direction)` (use `byFacing(...)`) and `spawnHazardParticles`. Carries the same failure-consequence hooks as `HazardBlock`. |
-| `HazardManager` | Drives the normal→hazardous→failure state machine for all 20 hazard prop blocks (plus the sawdust layer and `ComputerBlock`) inside an active FIRE-type arena, per `docs/md files/Items.md`. `scanHazardProps` runs once at session start (cached on `SimulationSession.hazardPositions`, mirroring `findComputersInCCS`); `tick()` (called from `SimulationManager.tickFireSession` every tick) randomly develops props to `HAZARDOUS=true` every 100 ticks (1-in-30 chance per prop) and advances a per-prop failure timer (`SimulationSession.hazardTimers`) that calls the block's `onHazardFailure` once `failureDelayTicks()` elapses without being defused. `woodshop_sawdust_layer`'s `ACCUMULATION` 0→5 ramp and 3×3 flash-ignite live directly in `HazardManager` (it has no `HAZARDOUS` property). `ComputerBlock` is similarly special-cased (`BURNING` instead of `HAZARDOUS`): `seedComputerTimers` lazily starts a 240-tick failure timer the first tick any of its 3 existing ignition triggers (flint & steel, session-start, periodic CCS spread) is observed to have set `BURNING=true`, so a computer left burning unattended escalates (`HazardBlock.igniteAdjacent`) like every other prop without duplicating its ignition logic. `HazardManager.defuse()` lets either extinguisher item reset a hazardous prop back to safe — wired into `FireExtinguisherItem`/`CO2ExtinguisherItem.extinguishAt`. |
+| `HazardBlock` | Abstract base for hazard blocks without FACING (symmetric). Real 3-state lifecycle: `HAZARDOUS` (developing danger) + `ON_FIRE` (actually burning, terminal) `BooleanProperty`s; subclasses implement `spawnHazardParticles`. `animateTick` calls it when `HAZARDOUS=true`, intensified (extra calls + FLAME particles) when `ON_FIRE=true` too. `useWithoutItem` is a base-class bare-hand "prevention" interaction: right-clicking a merely-hazardous (not yet on fire) prop resets it to safe (`preventMessage()`, overridable flavor text) — does nothing once `ON_FIRE=true` (too late for a bare-handed fix). Also declares the failure-consequence hooks (`failureDelayTicks`, `failureMessage`, `onHazardFailure`, plus `igniteAdjacent`/`igniteRadius` helpers) driven by `HazardManager`. |
+| `HazardFacingBlock` | Abstract base for hazard blocks with FACING. Combines `HazardBlock`'s `HAZARDOUS`/`ON_FIRE` properties with `HorizontalFacingBlock`'s FACING logic; same intensified-particle `animateTick` and bare-hand prevention `useWithoutItem` as `HazardBlock`. Subclasses implement `shapeFor(Direction)` (use `byFacing(...)`) and `spawnHazardParticles`. Carries the same failure-consequence hooks as `HazardBlock`. |
+| `HazardManager` | Drives the normal→hazardous→on-fire state machine for all 20 hazard prop blocks (plus the sawdust layer and `ComputerBlock`) inside an active FIRE-type arena, per `docs/md files/Items.md`. `scanHazardProps` runs once at session start (cached on `SimulationSession.hazardPositions`, mirroring `findComputersInCCS`); `tick()` (called from `SimulationManager.tickFireSession` every tick) randomly develops props to `HAZARDOUS=true` every 100 ticks (1-in-30 chance per prop) and advances a per-prop failure timer (`SimulationSession.hazardTimers`). When `failureDelayTicks()` elapses without being defused, `triggerFailure` now first flips the prop's `ON_FIRE=true` (a real terminal block state, not just an invisible transition) before calling the block's `onHazardFailure` — see Hazard Prop 3-State Log below. `woodshop_sawdust_layer`'s `ACCUMULATION` 0→5 ramp and 3×3 flash-ignite live directly in `HazardManager` (it has no `HAZARDOUS`/`ON_FIRE` property). `ComputerBlock` is similarly special-cased (`BURNING` instead of `HAZARDOUS`): `seedComputerTimers` lazily starts a 240-tick failure timer the first tick any of its 3 existing ignition triggers (flint & steel, session-start, periodic CCS spread) is observed to have set `BURNING=true`, so a computer left burning unattended escalates (`HazardBlock.igniteAdjacent`) like every other prop without duplicating its ignition logic. `HazardManager.defuse()` lets either extinguisher item reset a hazardous (or already on-fire) prop back to fully safe (`HAZARDOUS=false, ON_FIRE=false`) — wired into `FireExtinguisherItem`/`CO2ExtinguisherItem.extinguishAt`. |
 | `WoodshopSawdustLayerBlock` | Floor sawdust accumulation layer; `ACCUMULATION` 0–5 integer state drives height (1–6 px). Emits ASH particles at accumulation ≥ 3. No FACING. |
 | `PlasticTrashBinBlock` | Classroom trash bin with vape inside; SMOKE particles when hazardous. |
 | `DaisyChainExtensionBlock` | Overloaded extension cord; ELECTRIC_SPARK particles when hazardous. |
@@ -680,6 +718,31 @@ python3 scripts/generate_furniture_textures.py
 ```
 
 ---
+
+## Hazard Prop 3-State Log (2026-07-05)
+
+Before this pass, `HAZARDOUS=true` served double duty: it was both "developing danger" (the window
+during which a prop could be defused) *and* the direct trigger for `onHazardFailure` (real adjacent
+fire) once its failure timer elapsed — there was no distinct "this prop is now actually burning"
+block state, and no way to fix a hazard except spraying it with an extinguisher.
+
+All 19 hazardous-property props (`woodshop_sawdust_layer` keeps its own `ACCUMULATION` mechanic)
+now have a genuine 3-state lifecycle: **normal → hazardous → on-fire**.
+
+- `HazardBlock`/`HazardFacingBlock` gained a new `ON_FIRE` `BooleanProperty` alongside `HAZARDOUS`.
+- `HazardManager.triggerFailure` sets `ON_FIRE=true` on the prop itself before igniting adjacent
+  blocks — "on fire" is now a real terminal state instead of an invisible transition.
+- A new bare-hand right-click **prevention** interaction (`HazardBlock`/`HazardFacingBlock.useWithoutItem`)
+  resets a merely-hazardous prop back to safe — teaches "prevention beats intervention" without
+  needing an extinguisher. It does nothing once the prop is genuinely `ON_FIRE` (too late for a
+  bare-handed fix at that point; matches Sgt. Reyes's new prevention → intervention lesson order,
+  see Room 2 above).
+- `HazardManager.defuse()` (the extinguisher-spray path) resets both `HAZARDOUS` and `ON_FIRE`.
+- **Scope decision:** "on fire" is signaled via intensified particles (extra `spawnHazardParticles`
+  calls + `FLAME`) and the existing real adjacent-fire ignition, reusing each prop's existing
+  `_hazardous` model for the new `on_fire=true` blockstate variant — not 20 new sets of bespoke
+  burning textures/models (a disproportionate art task; can be iterated later).
+  `scripts/add_onfire_blockstates.py` regenerated all 19 blockstate JSONs with the new permutation.
 
 ## Hazard Prop State Management Log
 
