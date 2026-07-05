@@ -39,6 +39,7 @@ public final class SantosRoomManager {
     );
 
     private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches AssemblyZone's own cadence
+    private static final int SECOND_TICKS = 20;
     private static final int PRE_DRILL_DELAY_TICKS = 60;   // 3s from briefing-done to quake trigger
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final float QUAKE_SHAKE_INTENSITY = 1.5f;
@@ -137,6 +138,14 @@ public final class SantosRoomManager {
                 AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
                         + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
                         + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.", 0f);
+                return;
+            }
+            // Live countdown once genuinely under the table and holding — confirms the detection
+            // actually fired and gives a clear sense of the 5-second requirement counting down,
+            // instead of silently accumulating with no feedback until it suddenly completes.
+            if (held % SECOND_TICKS == 0) {
+                int secondsLeft = (DuckCoverHoldManager.TARGET_TICKS - held) / SECOND_TICKS;
+                AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s", 0f);
             }
             return;
         }
