@@ -103,7 +103,7 @@ public class ComputerBlock extends Block {
 
             for (Direction dir : Direction.values()) {
                 BlockPos adj = pos.relative(dir);
-                if (level.getBlockState(adj).isAir()) {
+                if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
                     level.setBlock(adj, Blocks.FIRE.defaultBlockState(), 3);
                 }
             }
@@ -169,7 +169,7 @@ public class ComputerBlock extends Block {
 
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
-            if (level.getBlockState(adj).isAir()) {
+            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
                 level.setBlock(adj, Blocks.FIRE.defaultBlockState(), 3);
             }
         }
@@ -184,12 +184,12 @@ public class ComputerBlock extends Block {
 
                     if (checkState.ignitedByLava() && random.nextInt(5) == 0) {
                         BlockPos above = checkPos.above();
-                        if (level.getBlockState(above).isAir()) {
+                        if (level.getBlockState(above).isAir() && !isPlayerNear(level, above)) {
                             level.setBlock(above, Blocks.FIRE.defaultBlockState(), 3);
                         }
                     }
 
-                    if (checkState.isAir() && random.nextInt(8) == 0) {
+                    if (checkState.isAir() && !isPlayerNear(level, checkPos) && random.nextInt(8) == 0) {
                         for (Direction checkDir : Direction.values()) {
                             if (level.getBlockState(checkPos.relative(checkDir)).ignitedByLava()) {
                                 level.setBlock(checkPos, Blocks.FIRE.defaultBlockState(), 3);
@@ -200,6 +200,18 @@ public class ComputerBlock extends Block {
                 }
             }
         }
+    }
+
+    /**
+     * True if any player occupies or is standing close enough to {@code pos} that placing fire
+     * there would touch them — vanilla fire both damages and ignites entities standing in it, and
+     * this flood used to place it with no regard for the player defusing/spraying the computer
+     * right next to it, which is what let Sgt. Reyes's electrical hazard step "randomly" set the
+     * player alight while they were fighting the fire at close range.
+     */
+    private static boolean isPlayerNear(Level level, BlockPos pos) {
+        return !level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(0.6)).isEmpty();
     }
 
     @Override

@@ -135,13 +135,13 @@ public abstract class HazardFacingBlock extends Block {
         igniteAdjacent(level, pos, 1);
     }
 
-    /** Lights up to {@code maxBlocks} adjacent air blocks on fire. */
+    /** Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is standing in/near. */
     public static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
         int lit = 0;
         for (Direction dir : Direction.values()) {
             if (lit >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
-            if (level.getBlockState(target).isAir()) {
+            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
@@ -154,7 +154,7 @@ public abstract class HazardFacingBlock extends Block {
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
             if (lit >= maxBlocks) break;
-            if (level.getBlockState(target).isAir()) {
+            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }

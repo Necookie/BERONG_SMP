@@ -450,6 +450,12 @@ public final class ReyesRoomManager {
         boolean usedCorrectTool = hazard.correctTool().isInstance(player.getMainHandItem().getItem());
         if (usedCorrectTool) {
             data.mutate(player.getUUID(), AcademyProgress::addFireCorrectUse);
+            // Sweep any vanilla fire this hazard's failure/re-ignitions left lying around before
+            // moving on -- HazardManager.defuse only resets the prop's OWN block state, it never
+            // removes the real fire igniteAdjacent/ComputerBlock.randomTick already placed beside
+            // it, so leftover fire could otherwise persist into the next hazard step and touch the
+            // player as they walk over to it (part of what read as "randomly" catching fire).
+            clearNearbyFire(level, pos, RESIDUAL_FIRE_SWEEP_RADIUS);
             AcademyManager.sendPrompt(player, AcademyManager.pick(player,
                     "§6[Sgt. Reyes] §aPerfect match! That's exactly the right extinguisher for "
                             + "that fire. Well done!",
@@ -632,6 +638,20 @@ public final class ReyesRoomManager {
             level.setBlock(hazard.pos(), Blocks.AIR.defaultBlockState(), 3);
         }
         for (BlockPos pos : BlockPos.betweenClosed(ROOM_MIN, ROOM_MAX)) {
+            BlockState state = level.getBlockState(pos);
+            if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
+                level.setBlock(pos.immutable(), Blocks.AIR.defaultBlockState(), 3);
+            }
+        }
+    }
+
+    /** How far around a just-defused hazard {@link #clearNearbyFire} sweeps for leftover vanilla fire. */
+    private static final int RESIDUAL_FIRE_SWEEP_RADIUS = 3;
+
+    /** Removes any vanilla fire/soul fire within {@code radius} of {@code center} — see {@link #checkAndHandleDefuse}. */
+    private static void clearNearbyFire(ServerLevel level, BlockPos center, int radius) {
+        for (BlockPos pos : BlockPos.betweenClosed(center.offset(-radius, -radius, -radius),
+                center.offset(radius, radius, radius))) {
             BlockState state = level.getBlockState(pos);
             if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
                 level.setBlock(pos.immutable(), Blocks.AIR.defaultBlockState(), 3);

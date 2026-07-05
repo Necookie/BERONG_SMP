@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
@@ -89,13 +90,13 @@ public abstract class HazardBlock extends Block {
         igniteAdjacent(level, pos, 1);
     }
 
-    /** Lights up to {@code maxBlocks} adjacent air blocks on fire. */
+    /** Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is standing in/near. */
     public static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
         int lit = 0;
         for (Direction dir : Direction.values()) {
             if (lit >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
-            if (level.getBlockState(target).isAir()) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
@@ -108,10 +109,20 @@ public abstract class HazardBlock extends Block {
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
             if (lit >= maxBlocks) break;
-            if (level.getBlockState(target).isAir()) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
         }
+    }
+
+    /**
+     * True if any player occupies or is standing close enough to {@code pos} that placing fire
+     * there would touch them — vanilla fire both damages and ignites any entity standing in it, and
+     * nothing here previously checked for that, which is what let the Academy's scripted hazard
+     * failures set the player "randomly" alight while they were right there defusing the prop.
+     */
+    protected static boolean isPlayerNear(Level level, BlockPos pos) {
+        return !level.getEntitiesOfClass(Player.class, new AABB(pos).inflate(0.6)).isEmpty();
     }
 }
