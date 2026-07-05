@@ -189,7 +189,11 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   The duplicate second Cruz from the old two-NPC handoff design was **removed from the .schem file
   itself** (NBT-edited, 29 → 28 entities) — `NewTutBuildingManager.discardDuplicateCruz` remains
   only as a silent safety net that keeps the Cruz nearest the briefing anchor if more than one
-  ever exists again (future schematic re-save, accidental spawner copy).
+  ever exists again (future schematic re-save, accidental spawner copy, or — the actual reason this
+  stays wide — a Cruz saved to disk from a session predating either this fix or the stuck-recovery
+  logic, which could have drifted anywhere reachable on the map since `SchemLoader`'s
+  discard-before-place only clears entities inside the schematic's own footprint; its scan bounds
+  cover the whole map, not just this building, for exactly that reason).
 
 Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. TOOL_SELECTION (inventory contains all 3
   extinguisher items, picked up from wall item frames) → LIVE_FIRE_DEMO, taught **sequentially**
@@ -259,14 +263,26 @@ World-space navigation, "compass" style ("follow the green floor arrows", said l
 
 Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click starts a phase's
   whole line sequence via `AcademyManager.startOrAdvanceDialogue`; each line auto-advances after a
-  word-count-based reading-pace delay (`tickDialogues`, clamped ~3-10s), and clicking again while a
-  sequence plays skips immediately to the next line. `AcademyManager.cancelDialogue` drops a
-  player's in-flight session without firing its `onComplete` — used at the two spots that mutate
-  phase state out from under a possibly-active sequence (Cruz's Go/Stop violation revert, Morfe's
-  fail-path reset) — plus a `PlayerEvent.PlayerLoggedOutEvent` hook that cancels dialogue and clears
-  every room manager's transient per-player maps. Each room's periodic "idle nudge" reminders check
-  `AcademyManager.isDialogueActive(uuid)` before firing, so a coincidental idle nudge can no longer
-  stomp an in-progress dialogue line's caption while its voice line may still be playing.
+  word-count-based reading-pace delay (`tickDialogues`, clamped ~3-10s), and clicking again while
+  the SAME sequence is playing skips immediately to the next line. A request for a *different*
+  sequence while one is already active is now **ignored, not clobbered** — re-clicking Sgt. Reyes
+  while her tick-auto-triggered per-hazard explanation was still on screen used to silently
+  overwrite that session (and its `onComplete`, which is what actually ignites the hazard),
+  permanently stranding Room 2 with nothing ever catching fire. The one call site that must still
+  start regardless of what's playing — the hazard-explanation auto-trigger itself, since it's
+  driven by tick-order not by a click — uses the new `AcademyManager.forceStartDialogue` instead
+  (safe there specifically because anything it could be clobbering is a re-click reminder with a
+  no-op `onComplete`). `advanceSession` also clears the caption the instant a sequence naturally
+  finishes (`sendPrompt(player, "")`, immediately overwritten if `onComplete` has something new to
+  say) — previously the last line stayed glued to the screen forever once a short conversation
+  ended, until some unrelated prompt happened to overwrite it. `AcademyManager.cancelDialogue`
+  drops a player's in-flight session without firing its `onComplete` — used at the two spots that
+  mutate phase state out from under a possibly-active sequence (Cruz's Go/Stop violation revert,
+  Morfe's fail-path reset) — plus a `PlayerEvent.PlayerLoggedOutEvent` hook that cancels dialogue
+  and clears every room manager's transient per-player maps. Each room's periodic "idle nudge"
+  reminders check `AcademyManager.isDialogueActive(uuid)` before firing, so a coincidental idle
+  nudge can no longer stomp an in-progress dialogue line's caption while its voice line may still
+  be playing.
 
 **Logout safety net** — a player who disconnects mid-effect doesn't just lose transient timers, they
   can end up with the effect itself silently resuming (or literally still burning) on reconnect:
