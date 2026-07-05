@@ -115,6 +115,18 @@ public final class AcademyDialogue {
     );
 
     /**
+     * Played once, before {@code ReyesRoomManager.beginIgniteDemo} actually sets the player alight —
+     * teaches the "stop, drop, and roll" mechanic and its controls up front, so the player already
+     * knows what's about to happen and exactly how to respond instead of reading instructions for
+     * the first time while already on fire.
+     */
+    public static final List<DialogueLine> REYES_IGNITE_LINES = List.of(
+        new DialogueLine("§6[Sgt. Reyes] §fOne last lesson, and it's an important one: even when you do everything right, sometimes your clothes still catch fire — a stray spark, hot oil, anything. Don't panic when that happens.", false),
+        new DialogueLine("§6[Sgt. Reyes] §fThe only way to put yourself out is §e§lSTOP, DROP, and ROLL§r§f: press and hold §eShift§f to drop down low, then press §eR§f to roll — keep pressing it until the flames are gone. Nothing else works, so don't waste time trying to swat it out or run for water.", false),
+        new DialogueLine("§6[Sgt. Reyes] §fReady? I'm going to light a small, completely safe spark on you now, just like everything else here. The instant you catch fire — §eShift§f, then §eR§f!", true)
+    );
+
+    /**
      * Per-hazard "prevention" explanations for {@code ReyesPhase#PREVENTION_DEMO} — index 0 = Class
      * A (archive boxes), 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s
      * fixed order. Each explains the everyday habit that stops the hazard from ever igniting; the

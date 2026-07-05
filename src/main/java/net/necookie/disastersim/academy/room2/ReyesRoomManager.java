@@ -110,6 +110,8 @@ public final class ReyesRoomManager {
     private static final Map<UUID, Integer> explainedFrame = new ConcurrentHashMap<>();
     /** Per-player safety-cap countdown for the scripted ignite demo; absent when not currently active. */
     private static final Map<UUID, Integer> igniteWindow = new ConcurrentHashMap<>();
+    /** Whether this player has already heard the pre-ignition "you're about to catch fire" explanation. */
+    private static final Map<UUID, Boolean> igniteExplained = new ConcurrentHashMap<>();
 
     private ReyesRoomManager() {}
 
@@ -390,6 +392,16 @@ public final class ReyesRoomManager {
 
         if (idx >= HAZARDS.size()) {
             AcademyVisuals.setCompassTarget(player, null);
+            if (!Boolean.TRUE.equals(igniteExplained.get(id))) {
+                // Teach the mechanic BEFORE setting the player alight, not simultaneously with it --
+                // the player should already know "it's about to happen and here's the only way out"
+                // ahead of time, instead of being caught off guard and reading instructions while
+                // already on fire. Ignition itself only happens once this explanation finishes.
+                igniteExplained.put(id, true);
+                AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_IGNITE_LINES,
+                        () -> beginIgniteDemo(player));
+                return;
+            }
             tickIgniteDemo(player, data);
             return;
         }
@@ -479,6 +491,21 @@ public final class ReyesRoomManager {
     }
 
     /**
+     * Actually sets the player alight — only called once, as {@link AcademyDialogue#REYES_IGNITE_LINES}'s
+     * completion callback, so ignition never happens before the player has already been taught what's
+     * about to occur and exactly how to respond.
+     */
+    private static void beginIgniteDemo(ServerPlayer player) {
+        // Never shorter than MIN_REACTION_TICKS, even if the config value is set lower -- the
+        // timeout branch in tickIgniteDemo must not be able to force completion before the minimum
+        // reaction window has actually elapsed either.
+        int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
+        igniteWindow.put(player.getUUID(), cap);
+        player.setRemainingFireTicks(cap);
+        AcademyManager.sendPrompt(player, "§c🔥 You're on fire! §fShift, then R — go!");
+    }
+
+    /**
      * The scripted "you caught fire" demo. The fire is re-topped-up every tick (never left to
      * naturally count down to 0) until {@link DropAndRollManager#isDropped} is observed true, so
      * the lesson always requires an actual drop-and-roll instead of the fire just expiring on a
@@ -490,15 +517,9 @@ public final class ReyesRoomManager {
         Integer remaining = igniteWindow.get(id);
 
         if (remaining == null) {
-            // Never shorter than MIN_REACTION_TICKS, even if the config value is set lower --
-            // the timeout branch below must not be able to force completion before the minimum
-            // reaction window has actually elapsed either.
-            int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
-            igniteWindow.put(id, cap);
-            player.setRemainingFireTicks(cap);
-            AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cOh! A spark caught your uniform — don't panic! "
-                    + "§fPress and hold §eShift§f, then press §eR§f to Drop and Roll. Roll until the flames "
-                    + "are out!");
+            // Shouldn't normally happen (beginIgniteDemo always runs first), but stay safe if this
+            // is ever reached without it having fired.
+            beginIgniteDemo(player);
             return;
         }
 
@@ -546,6 +567,7 @@ public final class ReyesRoomManager {
         cleanupHazardProps((ServerLevel) player.level());
         currentHazard.remove(id);
         explainedHazard.remove(id);
+        igniteExplained.remove(id);
         lastActive.remove(id);
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.ALARM_CHECKPOINT));
     }
@@ -635,6 +657,7 @@ public final class ReyesRoomManager {
         currentHazard.remove(id);
         explainedHazard.remove(id);
         explainedFrame.remove(id);
+        igniteExplained.remove(id);
         lastActive.remove(id);
 
         ServerLevel level = (ServerLevel) player.level();
