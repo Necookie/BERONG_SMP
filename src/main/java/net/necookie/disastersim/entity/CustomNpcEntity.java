@@ -57,8 +57,14 @@ public class CustomNpcEntity extends Mob {
     // --- Look-at-player behavior -------------------------------------------
     /** Players within this many blocks are tracked by the NPC's gaze. */
     private static final double LOOK_RANGE = 10.0;
-    /** Max degrees the head turns per tick — lower is slower and smoother. */
+    /** Max degrees the head turns per tick while escorting/walking — lower is slower and smoother. */
     private static final float HEAD_TURN_SPEED = 12.0f;
+    /**
+     * Head turn speed while stationary (not escorting) — noticeably snappier than
+     * {@link #HEAD_TURN_SPEED}, since an idle NPC that's just standing and talking should react to
+     * the player right away instead of easing over like she does mid-walk.
+     */
+    private static final float HEAD_TURN_SPEED_IDLE = 28.0f;
     /** Head won't deviate more than this many degrees from the body's facing (no owl spins). */
     private static final float MAX_HEAD_YAW = 60.0f;
     /** Max up/down head pitch in degrees. */
@@ -66,6 +72,8 @@ public class CustomNpcEntity extends Mob {
     /** Degrees per tick the body swings once the desired gaze exceeds the head cone — slower than
      *  the head so the turn reads as a natural "head leads, body follows". */
     private static final float BODY_TURN_SPEED = 6.0f;
+    /** Body turn speed while stationary — same faster-when-idle treatment as {@link #HEAD_TURN_SPEED_IDLE}. */
+    private static final float BODY_TURN_SPEED_IDLE = 14.0f;
 
     /** Speed used for the occasional tiny idle step on NpcTypes with minimalWander=true. */
     private static final double WANDER_SPEED = 0.35;
@@ -108,7 +116,7 @@ public class CustomNpcEntity extends Mob {
             if (!escorting) {
                 float bodyDelta = Mth.wrapDegrees(rawYaw - this.yBodyRot);
                 if (Math.abs(bodyDelta) > MAX_HEAD_YAW) {
-                    float newBody = approachDegrees(this.yBodyRot, rawYaw, BODY_TURN_SPEED);
+                    float newBody = approachDegrees(this.yBodyRot, rawYaw, BODY_TURN_SPEED_IDLE);
                     this.setYBodyRot(newBody);
                     this.setYRot(newBody); // keep entity yaw in sync so the turn syncs/persists
                 }
@@ -123,8 +131,11 @@ public class CustomNpcEntity extends Mob {
             desiredYaw = this.yBodyRot; // ease back to a resting forward gaze
             desiredPitch = 0.0f;
         }
-        this.setYHeadRot(approachDegrees(this.getYHeadRot(), desiredYaw, HEAD_TURN_SPEED));
-        this.setXRot(approachDegrees(this.getXRot(), desiredPitch, HEAD_TURN_SPEED));
+        // Turn faster whenever she isn't actively walking somewhere (escorting) — a stationary NPC
+        // reacts to the player right away instead of the slower, smoother mid-walk ease.
+        float headSpeed = escorting ? HEAD_TURN_SPEED : HEAD_TURN_SPEED_IDLE;
+        this.setYHeadRot(approachDegrees(this.getYHeadRot(), desiredYaw, headSpeed));
+        this.setXRot(approachDegrees(this.getXRot(), desiredPitch, headSpeed));
     }
 
     /** Steps {@code current} toward {@code target} by at most {@code maxStep} degrees, the short way. */

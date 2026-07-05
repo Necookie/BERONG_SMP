@@ -2,6 +2,7 @@ package net.necookie.disastersim.academy.room1;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -121,6 +122,14 @@ public final class CruzRoomManager {
     private static final double ESCORT_PROGRESS_EPSILON_SQ = 0.25 * 0.25;
     /** Within this range of her target Cruz is considered arrived — never counted as stuck. */
     private static final double ESCORT_ARRIVED_RANGE_SQ = 2.0 * 2.0;
+    /**
+     * If the escorted player strays this far from Cruz's current position, she abandons the
+     * phase's waypoint for a tick and walks straight toward the player instead — nudging them back
+     * toward the lesson instead of leaving them to wander off unsupervised. Resumes the normal
+     * waypoint target on the next re-issue once they're close again. Always bounds-clamped to
+     * {@link #ROOM1_BOUNDS} so she never leaves the building chasing someone through a wall gap.
+     */
+    private static final double PLAYER_TOO_FAR_DISTANCE_SQ = 14.0 * 14.0;
 
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
@@ -212,19 +221,24 @@ public final class CruzRoomManager {
 
         AcademySavedData data = AcademySavedData.get(level);
         CruzPhase phase = data.get(escortTarget.getUUID()).cruzPhase();
-        Vec3 target = switch (phase) {
-            case BRIEFING -> nextUnhitMarkFor(escortTarget);
-            case MAZE -> currentWaypoint(escortTarget, MAZE_WAYPOINTS);
-            case JUMP -> currentWaypoint(escortTarget, JUMP_WAYPOINTS);
-            // Waits at the tunnel entrance while she briefs...
-            case GOSTOP_STAGE -> STAGING_POS;
-            // ...then follows the player THROUGH the slab tunnel during the run. She can't crouch
-            // under the 1.5-block slab lanes, so each lane blocks her path — the stuck-recovery
-            // below then poofs her to the player's side, reading as the instructor keeping pace
-            // barrier by barrier instead of being left behind at the entrance.
-            case GOSTOP_RUN -> escortTarget.position();
-            default -> null;
-        };
+        Vec3 target;
+        if (cruz.position().distanceToSqr(escortTarget.position()) > PLAYER_TOO_FAR_DISTANCE_SQ) {
+            target = clampToRoom1Bounds(escortTarget.position());
+        } else {
+            target = switch (phase) {
+                case BRIEFING -> nextUnhitMarkFor(escortTarget);
+                case MAZE -> currentWaypoint(escortTarget, MAZE_WAYPOINTS);
+                case JUMP -> currentWaypoint(escortTarget, JUMP_WAYPOINTS);
+                // Waits at the tunnel entrance while she briefs...
+                case GOSTOP_STAGE -> STAGING_POS;
+                // ...then follows the player THROUGH the slab tunnel during the run. She can't crouch
+                // under the 1.5-block slab lanes, so each lane blocks her path — the stuck-recovery
+                // below then poofs her to the player's side, reading as the instructor keeping pace
+                // barrier by barrier instead of being left behind at the entrance.
+                case GOSTOP_RUN -> escortTarget.position();
+                default -> null;
+            };
+        }
         if (target == null) return;
         boolean issued = cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
 
@@ -247,6 +261,14 @@ public final class CruzRoomManager {
             stuckCycles = 0;
             recoverCruz(level, cruz, escortTarget);
         }
+    }
+
+    /** Clamps a position into {@link #ROOM1_BOUNDS} so a "come back here" chase target never leaves the building. */
+    private static Vec3 clampToRoom1Bounds(Vec3 pos) {
+        return new Vec3(
+                Mth.clamp(pos.x, ROOM1_BOUNDS.minX, ROOM1_BOUNDS.maxX),
+                Mth.clamp(pos.y, ROOM1_BOUNDS.minY, ROOM1_BOUNDS.maxY),
+                Mth.clamp(pos.z, ROOM1_BOUNDS.minZ, ROOM1_BOUNDS.maxZ));
     }
 
     /**
