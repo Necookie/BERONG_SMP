@@ -139,18 +139,23 @@ public final class AcademyDialogue {
     public static final Map<SantosPhase, List<DialogueLine>> SANTOS_LINES = Map.of(
         SantosPhase.NOT_STARTED, List.of(
             new DialogueLine("§6[Sgt. Santos] §fWell done getting this far! I'm Sergeant Santos. Earthquakes are different from fires — they give §cno warning at all§f. So we practice until the right move is automatic.", false),
+            new DialogueLine("§6[Sgt. Santos] §fA few things to know before the ground even moves: stay §caway from windows and glass§f — they shatter. Stay clear of tall shelves or anything heavy that isn't bolted down — it can tip.", false),
+            new DialogueLine("§6[Sgt. Santos] §fAnd whatever you do, §cdon't run outside mid-shake§f, and never use an elevator during or right after — stairs only, once it's safe to move at all.", false),
             new DialogueLine("§6[Sgt. Santos] §fSee that sturdy table glowing green? That's your safe spot. When the shaking starts, walk under it — hold the §eW key§f to move, then press and hold §eShift§f to crouch down low.", false),
             new DialogueLine("§6[Sgt. Santos] §fRemember three words: §e§lDROP — COVER — HOLD ON!§r§f DROP down low (hold §eShift§f), take COVER under the table, and HOLD ON — stay there until the shaking completely stops.", false),
+            new DialogueLine("§6[Sgt. Santos] §fOne more thing — real quakes often have §caftershocks§f. Don't jump up the second the first shake fades; hold your position a little longer, just in case.", false),
             new DialogueLine("§6[Sgt. Santos] §fReady to try? The floor is about to shake — it's only practice, you're completely safe. Head for that glowing table the moment it starts!", true)
         ),
         SantosPhase.PRE_DRILL, List.of(
-            new DialogueLine("§6[Sgt. Santos] §7Any second now — keep your eyes on that glowing green table!", false)
+            new DialogueLine("§6[Sgt. Santos] §7Any second now — keep your eyes on that glowing green table!", false),
+            new DialogueLine("§6[Sgt. Santos] §7Remember: away from windows, away from anything tall and heavy — straight to the table.", false)
         ),
         SantosPhase.QUAKE_ACTIVE, List.of(
             new DialogueLine("§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to walk there, then press and hold §eShift§7 to crouch — and stay put!", false)
         ),
         SantosPhase.DONE, List.of(
-            new DialogueLine("§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, covered, and held on like a pro! One last stop: follow the glowing arrow to §cCaptain Morfe§f for your results. Stand tall — you've earned it.", false)
+            new DialogueLine("§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, covered, and held on like a pro! In a real quake you'd still watch for aftershocks and check the path out before moving.", false),
+            new DialogueLine("§6[Sgt. Santos] §fOne last stop: follow the glowing arrow to §cCaptain Morfe§f for your results. Stand tall — you've earned it. Congratulations, trainee!", false)
         )
     );
 

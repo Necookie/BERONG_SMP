@@ -47,6 +47,16 @@ public final class SantosRoomManager {
     private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
 
     private static final Map<UUID, Long> preDrillStartTick = new ConcurrentHashMap<>();
+    /**
+     * This room's own table-scoped compliance streak (ticks), separate from
+     * {@link DuckCoverHoldManager}'s global crouch+cover streak. The global streak accumulates
+     * anywhere in the world regardless of location, so reading it directly here let a player build
+     * the whole streak elsewhere and merely step within {@link #NEAR_TABLE_RANGE_SQ} for a single
+     * tick to pass instantly. This counter only ever grows on ticks where the player is genuinely
+     * near {@link #TABLE_ROW} *and* {@link DuckCoverHoldManager#isCompliant} is true that tick; any
+     * other tick resets it to zero.
+     */
+    private static final Map<UUID, Integer> tableHoldTicks = new ConcurrentHashMap<>();
 
     private SantosRoomManager() {}
 
@@ -96,7 +106,7 @@ public final class SantosRoomManager {
             AcademyVisuals.highlightBlocks(level, TABLE_ROW);
         }
         UUID id = player.getUUID();
-        long start = preDrillStartTick.getOrDefault(id, level.getGameTime());
+        long start = preDrillStartTick.computeIfAbsent(id, k -> level.getGameTime());
         if (level.getGameTime() - start >= PRE_DRILL_DELAY_TICKS) {
             data.mutate(id, p -> p.setSantosPhase(SantosPhase.QUAKE_ACTIVE));
             preDrillStartTick.remove(id);
@@ -113,17 +123,21 @@ public final class SantosRoomManager {
         UUID id = player.getUUID();
         boolean nearTable = isNearTableRow(player);
 
-        if (nearTable && DuckCoverHoldManager.isCompliant(id)
-                && DuckCoverHoldManager.ticksHeld(id) >= DuckCoverHoldManager.TARGET_TICKS) {
-            data.mutate(id, p -> {
-                p.setSantosPhase(SantosPhase.DONE);
-                p.setQuakeCompliant(true);
-            });
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
-                    + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
-                    + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.", 0f);
+        if (nearTable && DuckCoverHoldManager.isCompliant(id)) {
+            int held = tableHoldTicks.merge(id, 1, Integer::sum);
+            if (held >= DuckCoverHoldManager.TARGET_TICKS) {
+                tableHoldTicks.remove(id);
+                data.mutate(id, p -> {
+                    p.setSantosPhase(SantosPhase.DONE);
+                    p.setQuakeCompliant(true);
+                });
+                AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
+                        + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
+                        + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.", 0f);
+            }
             return;
         }
+        tableHoldTicks.remove(id);
 
         if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                 && !AcademyManager.isDialogueActive(id)) {
@@ -167,6 +181,7 @@ public final class SantosRoomManager {
     public static void clearPlayer(ServerPlayer player) {
         UUID id = player.getUUID();
         preDrillStartTick.remove(id);
+        tableHoldTicks.remove(id);
 
         ServerLevel level = (ServerLevel) player.level();
         AcademySavedData data = AcademySavedData.get(level);
