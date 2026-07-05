@@ -13,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
@@ -54,10 +53,9 @@ import java.util.function.Supplier;
  * non-kitchen props — this room's own logic is what enforces "the right one" here).
  *
  * <p>Once all 3 are correctly handled, Reyes's scripted "you caught fire" demo ignites the player;
- * the fire is kept topped up every tick (never left to burn down on its own) until
- * {@link DropAndRollManager#isDropped} is observed true, so the player actually has to drop and
- * roll rather than the fire just expiring on a timer — {@code Config.ACADEMY_IGNITE_DEMO_TICKS} is
- * a safety-cap timeout, not the real duration.
+ * the fire is kept topped up every tick and never goes out on its own — the only way out is
+ * accumulating {@link #ROLL_REQUIRED_TICKS} (5s) of actual rolling inside
+ * {@link DropAndRollManager#isDropped}'s dropped window, shown as a live once-per-second timer.
  */
 public final class ReyesRoomManager {
 
@@ -80,7 +78,8 @@ public final class ReyesRoomManager {
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
     /** Guaranteed minimum reaction window for the drop-and-roll demo, regardless of config value. */
-    private static final int MIN_REACTION_TICKS = 100; // 5s
+    /** Continuous-roll requirement for the ignite demo — the fire only goes out after this much rolling. */
+    private static final int ROLL_REQUIRED_TICKS = 100; // 5s
     private static final int SECOND_TICKS = 20;
     private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches Cruz's/Santos's own cadence
 
@@ -108,8 +107,10 @@ public final class ReyesRoomManager {
     private static final Map<UUID, Integer> explainedHazard = new ConcurrentHashMap<>();
     /** The extinguisher-frame index whose "point, then teach" dialogue has already been kicked off. */
     private static final Map<UUID, Integer> explainedFrame = new ConcurrentHashMap<>();
-    /** Per-player safety-cap countdown for the scripted ignite demo; absent when not currently active. */
+    /** Marker that the scripted ignite demo is active for this player; absent when not. */
     private static final Map<UUID, Integer> igniteWindow = new ConcurrentHashMap<>();
+    /** Ticks of actual rolling (inside DropAndRollManager's dropped window) accumulated so far. */
+    private static final Map<UUID, Integer> rollHeldTicks = new ConcurrentHashMap<>();
     /** Whether this player has already heard the pre-ignition "you're about to catch fire" explanation. */
     private static final Map<UUID, Boolean> igniteExplained = new ConcurrentHashMap<>();
 
@@ -502,68 +503,55 @@ public final class ReyesRoomManager {
      * about to occur and exactly how to respond.
      */
     private static void beginIgniteDemo(ServerPlayer player) {
-        // Never shorter than MIN_REACTION_TICKS, even if the config value is set lower -- the
-        // timeout branch in tickIgniteDemo must not be able to force completion before the minimum
-        // reaction window has actually elapsed either.
-        int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
-        igniteWindow.put(player.getUUID(), cap);
-        player.setRemainingFireTicks(cap);
-        AcademyManager.sendPrompt(player, "§c🔥 You're on fire! §fShift, then R — go!");
+        igniteWindow.put(player.getUUID(), 1); // marker: demo active (kept alight by tickIgniteDemo)
+        player.setRemainingFireTicks(FIRE_REFRESH_TICKS * 2);
+        AcademyManager.sendPrompt(player, "§c🔥 You're on fire! §fHold §eShift§f to DROP, then press §eR§f "
+                + "to ROLL — keep rolling until it's out!");
     }
 
     /**
-     * The scripted "you caught fire" demo. The fire is re-topped-up every tick (never left to
-     * naturally count down to 0) until {@link DropAndRollManager#isDropped} is observed true, so
-     * the lesson always requires an actual drop-and-roll instead of the fire just expiring on a
-     * timer; {@code Config.ACADEMY_IGNITE_DEMO_TICKS} is only a safety-cap fallback in case the
-     * player never rolls at all.
+     * The scripted "you caught fire" demo. The fire is re-topped-up every tick and NEVER goes out
+     * on its own — no timeout, no shortcut: the only way out is accumulating
+     * {@link #ROLL_REQUIRED_TICKS} (5s) of actual rolling (ticks spent inside
+     * {@link DropAndRollManager#isDropped}'s dropped window, i.e. genuinely holding Shift and
+     * pressing R), tracked in {@link #rollHeldTicks} and shown as a live once-per-second timer.
      */
     private static void tickIgniteDemo(ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
-        Integer remaining = igniteWindow.get(id);
-
-        if (remaining == null) {
-            // Shouldn't normally happen (beginIgniteDemo always runs first), but stay safe if this
-            // is ever reached without it having fired.
+        if (!igniteWindow.containsKey(id)) {
+            // Shouldn't normally happen (beginIgniteDemo always runs first as the explanation's
+            // completion callback), but stay safe if this is ever reached without it having fired.
             beginIgniteDemo(player);
             return;
         }
 
-        int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
-        int elapsed = cap - remaining;
+        boolean rolling = DropAndRollManager.isDropped(id);
+        int held = rolling ? rollHeldTicks.merge(id, 1, Integer::sum) : rollHeldTicks.getOrDefault(id, 0);
 
-        // Never let the demo complete (drop-and-roll detected or timeout) before the player has
-        // had at least MIN_REACTION_TICKS (5s) to actually react -- previously nothing enforced a
-        // floor here, so anything that could make DropAndRollManager.isDropped() report true early
-        // (or even a single unlucky tick ordering) could resolve the whole demo almost instantly,
-        // never really giving the player a chance to shift+R at all.
-        if (elapsed >= MIN_REACTION_TICKS && DropAndRollManager.isDropped(id)) {
+        if (held >= ROLL_REQUIRED_TICKS) {
             player.clearFire();
             data.mutate(id, p -> p.setDropAndRollPerformed(true));
             igniteWindow.remove(id);
+            rollHeldTicks.remove(id);
             AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aFlames out — beautifully done! §fYou just "
                     + "learned how to keep yourself safe. Take a breath.");
             advanceToAlarmCheckpoint(player, data);
             return;
         }
 
-        // Live countdown for the guaranteed reaction window, same once-per-second style as
-        // Santos's table-hold countdown — makes the 5-second requirement visible instead of a
-        // silent floor the player has no way to perceive.
-        if (elapsed < MIN_REACTION_TICKS && elapsed % SECOND_TICKS == 0) {
-            int secondsLeft = (MIN_REACTION_TICKS - elapsed) / SECOND_TICKS;
-            AcademyManager.sendPrompt(player, "§c🔥 Drop and roll! §f" + secondsLeft + "s");
-        }
-
+        // The fire never burns out on its own — topped back up every tick until the roll is done.
         player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), FIRE_REFRESH_TICKS));
 
-        if (remaining - 1 <= 0) {
-            // Safety-cap timeout — they never rolled. Clear it and move on anyway (forgiving).
-            player.clearFire();
-            igniteWindow.remove(id);
-            advanceToAlarmCheckpoint(player, data);
-        } else {
-            igniteWindow.put(id, remaining - 1);
+        // Live once-per-second timer, same style as Santos's table-hold countdown: shows how much
+        // rolling is still required, and re-teaches the controls whenever they aren't rolling.
+        if (player.level().getGameTime() % SECOND_TICKS == 0) {
+            int secondsLeft = (ROLL_REQUIRED_TICKS - held + SECOND_TICKS - 1) / SECOND_TICKS;
+            if (rolling) {
+                AcademyManager.sendPrompt(player, "§a✔ Rolling — keep it up! §f" + secondsLeft + "s");
+            } else {
+                AcademyManager.sendPrompt(player, "§c🔥 DROP (hold §eShift§c) and ROLL (press §eR§c)! §f"
+                        + secondsLeft + "s of rolling to go");
+            }
         }
     }
 
@@ -678,6 +666,7 @@ public final class ReyesRoomManager {
         explainedHazard.remove(id);
         explainedFrame.remove(id);
         igniteExplained.remove(id);
+        rollHeldTicks.remove(id);
         lastActive.remove(id);
 
         ServerLevel level = (ServerLevel) player.level();
