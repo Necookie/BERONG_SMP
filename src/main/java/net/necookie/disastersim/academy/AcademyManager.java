@@ -127,8 +127,12 @@ public final class AcademyManager {
         return variants[player.level().getRandom().nextInt(variants.length)];
     }
 
+    /** Extra ticks beyond a caption's own reading pace before it auto-clears, in case a player lingers on it. */
+    private static final int PROMPT_EXPIRY_GRACE_TICKS = 40; // 2s
+
     public static void sendPrompt(ServerPlayer player, String text, float intensity) {
-        PacketDistributor.sendToPlayer(player, new AcademyStatusPayload(text, intensity));
+        int displayTicks = text.isEmpty() ? 0 : ticksFor(text) + PROMPT_EXPIRY_GRACE_TICKS;
+        PacketDistributor.sendToPlayer(player, new AcademyStatusPayload(text, intensity, displayTicks));
     }
 
     /** Plays an NPC voice line for a single player only, stopping any previous VOICE sound first. */

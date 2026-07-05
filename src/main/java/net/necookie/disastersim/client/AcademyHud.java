@@ -30,11 +30,24 @@ public class AcademyHud {
     /** Camera shake amplitude for the earthquake drill; 0 disables shake. */
     public static float intensity = 0f;
 
+    /**
+     * Wall-clock millis (System.currentTimeMillis()) at which {@link #prompt} should auto-clear;
+     * 0 means "no expiry, persists until overwritten" — see {@code AcademyStatusPayload}. Without
+     * this, every non-dialogue-sequence caption (idle nudges, phase banners, GO/STOP calls) used
+     * to sit on screen forever once the player walked away, since the only place that ever sent an
+     * explicit clear was a timed dialogue sequence naturally finishing.
+     */
+    public static long promptExpiresAtMillis = 0L;
+
     public static void registerGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.HOTBAR, HUD_LAYER, AcademyHud::render);
     }
 
     private static void render(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
+        if (promptExpiresAtMillis > 0 && System.currentTimeMillis() >= promptExpiresAtMillis) {
+            prompt = "";
+            promptExpiresAtMillis = 0L;
+        }
         if (prompt.isEmpty()) return;
         if (!SimulationHud.currentStatus.isEmpty() || SimulationHud.timeLeft > 0) return;
         if (!TutorialHud.prompt.isEmpty()) return;

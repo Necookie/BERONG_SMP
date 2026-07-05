@@ -57,6 +57,7 @@ public class ClientEvents {
         TutorialHud.intensity = 0f;
         AcademyHud.prompt = "";
         AcademyHud.intensity = 0f;
+        AcademyHud.promptExpiresAtMillis = 0L;
         AcademyCompassHud.active = false;
     }
 }

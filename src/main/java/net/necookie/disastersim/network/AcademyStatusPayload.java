@@ -18,10 +18,15 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * from the old tutorial and the two need to be able to show different captions simultaneously
  * without one overwriting the other's last-message-wins static fields.
  *
- * @param prompt    Instruction/caption text shown on the Academy HUD (empty string clears it).
- * @param intensity Camera shake amplitude for Sgt. Santos's earthquake drill (0.0 when not shaking).
+ * @param prompt      Instruction/caption text shown on the Academy HUD (empty string clears it).
+ * @param intensity   Camera shake amplitude for Sgt. Santos's earthquake drill (0.0 when not shaking).
+ * @param displayTicks How long (in ticks) this prompt should stay on screen before auto-clearing
+ *                     client-side; 0 means "persist until overwritten" (used for the empty-string
+ *                     clear itself, where duration is moot). Every other caption expires on its
+ *                     own instead of sitting on screen forever once the player walks away from
+ *                     whatever room manager sent it — see {@code AcademyHud}.
  */
-public record AcademyStatusPayload(String prompt, float intensity) implements CustomPacketPayload {
+public record AcademyStatusPayload(String prompt, float intensity, int displayTicks) implements CustomPacketPayload {
 
     public static final Type<AcademyStatusPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "academy_status"));
@@ -30,6 +35,7 @@ public record AcademyStatusPayload(String prompt, float intensity) implements Cu
             StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8, AcademyStatusPayload::prompt,
                     ByteBufCodecs.FLOAT,       AcademyStatusPayload::intensity,
+                    ByteBufCodecs.VAR_INT,     AcademyStatusPayload::displayTicks,
                     AcademyStatusPayload::new
             );
 
@@ -40,8 +46,11 @@ public record AcademyStatusPayload(String prompt, float intensity) implements Cu
 
     private static void handle(AcademyStatusPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            AcademyHud.prompt    = payload.prompt();
+            AcademyHud.prompt = payload.prompt();
             AcademyHud.intensity = payload.intensity();
+            AcademyHud.promptExpiresAtMillis = payload.displayTicks() <= 0
+                    ? 0L
+                    : System.currentTimeMillis() + payload.displayTicks() * 50L;
         });
     }
 
