@@ -182,7 +182,12 @@ public final class ReyesRoomManager {
         if (!Objects.equals(explainedHazard.get(id), idx)) {
             explainedHazard.put(id, idx);
             HazardStep hazard = HAZARDS.get(idx);
-            AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx),
+            // forceStartDialogue, not startOrAdvanceDialogue: this trigger MUST actually start the
+            // instant the hazard's turn comes up. A re-click on Reyes right around this moment
+            // (e.g. a lingering TOOL_SELECTION reminder session) used to make the non-forcing
+            // version silently ignore this call while explainedHazard was already marked done --
+            // permanently stranding the room with nothing ever igniting.
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx),
                     () -> igniteHazard(level, id, hazard));
             return; // wait for the explanation to finish before this hazard even ignites
         }

@@ -180,6 +180,14 @@ public final class AcademyManager {
      * elapses (or is skipped past) — callers put their phase-transition logic there instead of
      * checking a returned boolean, since completion is no longer synchronous with the call that
      * started the sequence.
+     *
+     * <p>If a <em>different</em> sequence is already playing for this player (most commonly: they
+     * re-clicked an NPC while a tick-driven sequence like Sgt. Reyes's per-hazard explanation was
+     * still on screen), this call is ignored instead of overwriting it — overwriting silently
+     * discarded the in-flight session's {@code onComplete}, which is how a re-click used to
+     * permanently strand Room 2 with the fire never igniting. Callers whose sequence MUST start
+     * regardless of what else is playing (state that has to progress on a fixed tick schedule, not
+     * on request) should use {@link #forceStartDialogue} instead.
      */
     public static void startOrAdvanceDialogue(ServerPlayer player, List<AcademyDialogue.DialogueLine> lines,
                                                Runnable onComplete) {
@@ -187,13 +195,33 @@ public final class AcademyManager {
         UUID id = player.getUUID();
         DialogueSession session = activeSessions.get(id);
 
-        if (session != null && session.lines == lines) {
-            advanceSession(player, session);
+        if (session != null) {
+            if (session.lines == lines) {
+                advanceSession(player, session);
+            }
+            // else: already mid-conversation about something else — ignore rather than clobber.
             return;
         }
 
         session = new DialogueSession(lines, onComplete);
         activeSessions.put(id, session);
+        playCurrentLine(player, session);
+    }
+
+    /**
+     * Like {@link #startOrAdvanceDialogue}, but always starts fresh even if a different sequence
+     * is currently playing for this player — for tick-driven sequences that must begin exactly
+     * when game state says they should (e.g. a hazard's explanation the instant its turn comes
+     * up), where silently ignoring the request because an unrelated line happened to still be on
+     * screen would strand that state forever. Safe to use here specifically because every session
+     * that could still be active at that moment is a re-click reminder whose own onComplete is a
+     * no-op (condition-gated phases, not dialogue-gated) — discarding it loses nothing.
+     */
+    public static void forceStartDialogue(ServerPlayer player, List<AcademyDialogue.DialogueLine> lines,
+                                           Runnable onComplete) {
+        if (lines == null || lines.isEmpty()) return;
+        DialogueSession session = new DialogueSession(lines, onComplete);
+        activeSessions.put(player.getUUID(), session);
         playCurrentLine(player, session);
     }
 
@@ -229,6 +257,10 @@ public final class AcademyManager {
         session.index++;
         if (session.index >= session.lines.size()) {
             activeSessions.remove(player.getUUID());
+            // Nothing else clears the caption once a sequence naturally finishes -- without this,
+            // the last line stays glued to the screen forever until some unrelated prompt happens
+            // to overwrite it. If onComplete has something new to say, it sends it right after.
+            sendPrompt(player, "");
             session.onComplete.run();
             return;
         }
