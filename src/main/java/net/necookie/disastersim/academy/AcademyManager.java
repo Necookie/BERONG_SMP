@@ -163,6 +163,7 @@ public final class AcademyManager {
         final List<AcademyDialogue.DialogueLine> lines;
         int index;
         long nextAdvanceTick;
+        long shownAtTick;
         final Runnable onComplete;
 
         DialogueSession(List<AcademyDialogue.DialogueLine> lines, Runnable onComplete) {
@@ -176,6 +177,16 @@ public final class AcademyManager {
     private static final int MIN_LINE_TICKS = 60;  // 3s floor
     private static final int MAX_LINE_TICKS = 200; // 10s ceiling
     private static final int TICKS_PER_WORD = 5;   // ~0.25s/word reading pace
+    /**
+     * Guardrail against rapid over-clicking an NPC: a click-driven skip-ahead (the branch in
+     * {@link #startOrAdvanceDialogue} below) is only honored once a line has been showing for at
+     * least this long, across every room/course that uses this shared sequencer. Without this, a
+     * player mashing the interact key could blow through an entire multi-line sequence (and
+     * whatever phase transition its {@code onComplete} triggers) within a fraction of a second,
+     * skipping content and — for a tick-gated room like Cruz's — visibly racing ahead of what the
+     * room's own state machine expected to still be teaching.
+     */
+    private static final int MIN_LINE_DISPLAY_TICKS = 20; // 1s
 
     /**
      * Starts (or, if this exact line list is already playing for this player, immediately
@@ -201,10 +212,12 @@ public final class AcademyManager {
         DialogueSession session = activeSessions.get(id);
 
         if (session != null) {
-            if (session.lines == lines) {
+            long now = ((ServerLevel) player.level()).getGameTime();
+            if (session.lines == lines && now - session.shownAtTick >= MIN_LINE_DISPLAY_TICKS) {
                 advanceSession(player, session);
             }
-            // else: already mid-conversation about something else — ignore rather than clobber.
+            // else: already mid-conversation about something else (ignore rather than clobber), or
+            // the current line hasn't been up long enough yet for a click-skip to be honored.
             return;
         }
 
@@ -276,7 +289,9 @@ public final class AcademyManager {
         AcademyDialogue.DialogueLine line = session.lines.get(session.index);
         sendPrompt(player, line.text());
         playNpcSound(player, line.soundKey());
-        session.nextAdvanceTick = ((ServerLevel) player.level()).getGameTime() + ticksFor(line.text());
+        long now = ((ServerLevel) player.level()).getGameTime();
+        session.shownAtTick = now;
+        session.nextAdvanceTick = now + ticksFor(line.text());
     }
 
     private static int ticksFor(String text) {
