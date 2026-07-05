@@ -49,6 +49,16 @@ public final class NewTutBuildingManager {
      */
     private static final Vec3 CRUZ_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
     /**
+     * The old tunnel-finish handoff Cruz has kept reappearing at this exact spot (a disk-persisted
+     * leftover from a session predating the schem-level fix, per the {@link #BUILDING_SCAN_BOUNDS}
+     * comment below) even though the "keep nearest anchor" pass alone should already have caught
+     * her. {@link #discardDuplicateCruz} now discards anything found within {@link #STRAY_CRUZ_RADIUS}
+     * of this point unconditionally, on every boot, before the nearest-anchor pass ever runs — so
+     * she's gone from the very start of the session instead of merely losing a tie-break.
+     */
+    private static final Vec3 STRAY_CRUZ_POS = new Vec3(-122, -33, 49);
+    private static final double STRAY_CRUZ_RADIUS = 3.0;
+    /**
      * Deliberately much wider than the building itself: a Cruz saved to disk from a session
      * predating either the schem-level fix or the escort stuck-recovery logic could have drifted
      * or been left anywhere reachable on the map, and {@code SchemLoader}'s discard-before-place
@@ -111,8 +121,25 @@ public final class NewTutBuildingManager {
 
     /** See {@link #CRUZ_ANCHOR}. Runs after every placement, not just once. */
     private static void discardDuplicateCruz(ServerLevel level) {
-        List<CustomNpcEntity> all = level.getEntitiesOfClass(CustomNpcEntity.class, BUILDING_SCAN_BOUNDS,
+        List<CustomNpcEntity> found = level.getEntitiesOfClass(CustomNpcEntity.class, BUILDING_SCAN_BOUNDS,
                 npc -> npc.getNpcType() == NpcType.OFFICER_CRUZ);
+
+        int strayDiscarded = 0;
+        List<CustomNpcEntity> all = new java.util.ArrayList<>();
+        for (CustomNpcEntity npc : found) {
+            if (npc.position().distanceToSqr(STRAY_CRUZ_POS) <= STRAY_CRUZ_RADIUS * STRAY_CRUZ_RADIUS) {
+                npc.discard();
+                strayDiscarded++;
+            } else {
+                all.add(npc);
+            }
+        }
+        if (strayDiscarded > 0) {
+            BerongSMP.LOGGER.info("Discarded {} stray Officer Cruz entity/entities at the old tunnel-finish handoff spot", strayDiscarded);
+        }
+
+        // Only apply the keep-nearest-anchor tie-break when more than one legitimate Cruz remains —
+        // a lone survivor (the common case) must never be touched by this pass.
         if (all.size() <= 1) return;
 
         CustomNpcEntity keep = all.get(0);
