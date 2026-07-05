@@ -730,6 +730,7 @@ public class BerongSMP {
         modEventBus.register(net.necookie.disastersim.network.DropAndRollPayload.class);
         modEventBus.register(net.necookie.disastersim.network.AcademyStatusPayload.class);
         modEventBus.register(net.necookie.disastersim.network.AcademyCompassPayload.class);
+        modEventBus.register(net.necookie.disastersim.network.AcademyShakePayload.class);
 
         // BerongSMPClient is annotated @Mod(dist = CLIENT) so it only loads on the
         // physical client, keeping server JARs free of client-only Minecraft classes.

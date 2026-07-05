@@ -114,7 +114,7 @@ public final class SantosRoomManager {
             data.mutate(id, p -> p.setSantosPhase(SantosPhase.QUAKE_ACTIVE));
             preDrillStartTick.remove(id);
             AcademyManager.sendPrompt(player, "§c⚠ EARTHQUAKE! §fWalk to the glowing table (hold §eW§f), get "
-                    + "under it, and press and hold §eShift§f — DROP, COVER, HOLD ON!", QUAKE_SHAKE_INTENSITY);
+                    + "under it, and press and hold §eShift§f — DROP, COVER, HOLD ON!");
         }
     }
 
@@ -135,40 +135,43 @@ public final class SantosRoomManager {
                     p.setSantosPhase(SantosPhase.DONE);
                     p.setQuakeCompliant(true);
                 });
+                AcademyVisuals.setShake(player, 0f);
                 AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
                         + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
-                        + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.", 0f);
+                        + "§cCaptain Morfe§f for your results. Stand tall — you've earned it.");
                 return;
             }
+            // The shake intensity FADES with hold progress (mirroring the old tutorial's
+            // QUAKE_HOLDON, 1.5 → 0 across the 5 seconds), re-asserted every single tick over the
+            // dedicated shake channel — no caption anywhere can interrupt or stop it. Only the
+            // completion branch above truly ends the shaking.
+            AcademyVisuals.setShake(player, QUAKE_SHAKE_INTENSITY
+                    * (1.0f - (float) held / DuckCoverHoldManager.TARGET_TICKS));
             // Live countdown once genuinely under the table and holding — confirms the detection
             // actually fired and gives a clear sense of the 5-second requirement counting down.
-            // The shake intensity FADES with progress (mirroring the old tutorial's QUAKE_HOLDON,
-            // 1.5 → 0 across the hold) instead of being zeroed outright: sending 0f here was the
-            // bug that made the earthquake visually stop the instant the player started holding,
-            // seconds before the drill was actually complete. Only the completion message above
-            // truly ends the shaking.
             if (held % SECOND_TICKS == 0) {
                 int secondsLeft = (DuckCoverHoldManager.TARGET_TICKS - held) / SECOND_TICKS;
-                float fading = QUAKE_SHAKE_INTENSITY
-                        * (1.0f - (float) held / DuckCoverHoldManager.TARGET_TICKS);
-                AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s", fading);
+                AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s");
             }
             return;
         }
-        // Cover broken (or never established): reset the hold and put the shaking back at full
-        // strength — breaking cover mid-hold restarts the 5 seconds, exactly like the old
-        // tutorial's QUAKE_HOLDON break-cover reset.
+        // Not holding: the quake shakes at FULL strength, asserted every tick — it never stops on
+        // its own, no matter where the player goes or what captions come and go. The only way out
+        // is the 5-consecutive-second hold above.
+        AcademyVisuals.setShake(player, QUAKE_SHAKE_INTENSITY);
+
+        // Cover broken: reset the hold — breaking cover mid-hold restarts the full 5 seconds,
+        // exactly like the old tutorial's QUAKE_HOLDON break-cover reset.
         if (tableHoldTicks.remove(id) != null) {
-            AcademyManager.sendPrompt(player, "§c✗ You left cover — get back under the table and hold on!",
-                    QUAKE_SHAKE_INTENSITY);
+            AcademyManager.sendPrompt(player, "§c✗ You left cover — the countdown reset! Get back under "
+                    + "the table, hold §eShift§f, and stay put for the full 5 seconds.");
         }
 
         if (nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                 && !AcademyManager.isDialogueActive(id)) {
-            // At the table but not crouched/covered — remind them of the missing half, keeping the
-            // quake shaking at full strength the whole time.
+            // At the table but not crouched/covered — remind them of the missing half.
             AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Almost! Now press and hold §eShift§7 to "
-                    + "crouch under the table — and stay put!", QUAKE_SHAKE_INTENSITY);
+                    + "crouch under the table — and stay put!");
             return;
         }
 
@@ -180,7 +183,7 @@ public final class SantosRoomManager {
                     "§6[Sgt. Santos] §7The table is your safe spot — hurry back under it and hold "
                             + "§eShift§7 until the shaking stops!",
                     "§6[Sgt. Santos] §7Stay low, stay covered! Under the glowing table, hold "
-                            + "§eShift§7, and don't let go!"), QUAKE_SHAKE_INTENSITY);
+                            + "§eShift§7, and don't let go!"));
         }
     }
 
@@ -225,6 +228,11 @@ public final class SantosRoomManager {
         UUID id = player.getUUID();
         preDrillStartTick.remove(id);
         tableHoldTicks.remove(id);
+        // Stop the shake explicitly: on the /bfp reset path the player stays connected, and the
+        // phase rollback below silently ends the per-tick shake assertion — without this, the
+        // client would keep shaking with its last-received intensity forever. (On logout this is a
+        // harmless no-op send; the client resets its own HUD statics via ClientEvents anyway.)
+        AcademyVisuals.setShake(player, 0f);
 
         ServerLevel level = (ServerLevel) player.level();
         AcademySavedData data = AcademySavedData.get(level);

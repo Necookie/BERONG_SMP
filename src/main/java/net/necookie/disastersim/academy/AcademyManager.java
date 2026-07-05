@@ -113,8 +113,15 @@ public final class AcademyManager {
     // Shared helpers — used by all 4 room managers
     // -----------------------------------------------------------------------
 
+    /**
+     * Sends a caption to the Academy HUD. Deliberately does NOT touch camera-shake intensity —
+     * shake travels on its own {@code AcademyShakePayload} channel (see
+     * {@link AcademyVisuals#setShake}), so an unrelated caption can never silently stop (or
+     * accidentally preserve) Sgt. Santos's earthquake the way the old combined packet did.
+     */
     public static void sendPrompt(ServerPlayer player, String text) {
-        sendPrompt(player, text, 0f);
+        int displayTicks = text.isEmpty() ? 0 : ticksFor(text) + PROMPT_EXPIRY_GRACE_TICKS;
+        PacketDistributor.sendToPlayer(player, new AcademyStatusPayload(text, displayTicks));
     }
 
     /**
@@ -129,11 +136,6 @@ public final class AcademyManager {
 
     /** Extra ticks beyond a caption's own reading pace before it auto-clears, in case a player lingers on it. */
     private static final int PROMPT_EXPIRY_GRACE_TICKS = 40; // 2s
-
-    public static void sendPrompt(ServerPlayer player, String text, float intensity) {
-        int displayTicks = text.isEmpty() ? 0 : ticksFor(text) + PROMPT_EXPIRY_GRACE_TICKS;
-        PacketDistributor.sendToPlayer(player, new AcademyStatusPayload(text, intensity, displayTicks));
-    }
 
     /** Plays an NPC voice line for a single player only, stopping any previous VOICE sound first. */
     public static void playNpcSound(ServerPlayer player, String soundKey) {

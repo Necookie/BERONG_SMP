@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.network.AcademyCompassPayload;
+import net.necookie.disastersim.network.AcademyShakePayload;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collection;
@@ -141,8 +142,25 @@ public final class AcademyVisuals {
         PacketDistributor.sendToPlayer(player, new AcademyCompassPayload(true, target.x, target.y, target.z));
     }
 
-    /** Called from {@code AcademyManager}'s logout handler to drop this player's dedupe cache. */
+    /** Last shake intensity actually sent to each player; used to dedupe {@link #setShake} calls. */
+    private static final Map<UUID, Float> lastSentShake = new ConcurrentHashMap<>();
+
+    /**
+     * Asserts the Academy camera-shake amplitude for this player ({@code 0f} stops the shaking),
+     * over the dedicated {@code AcademyShakePayload} channel — completely independent of captions,
+     * so no dialogue line, banner, or nudge can ever stop (or accidentally prolong) the earthquake.
+     * Safe to call every tick: a packet is only sent when the value actually changes.
+     */
+    public static void setShake(ServerPlayer player, float intensity) {
+        Float last = lastSentShake.put(player.getUUID(), intensity);
+        if (last == null || last != intensity) {
+            PacketDistributor.sendToPlayer(player, new AcademyShakePayload(intensity));
+        }
+    }
+
+    /** Called from {@code AcademyManager}'s logout handler to drop this player's dedupe caches. */
     public static void clearPlayer(UUID id) {
         lastSentTarget.remove(id);
+        lastSentShake.remove(id);
     }
 }
