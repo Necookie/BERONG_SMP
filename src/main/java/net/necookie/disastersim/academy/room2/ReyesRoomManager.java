@@ -81,6 +81,7 @@ public final class ReyesRoomManager {
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
     /** Guaranteed minimum reaction window for the drop-and-roll demo, regardless of config value. */
     private static final int MIN_REACTION_TICKS = 100; // 5s
+    private static final int SECOND_TICKS = 20;
     private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches Cruz's/Santos's own cadence
 
     /**
@@ -517,6 +518,14 @@ public final class ReyesRoomManager {
                     + "learned how to keep yourself safe. Take a breath.");
             advanceToAlarmCheckpoint(player, data);
             return;
+        }
+
+        // Live countdown for the guaranteed reaction window, same once-per-second style as
+        // Santos's table-hold countdown — makes the 5-second requirement visible instead of a
+        // silent floor the player has no way to perceive.
+        if (elapsed < MIN_REACTION_TICKS && elapsed % SECOND_TICKS == 0) {
+            int secondsLeft = (MIN_REACTION_TICKS - elapsed) / SECOND_TICKS;
+            AcademyManager.sendPrompt(player, "§c🔥 Drop and roll! §f" + secondsLeft + "s");
         }
 
         player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), FIRE_REFRESH_TICKS));
