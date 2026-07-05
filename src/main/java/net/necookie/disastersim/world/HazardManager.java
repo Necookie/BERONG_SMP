@@ -202,6 +202,10 @@ public final class HazardManager {
     private static void triggerFailure(ServerLevel level, SimulationSession session, BlockPos pos,
                                         BlockState state, ServerPlayer notifyPlayer) {
         Block block = state.getBlock();
+        if (state.hasProperty(HazardBlock.ON_FIRE)) {
+            state = state.setValue(HazardBlock.ON_FIRE, true);
+            level.setBlock(pos, state, 3);
+        }
         String message = "§c⚠ A neglected hazard just started a fire!";
         if (block instanceof ComputerBlock) {
             HazardBlock.igniteAdjacent(level, pos, 2);
@@ -244,11 +248,13 @@ public final class HazardManager {
                 || (state.getBlock() instanceof ComputerBlock && state.getValue(ComputerBlock.BURNING));
     }
 
-    /** Defuses a hazardous prop at {@code pos} (sets hazardous=false, clears its failure timer). */
+    /** Defuses a hazardous (or already on-fire) prop at {@code pos} back to fully safe, clears its failure timer. */
     public static boolean defuse(ServerLevel level, SimulationSession session, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!isHazardous(state)) return false;
-        level.setBlock(pos, state.setValue(HazardBlock.HAZARDOUS, false), 3);
+        BlockState safe = state.setValue(HazardBlock.HAZARDOUS, false);
+        if (safe.hasProperty(HazardBlock.ON_FIRE)) safe = safe.setValue(HazardBlock.ON_FIRE, false);
+        level.setBlock(pos, safe, 3);
         level.levelEvent(null, 1009, pos, 0);
         if (session != null) session.getHazardTimers().remove(pos);
         return true;

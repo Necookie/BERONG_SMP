@@ -1,6 +1,16 @@
 {
   "variants": {
-    "hazardous=false": { "model": "berongsmp:block/swollen_phone_battery" },
-    "hazardous=true":  { "model": "berongsmp:block/swollen_phone_battery_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/swollen_phone_battery"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/swollen_phone_battery_hazardous"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/swollen_phone_battery_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/swollen_phone_battery_hazardous"
+    }
   }
 }

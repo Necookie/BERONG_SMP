@@ -2,6 +2,10 @@ package net.necookie.disastersim.block.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -9,23 +13,27 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * Base for symmetric (no-facing) hazard prop blocks. Adds a single {@code hazardous} boolean
- * state and wires {@link #animateTick} to call {@link #spawnHazardParticles} when hazardous=true.
+ * Base for symmetric (no-facing) hazard prop blocks. Adds the {@code hazardous} (developing
+ * danger) and {@code on_fire} (actually burning) boolean states, wires {@link #animateTick} to
+ * call {@link #spawnHazardParticles} and intensify while on fire, and offers a bare-hand
+ * "prevention" right-click that resets a hazardous-but-not-yet-burning prop back to safe.
  */
 public abstract class HazardBlock extends Block {
 
     public static final BooleanProperty HAZARDOUS = BooleanProperty.create("hazardous");
+    public static final BooleanProperty ON_FIRE = BooleanProperty.create("on_fire");
 
     protected HazardBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(HAZARDOUS, false));
+        registerDefaultState(stateDefinition.any().setValue(HAZARDOUS, false).setValue(ON_FIRE, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(HAZARDOUS);
+        builder.add(HAZARDOUS, ON_FIRE);
     }
 
     /** Emit client-side particles that signal the hazardous state. Called every animateTick. */
@@ -33,9 +41,37 @@ public abstract class HazardBlock extends Block {
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
-        if (state.getValue(HAZARDOUS)) {
+        if (!state.getValue(HAZARDOUS)) return;
+        spawnHazardParticles(level, pos, state, rand);
+        if (state.getValue(ON_FIRE)) {
             spawnHazardParticles(level, pos, state, rand);
+            if (rand.nextInt(3) == 0) {
+                level.addParticle(ParticleTypes.FLAME,
+                        pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 0, 0.02, 0);
+            }
         }
+    }
+
+    /**
+     * Bare-hand "prevention" action: fixing a hazard while it's merely hazardous (unplug the
+     * frayed cord, clear the vent, etc.) before it becomes a real fire. Once {@code on_fire} is
+     * true it's too late for a bare-handed fix — an extinguisher (or evacuation) is required.
+     */
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (state.getValue(HAZARDOUS) && !state.getValue(ON_FIRE)) {
+            if (!level.isClientSide()) {
+                level.setBlock(pos, state.setValue(HAZARDOUS, false), 3);
+                level.levelEvent(null, 1009, pos, 0);
+                player.sendSystemMessage(Component.literal(preventMessage()));
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.PASS;
+    }
+
+    /** Chat flavor text shown when a player prevents this hazard via bare-hand right-click. */
+    public String preventMessage() {
+        return "§a✔ Prevented! You fixed it before it could catch fire.";
     }
 
     /** Ticks a hazardous prop stays active before its failure consequence fires. Override to tune pacing. */

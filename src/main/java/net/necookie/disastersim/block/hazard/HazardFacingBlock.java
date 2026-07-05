@@ -2,6 +2,10 @@ package net.necookie.disastersim.block.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -15,29 +19,33 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Base for hazard prop blocks that carry a horizontal {@code FACING} alongside {@code hazardous}.
- * Replicates the FACING boilerplate from {@link net.necookie.disastersim.block.HorizontalFacingBlock}
- * while adding the shared hazard state and animateTick particle hook.
+ * Base for hazard prop blocks that carry a horizontal {@code FACING} alongside {@code hazardous}
+ * and {@code on_fire}. Replicates the FACING boilerplate from
+ * {@link net.necookie.disastersim.block.HorizontalFacingBlock} while adding the shared hazard
+ * state machine, animateTick particle hook, and bare-hand "prevention" interaction.
  */
 public abstract class HazardFacingBlock extends Block {
 
     public static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty HAZARDOUS = HazardBlock.HAZARDOUS;
+    public static final BooleanProperty ON_FIRE = HazardBlock.ON_FIRE;
 
     protected HazardFacingBlock(Properties props) {
         super(props);
         registerDefaultState(stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(HAZARDOUS, false));
+                .setValue(HAZARDOUS, false)
+                .setValue(ON_FIRE, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, HAZARDOUS);
+        builder.add(FACING, HAZARDOUS, ON_FIRE);
     }
 
     @Override
@@ -79,9 +87,37 @@ public abstract class HazardFacingBlock extends Block {
 
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand) {
-        if (state.getValue(HAZARDOUS)) {
+        if (!state.getValue(HAZARDOUS)) return;
+        spawnHazardParticles(level, pos, state, rand);
+        if (state.getValue(ON_FIRE)) {
             spawnHazardParticles(level, pos, state, rand);
+            if (rand.nextInt(3) == 0) {
+                level.addParticle(ParticleTypes.FLAME,
+                        pos.getX() + 0.5, pos.getY() + 0.6, pos.getZ() + 0.5, 0, 0.02, 0);
+            }
         }
+    }
+
+    /**
+     * Bare-hand "prevention" action: fixing a hazard while it's merely hazardous (unplug the
+     * frayed cord, clear the vent, etc.) before it becomes a real fire. Once {@code on_fire} is
+     * true it's too late for a bare-handed fix — an extinguisher (or evacuation) is required.
+     */
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (state.getValue(HAZARDOUS) && !state.getValue(ON_FIRE)) {
+            if (!level.isClientSide()) {
+                level.setBlock(pos, state.setValue(HAZARDOUS, false), 3);
+                level.levelEvent(null, 1009, pos, 0);
+                player.sendSystemMessage(Component.literal(preventMessage()));
+            }
+            return InteractionResult.SUCCESS;
+        }
+        return InteractionResult.PASS;
+    }
+
+    /** Chat flavor text shown when a player prevents this hazard via bare-hand right-click. */
+    public String preventMessage() {
+        return "§a✔ Prevented! You fixed it before it could catch fire.";
     }
 
     /** Ticks a hazardous prop stays active before its failure consequence fires. Override to tune pacing. */

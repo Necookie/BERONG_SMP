@@ -1,6 +1,16 @@
 {
   "variants": {
-    "hazardous=false": { "model": "berongsmp:block/damaged_lipo_pack" },
-    "hazardous=true":  { "model": "berongsmp:block/damaged_lipo_pack_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/damaged_lipo_pack"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/damaged_lipo_pack_hazardous"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/damaged_lipo_pack_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/damaged_lipo_pack_hazardous"
+    }
   }
 }

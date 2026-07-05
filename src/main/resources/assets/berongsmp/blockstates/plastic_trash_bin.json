@@ -1,12 +1,64 @@
 {
   "variants": {
-    "facing=north,hazardous=false": { "model": "berongsmp:block/plastic_trash_bin" },
-    "facing=north,hazardous=true":  { "model": "berongsmp:block/plastic_trash_bin_hazardous" },
-    "facing=south,hazardous=false": { "model": "berongsmp:block/plastic_trash_bin", "y": 180 },
-    "facing=south,hazardous=true":  { "model": "berongsmp:block/plastic_trash_bin_hazardous", "y": 180 },
-    "facing=east,hazardous=false":  { "model": "berongsmp:block/plastic_trash_bin", "y": 90 },
-    "facing=east,hazardous=true":   { "model": "berongsmp:block/plastic_trash_bin_hazardous", "y": 90 },
-    "facing=west,hazardous=false":  { "model": "berongsmp:block/plastic_trash_bin", "y": 270 },
-    "facing=west,hazardous=true":   { "model": "berongsmp:block/plastic_trash_bin_hazardous", "y": 270 }
+    "facing=north,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin"
+    },
+    "facing=north,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous"
+    },
+    "facing=north,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous"
+    },
+    "facing=north,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous"
+    },
+    "facing=south,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin",
+      "y": 180
+    },
+    "facing=south,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 180
+    },
+    "facing=south,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 180
+    },
+    "facing=south,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 180
+    },
+    "facing=east,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin",
+      "y": 90
+    },
+    "facing=east,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 90
+    },
+    "facing=east,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 90
+    },
+    "facing=east,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 90
+    },
+    "facing=west,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin",
+      "y": 270
+    },
+    "facing=west,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 270
+    },
+    "facing=west,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 270
+    },
+    "facing=west,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/plastic_trash_bin_hazardous",
+      "y": 270
+    }
   }
 }

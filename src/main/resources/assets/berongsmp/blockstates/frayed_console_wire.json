@@ -1,6 +1,16 @@
 {
   "variants": {
-    "hazardous=false": { "model": "berongsmp:block/frayed_console_wire" },
-    "hazardous=true":  { "model": "berongsmp:block/frayed_console_wire_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/frayed_console_wire"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/frayed_console_wire_hazardous"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/frayed_console_wire_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/frayed_console_wire_hazardous"
+    }
   }
 }

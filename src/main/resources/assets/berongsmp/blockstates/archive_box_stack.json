@@ -1,12 +1,64 @@
 {
   "variants": {
-    "facing=north,hazardous=false": { "model": "berongsmp:block/archive_box_stack" },
-    "facing=north,hazardous=true":  { "model": "berongsmp:block/archive_box_stack_hazardous" },
-    "facing=south,hazardous=false": { "model": "berongsmp:block/archive_box_stack", "y": 180 },
-    "facing=south,hazardous=true":  { "model": "berongsmp:block/archive_box_stack_hazardous", "y": 180 },
-    "facing=east,hazardous=false":  { "model": "berongsmp:block/archive_box_stack", "y": 90 },
-    "facing=east,hazardous=true":   { "model": "berongsmp:block/archive_box_stack_hazardous", "y": 90 },
-    "facing=west,hazardous=false":  { "model": "berongsmp:block/archive_box_stack", "y": 270 },
-    "facing=west,hazardous=true":   { "model": "berongsmp:block/archive_box_stack_hazardous", "y": 270 }
+    "facing=north,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack"
+    },
+    "facing=north,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous"
+    },
+    "facing=north,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack_hazardous"
+    },
+    "facing=north,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous"
+    },
+    "facing=south,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack",
+      "y": 180
+    },
+    "facing=south,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 180
+    },
+    "facing=south,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 180
+    },
+    "facing=south,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 180
+    },
+    "facing=east,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack",
+      "y": 90
+    },
+    "facing=east,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 90
+    },
+    "facing=east,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 90
+    },
+    "facing=east,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 90
+    },
+    "facing=west,hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack",
+      "y": 270
+    },
+    "facing=west,hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 270
+    },
+    "facing=west,hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 270
+    },
+    "facing=west,hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/archive_box_stack_hazardous",
+      "y": 270
+    }
   }
 }
