@@ -76,6 +76,13 @@ public final class CruzRoomManager {
     private static final double GOSTOP_STARTING_LINE_X = -103.0;
     private static final double GOSTOP_STARTING_LINE_MIN_Z = 46.0;
     private static final double GOSTOP_STARTING_LINE_MAX_Z = 56.0;
+    /**
+     * The crouch-tunnel corridor, schem-verified: the three low-ceiling slab lanes sit at X=-106/
+     * -107, -110, and -114/-115 (each spanning the full Z 40..62 corridor width), so this covers a
+     * margin around all of them plus the open runs between. Cruz shrinks to
+     * {@code CustomNpcEntity.CROUCH_DIMENSIONS} whenever she's inside it.
+     */
+    private static final AABB GOSTOP_TUNNEL_ZONE = new AABB(-117, -34, 39, -103, -30, 63);
     /** Throttle for the "wait for GO" barrier nudge, same idiom as the too-far-chase nudge. */
     private static final long STARTING_LINE_NUDGE_COOLDOWN_TICKS = 60; // 3s
 
@@ -283,6 +290,13 @@ public final class CruzRoomManager {
     private static void updateCruzEscort(ServerLevel level, ServerPlayer escortTarget) {
         CustomNpcEntity cruz = findCruz(level);
         if (cruz == null) return;
+
+        // Shrink her hitbox to fit under the crouch-tunnel's slab lanes whenever she's actually in
+        // there (either direction) -- checked every tick regardless of escort state, since she can
+        // pass through the tunnel escorting a player OR walking home. This is what actually lets
+        // her walk it at all instead of every lane being a provably unreachable path that the
+        // stuck-recovery had no choice but to poof through.
+        cruz.setCrouchingForObstacle(GOSTOP_TUNNEL_ZONE.contains(cruz.position()));
 
         if (escortTarget == null) {
             // Nobody to escort (nobody online in Room 1, everyone reset/finished): walk back to

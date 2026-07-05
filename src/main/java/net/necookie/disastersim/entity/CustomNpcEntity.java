@@ -4,8 +4,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -199,6 +201,38 @@ public class CustomNpcEntity extends Mob {
             // full re-issue cadence before a fresh moveTo call replaces it.
             this.getNavigation().stop();
         }
+    }
+
+    /**
+     * Shrunk hitbox used while {@link #crouchingForObstacle} is set, matching vanilla's own
+     * crouching dimensions (0.6×1.5) — just short of the Academy's crouch-tunnel clearance (1.5
+     * blocks under a top-slab ceiling), which her normal 0.6×1.8 standing box can never fit under.
+     * Unlike a player, a {@code Mob}'s bounding box doesn't change with {@link Pose} on its own —
+     * this override plus {@link #refreshDimensions()} in {@link #setCrouchingForObstacle} is what
+     * actually shrinks her hitbox, matching {@code DuckCoverHoldManager.allowCrawlUnderTable}'s
+     * player-side crouch trick but adapted for a non-player {@code Mob}.
+     */
+    private static final EntityDimensions CROUCH_DIMENSIONS = EntityDimensions.scalable(0.6f, 1.5f);
+
+    private boolean crouchingForObstacle = false;
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return crouchingForObstacle ? CROUCH_DIMENSIONS : super.getDefaultDimensions(pose);
+    }
+
+    /**
+     * Toggles the shrunk crouch hitbox — called every escort tick by whichever room manager is
+     * driving her (e.g. {@code CruzRoomManager} while she's in/near the Go/Stop tunnel), based on
+     * her current position, so pathfinding through a low-ceiling obstacle becomes a normal
+     * reachable path instead of the provably-unreachable one the poof-recovery used to have to
+     * bail out of.
+     */
+    public void setCrouchingForObstacle(boolean crouching) {
+        if (this.crouchingForObstacle == crouching) return;
+        this.crouchingForObstacle = crouching;
+        this.setPose(crouching ? Pose.CROUCHING : Pose.STANDING);
+        this.refreshDimensions();
     }
 
     @Override
