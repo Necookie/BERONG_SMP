@@ -103,6 +103,8 @@ public final class ReyesRoomManager {
     private static final Map<UUID, Integer> currentHazard = new ConcurrentHashMap<>();
     /** The hazard index whose explanation dialogue has already been kicked off, so it's only started once. */
     private static final Map<UUID, Integer> explainedHazard = new ConcurrentHashMap<>();
+    /** The extinguisher-frame index whose "point, then teach" dialogue has already been kicked off. */
+    private static final Map<UUID, Integer> explainedFrame = new ConcurrentHashMap<>();
     /** Per-player safety-cap countdown for the scripted ignite demo; absent when not currently active. */
     private static final Map<UUID, Integer> igniteWindow = new ConcurrentHashMap<>();
 
@@ -310,29 +312,33 @@ public final class ReyesRoomManager {
     }
 
     private static void tickToolSelection(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        UUID id = player.getUUID();
         FrameSpec nextFrame = nextUncollectedFrame(player);
         if (nextFrame != null) {
+            int idx = EXTINGUISHER_FRAMES.indexOf(nextFrame);
             if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
                 AcademyVisuals.highlightBlocks(level, List.of(nextFrame.pos()));
             }
             BlockPos pos = nextFrame.pos();
             AcademyVisuals.setCompassTarget(player, new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
 
-            if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
-                    && !AcademyManager.isDialogueActive(player.getUUID())) {
+            if (!Objects.equals(explainedFrame.get(id), idx)) {
+                // Point the player at THIS specific frame, then teach the pop-off-the-wall pickup
+                // mechanic for it, instead of one generic "collect all three" line -- matches how
+                // Cruz and the hazard steps teach one concept at a time.
+                explainedFrame.put(id, idx);
+                AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_TOOL_LINES.get(idx), () -> {});
+            } else if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
+                    && !AcademyManager.isDialogueActive(id)) {
                 AcademyManager.sendPrompt(player, AcademyManager.pick(player,
-                        "§6[Sgt. Reyes] §7Walk right up to each extinguisher and click it with your "
-                                + "§eleft mouse button§7 — it pops off the wall, then step onto it to "
-                                + "pick it up. You need all three!",
-                        "§6[Sgt. Reyes] §7Red, green, yellow — collect all three! §eLeft-click§7 a "
-                                + "frame on the wall and walk over what drops.",
-                        "§6[Sgt. Reyes] §7Each frame on the wall holds one extinguisher. Hit it with "
-                                + "your §eleft mouse button§7, then scoop it up off the floor!"));
+                        "§6[Sgt. Reyes] §7Left-click the frame, then step onto the extinguisher to pick it up!",
+                        "§6[Sgt. Reyes] §7That frame's still got one waiting — left-click it loose, then "
+                                + "walk over it."));
             }
             return;
         }
+        explainedFrame.remove(id);
         AcademyVisuals.setCompassTarget(player, null);
-        UUID id = player.getUUID();
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.LIVE_FIRE_DEMO));
         currentHazard.put(id, 0);
         explainedHazard.remove(id);
@@ -589,6 +595,7 @@ public final class ReyesRoomManager {
         }
         currentHazard.remove(id);
         explainedHazard.remove(id);
+        explainedFrame.remove(id);
         lastActive.remove(id);
 
         ServerLevel level = (ServerLevel) player.level();

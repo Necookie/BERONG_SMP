@@ -73,7 +73,7 @@ public final class AcademyDialogue {
             new DialogueLine("§6[Sgt. Reyes] §7Right-click a glowing hazard to fix it — that's prevention. Work through all three before they get away from you!", false)
         ),
         ReyesPhase.TOOL_SELECTION, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §7Walk right up to each extinguisher and click it with your §eleft mouse button§7 — it pops off the wall, then step onto it to pick it up. You need all three!", false)
+            new DialogueLine("§6[Sgt. Reyes] §7Time to gear up — follow the glowing arrow to each extinguisher and I'll walk you through grabbing it.", false)
         ),
         ReyesPhase.LIVE_FIRE_DEMO, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7To use an extinguisher: press its §enumber key (1-9)§7 to hold it, aim at the §ebase§7 of the fire, and §ehold the right mouse button§7. Match the color to what's burning — you can do it!", false)
@@ -88,6 +88,29 @@ public final class AcademyDialogue {
         ),
         ReyesPhase.DONE, List.of(
             new DialogueLine("§6[Sgt. Reyes] §fThree fires, three perfect matches — and you even put yourself out safely. I'm proud of you! Follow the glowing arrow to §6Sgt. Santos§f for the Earthquake Drill.", false)
+        )
+    );
+
+    /**
+     * Per-frame "point, then teach" lines for {@code ReyesPhase#TOOL_SELECTION} — index matches
+     * {@code room2.ReyesRoomManager.EXTINGUISHER_FRAMES}'s order (0=ABC red, 1=CO2 green, 2=wet
+     * chemical yellow). The first line points the player at that frame specifically (the compass
+     * and beacon are already up by the time this plays); the second teaches the pop-off-the-wall
+     * pickup mechanic. Played once per frame, the instant it becomes the player's current target,
+     * instead of one generic line covering all three at once.
+     */
+    public static final List<List<DialogueLine>> REYES_TOOL_LINES = List.of(
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fFirst, the §cRED ABC extinguisher§f — see it glowing in its frame? Follow the arrow over.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLeft-click the frame to pop it loose, then walk over the extinguisher on the floor to pick it up.", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fNext, the §aGREEN CO2 extinguisher§f — for electrical fires. Follow the arrow to its frame.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fSame as before: §eleft-click§f to pop it off the wall, then step onto it to grab it.", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fLast one — the §eYELLOW wet chemical extinguisher§f, for kitchen grease fires. Follow the arrow.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLeft-click the frame, then scoop it up off the floor. That's all three — you're fully equipped!", true)
         )
     );
 
