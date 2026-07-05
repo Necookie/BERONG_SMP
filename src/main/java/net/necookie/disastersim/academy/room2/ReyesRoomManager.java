@@ -178,6 +178,11 @@ public final class ReyesRoomManager {
             lastActive.remove(id);
             AcademyVisuals.setCompassTarget(player, null);
             data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
+            // TOOL_SELECTION's "walk up to each extinguisher..." line is otherwise only ever heard
+            // if the player happens to right-click Reyes again on their own -- this phase entry is
+            // tick-driven, not onInteract-driven, so nothing was actually teaching the pickup
+            // mechanic without it. forceStartDialogue announces it the instant the phase begins.
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_LINES.get(ReyesPhase.TOOL_SELECTION), () -> {});
             return;
         }
 
@@ -317,6 +322,10 @@ public final class ReyesRoomManager {
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.LIVE_FIRE_DEMO));
         currentHazard.put(id, 0);
         explainedHazard.remove(id);
+        // Same reasoning as the TOOL_SELECTION entry above -- this transition is tick-driven, so
+        // announce the "press the extinguisher's number key, hold right-click" instruction the
+        // instant LIVE_FIRE_DEMO actually begins instead of only on a coincidental re-click.
+        AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_LINES.get(ReyesPhase.LIVE_FIRE_DEMO), () -> {});
     }
 
     private static boolean hasAllExtinguishers(ServerPlayer player) {
