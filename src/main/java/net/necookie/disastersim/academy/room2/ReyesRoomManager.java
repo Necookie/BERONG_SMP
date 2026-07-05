@@ -79,6 +79,8 @@ public final class ReyesRoomManager {
     private static final double NEAR_RANGE_SQ = 6.0 * 6.0;
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
+    /** Guaranteed minimum reaction window for the drop-and-roll demo, regardless of config value. */
+    private static final int MIN_REACTION_TICKS = 100; // 5s
     private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches Cruz's/Santos's own cadence
 
     /**
@@ -487,7 +489,10 @@ public final class ReyesRoomManager {
         Integer remaining = igniteWindow.get(id);
 
         if (remaining == null) {
-            int cap = Config.ACADEMY_IGNITE_DEMO_TICKS.get();
+            // Never shorter than MIN_REACTION_TICKS, even if the config value is set lower --
+            // the timeout branch below must not be able to force completion before the minimum
+            // reaction window has actually elapsed either.
+            int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
             igniteWindow.put(id, cap);
             player.setRemainingFireTicks(cap);
             AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §cOh! A spark caught your uniform — don't panic! "
@@ -496,7 +501,15 @@ public final class ReyesRoomManager {
             return;
         }
 
-        if (DropAndRollManager.isDropped(id)) {
+        int cap = Math.max(Config.ACADEMY_IGNITE_DEMO_TICKS.get(), MIN_REACTION_TICKS);
+        int elapsed = cap - remaining;
+
+        // Never let the demo complete (drop-and-roll detected or timeout) before the player has
+        // had at least MIN_REACTION_TICKS (5s) to actually react -- previously nothing enforced a
+        // floor here, so anything that could make DropAndRollManager.isDropped() report true early
+        // (or even a single unlucky tick ordering) could resolve the whole demo almost instantly,
+        // never really giving the player a chance to shift+R at all.
+        if (elapsed >= MIN_REACTION_TICKS && DropAndRollManager.isDropped(id)) {
             player.clearFire();
             data.mutate(id, p -> p.setDropAndRollPerformed(true));
             igniteWindow.remove(id);
