@@ -87,6 +87,22 @@ public final class AcademyManager {
     }
 
     /**
+     * The logout hook above is the primary mid-effect cleanup, but it only runs on a clean
+     * disconnect — a server crash (or force-kill) mid-drill persists {@code SantosPhase.PRE_DRILL}/
+     * {@code QUAKE_ACTIVE} (or a mid-demo Reyes phase) in {@link AcademySavedData} with the logout
+     * rollback never having run, and the room's tick loop would re-enter the effect the moment the
+     * player rejoins: a full-strength earthquake out of nowhere, with no dialogue and no context.
+     * Running the same (idempotent, phase-gated) rollback on login closes that path; for players
+     * whose logout hook already ran, every step is a no-op.
+     */
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            clearTransientState(player);
+        }
+    }
+
+    /**
      * Drops every room manager's leak-prone per-player transient state (marks hit, Go/Stop
      * timers, ignite windows, the compass dedupe cache, ...) without touching persisted
      * {@link AcademyProgress} phases in general — except the two specific "mid-effect" phases
