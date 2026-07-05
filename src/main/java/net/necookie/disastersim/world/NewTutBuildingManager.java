@@ -40,14 +40,24 @@ public final class NewTutBuildingManager {
      * the old tunnel-finish handoff position (~(-123.5,-33,49.5), from the pre-polish two-NPC
      * design) has been **removed from the .schem file itself** (NBT-edited: 29 → 28 entities, both
      * the resource copy and the WorldEdit copy) — so nothing needs discarding on a normal boot
-     * anymore. {@link #discardDuplicateCruz} stays as a pure safety net: it scans the whole
-     * building after every placement and, if more than one {@code OFFICER_CRUZ} somehow exists
-     * (a future schematic re-save reintroducing one, an accidental spawner-item copy), keeps only
-     * the one nearest {@link #CRUZ_ANCHOR}. Silent when there's exactly one.
+     * anymore. {@link #discardDuplicateCruz} stays as a pure safety net: it scans a generous area
+     * of the whole map after every placement (not just this building — see
+     * {@link #BUILDING_SCAN_BOUNDS}) and, if more than one {@code OFFICER_CRUZ} exists anywhere
+     * (a leftover from a session that predates this fix, a future schematic re-save reintroducing
+     * one, an accidental spawner-item copy), keeps only the one nearest {@link #CRUZ_ANCHOR} and
+     * discards every other copy. Silent when there's exactly one.
      */
     private static final Vec3 CRUZ_ANCHOR = new Vec3(-153.5, -33.0, 32.5);
-    /** Whole-building scan bounds — matches {@code AcademyGuardrails.BUILDING_BOUNDS}. */
-    private static final AABB BUILDING_SCAN_BOUNDS = new AABB(-178, -40, 7, -94, -20, 86);
+    /**
+     * Deliberately much wider than the building itself: a Cruz saved to disk from a session
+     * predating either the schem-level fix or the escort stuck-recovery logic could have drifted
+     * or been left anywhere reachable on the map, and {@code SchemLoader}'s discard-before-place
+     * only clears entities inside the schematic's own placement footprint — a stray outside it
+     * would otherwise survive forever across reboots. Covers every built structure in the mod
+     * (lobby, library, SSC, CCS, this building) with generous margin; still cheap since
+     * {@code getEntitiesOfClass} only visits loaded entity sections, not the raw volume.
+     */
+    private static final AABB BUILDING_SCAN_BOUNDS = new AABB(-400, -80, -200, 400, 60, 400);
 
     /** A named F3-captured reference viewpoint inside the building, for {@code /bfp new_tutorial}. */
     public record Viewpoint(double x, double y, double z, float yaw, float pitch) {}
