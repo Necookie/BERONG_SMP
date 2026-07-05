@@ -80,6 +80,7 @@ public final class CruzRoomManager {
     private static final long STARTING_LINE_NUDGE_COOLDOWN_TICKS = 60; // 3s
 
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100; // 5s, matches TutorialManager's idiom
+    private static final int SECOND_TICKS = 20;
     private static final int GOSTOP_MIN_INTERVAL_TICKS = 60;  // 3s
     private static final int GOSTOP_MAX_INTERVAL_TICKS = 120; // 6s
     private static final double GOSTOP_MOVE_EPSILON_SQ = 0.35 * 0.35;
@@ -677,16 +678,19 @@ public final class CruzRoomManager {
         long nextFlipTick;
         long stopStartTick = -1;
         Vec3 posAtStop = Vec3.ZERO;
+        /** The exact banner text last sent, so the fun countdown below can re-append it without re-randomizing. */
+        String currentBanner = "";
     }
 
     private static void startGoStop(ServerLevel level, ServerPlayer player) {
         GoStopState state = new GoStopState();
         state.nextFlipTick = level.getGameTime() + randomInterval(level);
-        goStopStates.put(player.getUUID(), state);
-        AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+        state.currentBanner = AcademyManager.pick(player,
                 "§a▶ GO! Hold the W key and keep walking!",
                 "§a▶ GO! Move move move — keep that W key down!",
-                "§a▶ GO! Forward, trainee — hold W and go!"));
+                "§a▶ GO! Forward, trainee — hold W and go!");
+        goStopStates.put(player.getUUID(), state);
+        AcademyManager.sendPrompt(player, state.currentBanner);
     }
 
     private static long randomInterval(ServerLevel level) {
@@ -704,24 +708,35 @@ public final class CruzRoomManager {
         }
 
         long gameTime = level.getGameTime();
+        boolean justFlipped = false;
 
         if (gameTime >= state.nextFlipTick) {
+            justFlipped = true;
             state.isGo = !state.isGo;
             state.nextFlipTick = gameTime + randomInterval(level);
             if (state.isGo) {
                 state.stopStartTick = -1;
-                AcademyManager.sendPrompt(player, AcademyManager.pick(player,
-                "§a▶ GO! Hold the W key and keep walking!",
-                "§a▶ GO! Move move move — keep that W key down!",
-                "§a▶ GO! Forward, trainee — hold W and go!"));
+                state.currentBanner = AcademyManager.pick(player,
+                        "§a▶ GO! Hold the W key and keep walking!",
+                        "§a▶ GO! Move move move — keep that W key down!",
+                        "§a▶ GO! Forward, trainee — hold W and go!");
             } else {
                 state.stopStartTick = gameTime;
                 state.posAtStop = player.position();
-                AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                state.currentBanner = AcademyManager.pick(player,
                         "§c■ STOP! Let go of every key and freeze!",
                         "§c■ STOP! Hands off the keys — statue still!",
-                        "§c■ STOP! Freeze right where you are!"));
+                        "§c■ STOP! Freeze right where you are!");
             }
+            AcademyManager.sendPrompt(player, state.currentBanner);
+        }
+
+        // Fun green countdown to the next call, refreshed once a second — purely cosmetic, doesn't
+        // change any timing or detection, just re-appends the remaining seconds to whatever banner
+        // is already showing so the wait doesn't feel like a black box.
+        if (!justFlipped && gameTime % SECOND_TICKS == 0) {
+            long secondsLeft = Math.max(0, (state.nextFlipTick - gameTime) / SECOND_TICKS);
+            AcademyManager.sendPrompt(player, state.currentBanner + " §a⏱" + secondsLeft + "s");
         }
 
         if (!state.isGo && state.stopStartTick >= 0) {
