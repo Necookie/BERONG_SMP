@@ -180,15 +180,18 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   can never pull her outside the building), resuming the normal waypoint once they're close again.
   The first time this triggers she also speaks up — a throttled (`TOO_FAR_NUDGE_COOLDOWN_TICKS`,
   once per 10s) "come back this way, trainee!" line — instead of silently repositioning with no
-  in-character acknowledgment. At the Go/Stop finish line specifically, `tickGoStopRun` also
-  guarantees she's actually standing beside the player for the "you did it, go find Reyes" beat
-  (`recoverCruz`'s snap-to-side poof if she isn't already close, rather than wherever the last
-  15-tick escort re-issue left her), delivered as a real spoken Cruz line via `forceStartDialogue`
-  (reusing `CRUZ_LINES.get(DONE)`) instead of a bare caption. **Realistic walk home**: `tickReturnHome`
-  now uses a far more generous stuck threshold (`RETURN_HOME_STUCK_CYCLES_MAX`, ~30s vs. a normal
-  escort leg's ~4.5s) before ever falling back to a poof-teleport — that walk is a simple,
-  obstacle-free route, so she should just walk it for realism; the poof still exists as an absolute
-  last resort so she's never permanently stranded. **Escort-through-the-door hand-off
+  in-character acknowledgment. **No teleports at the finish line or on the walk home
+  (2026-07-05):** at the Go/Stop finish line, `tickGoStopRun` no longer snaps her beside the player
+  at all — `DONE` already keeps her escorting (targeting the player's live position every re-issue,
+  same as `GOSTOP_RUN`), so she just naturally walks up over the next couple of seconds instead of
+  teleporting, and keeps standing with the player through the whole "you did it, go find Reyes"
+  line (a real spoken Cruz line via `forceStartDialogue`, reusing `CRUZ_LINES.get(DONE)`) and beyond,
+  until they actually leave through the door — never rushing off mid-sentence. `tickReturnHome`
+  itself no longer teleports either: it just keeps re-issuing the walk home every cycle instead of
+  giving up after a stuck threshold (`RETURN_HOME_STALL_WARNING_CYCLES` only logs a one-time
+  diagnostic warning at ~30s of no progress — it takes no action). The walk back to
+  `BRIEFING_ANCHOR` is a short, schem-verified-open route, so she always just walks it for realism.
+  **Escort-through-the-door hand-off
   (2026-07-05)**: `CruzPhase.DONE` used to immediately drop the player from escort selection the
   instant the Go/Stop finish line was crossed — well inside Room 1 — sending Cruz into
   `tickReturnHome` before the player had gone anywhere near actually leaving (read by the user as
@@ -281,7 +284,15 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     `EXTINGUISHER_FRAMES`) gives each extinguisher its own two-beat introduction — pointing at that
     specific frame (compass+beacon, via `nextUncollectedFrame`), then teaching the pop-off-the-wall
     pickup mechanic — played once per frame (`explainedFrame`) the instant it becomes the player's
-    target, instead of everything being explained at once regardless of which frame is next.
+    target, instead of everything being explained at once regardless of which frame is next. The 3
+    glow item frames' positions/facings/items are schem-verified against `new_tut_building1.0.schem`
+    directly (`-170/-168/-166,-32,10`, facing south, fire/CO2/wet-chemical respectively) — they were
+    already correct. **Reyes never hands out an extinguisher (2026-07-05):** entering
+    `TOOL_SELECTION` now calls `stripExistingExtinguishers`, removing any of the 3 the player already
+    holds — otherwise a player who already had one or more (in practice, most often a dev who'd used
+    `/item kit` earlier in the same session) skipped straight past the whole phase the instant it
+    began, since the completion check only looked at current inventory contents. Every player now
+    has to genuinely retrieve all 3 from their wall frames, regardless of prior inventory state.
     `LIVE_FIRE_DEMO`, the "intervention" phase, taught **sequentially** one hazard at a
     time in the same fixed order. Entering a hazard's turn plays its
     `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
@@ -392,7 +403,14 @@ World-space navigation, "compass" style ("follow the green floor arrows", said l
 Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click starts a phase's
   whole line sequence via `AcademyManager.startOrAdvanceDialogue`; each line auto-advances after a
   word-count-based reading-pace delay (`tickDialogues`, clamped ~3-10s), and clicking again while
-  the SAME sequence is playing skips immediately to the next line. A request for a *different*
+  the SAME sequence is playing skips immediately to the next line — but only once that line has
+  been up for at least `MIN_LINE_DISPLAY_TICKS` (1s, tracked via `DialogueSession.shownAtTick`;
+  added 2026-07-05) — a guardrail in this one shared sequencer, protecting every room/course at
+  once, against a player mashing the interact key to blow through an entire sequence (and whatever
+  phase transition its `onComplete` triggers) within a fraction of a second, most visibly seen as
+  Cruz's dialogue racing ahead of what her own tick-driven state machine expected to still be
+  teaching. `forceStartDialogue` (tick-driven triggers, not click-driven) is unaffected. A request
+  for a *different*
   sequence while one is already active is now **ignored, not clobbered** — re-clicking Sgt. Reyes
   while her tick-auto-triggered per-hazard explanation was still on screen used to silently
   overwrite that session (and its `onComplete`, which is what actually ignites the hazard),
