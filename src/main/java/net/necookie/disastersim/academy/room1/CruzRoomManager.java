@@ -62,6 +62,22 @@ public final class CruzRoomManager {
     private static final Vec3 STAGING_POS = new Vec3(-103.5, -33.0, 51.0);
     /** Far end of the Go/Stop corridor — reaching this while compliant finishes Room 1. */
     private static final double GOSTOP_FINISH_X = -118.0;
+    /**
+     * The staging pen the player must physically enter before Cruz will even start the Go/Stop
+     * briefing — schem-verified: this is the pen's actual open interior (X -102..-98, Z 47..55),
+     * one block inside the entrance gap at X=-103.
+     */
+    private static final AABB GOSTOP_ZONE = new AABB(-102, -34, 47, -97, -30, 55);
+    /**
+     * The starting line at the pen's entrance gap (X=-103, schem-verified against the flanking wall
+     * blocks at Z=46/56 — the actual opening is Z 47..55). Nothing stops the player from crossing
+     * this before Cruz calls the first GO; {@link #tickGoStopStage} pushes them back east if they try.
+     */
+    private static final double GOSTOP_STARTING_LINE_X = -103.0;
+    private static final double GOSTOP_STARTING_LINE_MIN_Z = 46.0;
+    private static final double GOSTOP_STARTING_LINE_MAX_Z = 56.0;
+    /** Throttle for the "wait for GO" barrier nudge, same idiom as the too-far-chase nudge. */
+    private static final long STARTING_LINE_NUDGE_COOLDOWN_TICKS = 60; // 3s
 
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100; // 5s, matches TutorialManager's idiom
     private static final int GOSTOP_MIN_INTERVAL_TICKS = 60;  // 3s
@@ -181,6 +197,7 @@ public final class CruzRoomManager {
     private static Vec3 lastTarget;
     private static int stuckCycles;
     private static long lastTooFarNudgeTick = Long.MIN_VALUE;
+    private static long lastStartingLineNudgeTick = Long.MIN_VALUE;
 
     private CruzRoomManager() {}
 
@@ -188,6 +205,14 @@ public final class CruzRoomManager {
         ServerLevel level = (ServerLevel) player.level();
         AcademySavedData data = AcademySavedData.get(level);
         CruzPhase phase = data.get(player.getUUID()).cruzPhase();
+
+        // The Go/Stop briefing (and the crouch teaching in it) only starts once the player is
+        // actually standing in the staging pen — not the instant the jump course hands them off.
+        if (phase == CruzPhase.GOSTOP_STAGE && !GOSTOP_ZONE.contains(player.position())) {
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Come stand with me in the marked area "
+                    + "first — follow the glowing arrow!");
+            return;
+        }
 
         List<AcademyDialogue.DialogueLine> lines = AcademyDialogue.CRUZ_LINES.get(phase);
         AcademyManager.startOrAdvanceDialogue(player, lines, () -> {
@@ -217,7 +242,7 @@ public final class CruzRoomManager {
                 case JUMP -> tickJump(level, player, data);
                 case GOSTOP_RUN -> tickGoStopRun(level, player, data);
                 case DONE -> tickDone(level, player, data);
-                case GOSTOP_STAGE -> AcademyVisuals.setCompassTarget(player, STAGING_POS);
+                case GOSTOP_STAGE -> tickGoStopStage(level, player);
                 default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED
             }
             // DONE keeps counting as escortable, but only while the player is still physically
@@ -605,6 +630,32 @@ public final class CruzRoomManager {
                             + "§eSpacebar§7 right at its edge!",
                     "§a[Officer Cruz] §7Almost there! Keep moving with §eW§7 and hop each hurdle "
                             + "with a quick §eSpacebar§7 tap."));
+        }
+    }
+
+    /**
+     * Before the Go/Stop game actually begins: point the compass at the staging pen, and push the
+     * player back east if they try to cross the starting line before Cruz has called GO. Doesn't
+     * count as a movement mistake — the game hasn't started yet, this is just an invisible wall.
+     */
+    private static void tickGoStopStage(ServerLevel level, ServerPlayer player) {
+        AcademyVisuals.setCompassTarget(player, STAGING_POS);
+
+        if (player.getX() > GOSTOP_STARTING_LINE_X
+                || player.getZ() < GOSTOP_STARTING_LINE_MIN_Z
+                || player.getZ() > GOSTOP_STARTING_LINE_MAX_Z) {
+            return;
+        }
+
+        player.teleportTo(level, GOSTOP_STARTING_LINE_X + 0.5, player.getY(), player.getZ(),
+                Collections.emptySet(), player.getYRot(), player.getXRot(), true);
+
+        long gameTime = level.getGameTime();
+        if (gameTime - lastStartingLineNudgeTick >= STARTING_LINE_NUDGE_COOLDOWN_TICKS
+                && !AcademyManager.isDialogueActive(player.getUUID())) {
+            lastStartingLineNudgeTick = gameTime;
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Not yet! Wait for me to call §a§lGO§r§7 "
+                    + "before you cross the line.");
         }
     }
 

@@ -50,8 +50,10 @@ public final class AcademyDialogue {
             new DialogueLine("§a[Officer Cruz] §7To hop a hurdle: keep holding §eW§7 and tap the §eSpacebar§7 just before you reach it. Missed one? No problem — back up and try again!", false)
         ),
         CruzPhase.GOSTOP_STAGE, List.of(
-            new DialogueLine("§a[Officer Cruz] §fLast lesson — my favorite: knowing when to §aGO§f and when to §cSTOP§f. See the low boards in the tunnel ahead? Press and hold §eShift§f to crouch, and you'll slip right under them while you walk.", false),
-            new DialogueLine("§a[Officer Cruz] §fHere's how it works: when I call §a§lGO!§r§f, hold §eW§f and keep walking. When I call §c§lSTOP!§r§f, let go of every key and stand perfectly still. In a real emergency, stopping at the right moment keeps you safe. Ready? Let's go!", true)
+            new DialogueLine("§a[Officer Cruz] §fLast lesson — my favorite: knowing when to §aGO§f and when to §cSTOP§f. You're standing right at the starting line — don't cross it until you hear me call it!", false),
+            new DialogueLine("§a[Officer Cruz] §fSee the low boards up ahead in the tunnel? Press and hold §eShift§f to crouch down low, and you'll slip right underneath them while you keep walking — no need to stop.", false),
+            new DialogueLine("§a[Officer Cruz] §fHere's how the game works: when I call §a§lGO!§r§f, hold §eW§f and keep walking through the tunnel. When I call §c§lSTOP!§r§f, let go of every key immediately and stand perfectly still — don't take even one more step.", false),
+            new DialogueLine("§a[Officer Cruz] §fIn a real emergency, freezing the instant you're told keeps everyone safe. Ready? Wait for my call — here we go!", true)
         ),
         CruzPhase.GOSTOP_RUN, List.of(
             new DialogueLine("§a[Officer Cruz] §7Listen for my call! §aGO§7 means walk (hold §eW§7). §cSTOP§7 means let go of all the keys and freeze.", false)
