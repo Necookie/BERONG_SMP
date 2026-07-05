@@ -81,8 +81,14 @@ public final class ReyesRoomManager {
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
     private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches Cruz's/Santos's own cadence
 
-    /** Schematic-adjacent world position of the Academy's fire alarm, taught during {@code ALARM_CHECKPOINT}. */
-    public static final BlockPos ALARM_POS = new BlockPos(-143, -33, 40);
+    /**
+     * World position of the Academy's fire alarm, taught during {@code ALARM_CHECKPOINT}. The
+     * schematic already bakes one in here (verified by parsing {@code new_tut_building1.0.schem}'s
+     * raw block data: {@code berongsmp:fire_alarm[activated=false,facing=south]} at this exact
+     * spot) — {@code NewTutBuildingManager} used to also place a second one one block below this,
+     * which is what the "two fire alarms stacked on top of each other" report was.
+     */
+    public static final BlockPos ALARM_POS = new BlockPos(-143, -32, 40);
     private static final Vec3 REYES_ANCHOR = new Vec3(-172.5, -33.0, 17.5);
     /** True once a player has pressed the alarm and is expected back at Reyes; cleared on return. */
     private static final Map<UUID, Boolean> alarmRinging = new ConcurrentHashMap<>();
