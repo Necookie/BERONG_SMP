@@ -24,10 +24,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * Room 3 — Sgt. Santos's Earthquake Drill. Gated on Room 2 ({@link ReyesPhase#DONE}).
  *
  * <p>The safe-zone table row is exactly the {@code TableBlock} run the user specified:
- * {@code (-170,-33,29)} to {@code (-167,-33,29)}. This room adds zero new duck/cover/hold logic —
- * it only triggers the quake event, keeps the row highlighted, and watches
- * {@link DuckCoverHoldManager}'s existing compliance state (plus a proximity check, so holding
- * under some *other* unrelated table elsewhere doesn't count).
+ * {@code (-170,-33,29)} to {@code (-167,-33,29)}.
+ *
+ * <p><b>Detection is this room's own, not {@code DuckCoverHoldManager}'s</b> (which is still used
+ * elsewhere for the live-simulation drill): its {@code isCrouching()}-based compliance check
+ * actually <em>fails</em> a player who has genuinely crawled into the table's kneehole, because
+ * vanilla forces {@code Pose.SWIMMING} under the sub-1-block clearance and {@code isCrouching()}
+ * only returns true for {@code Pose.CROUCHING} — the exact player doing the drill correctly was
+ * the one who could never complete it. Here, "under the table" means the player's feet are
+ * literally inside one of {@link #TABLE_ROW}'s block cells ({@link #isUnderTable}), and "ducking"
+ * means the sneak key is held (or a crouch pose, for completeness) — see {@link #isDucking}. The
+ * quake never stops until both hold for {@link #HOLD_REQUIRED_TICKS} <em>consecutive</em> ticks;
+ * any tick either is false resets the countdown to zero.
  */
 public final class SantosRoomManager {
 
@@ -43,6 +51,15 @@ public final class SantosRoomManager {
     private static final int PRE_DRILL_DELAY_TICKS = 60;   // 3s from briefing-done to quake trigger
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final float QUAKE_SHAKE_INTENSITY = 1.5f;
+    /** Consecutive ticks the player must stay ducked under the table (5s). */
+    private static final int HOLD_REQUIRED_TICKS = 100;
+    /**
+     * The quake only actually starts once the player is within this XZ distance of the table row —
+     * a player who clicked Santos and then wandered off mid-briefing used to get hit by a
+     * seemingly random earthquake wherever they happened to be standing once the fixed 3s timer
+     * elapsed. Now the timer holds until they're genuinely back in Room 3 for the drill.
+     */
+    private static final double QUAKE_START_RANGE = 20.0;
     /** Capt. Morfe's anchor — points there until the player has actually started Room 4. */
     private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
     /** Center of the table row, for the compass needle — the beacon alone had no compass pairing. */
@@ -50,13 +67,12 @@ public final class SantosRoomManager {
 
     private static final Map<UUID, Long> preDrillStartTick = new ConcurrentHashMap<>();
     /**
-     * This room's own table-scoped compliance streak (ticks), separate from
-     * {@link DuckCoverHoldManager}'s global crouch+cover streak. The global streak accumulates
-     * anywhere in the world regardless of location, so reading it directly here let a player build
-     * the whole streak elsewhere and merely step within {@link #isNearTableRow}'s range for a single
-     * tick to pass instantly. This counter only ever grows on ticks where the player is genuinely
-     * near {@link #TABLE_ROW} *and* {@link DuckCoverHoldManager#isCompliant} is true that tick; any
-     * other tick resets it to zero.
+     * This room's own table-scoped hold streak (ticks), fully independent of
+     * {@link DuckCoverHoldManager}'s global crouch+cover streak (whose {@code isCompliant} both
+     * accumulates anywhere in the world AND fails a player crawled into the kneehole — see the
+     * class javadoc). Only grows on ticks where {@link #isUnderTable} and {@link #isDucking} are
+     * both true; any other tick resets it to zero, so only 5 <em>consecutive</em> seconds under
+     * Santos's table ever completes the drill.
      */
     private static final Map<UUID, Integer> tableHoldTicks = new ConcurrentHashMap<>();
 
@@ -110,6 +126,11 @@ public final class SantosRoomManager {
         AcademyVisuals.setCompassTarget(player, TABLE_ROW_CENTER);
         UUID id = player.getUUID();
         long start = preDrillStartTick.computeIfAbsent(id, k -> level.getGameTime());
+        // The drill only fires with the player actually present in Room 3 — the delay elapsing
+        // while they wandered off used to start a seemingly random earthquake wherever they were.
+        if (!player.position().closerThan(TABLE_ROW_CENTER, QUAKE_START_RANGE)) {
+            return;
+        }
         if (level.getGameTime() - start >= PRE_DRILL_DELAY_TICKS) {
             data.mutate(id, p -> p.setSantosPhase(SantosPhase.QUAKE_ACTIVE));
             preDrillStartTick.remove(id);
@@ -125,11 +146,12 @@ public final class SantosRoomManager {
         AcademyVisuals.setCompassTarget(player, TABLE_ROW_CENTER);
 
         UUID id = player.getUUID();
-        boolean nearTable = isNearTableRow(player);
+        boolean underTable = isUnderTable(player);
+        boolean ducking = isDucking(player);
 
-        if (nearTable && DuckCoverHoldManager.isCompliant(id)) {
+        if (underTable && ducking) {
             int held = tableHoldTicks.merge(id, 1, Integer::sum);
-            if (held >= DuckCoverHoldManager.TARGET_TICKS) {
+            if (held >= HOLD_REQUIRED_TICKS) {
                 tableHoldTicks.remove(id);
                 data.mutate(id, p -> {
                     p.setSantosPhase(SantosPhase.DONE);
@@ -146,11 +168,11 @@ public final class SantosRoomManager {
             // dedicated shake channel — no caption anywhere can interrupt or stop it. Only the
             // completion branch above truly ends the shaking.
             AcademyVisuals.setShake(player, QUAKE_SHAKE_INTENSITY
-                    * (1.0f - (float) held / DuckCoverHoldManager.TARGET_TICKS));
+                    * (1.0f - (float) held / HOLD_REQUIRED_TICKS));
             // Live countdown once genuinely under the table and holding — confirms the detection
             // actually fired and gives a clear sense of the 5-second requirement counting down.
             if (held % SECOND_TICKS == 0) {
-                int secondsLeft = (DuckCoverHoldManager.TARGET_TICKS - held) / SECOND_TICKS;
+                int secondsLeft = (HOLD_REQUIRED_TICKS - held) / SECOND_TICKS;
                 AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s");
             }
             return;
@@ -167,19 +189,21 @@ public final class SantosRoomManager {
                     + "the table, hold §eShift§f, and stay put for the full 5 seconds.");
         }
 
-        if (nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
-                && !AcademyManager.isDialogueActive(id)) {
-            // At the table but not crouched/covered — remind them of the missing half.
-            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Almost! Now press and hold §eShift§7 to "
-                    + "crouch under the table — and stay put!");
+        if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS != 0 || AcademyManager.isDialogueActive(id)) {
             return;
         }
-
-        if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
-                && !AcademyManager.isDialogueActive(id)) {
+        if (underTable) {
+            // Genuinely inside the kneehole but not holding sneak — the only missing half.
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7You're under the table — now press and "
+                    + "HOLD §eShift§7, and don't let go for 5 whole seconds!");
+        } else if (isNearTableRow(player)) {
+            // Beside the table but not actually underneath it — being near is NOT cover.
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Almost! Being beside the table isn't "
+                    + "cover — hold §eShift§7 and walk INTO it to crawl underneath, then stay put!");
+        } else {
             AcademyManager.sendPrompt(player, AcademyManager.pick(player,
                     "§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to walk there, then "
-                            + "press and hold §eShift§7 to crouch — and stay put!",
+                            + "press and hold §eShift§7 to crawl underneath — and stay put!",
                     "§6[Sgt. Santos] §7The table is your safe spot — hurry back under it and hold "
                             + "§eShift§7 until the shaking stops!",
                     "§6[Sgt. Santos] §7Stay low, stay covered! Under the glowing table, hold "
@@ -197,11 +221,41 @@ public final class SantosRoomManager {
     }
 
     /**
-     * True only when the player is actually at/under one of {@link #TABLE_ROW}'s cells — a
-     * 1-block XZ tolerance (matching {@code DuckCoverHoldManager.hasNearbyTable}'s own radius
-     * exactly), not the previous 3-block sphere, which let a player pass the drill just by
-     * standing somewhere nearby in the open room without ever actually taking cover under the
-     * table.
+     * True only when the player's feet are literally inside one of {@link #TABLE_ROW}'s block
+     * cells — the same cell the tabletop occupies, reachable via the crawl-under assist
+     * ({@code DuckCoverHoldManager.allowCrawlUnderTable}). This is the strict "actually under the
+     * table" check that earns countdown progress; crouching beside the table (which the previous
+     * ±1-block tolerance accepted) no longer counts.
+     */
+    private static boolean isUnderTable(ServerPlayer player) {
+        BlockPos feet = player.blockPosition();
+        for (BlockPos pos : TABLE_ROW) {
+            if (feet.getX() == pos.getX() && feet.getZ() == pos.getZ()
+                    && Math.abs(feet.getY() - pos.getY()) <= 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Whether the player is deliberately staying low. {@code isCrouching()} alone is WRONG under
+     * the table: the kneehole's sub-1-block clearance forces vanilla's {@code Pose.SWIMMING}
+     * (crawl), and {@code isCrouching()} only returns true for {@code Pose.CROUCHING} — so the old
+     * {@code DuckCoverHoldManager.isCompliant}-based gate failed exactly the player who had
+     * correctly crawled underneath. The sneak key ({@code isShiftKeyDown()}) stays true while
+     * crawling, so it's the primary signal; the pose check is kept for any edge case where the
+     * player is in a crouch pose without the key (e.g. forced by a low ceiling elsewhere).
+     */
+    private static boolean isDucking(ServerPlayer player) {
+        return player.isShiftKeyDown() || player.isCrouching();
+    }
+
+    /**
+     * Looser 1-block-tolerance proximity to the row (matching
+     * {@code DuckCoverHoldManager.hasNearbyTable}'s radius) — used only to pick the right coaching
+     * nudge ("you're beside it, crawl IN"), never to award countdown progress; that requires the
+     * strict {@link #isUnderTable}.
      */
     private static boolean isNearTableRow(ServerPlayer player) {
         BlockPos feet = player.blockPosition();
