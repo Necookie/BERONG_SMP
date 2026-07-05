@@ -159,7 +159,19 @@ public final class ReyesRoomManager {
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             AcademyProgress progress = data.get(player.getUUID());
             if (progress.cruzPhase() != CruzPhase.DONE) continue;
-            switch (progress.reyesPhase()) {
+            ReyesPhase phase = progress.reyesPhase();
+
+            // Hard guarantee against "randomly caught fire": the ONLY sanctioned way a Room-2
+            // trainee ever burns is the scripted ignite demo (igniteWindow present). Any other
+            // ignition — brushing a hazard's environmental fire, vanilla spread, splash-back — is
+            // an accident of the training props, not a lesson, and is extinguished the same tick.
+            if (phase != ReyesPhase.NOT_STARTED && phase != ReyesPhase.DONE
+                    && !igniteWindow.containsKey(player.getUUID())
+                    && player.getRemainingFireTicks() > 0) {
+                player.clearFire();
+            }
+
+            switch (phase) {
                 case PREVENTION_DEMO -> tickPreventionDemo(level, player, data);
                 case TOOL_SELECTION -> tickToolSelection(level, player, data);
                 case LIVE_FIRE_DEMO -> tickLiveFireDemo(level, player, data);
@@ -179,6 +191,13 @@ public final class ReyesRoomManager {
     private static void tickPreventionDemo(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
         int idx = currentHazard.getOrDefault(id, 0);
+
+        // No fire of any kind belongs in the prevention drill — the props are only ever set
+        // hazardous here, never ignited. Sweep the whole room once a second so nothing left over
+        // from an earlier run (or any stray ignition) can exist during this phase.
+        if (level.getGameTime() % SECOND_TICKS == 0) {
+            containRoomFire(level, null, 0);
+        }
 
         if (idx >= HAZARDS.size()) {
             currentHazard.remove(id);
@@ -409,6 +428,15 @@ public final class ReyesRoomManager {
 
         HazardStep hazard = HAZARDS.get(idx);
         pointAtHazard(level, player, hazard);
+
+        // Keep the training fire CONTROLLED: once a second, remove any vanilla fire in the room
+        // that has strayed more than a couple of blocks from the current hazard — vanilla spread
+        // would otherwise creep across the floor over the demo's duration and eventually reach
+        // wherever the player happens to be standing (the residual half of the "randomly caught
+        // fire" reports).
+        if (level.getGameTime() % SECOND_TICKS == 0) {
+            containRoomFire(level, hazard.pos(), RESIDUAL_FIRE_SWEEP_RADIUS);
+        }
 
         if (!Objects.equals(explainedHazard.get(id), idx)) {
             explainedHazard.put(id, idx);
@@ -644,6 +672,26 @@ public final class ReyesRoomManager {
             if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
                 level.setBlock(pos.immutable(), Blocks.AIR.defaultBlockState(), 3);
             }
+        }
+    }
+
+    /**
+     * Sweeps the whole Room 2 box for vanilla fire, sparing only blocks within
+     * {@code exceptRadius} of {@code exceptCenter} (pass {@code null} to spare nothing) — the
+     * periodic containment that keeps a training fire an actual training fire instead of letting
+     * vanilla spread creep across the room toward the player.
+     */
+    private static void containRoomFire(ServerLevel level, BlockPos exceptCenter, int exceptRadius) {
+        for (BlockPos pos : BlockPos.betweenClosed(ROOM_MIN, ROOM_MAX)) {
+            BlockState state = level.getBlockState(pos);
+            if (!state.is(Blocks.FIRE) && !state.is(Blocks.SOUL_FIRE)) continue;
+            if (exceptCenter != null
+                    && Math.abs(pos.getX() - exceptCenter.getX()) <= exceptRadius
+                    && Math.abs(pos.getY() - exceptCenter.getY()) <= exceptRadius
+                    && Math.abs(pos.getZ() - exceptCenter.getZ()) <= exceptRadius) {
+                continue;
+            }
+            level.setBlock(pos.immutable(), Blocks.AIR.defaultBlockState(), 3);
         }
     }
 
