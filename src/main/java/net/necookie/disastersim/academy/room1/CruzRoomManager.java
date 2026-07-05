@@ -113,11 +113,27 @@ public final class CruzRoomManager {
      * Room 1's full footprint (briefing + maze + jump + Go/Stop tunnel, with margin). Cruz must
      * never end up outside this — it's a beginner tutorial and she has to stay reachable. If she
      * somehow escapes (bad path, shove, glitch), the next escort cycle poof-recovers her.
+     *
+     * <p>Widened 6 blocks past the original briefing-room wall (X -156 → -162), verified directly
+     * against the schematic's block data: the only real wall gap between Room 1's open floor and
+     * Sgt. Reyes's walled hazard room sits at relative X=15 (world X=-162), spanning the doorway
+     * Z-range the briefing anchor already lines up with. This lets Cruz's "still escorting" check
+     * (see {@link #isEscortablePhase}/{@code CruzPhase#DONE} handling in {@link #tick}) cover the
+     * open corridor right up to that doorway threshold — she escorts the player that far, then
+     * stops the instant they actually step through into Reyes's room, instead of cutting off deep
+     * inside Room 1 the moment the Go/Stop finish line is crossed (the old boundary, which was
+     * ~17 blocks short of Reyes's room and the actual cause of her "instantly banishing" herself
+     * mid-room instead of walking the player to the door first).
      */
-    private static final AABB ROOM1_BOUNDS = new AABB(-156, -36, 23, -95, -28, 64);
+    private static final AABB ROOM1_BOUNDS = new AABB(-162, -36, 23, -95, -28, 64);
     private static final int ESCORT_MOVE_INTERVAL_TICKS = 15;
-    /** Consecutive no-progress re-issue cycles (≈3s at the 15-tick cadence) before poof-recovery. */
-    private static final int ESCORT_STUCK_CYCLES_MAX = 4;
+    /**
+     * Consecutive no-progress re-issue cycles before poof-recovery. Slightly more generous than a
+     * single briefing/maze/jump leg (≈3s) since the door hand-off leg below can be a longer walk
+     * across the open corridor — a normal walk there shouldn't spuriously trip a poof, which would
+     * look exactly like the "instant banishing" this system is meant to avoid.
+     */
+    private static final int ESCORT_STUCK_CYCLES_MAX = 6;
     /** "Made progress" = Cruz moved more than this per re-issue cycle. */
     private static final double ESCORT_PROGRESS_EPSILON_SQ = 0.25 * 0.25;
     /** Within this range of her target Cruz is considered arrived — never counted as stuck. */
@@ -175,7 +191,16 @@ public final class CruzRoomManager {
                 case GOSTOP_STAGE -> AcademyVisuals.setCompassTarget(player, STAGING_POS);
                 default -> AcademyVisuals.setCompassTarget(player, null); // NOT_STARTED
             }
-            if (escortTarget == null && isEscortablePhase(phase)) {
+            // DONE keeps counting as escortable, but only while the player is still physically
+            // inside Room 1's (now door-inclusive) footprint — she walks them right up to the
+            // doorway into Reyes's room instead of cutting the escort the instant the Go/Stop
+            // finish line is crossed, which used to happen well before the player was anywhere
+            // near actually leaving. The moment they step through the door and out of
+            // ROOM1_BOUNDS, this stops matching and updateCruzEscort's null branch sends her
+            // walking gradually back home instead.
+            boolean stillEscortable = isEscortablePhase(phase)
+                    || (phase == CruzPhase.DONE && ROOM1_BOUNDS.contains(player.position()));
+            if (escortTarget == null && stillEscortable) {
                 escortTarget = player;
             }
         }
@@ -236,6 +261,11 @@ public final class CruzRoomManager {
                 // below then poofs her to the player's side, reading as the instructor keeping pace
                 // barrier by barrier instead of being left behind at the entrance.
                 case GOSTOP_RUN -> escortTarget.position();
+                // The lesson itself is done — walk the player straight to the doorway instead of
+                // a fixed waypoint. `tick`'s stillEscortable check already stops treating them as
+                // an escort target the instant they physically step outside ROOM1_BOUNDS, so this
+                // case only ever runs while they're still inside (heading for the door).
+                case DONE -> escortTarget.position();
                 default -> null;
             };
         }
