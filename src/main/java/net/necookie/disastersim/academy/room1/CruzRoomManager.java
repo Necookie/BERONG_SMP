@@ -264,7 +264,9 @@ public final class CruzRoomManager {
         CruzPhase phase = data.get(escortTarget.getUUID()).cruzPhase();
         Vec3 target;
         if (cruz.position().distanceToSqr(escortTarget.position()) > PLAYER_TOO_FAR_DISTANCE_SQ) {
-            target = clampToRoom1Bounds(escortTarget.position());
+            // Stop about 2 blocks short of the player rather than pathing exactly onto their
+            // position — reads as "catching up to" them rather than walking through them.
+            target = clampToRoom1Bounds(nearPlayerTarget(cruz.position(), escortTarget.position()));
             long gameTime = level.getGameTime();
             if (gameTime - lastTooFarNudgeTick >= TOO_FAR_NUDGE_COOLDOWN_TICKS
                     && !AcademyManager.isDialogueActive(escortTarget.getUUID())) {
@@ -324,6 +326,21 @@ public final class CruzRoomManager {
                 Mth.clamp(pos.x, ROOM1_BOUNDS.minX, ROOM1_BOUNDS.maxX),
                 Mth.clamp(pos.y, ROOM1_BOUNDS.minY, ROOM1_BOUNDS.maxY),
                 Mth.clamp(pos.z, ROOM1_BOUNDS.minZ, ROOM1_BOUNDS.maxZ));
+    }
+
+    /** How short of the player's exact position the too-far chase target stops. */
+    private static final double CHASE_STOP_DISTANCE = 2.0;
+
+    /**
+     * A point {@link #CHASE_STOP_DISTANCE} blocks short of {@code playerPos}, on the side
+     * {@code fromPos} is already approaching from — same offset idiom as {@link #recoverCruz}, so
+     * the too-far chase reads as catching up to the player rather than walking through them.
+     */
+    private static Vec3 nearPlayerTarget(Vec3 fromPos, Vec3 playerPos) {
+        Vec3 toward = fromPos.subtract(playerPos);
+        if (toward.horizontalDistanceSqr() < 0.01) return playerPos;
+        Vec3 offset = new Vec3(toward.x, 0, toward.z).normalize().scale(CHASE_STOP_DISTANCE);
+        return playerPos.add(offset);
     }
 
     /**
