@@ -94,6 +94,11 @@ public class FireAlarmBlock extends Block {
                                             Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
+        if (player instanceof ServerPlayer sp
+                && net.necookie.disastersim.academy.room2.ReyesRoomManager.tryHandleAlarmPress(sp, pos)) {
+            return InteractionResult.SUCCESS;
+        }
+
         if (state.getValue(ACTIVATED)) {
             player.sendSystemMessage(Component.literal("§c[ALARM] Already activated!"));
             return InteractionResult.SUCCESS;

@@ -111,6 +111,7 @@ public final class NewTutBuildingManager {
             BerongSMP.LOGGER.info("New tutorial building placed at {}", POS);
             discardDuplicateCruz(level);
             placeGreenMarks(level);
+            placeFireAlarm(level);
             // Self-healing: make sure the Tool Selection Wall's 3 extinguisher frames exist and
             // are filled, even if the schematic's own copies failed to spawn for any reason.
             net.necookie.disastersim.academy.room2.ReyesRoomManager.restockExtinguisherFrames(level);
@@ -186,5 +187,19 @@ public final class NewTutBuildingManager {
             level.setBlock(pos, Blocks.LIME_CONCRETE.defaultBlockState(), 3);
         }
         BerongSMP.LOGGER.info("Placed {} lime concrete WASD marks in the Academy briefing zone", GREEN_MARK_FLOOR.size());
+    }
+
+    /**
+     * Places Sgt. Reyes's teaching-only fire alarm at
+     * {@link net.necookie.disastersim.academy.room2.ReyesRoomManager#ALARM_POS} on every boot —
+     * the schematic doesn't bake one in near Room 2, and unlike the old tutorial's alarm this one
+     * isn't gated on a {@code SimulationSession} (see {@code FireAlarmBlock}'s Academy hook).
+     * Permanent per-placement fixup like {@link #placeGreenMarks}, not a one-time migration.
+     */
+    private static void placeFireAlarm(ServerLevel level) {
+        BlockPos pos = net.necookie.disastersim.academy.room2.ReyesRoomManager.ALARM_POS;
+        level.setBlock(pos, BerongSMP.FIRE_ALARM_BLOCK.get().defaultBlockState()
+                .setValue(net.necookie.disastersim.block.FireAlarmBlock.FACING, net.minecraft.core.Direction.SOUTH), 3);
+        BerongSMP.LOGGER.info("Placed Academy fire alarm at {}", pos);
     }
 }

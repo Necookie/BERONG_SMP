@@ -23,6 +23,8 @@ import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.block.FireAlarmBlock;
+import net.minecraft.sounds.SoundSource;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.item.AbstractExtinguisherItem;
 import net.necookie.disastersim.item.CO2ExtinguisherItem;
@@ -78,6 +80,12 @@ public final class ReyesRoomManager {
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
 
+    /** Schematic-adjacent world position of the Academy's fire alarm, taught during {@code ALARM_CHECKPOINT}. */
+    public static final BlockPos ALARM_POS = new BlockPos(-143, -33, 40);
+    private static final Vec3 REYES_ANCHOR = new Vec3(-172.5, -33.0, 17.5);
+    /** True once a player has pressed the alarm and is expected back at Reyes; cleared on return. */
+    private static final Map<UUID, Boolean> alarmRinging = new ConcurrentHashMap<>();
+
     /**
      * Per-player "was this position an active hazard last tick" snapshot, keyed by player UUID
      * first so two concurrent Room-2 players don't corrupt each other's hazardous→safe edge
@@ -105,14 +113,28 @@ public final class ReyesRoomManager {
         }
 
         ReyesPhase phase = progress.reyesPhase();
+        UUID id = player.getUUID();
+
+        // Returning to Reyes after the alarm is already ringing is a special transition, not a
+        // plain re-click of the current phase's dialogue: it stops the alarm and moves straight
+        // into the evacuation briefing.
+        if (phase == ReyesPhase.ALARM_CHECKPOINT && Boolean.TRUE.equals(alarmRinging.get(id))) {
+            alarmRinging.remove(id);
+            stopAlarm(level);
+            data.mutate(id, p -> p.setReyesPhase(ReyesPhase.EVACUATION_BRIEF));
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_LINES.get(ReyesPhase.EVACUATION_BRIEF),
+                    () -> finishRoom(player, data));
+            return;
+        }
+
         List<AcademyDialogue.DialogueLine> lines = AcademyDialogue.REYES_LINES.get(phase);
         AcademyManager.startOrAdvanceDialogue(player, lines, () -> {
             ReyesPhase next = switch (phase) {
-                case NOT_STARTED -> ReyesPhase.TOOL_SELECTION;
-                default -> phase; // condition-gated, not dialogue-gated
+                case NOT_STARTED -> ReyesPhase.PREVENTION_DEMO;
+                default -> phase; // condition-/tick-gated, or handled by the branch above
             };
             if (next != phase) {
-                data.mutate(player.getUUID(), p -> p.setReyesPhase(next));
+                data.mutate(id, p -> p.setReyesPhase(next));
             }
         });
     }
@@ -123,11 +145,110 @@ public final class ReyesRoomManager {
             AcademyProgress progress = data.get(player.getUUID());
             if (progress.cruzPhase() != CruzPhase.DONE) continue;
             switch (progress.reyesPhase()) {
+                case PREVENTION_DEMO -> tickPreventionDemo(level, player, data);
                 case TOOL_SELECTION -> tickToolSelection(level, player, data);
                 case LIVE_FIRE_DEMO -> tickLiveFireDemo(level, player, data);
+                case ALARM_CHECKPOINT -> tickAlarmCheckpoint(player);
                 case DONE -> tickDone(level, player, data);
                 default -> { }
             }
+        }
+    }
+
+    /**
+     * Bare-hand right-click "prevention" drill on the same 3 hazard props LIVE_FIRE_DEMO later
+     * ignites for real — here they're merely set hazardous (never actually catch fire) and the
+     * player fixes each one with {@link net.necookie.disastersim.block.hazard.HazardBlock}'s
+     * prevention interaction before moving to the next.
+     */
+    private static void tickPreventionDemo(ServerLevel level, ServerPlayer player, AcademySavedData data) {
+        UUID id = player.getUUID();
+        int idx = currentHazard.getOrDefault(id, 0);
+
+        if (idx >= HAZARDS.size()) {
+            currentHazard.remove(id);
+            explainedHazard.remove(id);
+            lastActive.remove(id);
+            data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
+            return;
+        }
+
+        HazardStep hazard = HAZARDS.get(idx);
+        if (!Objects.equals(explainedHazard.get(id), idx)) {
+            explainedHazard.put(id, idx);
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_PREVENTION_LINES.get(idx),
+                    () -> armPreventionHazard(level, id, hazard));
+            return;
+        }
+
+        if (checkAndHandlePrevention(player, hazard)) {
+            currentHazard.put(id, idx + 1);
+        }
+    }
+
+    private static void armPreventionHazard(ServerLevel level, UUID playerId, HazardStep hazard) {
+        level.setBlock(hazard.pos(), hazard.blockState().get(), 3);
+        HazardManager.activate(level, null, hazard.pos());
+        lastActive.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(hazard.pos(), true);
+    }
+
+    /** Returns true once the player's bare-hand right-click has reset the prop back to safe. */
+    private static boolean checkAndHandlePrevention(ServerPlayer player, HazardStep hazard) {
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos pos = hazard.pos();
+        Map<BlockPos, Boolean> mine = lastActive.computeIfAbsent(player.getUUID(), k -> new ConcurrentHashMap<>());
+        boolean activeNow = isActive(level, pos);
+        boolean wasActive = mine.getOrDefault(pos, false);
+        mine.put(pos, activeNow);
+        if (!wasActive || activeNow) return false;
+
+        AcademyManager.sendPrompt(player, AcademyManager.pick(player,
+                "§6[Sgt. Reyes] §aNicely done — caught before it ever became a fire!",
+                "§6[Sgt. Reyes] §aThat's prevention in action. Well spotted!"));
+        return true;
+    }
+
+    /** Points the compass at the alarm until pressed, then back at Reyes once it's ringing. */
+    private static void tickAlarmCheckpoint(ServerPlayer player) {
+        if (Boolean.TRUE.equals(alarmRinging.get(player.getUUID()))) {
+            AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
+        } else {
+            AcademyVisuals.setCompassTarget(player,
+                    new Vec3(ALARM_POS.getX() + 0.5, ALARM_POS.getY(), ALARM_POS.getZ() + 0.5));
+        }
+    }
+
+    /**
+     * Called from {@link FireAlarmBlock#useWithoutItem} so the Academy's own alarm checkpoint can
+     * hook the shared block without touching its old-tutorial {@code SimulationSession} behavior
+     * at all. Returns false (falls through to the block's normal behavior) unless this exact
+     * player is at this exact alarm during {@code ALARM_CHECKPOINT}.
+     */
+    public static boolean tryHandleAlarmPress(ServerPlayer player, BlockPos pos) {
+        if (!pos.equals(ALARM_POS)) return false;
+        ServerLevel level = (ServerLevel) player.level();
+        AcademySavedData data = AcademySavedData.get(level);
+        UUID id = player.getUUID();
+        if (data.get(id).reyesPhase() != ReyesPhase.ALARM_CHECKPOINT) return false;
+        if (Boolean.TRUE.equals(alarmRinging.get(id))) return true; // already ringing, absorb the click
+
+        alarmRinging.put(id, true);
+        BlockState state = level.getBlockState(pos);
+        if (state.getBlock() instanceof FireAlarmBlock && state.hasProperty(FireAlarmBlock.ACTIVATED)) {
+            level.setBlock(pos, state.setValue(FireAlarmBlock.ACTIVATED, true), 3);
+            level.playSound(null, pos, net.necookie.disastersim.BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
+            level.scheduleTick(pos, state.getBlock(), 25);
+        }
+        AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fGreat — the alarm's ringing! Now head back to me "
+                + "so I can walk you through what happens next.");
+        return true;
+    }
+
+    private static void stopAlarm(ServerLevel level) {
+        BlockState state = level.getBlockState(ALARM_POS);
+        if (state.getBlock() instanceof FireAlarmBlock && state.hasProperty(FireAlarmBlock.ACTIVATED)) {
+            level.setBlock(ALARM_POS, state.setValue(FireAlarmBlock.ACTIVATED, false), 3);
         }
     }
 
@@ -275,7 +396,7 @@ public final class ReyesRoomManager {
             igniteWindow.remove(id);
             AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aFlames out — beautifully done! §fYou just "
                     + "learned how to keep yourself safe. Take a breath.");
-            finishRoom(player, data);
+            advanceToAlarmCheckpoint(player, data);
             return;
         }
 
@@ -285,22 +406,29 @@ public final class ReyesRoomManager {
             // Safety-cap timeout — they never rolled. Clear it and move on anyway (forgiving).
             player.clearFire();
             igniteWindow.remove(id);
-            finishRoom(player, data);
+            advanceToAlarmCheckpoint(player, data);
         } else {
             igniteWindow.put(id, remaining - 1);
         }
     }
 
-    private static void finishRoom(ServerPlayer player, AcademySavedData data) {
+    /** LIVE_FIRE_DEMO is over — clean up its props/fire and move on to the alarm checkpoint. */
+    private static void advanceToAlarmCheckpoint(ServerPlayer player, AcademySavedData data) {
         UUID id = player.getUUID();
         cleanupHazardProps((ServerLevel) player.level());
-        data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
         currentHazard.remove(id);
         explainedHazard.remove(id);
         lastActive.remove(id);
-        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fThree fires, three perfect matches — and you even "
-                + "put yourself out safely. I'm proud of you! Follow the glowing arrow to §6Sgt. Santos§f "
-                + "for the Earthquake Drill.");
+        data.mutate(id, p -> p.setReyesPhase(ReyesPhase.ALARM_CHECKPOINT));
+    }
+
+    /** The room's true end, run once EVACUATION_BRIEF's dialogue finishes. */
+    private static void finishRoom(ServerPlayer player, AcademySavedData data) {
+        UUID id = player.getUUID();
+        alarmRinging.remove(id);
+        data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
+        AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fFollow the glowing arrow to §6Sgt. Santos§f "
+                + "for the Earthquake Drill whenever you're ready.");
     }
 
     /** Room 2's box (with ceiling headroom) — the sweep area for leftover vanilla fire. */
@@ -382,9 +510,15 @@ public final class ReyesRoomManager {
 
         ServerLevel level = (ServerLevel) player.level();
         AcademySavedData data = AcademySavedData.get(level);
-        if (data.get(id).reyesPhase() == ReyesPhase.LIVE_FIRE_DEMO) {
+        ReyesPhase phase = data.get(id).reyesPhase();
+        if (phase == ReyesPhase.LIVE_FIRE_DEMO) {
             cleanupHazardProps(level);
             data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
+        } else if (phase == ReyesPhase.PREVENTION_DEMO) {
+            cleanupHazardProps(level);
+            data.mutate(id, p -> p.setReyesPhase(ReyesPhase.NOT_STARTED));
+        } else if (phase == ReyesPhase.ALARM_CHECKPOINT && alarmRinging.remove(id) != null) {
+            stopAlarm(level);
         }
     }
 }

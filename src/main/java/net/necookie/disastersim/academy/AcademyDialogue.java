@@ -65,9 +65,12 @@ public final class AcademyDialogue {
 
     public static final Map<ReyesPhase, List<DialogueLine>> REYES_LINES = Map.of(
         ReyesPhase.NOT_STARTED, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fHello, trainee — great to meet you! I'm Sergeant Reyes. Today you'll learn something that saves real lives: matching the right fire extinguisher to the right fire.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fLook at the wall — three extinguishers. §cRED (ABC)§f is for ordinary things like paper and wood. §aGREEN (CO2)§f is for electrical fires — never water on those! §eYELLOW (wet chemical)§f is for kitchen oil and grease fires.", false),
-            new DialogueLine("§6[Sgt. Reyes] §fLet's get you equipped: walk up to each extinguisher and hit it with your §eleft mouse button§f — it pops off the wall, then walk over it to pick it up. Grab all three and we'll practice on some safe training fires!", true)
+            new DialogueLine("§6[Sgt. Reyes] §fHello, trainee — great to meet you! I'm Sergeant Reyes. Today's lesson has three parts, in this order: §aprevention§f first, §eintervention§f second, and §cevacuation§f last — because §a§lpreventing a fire beats fighting one, every single time§r§f.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLook around this room — a few everyday hazards, just like you'd see in a real building. A frayed cord, a stack of forgotten boxes, an unattended pan. Most fires never have to happen at all if someone catches them early.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fLet's practice that first — spotting a hazard §ebefore§f it becomes a fire, and fixing it with nothing but your own two hands. Follow me!", true)
+        ),
+        ReyesPhase.PREVENTION_DEMO, List.of(
+            new DialogueLine("§6[Sgt. Reyes] §7Right-click a glowing hazard to fix it — that's prevention. Work through all three before they get away from you!", false)
         ),
         ReyesPhase.TOOL_SELECTION, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7Walk right up to each extinguisher and click it with your §eleft mouse button§7 — it pops off the wall, then step onto it to pick it up. You need all three!", false)
@@ -75,24 +78,54 @@ public final class AcademyDialogue {
         ReyesPhase.LIVE_FIRE_DEMO, List.of(
             new DialogueLine("§6[Sgt. Reyes] §7To use an extinguisher: press its §enumber key (1-9)§7 to hold it, aim at the §ebase§7 of the fire, and §ehold the right mouse button§7. Match the color to what's burning — you can do it!", false)
         ),
+        ReyesPhase.ALARM_CHECKPOINT, List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fWell fought — but here's the one step people forget: the §cmoment§f a fire starts, before anything else, §c§lring the alarm§r§f. It warns everyone else in the building, even if you already put the fire out.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fFollow the glowing arrow to the fire alarm and press it. Once it's ringing, come straight back to me.", false)
+        ),
+        ReyesPhase.EVACUATION_BRIEF, List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fPerfect — alarm's stopped, and everyone's been warned. Now for the very last step, and it's the simplest: once that alarm is ringing, §cyou evacuate§f. Don't grab your things, don't go back for anything — walk calmly to the nearest exit.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fPrevention, intervention, evacuation — in that order, every time. You've got all three now. I'm proud of you, trainee!", true)
+        ),
         ReyesPhase.DONE, List.of(
             new DialogueLine("§6[Sgt. Reyes] §fThree fires, three perfect matches — and you even put yourself out safely. I'm proud of you! Follow the glowing arrow to §6Sgt. Santos§f for the Earthquake Drill.", false)
         )
     );
 
     /**
-     * Per-hazard explanation lines for Sgt. Reyes's sequential Room 2 teaching — index 0 = Class A,
-     * 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s fixed order.
-     * Each explains what's on fire, which extinguisher, and exactly how to use it, before that
-     * hazard ignites (the ignition is triggered by this sequence's completion, not a separate click).
+     * Per-hazard "prevention" explanations for {@code ReyesPhase#PREVENTION_DEMO} — index 0 = Class
+     * A (archive boxes), 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s
+     * fixed order. Each explains the everyday habit that stops the hazard from ever igniting; the
+     * player then bare-hand right-clicks the (merely hazardous, not yet on fire) prop to fix it.
+     */
+    public static final List<List<DialogueLine>> REYES_PREVENTION_LINES = List.of(
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fSee that stack of boxes starting to spark and smoke? Loose paper piled near anything warm is an easy Class A fire waiting to happen.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fRight-click it now — pretend you're clearing it away from the heat source and stacking it properly. That's it. That's the whole fix.", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fThat computer's sparking — a damaged cord or an overloaded outlet, left plugged in and unwatched.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fRight-click it — you're unplugging it and setting it aside for a real repair. Never wait on a sparking cord.", true)
+        ),
+        List.of(
+            new DialogueLine("§6[Sgt. Reyes] §fAnd that pan — oil left heating with nobody watching it. Kitchen fires start this way more than almost anything else.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fRight-click it — you're pulling it off the heat before it ever catches. Never leave hot oil unattended, even for a minute.", true)
+        )
+    );
+
+    /**
+     * Per-hazard explanation lines for Sgt. Reyes's sequential Room 2 intervention teaching — index
+     * 0 = Class A, 1 = electrical, 2 = kitchen, matching {@code room2.ReyesRoomManager.HAZARDS}'s
+     * fixed order. Each explains what's on fire, which extinguisher, and exactly how to use it,
+     * before that hazard ignites (the ignition is triggered by this sequence's completion, not a
+     * separate click).
      */
     public static final List<List<DialogueLine>> REYES_HAZARD_LINES = List.of(
         List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fFirst practice fire — that stack of paper boxes! Paper and cardboard are \"Class A\": ordinary materials.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fSometimes prevention doesn't catch it in time — like now. That stack of paper boxes just caught fire! Paper and cardboard are \"Class A\": ordinary materials.", false),
             new DialogueLine("§6[Sgt. Reyes] §fPress your §cRED ABC extinguisher§f's number key to hold it, walk close, aim at the §ebase§f of the fire, and §ehold the right mouse button§f. Sweep side to side!", true)
         ),
         List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fNext — that computer is sparking! That's an electrical fire, \"Class C\".", false),
+            new DialogueLine("§6[Sgt. Reyes] §fNext — that computer is sparking and now it's alight! That's an electrical fire, \"Class C\".", false),
             new DialogueLine("§6[Sgt. Reyes] §cNever use water or foam on electrical fires§f — electricity can travel back to you! Hold your §aGREEN CO2 extinguisher§f, get close, and §ehold the right mouse button§f to put it out.", true)
         ),
         List.of(
