@@ -194,6 +194,15 @@ public final class HazardManager {
             return true;
         }
         if (!isHazardCapable(state)) return false;
+        if (!isHazardous(state)) {
+            // Skipping straight to failure from the normal state (as Reyes's scripted hazard
+            // demos always do — they place a prop at its default state and force-fail it
+            // immediately, never going through activate() first) used to leave HAZARDOUS=false
+            // forever: triggerFailure only ever sets ON_FIRE, so isHazardous()/defuse() never
+            // recognized the prop as hazardous and an extinguisher spray silently did nothing.
+            level.setBlock(pos, state.setValue(HazardBlock.HAZARDOUS, true), 3);
+            state = level.getBlockState(pos);
+        }
         triggerFailure(level, session, pos, state, notifyPlayer);
         if (session != null) session.getHazardTimers().remove(pos);
         return true;
