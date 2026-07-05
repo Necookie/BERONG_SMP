@@ -175,7 +175,18 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   more than 14 blocks from Cruz's current position, `updateCruzEscort` abandons the phase's
   waypoint for that re-issue and walks straight toward the player instead (`clampToRoom1Bounds`
   keeps the chase target inside `ROOM1_BOUNDS` so it can never pull her outside the building),
-  resuming the normal waypoint once they're close again. **Faster idle look (2026-07-05)**:
+  resuming the normal waypoint once they're close again. **Escort-through-the-door hand-off
+  (2026-07-05)**: `CruzPhase.DONE` used to immediately drop the player from escort selection the
+  instant the Go/Stop finish line was crossed — well inside Room 1 — sending Cruz into
+  `tickReturnHome` before the player had gone anywhere near actually leaving (read by the user as
+  her "instantly banishing" herself). Parsed `new_tut_building1.0.schem`'s raw block data directly
+  to find the real wall gap into Sgt. Reyes's room (world X=-162, verified — not guessed) and
+  widened `ROOM1_BOUNDS` to that threshold; `DONE` now keeps counting as escortable (targeting the
+  player's live position, same idiom as `GOSTOP_RUN`) for as long as the player is still physically
+  inside that footprint, so Cruz walks them right up to the doorway before the normal gradual
+  `tickReturnHome` walk-back takes over the instant they actually step through. `ESCORT_STUCK_
+  CYCLES_MAX` bumped 4→6 so a normal walk across the wider corridor doesn't spuriously trip the
+  stuck-recovery poof. **Faster idle look (2026-07-05)**:
   `CustomNpcEntity.updateGaze` now turns her head/body noticeably faster whenever she isn't
   escorting (`HEAD_TURN_SPEED_IDLE`/`BODY_TURN_SPEED_IDLE`, applies to every `CustomNpcEntity`, not
   just Cruz) — a stationary NPC reacts to the player right away instead of the slower ease used
@@ -216,6 +227,13 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
   **prevention → intervention → alarm → evacuation** — via `ReyesPhase`:
   `NOT_STARTED → PREVENTION_DEMO → TOOL_SELECTION → LIVE_FIRE_DEMO → ALARM_CHECKPOINT →
   EVACUATION_BRIEF → DONE`.
+  - **Sync fix (2026-07-05):** `armPreventionHazard`/`igniteHazard` used to only run as the
+    explanation dialogue's `onComplete` callback — meaning the prop didn't exist in the world until
+    the full multi-line explanation finished playing several seconds later, so the player watched
+    Reyes narrate a fire that wasn't there yet. Both now arm/ignite the prop **synchronously**, the
+    instant a hazard's turn begins, before `forceStartDialogue` even starts narrating it;
+    `checkAndHandlePrevention`/`checkAndHandleDefuse` were already tick-driven independent of
+    dialogue completion, so this was a pure reordering fix, not a new mechanic.
   - `PREVENTION_DEMO`: the same 3 demo-hazard positions used later (`ReyesRoomManager.HAZARDS`:
     Class A archive boxes → electrical computer → kitchen grease pan) are set merely
     `HAZARDOUS=true` via `HazardManager.activate` (never actually ignited). Each hazard's turn
@@ -227,10 +245,10 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     frames) → `LIVE_FIRE_DEMO`, the "intervention" phase, taught **sequentially** one hazard at a
     time in the same fixed order. Entering a hazard's turn plays its
     `AcademyDialogue.REYES_HAZARD_LINES[idx]` explanation (what's burning, which extinguisher, why)
-    through the shared dialogue sequencer; only once that finishes does `igniteHazard` actually call
-    `HazardManager.forceFailure(level, null, pos, null)` (the same session-nullable entry point
-    `HazardWandItem` uses — this now also flips the prop's new `ON_FIRE` state true, per the Hazard
-    Prop 3-State Log). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
+    through the shared dialogue sequencer, alongside the now-already-armed prop; `igniteHazard`
+    calls `HazardManager.forceFailure(level, null, pos, null)` (the same session-nullable entry
+    point `HazardWandItem` uses — this now also flips the prop's new `ON_FIRE` state true, per the
+    Hazard Prop 3-State Log). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
     re-ignites the same prop immediately, so the player must get it right before the sequence
     advances (edge detection is per-player: `lastActive` is `Map<UUID, Map<BlockPos, Boolean>>` so
     two concurrent Room-2 players don't corrupt each other). After all 3, the scripted ignite-demo
@@ -252,6 +270,12 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
   - `EVACUATION_BRIEF`: a short final "once that alarm rings, you evacuate — don't go back for
     anything" briefing; its completion (`finishRoom`) is the room's true end → `DONE`, pointing at
     Sgt. Santos.
+  **Nav-aid parity (2026-07-05):** every phase now pairs `AcademyVisuals.highlightBlocks`'s green
+  beacon with `setCompassTarget`'s needle (the same pairing Room 1 already used for its waypoints;
+  previously only `ALARM_CHECKPOINT` had a compass, and it had no beacon) — `TOOL_SELECTION` points
+  at the next not-yet-collected extinguisher frame (`nextUncollectedFrame`), `PREVENTION_DEMO`/
+  `LIVE_FIRE_DEMO` point at the current hazard the instant it's armed (`pointAtHazard`), and
+  `ALARM_CHECKPOINT` now beacons the alarm itself, not just the compass.
   **Prop cleanup** (`cleanupHazardProps`): the 3 code-spawned props + any leftover vanilla fire in
   Room 2's box are removed when `LIVE_FIRE_DEMO` finishes, on a mid-demo logout/death (which also
   rolls the phase back to a clean re-entry point — `TOOL_SELECTION` from `LIVE_FIRE_DEMO`,
@@ -265,7 +289,9 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
 Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
   TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
   a per-block wireframe adaptation of AssemblyZone.spawnBorderParticles's particle-loop idiom —
-  there's no glow/highlight system elsewhere in the mod). After a short delay, triggers the quake
+  there's no glow/highlight system elsewhere in the mod) and, since 2026-07-05, also points the
+  compass at `TABLE_ROW_CENTER` (`setCompassTarget` — previously beacon-only, unlike every other
+  guided objective in the Academy). After a short delay, triggers the quake
   (own shake-intensity caption, same CameraShake mechanism TutorialHud already uses) → QUAKE_ACTIVE
   reads compliance from a **room-local, table-scoped streak** (`SantosRoomManager.tableHoldTicks`)
   instead of `DuckCoverHoldManager.ticksHeld` directly: the latter is a *global* crouch+cover
