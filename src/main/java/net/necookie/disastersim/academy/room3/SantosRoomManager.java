@@ -42,7 +42,6 @@ public final class SantosRoomManager {
     private static final int PRE_DRILL_DELAY_TICKS = 60;   // 3s from briefing-done to quake trigger
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final float QUAKE_SHAKE_INTENSITY = 1.5f;
-    private static final double NEAR_TABLE_RANGE_SQ = 3.0 * 3.0;
     /** Capt. Morfe's anchor — points there until the player has actually started Room 4. */
     private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
     /** Center of the table row, for the compass needle — the beacon alone had no compass pairing. */
@@ -53,7 +52,7 @@ public final class SantosRoomManager {
      * This room's own table-scoped compliance streak (ticks), separate from
      * {@link DuckCoverHoldManager}'s global crouch+cover streak. The global streak accumulates
      * anywhere in the world regardless of location, so reading it directly here let a player build
-     * the whole streak elsewhere and merely step within {@link #NEAR_TABLE_RANGE_SQ} for a single
+     * the whole streak elsewhere and merely step within {@link #isNearTableRow}'s range for a single
      * tick to pass instantly. This counter only ever grows on ticks where the player is genuinely
      * near {@link #TABLE_ROW} *and* {@link DuckCoverHoldManager#isCompliant} is true that tick; any
      * other tick resets it to zero.
@@ -164,9 +163,19 @@ public final class SantosRoomManager {
         AcademyVisuals.setCompassTarget(player, MORFE_ANCHOR);
     }
 
+    /**
+     * True only when the player is actually at/under one of {@link #TABLE_ROW}'s cells — a
+     * 1-block XZ tolerance (matching {@code DuckCoverHoldManager.hasNearbyTable}'s own radius
+     * exactly), not the previous 3-block sphere, which let a player pass the drill just by
+     * standing somewhere nearby in the open room without ever actually taking cover under the
+     * table.
+     */
     private static boolean isNearTableRow(ServerPlayer player) {
+        BlockPos feet = player.blockPosition();
         for (BlockPos pos : TABLE_ROW) {
-            if (player.position().distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5) <= NEAR_TABLE_RANGE_SQ) {
+            if (Math.abs(feet.getX() - pos.getX()) <= 1
+                    && Math.abs(feet.getZ() - pos.getZ()) <= 1
+                    && Math.abs(feet.getY() - pos.getY()) <= 1) {
                 return true;
             }
         }
