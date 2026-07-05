@@ -144,8 +144,12 @@ public final class CruzRoomManager {
      * toward the lesson instead of leaving them to wander off unsupervised. Resumes the normal
      * waypoint target on the next re-issue once they're close again. Always bounds-clamped to
      * {@link #ROOM1_BOUNDS} so she never leaves the building chasing someone through a wall gap.
+     *
+     * <p>Halved from the original 14 blocks (2026-07-05) — she reacts to a much smaller wander
+     * now, since 14 blocks felt unresponsive in practice (by the time she reacted, the player was
+     * already most of the way across a zone).
      */
-    private static final double PLAYER_TOO_FAR_DISTANCE_SQ = 14.0 * 14.0;
+    private static final double PLAYER_TOO_FAR_DISTANCE_SQ = 7.0 * 7.0;
 
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
@@ -607,9 +611,16 @@ public final class CruzRoomManager {
         if (player.getX() <= GOSTOP_FINISH_X) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.DONE));
             goStopStates.remove(id);
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §fYou did it! You can look, walk, jump, crouch, "
-                    + "and stop on command — that's everything you need. Now follow the glowing arrow to "
-                    + "§6Sgt. Reyes§f for the Fire Safety Drill. She's friendly, I promise!");
+            // Make sure she's actually standing right beside the player for this beat, rather than
+            // wherever the last 15-tick escort re-issue happened to leave her — a snap-to-side poof
+            // if she isn't already close (the same idiom recoverCruz already uses elsewhere), then
+            // the "you did it, go find Reyes" line delivered as a real spoken Cruz line through the
+            // dialogue sequencer instead of a bare caption.
+            CustomNpcEntity cruz = findCruz(level);
+            if (cruz != null && cruz.position().distanceToSqr(player.position()) > ESCORT_ARRIVED_RANGE_SQ) {
+                recoverCruz(level, cruz, player);
+            }
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.CRUZ_LINES.get(CruzPhase.DONE), () -> {});
         }
     }
 
