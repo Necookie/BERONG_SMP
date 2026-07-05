@@ -141,15 +141,36 @@ public final class SantosRoomManager {
                 return;
             }
             // Live countdown once genuinely under the table and holding — confirms the detection
-            // actually fired and gives a clear sense of the 5-second requirement counting down,
-            // instead of silently accumulating with no feedback until it suddenly completes.
+            // actually fired and gives a clear sense of the 5-second requirement counting down.
+            // The shake intensity FADES with progress (mirroring the old tutorial's QUAKE_HOLDON,
+            // 1.5 → 0 across the hold) instead of being zeroed outright: sending 0f here was the
+            // bug that made the earthquake visually stop the instant the player started holding,
+            // seconds before the drill was actually complete. Only the completion message above
+            // truly ends the shaking.
             if (held % SECOND_TICKS == 0) {
                 int secondsLeft = (DuckCoverHoldManager.TARGET_TICKS - held) / SECOND_TICKS;
-                AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s", 0f);
+                float fading = QUAKE_SHAKE_INTENSITY
+                        * (1.0f - (float) held / DuckCoverHoldManager.TARGET_TICKS);
+                AcademyManager.sendPrompt(player, "§a✔ Under cover — hold there... §f" + secondsLeft + "s", fading);
             }
             return;
         }
-        tableHoldTicks.remove(id);
+        // Cover broken (or never established): reset the hold and put the shaking back at full
+        // strength — breaking cover mid-hold restarts the 5 seconds, exactly like the old
+        // tutorial's QUAKE_HOLDON break-cover reset.
+        if (tableHoldTicks.remove(id) != null) {
+            AcademyManager.sendPrompt(player, "§c✗ You left cover — get back under the table and hold on!",
+                    QUAKE_SHAKE_INTENSITY);
+        }
+
+        if (nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
+                && !AcademyManager.isDialogueActive(id)) {
+            // At the table but not crouched/covered — remind them of the missing half, keeping the
+            // quake shaking at full strength the whole time.
+            AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §7Almost! Now press and hold §eShift§7 to "
+                    + "crouch under the table — and stay put!", QUAKE_SHAKE_INTENSITY);
+            return;
+        }
 
         if (!nearTable && level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                 && !AcademyManager.isDialogueActive(id)) {
