@@ -79,6 +79,7 @@ public final class ReyesRoomManager {
     private static final double NEAR_RANGE_SQ = 6.0 * 6.0;
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
     private static final int FIRE_REFRESH_TICKS = 20; // 1s buffer kept topped up until they roll
+    private static final int HIGHLIGHT_INTERVAL_TICKS = 5; // matches Cruz's/Santos's own cadence
 
     /** Schematic-adjacent world position of the Academy's fire alarm, taught during {@code ALARM_CHECKPOINT}. */
     public static final BlockPos ALARM_POS = new BlockPos(-143, -33, 40);
@@ -148,7 +149,7 @@ public final class ReyesRoomManager {
                 case PREVENTION_DEMO -> tickPreventionDemo(level, player, data);
                 case TOOL_SELECTION -> tickToolSelection(level, player, data);
                 case LIVE_FIRE_DEMO -> tickLiveFireDemo(level, player, data);
-                case ALARM_CHECKPOINT -> tickAlarmCheckpoint(player);
+                case ALARM_CHECKPOINT -> tickAlarmCheckpoint(level, player);
                 case DONE -> tickDone(level, player, data);
                 default -> { }
             }
@@ -169,15 +170,23 @@ public final class ReyesRoomManager {
             currentHazard.remove(id);
             explainedHazard.remove(id);
             lastActive.remove(id);
+            AcademyVisuals.setCompassTarget(player, null);
             data.mutate(id, p -> p.setReyesPhase(ReyesPhase.TOOL_SELECTION));
             return;
         }
 
         HazardStep hazard = HAZARDS.get(idx);
+        pointAtHazard(level, player, hazard);
+
         if (!Objects.equals(explainedHazard.get(id), idx)) {
             explainedHazard.put(id, idx);
-            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_PREVENTION_LINES.get(idx),
-                    () -> armPreventionHazard(level, id, hazard));
+            // Arm the prop FIRST, synchronously, then narrate it — the prop must already be
+            // visible and hazardous the instant Reyes starts describing it, not several seconds
+            // later once the explanation happens to finish. onComplete is a no-op here since
+            // checkAndHandlePrevention already runs every tick once explainedHazard is marked,
+            // independent of whether the dialogue itself has finished playing.
+            armPreventionHazard(level, id, hazard);
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_PREVENTION_LINES.get(idx), () -> {});
             return;
         }
 
@@ -190,6 +199,15 @@ public final class ReyesRoomManager {
         level.setBlock(hazard.pos(), hazard.blockState().get(), 3);
         HazardManager.activate(level, null, hazard.pos());
         lastActive.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).put(hazard.pos(), true);
+    }
+
+    /** Beacon + compass pointed at a hazard's position, throttled to the shared highlight cadence. */
+    private static void pointAtHazard(ServerLevel level, ServerPlayer player, HazardStep hazard) {
+        if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+            AcademyVisuals.highlightBlocks(level, List.of(hazard.pos()));
+        }
+        BlockPos pos = hazard.pos();
+        AcademyVisuals.setCompassTarget(player, new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
     }
 
     /** Returns true once the player's bare-hand right-click has reset the prop back to safe. */
@@ -208,11 +226,14 @@ public final class ReyesRoomManager {
         return true;
     }
 
-    /** Points the compass at the alarm until pressed, then back at Reyes once it's ringing. */
-    private static void tickAlarmCheckpoint(ServerPlayer player) {
+    /** Beacon + compass at the alarm until pressed, then compass back at Reyes once it's ringing. */
+    private static void tickAlarmCheckpoint(ServerLevel level, ServerPlayer player) {
         if (Boolean.TRUE.equals(alarmRinging.get(player.getUUID()))) {
             AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
         } else {
+            if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+                AcademyVisuals.highlightBlocks(level, List.of(ALARM_POS));
+            }
             AcademyVisuals.setCompassTarget(player,
                     new Vec3(ALARM_POS.getX() + 0.5, ALARM_POS.getY(), ALARM_POS.getZ() + 0.5));
         }
@@ -264,7 +285,14 @@ public final class ReyesRoomManager {
     }
 
     private static void tickToolSelection(ServerLevel level, ServerPlayer player, AcademySavedData data) {
-        if (!hasAllExtinguishers(player)) {
+        FrameSpec nextFrame = nextUncollectedFrame(player);
+        if (nextFrame != null) {
+            if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+                AcademyVisuals.highlightBlocks(level, List.of(nextFrame.pos()));
+            }
+            BlockPos pos = nextFrame.pos();
+            AcademyVisuals.setCompassTarget(player, new Vec3(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
+
             if (level.getGameTime() % IDLE_NUDGE_INTERVAL_TICKS == 0
                     && !AcademyManager.isDialogueActive(player.getUUID())) {
                 AcademyManager.sendPrompt(player, AcademyManager.pick(player,
@@ -278,6 +306,7 @@ public final class ReyesRoomManager {
             }
             return;
         }
+        AcademyVisuals.setCompassTarget(player, null);
         UUID id = player.getUUID();
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.LIVE_FIRE_DEMO));
         currentHazard.put(id, 0);
@@ -285,10 +314,19 @@ public final class ReyesRoomManager {
     }
 
     private static boolean hasAllExtinguishers(ServerPlayer player) {
+        return nextUncollectedFrame(player) == null;
+    }
+
+    /** First extinguisher frame whose item the player doesn't have yet, or null once all 3 are collected. */
+    private static FrameSpec nextUncollectedFrame(ServerPlayer player) {
         var inventory = player.getInventory();
-        return inventory.contains(stack -> stack.is(BerongSMP.FIRE_EXTINGUISHER.get()))
-                && inventory.contains(stack -> stack.is(BerongSMP.CO2_EXTINGUISHER.get()))
-                && inventory.contains(stack -> stack.is(BerongSMP.WET_CHEMICAL_EXTINGUISHER.get()));
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            Item item = spec.item().get();
+            if (!inventory.contains(stack -> stack.is(item))) {
+                return spec;
+            }
+        }
+        return null;
     }
 
     private static void tickLiveFireDemo(ServerLevel level, ServerPlayer player, AcademySavedData data) {
@@ -296,21 +334,24 @@ public final class ReyesRoomManager {
         int idx = currentHazard.getOrDefault(id, 0);
 
         if (idx >= HAZARDS.size()) {
+            AcademyVisuals.setCompassTarget(player, null);
             tickIgniteDemo(player, data);
             return;
         }
 
+        HazardStep hazard = HAZARDS.get(idx);
+        pointAtHazard(level, player, hazard);
+
         if (!Objects.equals(explainedHazard.get(id), idx)) {
             explainedHazard.put(id, idx);
-            HazardStep hazard = HAZARDS.get(idx);
-            // forceStartDialogue, not startOrAdvanceDialogue: this trigger MUST actually start the
-            // instant the hazard's turn comes up. A re-click on Reyes right around this moment
-            // (e.g. a lingering TOOL_SELECTION reminder session) used to make the non-forcing
-            // version silently ignore this call while explainedHazard was already marked done --
-            // permanently stranding the room with nothing ever igniting.
-            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx),
-                    () -> igniteHazard(level, id, hazard));
-            return; // wait for the explanation to finish before this hazard even ignites
+            // Ignite FIRST, synchronously, then narrate it — the fire must already be burning the
+            // instant Reyes starts describing it, not several seconds later once the (still
+            // forceStartDialogue'd, so a stray re-click can't clobber it) explanation happens to
+            // finish. checkAndHandleDefuse already runs every tick once explainedHazard is marked,
+            // independent of whether the dialogue itself has finished playing.
+            igniteHazard(level, id, hazard);
+            AcademyManager.forceStartDialogue(player, AcademyDialogue.REYES_HAZARD_LINES.get(idx), () -> {});
+            return;
         }
 
         if (checkAndHandleDefuse(player, data, HAZARDS.get(idx))) {
