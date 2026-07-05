@@ -148,6 +148,7 @@ Two real-world drill techniques are modeled as live gameplay, not just tutorial 
   - **Distribution-safety note**: `KeyMappings` holds a real client-only `KeyMapping` field, so it's registered from `BerongSMPClient`'s own constructor (dist-gated by `@Mod(dist=CLIENT)`), never from the common `BerongSMP` constructor — registering it there would crash a real dedicated server (`NoClassDefFoundError`) even though local `./gradlew runServer` dev testing wouldn't catch it, since dev classpaths merge client+server classes.
   - **Physical cover object**: `TableBlock` (see Key Classes below) is a real, single-block table a player can shelter next to. Since a real table is under a metre tall, it can never occupy the "solid block above the player's feet" cell that `DuckCoverHoldManager`'s original check looks for — so `DuckCoverHoldManager.hasNearbyTable` separately scans a 1-block radius around the player for a `TableBlock` while crouching and counts that as valid cover too. `TutorialManager`'s scripted QUAKE_COVER/HOLDON drill is untouched (still the original station-based above-the-feet check only).
   - **Crawling under the table**: a table's kneehole (under 1 block tall) is shorter than even vanilla's `Pose.CROUCHING` hitbox, so normal collision would stop a player at its edge before they could ever shrink into it. `DuckCoverHoldManager.allowCrawlUnderTable` pre-emptively forces `Pose.SWIMMING` (vanilla's own crawl-through-tight-gaps hitbox) whenever a crouching player is facing or beside a `TableBlock` (`facingOrBesideTable` — stricter than `hasNearbyTable`: adjacent or a short look-direction raycast only, not "somewhere nearby"), letting ordinary movement carry them into the kneehole. Sneak/shift itself is untouched; this only changes what fits under the player once they're already crouching near a table, and vanilla's own per-tick pose logic (`Player.updatePlayerPose`) takes back over seamlessly on the way back out.
+  - **Message scoping fix (2026-07-05)**: `DuckCoverHoldManager.onHoldAchieved`'s "Duck, Cover, and Hold maintained" chat message (and its telemetry log) now requires an active quake-type `SimulationSession` before firing — it used to fire unconditionally, since `tick()` deliberately runs for every online player regardless of session (so the drill can be tested by just crouching under any block). That meant it popped up during completely unrelated activity, most visibly crouching under Officer Cruz's Go/Stop tunnel slabs in Room 1 (which satisfies the same crouch+cover check), and would have doubled up with `SantosRoomManager`'s own tailored completion message in Room 3 too.
 
 ### New Tutorial Building (Academy)
 
@@ -321,8 +322,13 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     Hazard Prop 3-State Log). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
     re-ignites the same prop immediately, so the player must get it right before the sequence
     advances (edge detection is per-player: `lastActive` is `Map<UUID, Map<BlockPos, Boolean>>` so
-    two concurrent Room-2 players don't corrupt each other). After all 3, the scripted ignite-demo
-    fires: the player is set alight and `tickIgniteDemo` continuously refreshes their fire ticks
+    two concurrent Room-2 players don't corrupt each other). **Explain-before-ignite (2026-07-05):**
+    after all 3, `AcademyDialogue.REYES_IGNITE_LINES` plays first — teaching that clothes can still
+    catch fire even after doing everything right, the stop-drop-and-roll mechanic, and its Shift+R
+    controls — and only its completion (`beginIgniteDemo`) actually sets the player alight
+    (`igniteExplained` tracks this per player, same idiom as `explainedHazard`/`explainedFrame`).
+    Previously ignition and the "here's the controls" message happened in the same instant, catching
+    the player off guard. Once ignited, `tickIgniteDemo` continuously refreshes their fire ticks
     every tick (`Math.max(current, FIRE_REFRESH_TICKS)`) so the fire never burns out on its own — it
     only clears the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player
     actually performed drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a
