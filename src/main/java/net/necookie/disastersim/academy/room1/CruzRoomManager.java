@@ -129,10 +129,11 @@ public final class CruzRoomManager {
     private static final AABB ROOM1_BOUNDS = new AABB(-162, -36, 23, -95, -28, 64);
     private static final int ESCORT_MOVE_INTERVAL_TICKS = 15;
     /**
-     * Consecutive no-progress re-issue cycles before poof-recovery. Slightly more generous than a
-     * single briefing/maze/jump leg (≈3s) since the door hand-off leg below can be a longer walk
-     * across the open corridor — a normal walk there shouldn't spuriously trip a poof, which would
-     * look exactly like the "instant banishing" this system is meant to avoid.
+     * Consecutive no-progress re-issue cycles before poof-recovery (6 × {@link
+     * #ESCORT_MOVE_INTERVAL_TICKS} = 90 ticks ≈ 4.5s) — generous enough that the door hand-off
+     * leg's longer walk across the open corridor shouldn't spuriously trip a poof, which would look
+     * exactly like the "instant banishing" this system is meant to avoid. A provably unreachable
+     * target (see {@link #UNREACHABLE_STUCK_STEP}) recovers much faster than this full budget.
      */
     private static final int ESCORT_STUCK_CYCLES_MAX = 6;
     /**
@@ -162,10 +163,22 @@ public final class CruzRoomManager {
     /** Throttle for the "come back" nudge below — spoken once per wander, not every re-issue tick. */
     private static final long TOO_FAR_NUDGE_COOLDOWN_TICKS = 200; // 10s
 
+    /** Distance a newly-computed target must differ by to count as a real target change. */
+    private static final double TARGET_CHANGE_EPSILON_SQ = 0.5 * 0.5;
+    /**
+     * How much a single cycle counts against {@link #ESCORT_STUCK_CYCLES_MAX} when the path is
+     * provably unreachable (null, or {@code !Path.canReach()}) rather than merely slow — recovers
+     * after ~1-2 cycles instead of waiting out the full budget, since there's nothing to wait for.
+     * This is what actually fixes her lagging a full 4.5s behind at every Go/Stop tunnel barrier
+     * (a genuinely unreachable target every time, since she can't crouch under the slabs).
+     */
+    private static final int UNREACHABLE_STUCK_STEP = 3;
+
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
     private static long nextEscortMoveTick;
     private static Vec3 lastCruzPos = Vec3.ZERO;
+    private static Vec3 lastTarget;
     private static int stuckCycles;
     private static long lastTooFarNudgeTick = Long.MIN_VALUE;
 
@@ -291,29 +304,47 @@ public final class CruzRoomManager {
                 // ...then follows the player THROUGH the slab tunnel during the run. She can't crouch
                 // under the 1.5-block slab lanes, so each lane blocks her path — the stuck-recovery
                 // below then poofs her to the player's side, reading as the instructor keeping pace
-                // barrier by barrier instead of being left behind at the entrance.
-                case GOSTOP_RUN -> escortTarget.position();
+                // barrier by barrier instead of being left behind at the entrance. Stops short via
+                // nearPlayerTarget rather than pathing exactly onto the player (same as the too-far
+                // chase above), so she never shoulders into them at the barrier.
+                case GOSTOP_RUN -> nearPlayerTarget(cruz.position(), escortTarget.position());
                 // The lesson itself is done — walk the player straight to the doorway instead of
                 // a fixed waypoint. `tick`'s stillEscortable check already stops treating them as
-                // an escort target the instant they physically step outside ROOM1_BOUNDS, so this
-                // case only ever runs while they're still inside (heading for the door).
-                case DONE -> escortTarget.position();
+                // an escort target the instant they physically step outside ROOM1_BOUNDS or Reyes
+                // starts instructing, so this case only ever runs while they're still inside,
+                // heading for the door. Same near-target stop-short as GOSTOP_RUN.
+                case DONE -> nearPlayerTarget(cruz.position(), escortTarget.position());
                 default -> null;
             };
         }
         if (target == null) return;
-        boolean issued = cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
 
-        // Stuck detection: count consecutive re-issue cycles where the path couldn't even be
-        // created, the navigator reports stuck, or Cruz made no net progress — unless she's
-        // already essentially at the target.
+        // A genuine target change (new phase, new waypoint, or the too-far chase toggling on/off)
+        // resets stall history -- otherwise stuckCycles/lastCruzPos accumulated chasing one target
+        // could trigger a spurious poof seconds into pursuing a completely different one.
+        if (lastTarget == null || lastTarget.distanceToSqr(target) > TARGET_CHANGE_EPSILON_SQ) {
+            stuckCycles = 0;
+            lastCruzPos = cruz.position();
+        }
+        lastTarget = target;
+
+        boolean issued = cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
+        net.minecraft.world.level.pathfinder.Path path = cruz.getNavigation().getPath();
+        boolean unreachable = !issued || path == null || !path.canReach();
+
+        // Stuck detection: a provably unreachable path (fast-fail) counts for more than a single
+        // cycle so recovery doesn't wait out the whole budget; otherwise it's genuine per-cycle
+        // progress (navigator-reported stuck, or no net displacement) — unless she's already
+        // essentially at the target.
         double distToTargetSq = cruz.position().distanceToSqr(target);
         boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
         lastCruzPos = cruz.position();
 
         if (distToTargetSq <= ESCORT_ARRIVED_RANGE_SQ) {
             stuckCycles = 0;
-        } else if (!issued || cruz.getNavigation().isStuck() || !movedThisCycle) {
+        } else if (unreachable) {
+            stuckCycles += UNREACHABLE_STUCK_STEP;
+        } else if (cruz.getNavigation().isStuck() || !movedThisCycle) {
             stuckCycles++;
         } else {
             stuckCycles = 0;
@@ -349,16 +380,25 @@ public final class CruzRoomManager {
     }
 
     /**
-     * With no one to escort, Cruz walks back to {@link #BRIEFING_ANCHOR} (same cadence and stuck
-     * handling as an escort leg; a return route blocked by the crouch-only tunnel just times out
-     * into a poof-teleport home after ~3s) and drops escort mode once she's arrived.
+     * With no one to escort, Cruz walks back to {@link #BRIEFING_ANCHOR} (same re-issue cadence as
+     * an escort leg) and drops escort mode once she's arrived — this leg never teleports, see
+     * {@link #RETURN_HOME_STALL_WARNING_CYCLES}.
      */
     private static void tickReturnHome(ServerLevel level, CustomNpcEntity cruz) {
         if (cruz.position().distanceToSqr(BRIEFING_ANCHOR) <= ESCORT_ARRIVED_RANGE_SQ) {
             cruz.setEscorting(false);
+            lastTarget = null;
             return;
         }
         cruz.setEscorting(true);
+
+        // Coming straight off an escort leg (lastTarget still set to wherever that left off):
+        // don't let its stall history count against this completely different walk.
+        if (lastTarget == null || lastTarget.distanceToSqr(BRIEFING_ANCHOR) > TARGET_CHANGE_EPSILON_SQ) {
+            stuckCycles = 0;
+            lastCruzPos = cruz.position();
+        }
+        lastTarget = BRIEFING_ANCHOR;
 
         long now = level.getGameTime();
         if (now < nextEscortMoveTick) return;

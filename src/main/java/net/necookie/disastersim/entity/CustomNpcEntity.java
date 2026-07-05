@@ -193,6 +193,12 @@ public class CustomNpcEntity extends Mob {
             nav.setRequiredPathLength(48.0f);
             nav.setMaxVisitedNodesMultiplier(4.0f);
         }
+        if (!escorting) {
+            // Without this, whatever path was in progress stays loaded (noAi just stops it
+            // ticking) and silently resumes the next time escorting turns back on, for up to a
+            // full re-issue cadence before a fresh moveTo call replaces it.
+            this.getNavigation().stop();
+        }
     }
 
     @Override
