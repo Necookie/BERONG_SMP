@@ -350,24 +350,30 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     3-block radius (`clearNearbyFire`) around a just-defused hazard, since `HazardManager.defuse`
     only ever reset the prop's own block state, never the real fire its failure/re-ignitions had
     already placed beside it — residual fire could otherwise linger into the next hazard step.
+    **Hard anti-ignition guarantee (2026-07-06):** two more layers closed the remaining paths
+    (vanilla fire spread over the demo's duration, residual fire brushed while walking between
+    hazards): `ReyesRoomManager.tick` now extinguishes any Room-2 trainee the same tick they catch
+    fire unless the scripted ignite demo (`igniteWindow`) is active — that demo is the ONLY
+    sanctioned way a trainee ever burns; and `containRoomFire` sweeps the whole room once a second —
+    during `LIVE_FIRE_DEMO` sparing only blocks within `RESIDUAL_FIRE_SWEEP_RADIUS` of the *current*
+    hazard, during `PREVENTION_DEMO` (where no fire belongs at all) sparing nothing.
     **Explain-before-ignite (2026-07-05):**
     after all 3, `AcademyDialogue.REYES_IGNITE_LINES` plays first — teaching that clothes can still
     catch fire even after doing everything right, the stop-drop-and-roll mechanic, and its Shift+R
     controls — and only its completion (`beginIgniteDemo`) actually sets the player alight
     (`igniteExplained` tracks this per player, same idiom as `explainedHazard`/`explainedFrame`).
     Previously ignition and the "here's the controls" message happened in the same instant, catching
-    the player off guard. Once ignited, `tickIgniteDemo` continuously refreshes their fire ticks
-    every tick (`Math.max(current, FIRE_REFRESH_TICKS)`) so the fire never burns out on its own — it
-    only clears the instant `DropAndRollManager.isDropped(uuid)` is observed true (the player
-    actually performed drop-and-roll). `Config.ACADEMY_IGNITE_DEMO_TICKS` (200 ticks/10s) is a
-    safety-cap timeout for a player who never rolls, not the real burn duration →
-    `advanceToAlarmCheckpoint` (prop/fire cleanup, phase → `ALARM_CHECKPOINT`). **Guaranteed 5s
-    reaction window (2026-07-05):** neither completion path (drop-and-roll detected, or the
-    safety-cap timeout) can resolve before `MIN_REACTION_TICKS` (100 ticks/5s) has genuinely
-    elapsed — previously nothing enforced a floor, so the demo could resolve almost instantly with
-    no real chance to shift+R; the ignite window itself is also clamped to never be shorter than
-    this minimum even if the config value is set lower. A once-per-second caption ("Drop and roll!
-    5s/4s/3s/2s/1s") makes the window visible, matching Santos's table-hold countdown style.
+    the player off guard. **5-second roll requirement (2026-07-05, superseding the earlier
+    single-press + reaction-floor design):** once ignited, the fire is topped up every tick and
+    **never goes out on its own — there is no timeout at all**. The only way out is accumulating
+    `ROLL_REQUIRED_TICKS` (100 ticks/5s) of *actual rolling*: `rollHeldTicks` counts only ticks
+    spent inside `DropAndRollManager.isDropped`'s dropped window (genuinely holding Shift and
+    pressing R; each press extends the window ~5s, so continuous rolling means repeated presses —
+    the counter pauses rather than resets while not rolling). A once-per-second timer shows the
+    remaining roll time ("Rolling — keep it up! Xs") and re-teaches the Shift+R controls whenever
+    the player isn't currently rolling. `Config.ACADEMY_IGNITE_DEMO_TICKS` is **no longer used by
+    this demo** (kept only as a config entry) → on completion, `advanceToAlarmCheckpoint`
+    (prop/fire cleanup, phase → `ALARM_CHECKPOINT`).
   - `ALARM_CHECKPOINT`: Reyes explicitly teaches "the moment a fire starts, always ring the alarm
     first" and points the compass at the fire alarm at `ALARM_POS = (-143,-32,40)`. **Duplicate
     alarm fix (2026-07-05):** the schematic actually already bakes a
@@ -421,6 +427,13 @@ Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highli
   the player is genuinely under the table and holds there for the same 5 seconds as before. A live
   countdown caption (once per second — "Under cover — hold there... 4s/3s/2s/1s") confirms the
   detection actually fired instead of the hold silently accumulating with no feedback.
+  **Shake-persistence fix (2026-07-06):** that countdown used to send `intensity=0f`, zeroing the
+  client's camera shake the instant the player started holding — the earthquake visually "stopped"
+  seconds before the drill was complete. It now sends a **fading** intensity (1.5 → 0 across the
+  hold, mirroring the old tutorial's `QUAKE_HOLDON` fade); only the true completion message ends the
+  shaking. Breaking cover mid-hold announces the reset and snaps the shake back to full strength
+  (same break-cover-resets-the-timer behavior as the old tutorial), and being at the table without
+  crouching gets its own periodic reminder that keeps the quake at full intensity.
   `tickPreDrill`
   also seeds `preDrillStartTick` via `computeIfAbsent` (previously `getOrDefault`, which never wrote
   the fallback back — a stale/missing entry after an ungraceful shutdown mid-drill could never
@@ -702,7 +715,7 @@ All values are read at call time via `.get()` — changes take effect without re
 | `quakePeakDuration` | 900 | Ticks in PEAK phase (45 s) |
 | `quakeAftershockDuration` | 300 | Ticks per aftershock wave (15 s); 2–4 waves follow the main quake |
 | `bfpAdminPin` | `""` | PIN for `/bfp login`. Empty = PIN login disabled (OP-only access). A WARN is logged at startup if left blank. |
-| `academyIgniteDemoTicks` | 200 | Safety-cap timeout (10 s) for Sgt. Reyes's scripted drop-and-roll demo — the fire itself stays lit until the player actually rolls; this only forces it out if they never do |
+| `academyIgniteDemoTicks` | 200 | **No longer used** (2026-07-06): the ignite demo has no timeout anymore — the fire only goes out after 5 s of accumulated rolling (`ReyesRoomManager.ROLL_REQUIRED_TICKS`). Config entry kept to avoid breaking existing config files. |
 | `academyGoStopGraceTicks` | 30 | Reaction window after Officer Cruz calls STOP (1.5 s) — movement during it is never punished (reference position keeps re-anchoring while the player slides to a halt); only movement after it counts as a violation |
 | `academyPassThreshold` | 70 | Minimum score (0–100) Capt. Morfe requires to certify a player after the Academy |
 
