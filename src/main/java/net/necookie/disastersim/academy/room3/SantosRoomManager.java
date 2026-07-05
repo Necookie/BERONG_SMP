@@ -45,6 +45,8 @@ public final class SantosRoomManager {
     private static final double NEAR_TABLE_RANGE_SQ = 3.0 * 3.0;
     /** Capt. Morfe's anchor — points there until the player has actually started Room 4. */
     private static final Vec3 MORFE_ANCHOR = new Vec3(-108.5, -33.0, 77.5);
+    /** Center of the table row, for the compass needle — the beacon alone had no compass pairing. */
+    private static final Vec3 TABLE_ROW_CENTER = new Vec3(-168.5, -33.0, 29.5);
 
     private static final Map<UUID, Long> preDrillStartTick = new ConcurrentHashMap<>();
     /**
@@ -105,6 +107,7 @@ public final class SantosRoomManager {
         if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
             AcademyVisuals.highlightBlocks(level, TABLE_ROW);
         }
+        AcademyVisuals.setCompassTarget(player, TABLE_ROW_CENTER);
         UUID id = player.getUUID();
         long start = preDrillStartTick.computeIfAbsent(id, k -> level.getGameTime());
         if (level.getGameTime() - start >= PRE_DRILL_DELAY_TICKS) {
@@ -119,6 +122,7 @@ public final class SantosRoomManager {
         if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
             AcademyVisuals.highlightBlocks(level, TABLE_ROW);
         }
+        AcademyVisuals.setCompassTarget(player, TABLE_ROW_CENTER);
 
         UUID id = player.getUUID();
         boolean nearTable = isNearTableRow(player);
