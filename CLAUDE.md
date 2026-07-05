@@ -160,7 +160,16 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   schematic contains no green blocks; the next unhit one also gets the particle beacon) → MAZE →
   JUMP → GOSTOP_STAGE/GOSTOP_RUN (Officer Cruz calls GO/STOP on a random 3-6s cadence; moving past
   Config.ACADEMY_GOSTOP_GRACE_TICKS after a STOP call warps the player back to the staging line
-  and counts a movement mistake) → DONE. MAZE and JUMP use **schem-verified waypoint chains**
+  and counts a movement mistake) → DONE. **Zone-gated Go/Stop start + starting-line barrier
+  (2026-07-05):** the briefing used to begin the instant the jump course's finish line was crossed,
+  with nothing stopping the player from wandering into the tunnel before ever talking to Cruz.
+  `CruzRoomManager.onInteract` now requires `GOSTOP_ZONE.contains(player.position())` (schem-verified
+  pen interior, X -102..-98/Z 47..55) before starting the briefing dialogue at all; `tickGoStopStage`
+  pushes the player back east of `GOSTOP_STARTING_LINE_X` (-103, the pen's real entrance gap) with a
+  throttled "wait for GO" nudge if they try to cross early — not counted as a movement mistake, just
+  an invisible wall. A **fun green countdown** (`GoStopState.currentBanner`, purely cosmetic) now
+  also refreshes once a second during `GOSTOP_RUN`, re-appending "next call in Xs" to whatever GO/STOP
+  banner is already showing. MAZE and JUMP use **schem-verified waypoint chains**
   (`MAZE_WAYPOINTS` through the serpentine's wall gaps at X=-131/Z=25, X=-127/Z=38, X=-124/Z=25;
   `JUMP_WAYPOINTS` just past each 1-block hurdle row at X=-117/-114/-111) advanced per-player when
   within 2 blocks — both the compass needle and Cruz's escort target the current waypoint, never
@@ -222,7 +231,16 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   *also* requires `reyesPhase() == ReyesPhase.NOT_STARTED` — the instant the player clicks Reyes and
   her dialogue actually begins, Cruz stops following that same tick regardless of whether they're
   still technically inside `ROOM1_BOUNDS`. She only ever follows during her own turn of the
-  tutorial, never once Reyes is teaching. **Faster idle look (2026-07-05)**:
+  tutorial, never once Reyes is teaching. **Crouch-through-the-tunnel (2026-07-05):** she can now
+  physically walk the crouch-tunnel instead of poofing past each slab lane —
+  `CustomNpcEntity.setCrouchingForObstacle` shrinks her hitbox to a vanilla-crouch-sized 0.6×1.5 via
+  an overridden `getDefaultDimensions` + `refreshDimensions()` (the same trick
+  `DuckCoverHoldManager.allowCrawlUnderTable` uses for players, adapted for a non-player `Mob`, whose
+  bounding box doesn't otherwise change with `Pose` at all), toggled every escort tick by
+  `updateCruzEscort` based on her own position against `GOSTOP_TUNNEL_ZONE` (schem-verified to cover
+  all three slab lanes at X=-106/-107, -110, -114/-115). Combined with the path-aware stuck detection
+  above, the lanes are now genuinely reachable paths instead of provably-unreachable ones needing the
+  poof fallback. **Faster idle look (2026-07-05)**:
   `CustomNpcEntity.updateGaze` now turns her head/body noticeably faster whenever she isn't
   escorting (`HEAD_TURN_SPEED_IDLE`/`BODY_TURN_SPEED_IDLE`, applies to every `CustomNpcEntity`, not
   just Cruz) — a stationary NPC reacts to the player right away instead of the slower ease used
@@ -322,7 +340,17 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     Hazard Prop 3-State Log). Using the wrong extinguisher doesn't just warn — `checkAndHandleDefuse`
     re-ignites the same prop immediately, so the player must get it right before the sequence
     advances (edge detection is per-player: `lastActive` is `Map<UUID, Map<BlockPos, Boolean>>` so
-    two concurrent Room-2 players don't corrupt each other). **Explain-before-ignite (2026-07-05):**
+    two concurrent Room-2 players don't corrupt each other). **Controlled fires only (2026-07-05):**
+    a Fable-5 investigation traced reports of the player "randomly" catching fire to real vanilla
+    fire placed with no player-occupancy check — `HazardBlock`/`HazardFacingBlock.igniteAdjacent`/
+    `igniteRadius` (every hazard failure) and especially `ComputerBlock.randomTick`'s 6-direction
+    flood while `BURNING=true` (the single most aggressive source, since a player fighting the
+    computer's fire stands right next to it) both now skip any target a player occupies or stands
+    within ~0.6 blocks of (`isPlayerNear`). `checkAndHandleDefuse`'s success branch also sweeps a
+    3-block radius (`clearNearbyFire`) around a just-defused hazard, since `HazardManager.defuse`
+    only ever reset the prop's own block state, never the real fire its failure/re-ignitions had
+    already placed beside it — residual fire could otherwise linger into the next hazard step.
+    **Explain-before-ignite (2026-07-05):**
     after all 3, `AcademyDialogue.REYES_IGNITE_LINES` plays first — teaching that clothes can still
     catch fire even after doing everything right, the stop-drop-and-roll mechanic, and its Shift+R
     controls — and only its completion (`beginIgniteDemo`) actually sets the player alight
