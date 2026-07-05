@@ -77,10 +77,12 @@ flowchart TD
 **NPC anchor:** `(-153.5,-33,32.5)` — a **single** Cruz escorts the player through every phase via
 real pathfinding (`setEscorting` + periodic `moveTo`, FOLLOW_RANGE 48, STEP_HEIGHT 1.1 so she walks
 the hurdles). If she can't path or falls behind for ~3 seconds she **poof-teleports** to the
-player's side (POOF particles at both ends, reads as an intentional catch-up). She waits at the
-Go/Stop staging line rather than entering the tunnel — her 1.8-block hitbox can't crouch under the
-1.5-block slab headroom — and calls GO/STOP/finish from there. (The schematic's leftover second
-Cruz at `(-123.5,-33,49.5)` is discarded on every placement by `NewTutBuildingManager`.)
+player's side (POOF particles at both ends, reads as an intentional catch-up). During the Go/Stop
+briefing she waits at the staging line — her 1.8-block hitbox can't crouch under the 1.5-block slab
+headroom — but during the run she follows the player themselves, poofing past each slab barrier to
+keep pace. (The old second Cruz at `(-123.5,-33,49.5)` has been NBT-edited out of the .schem file
+itself — 29 → 28 entities; `NewTutBuildingManager.discardDuplicateCruz` remains only as a silent
+safety net.)
 
 ### Phase 1 — Briefing Room (Mouse & WASD)
 **Zone:** `(-154,-33,38)` to `(-137,-33,25)`. **Gate:** all 4 green tiles visited.
@@ -171,8 +173,12 @@ exit (-105.5,31.5)`.
 > §a[Officer Cruz] §7Listen for my call! §aGO§7 means walk (hold §eW§7). §cSTOP§7 means let go of
 > all the keys and freeze.
 
-**Violation** (moved more than `ACADEMY_GOSTOP_GRACE_TICKS` after a STOP call — warped back to the
-staging line, counts a movement mistake):
+**Violation** — a STOP call gives a true reaction window (`ACADEMY_GOSTOP_GRACE_TICKS`, default
+30 ticks = 1.5 s): movement during the window is never punished (the reference position keeps
+re-anchoring while the player slides to a halt); only movement after it, measured from where they
+actually came to rest, warps them back to the staging line and counts a movement mistake. The
+GO/STOP calls and every repeated idle nudge also pick randomly from 2-3 phrasings
+(`AcademyManager.pick`) so repeated coaching doesn't sound like a broken record:
 > §c[Officer Cruz] §7Oops — you moved after STOP! That's okay, everyone does it once. Back to the
 > start line: walk on §aGO§7, and when you hear §cSTOP§7, let go of all the keys right away.
 
