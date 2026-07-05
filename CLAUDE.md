@@ -171,7 +171,15 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   FloatGoal, door passage + explicit path budget set on escort start. **Stuck recovery**: 4
   consecutive no-progress escort cycles (~3s — path not created, isStuck(), or <0.25 blocks moved
   while >2 blocks from target) → `recoverCruz` poof-teleports her to the player's side with POOF
-  particles at both ends. The jump phase's finish line is **directional** (`X >= JUMP_FINISH_X`
+  particles at both ends. **Wandered-too-far chase (2026-07-05)**: if the escorted player strays
+  more than 14 blocks from Cruz's current position, `updateCruzEscort` abandons the phase's
+  waypoint for that re-issue and walks straight toward the player instead (`clampToRoom1Bounds`
+  keeps the chase target inside `ROOM1_BOUNDS` so it can never pull her outside the building),
+  resuming the normal waypoint once they're close again. **Faster idle look (2026-07-05)**:
+  `CustomNpcEntity.updateGaze` now turns her head/body noticeably faster whenever she isn't
+  escorting (`HEAD_TURN_SPEED_IDLE`/`BODY_TURN_SPEED_IDLE`, applies to every `CustomNpcEntity`, not
+  just Cruz) — a stationary NPC reacts to the player right away instead of the slower ease used
+  mid-walk. The jump phase's finish line is **directional** (`X >= JUMP_FINISH_X`
   (-106), east past the last hurdle) — leaving the zone backward into the maze no longer skips the
   player ahead. During GOSTOP_STAGE (the briefing) she waits at the staging line — her fixed
   0.6×1.8 hitbox can't crouch under the slabs' 1.5-block headroom — but during GOSTOP_RUN her
@@ -187,16 +195,22 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   instantly snaps her there so a restarting trainee always finds her waiting; and a `ROOM1_BOUNDS`
   safety net poof-recovers her to the escorted player if she's ever outside Room 1's footprint.
   The duplicate second Cruz from the old two-NPC handoff design was **removed from the .schem file
-  itself** (NBT-edited, 29 → 28 entities), but a stray copy kept reappearing at the old handoff spot
-  `(-122,-33,49)` anyway (a disk-persisted leftover from a session predating that fix).
-  `NewTutBuildingManager.discardDuplicateCruz` now runs a **position-targeted pass first**: any
-  `OFFICER_CRUZ` within a small radius of `(-122,-33,49)` is discarded unconditionally on every
-  boot, before anything else runs. Only *after* that does the original keep-nearest-anchor
-  tie-break apply, and only when more than one Cruz still remains — a lone legitimate Cruz is never
-  touched by it. The whole-map scan bounds remain wide for the same reason as before (future
-  schematic re-save, accidental spawner copy, or a Cruz saved to disk from a session predating
-  either fix, which could have drifted anywhere reachable on the map since `SchemLoader`'s
-  discard-before-place only clears entities inside the schematic's own footprint).
+  itself** (NBT-edited, 29 → 28 entities — confirmed by parsing the schematic directly: it now
+  bakes in exactly one Officer Cruz, at the briefing anchor), but a stray copy kept reappearing at
+  the old handoff spot `(-122,-33,49)` anyway — a disk-persisted leftover entity from a session
+  predating that fix, sitting in a chunk that's merely block-loaded (from schematic placement) but
+  never promoted to Minecraft's entity-ticking ring, since that requires an online player nearby.
+  **A one-shot boot-time scan can never actually find her** (`getEntitiesOfClass` only sees
+  entities the level has attached, which doesn't happen until her chunk activates) — that's why an
+  earlier position-targeted boot-only fix didn't work. `NewTutBuildingManager.sweepStrayCruz`
+  (a tiny single-chunk-sized AABB query around `(-122,-33,49)`) is now called every tick from
+  `AcademyManager.tick()` instead, so she's discarded the exact tick her chunk activates — which
+  only happens because a player walked close enough to see her, so in practice she never renders
+  as encountered. `discardDuplicateCruz` still runs `sweepStrayCruz` once at boot too, then applies
+  the original keep-nearest-anchor tie-break only when more than one Cruz still remains (a lone
+  legitimate Cruz is never touched by it). The whole-map scan bounds remain wide for the same
+  reason as before (future schematic re-save, accidental spawner copy, or another stray from a
+  session predating either fix).
 
 Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full response ladder in order —
   **prevention → intervention → alarm → evacuation** — via `ReyesPhase`:
@@ -320,7 +334,14 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   and clears every room manager's transient per-player maps. Each room's periodic "idle nudge"
   reminders check `AcademyManager.isDialogueActive(uuid)` before firing, so a coincidental idle
   nudge can no longer stomp an in-progress dialogue line's caption while its voice line may still
-  be playing.
+  be playing. **Caption auto-clear (2026-07-05):** every non-dialogue-sequence caption (idle
+  nudges, phase banners, Go/Stop calls) used to have no expiry at all — the only place that ever
+  sent an explicit clear was `advanceSession` finishing a timed dialogue sequence, so walking away
+  right after an idle nudge left it glued to the screen forever. `AcademyStatusPayload` now carries
+  a `displayTicks` duration (computed in `AcademyManager.sendPrompt` from the same word-count
+  reading-pace formula as dialogue lines, `ticksFor`, plus a grace window); `AcademyHud` tracks
+  `promptExpiresAtMillis` client-side and clears its own prompt once past it — no extra server
+  round trip, and dialogue sequences are unaffected since they're overwritten well before expiry.
 
 **Logout safety net** — a player who disconnects mid-effect doesn't just lose transient timers, they
   can end up with the effect itself silently resuming (or literally still burning) on reconnect:
@@ -385,7 +406,7 @@ Go/Stop tunnel slabs, and the 4 WASD mark cells (which had no green blocks in th
 | `StructurePlacer` | Interface for placing a structure at a `BlockPos`; implemented by both loaders below |
 | `SimulationStructureLoader` | Implements `StructurePlacer`; wraps `StructureTemplateManager` for `.nbt` files |
 | `SchemLoader` | Implements `StructurePlacer`; parses Sponge Schematic v2/v3 `.schem` files, supports 0–3 CCW 90° rotations (rotates offsets and block states), places blocks, and spawns entities from the `Entities` tag — including modded mobs like `berongsmp:custom_npc`, not just vanilla decoration entities. Any pre-existing non-player entity in the placement footprint is discarded before re-placing to prevent duplicates (broadened from an item-frame-only check once schematics started baking in mobs/armor stands too — session restores never touch players, since they're explicitly excluded). **Item frame placement invariant (MC 26.x):** Sponge v3 top-level `Pos` = the entity's own AIR block (not the wall). `Data.Facing` = OUTWARD direction (frame face toward viewer, no `.getOpposite()` needed). `ItemFrame(level, pos, direction)` takes the entity's own block as `pos`; the wall is `pos.relative(direction.getOpposite())` — handled by a dedicated `spawnItemFrame` path since item frames need this wall-relative math the generic path doesn't do. **Generic entity deserialization gotcha (found while loading `new_tut_building1.0.schem`):** Sponge v3 nests an entity's *real* Minecraft save data under a `Data` sub-compound — `Id`/`Pos` are Sponge-level siblings, not part of it. Deserializing the raw entity tag directly (as this used to) left every actual field invisible to `EntityType.create`, so `CustomNpcEntity` silently read a missing `NpcType` and fell back to its default role for every copy. Fixed by merging `Data` into a fresh root before deserializing. That same root also needs `block_pos` (used by `BlockAttachedEntity` subclasses like `Painting`, checked with a 16-block sanity radius against the entity's real position) and any `facing`/`Facing` byte re-derived/rotated — left stale, `block_pos` still pointed at the original copy location, failed the sanity check, and vanilla logged "Block-attached entity at invalid position" while the entity failed to attach. |
-| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 10 `berongsmp:custom_npc` NPCs (the duplicate second Officer Cruz at the old two-NPC-handoff spot was NBT-edited out of the .schem itself — 29 → 28 entities), 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. `discardDuplicateCruz` always discards any `OFFICER_CRUZ` found near the old handoff spot `(-122,-33,49)` first, then — only if more than one legitimate copy still remains — keeps the one nearest the briefing anchor (a lone survivor is never touched). `placeGreenMarks` is a permanent per-placement fixup: swaps the 4 floor blocks under `CruzRoomManager.GREEN_MARKS` to lime concrete (the schematic has no green blocks in the briefing zone), re-run after every placement since `SchemLoader` restores the original floor each boot. `placeFireAlarm` places a `FireAlarmBlock` at `ReyesRoomManager.ALARM_POS` (-143,-33,40) every boot for Sgt. Reyes's alarm checkpoint — same idiom as `placeGreenMarks`. |
+| `NewTutBuildingManager` | Places `new_tut_building1.0.schem` (a WorldEdit `//copy -e` capture) at the fixed `POS = BlockPos(-177, -34, 8)` via `SchemLoader`, 0 rotations. The schematic bakes in its own 10 `berongsmp:custom_npc` NPCs (the duplicate second Officer Cruz at the old two-NPC-handoff spot was NBT-edited out of the .schem itself — 29 → 28 entities), 10 gear-display armor stands, item frames/glow item frames, and a painting — unlike `TutorialLobbyManager` (structure + hardcoded-offset NPCs as two separate passes), everything here comes from one `SchemLoader.place` call. Called from `onServerStarted`, not `onServerStarting`, for the same reason `TutorialLobbyManager.initNpcs` is: entity chunk storage must be fully loaded first, or freshly-spawned entities can collide with same-UUID copies the previous server run persisted to disk. Also owns `VIEWPOINTS` (`Map<String, Viewpoint>`) — named F3-captured admin teleport targets inside the building, one per named station, surfaced via `/bfp new_tutorial <name>`. `sweepStrayCruz` (public, tiny single-chunk AABB query around `(-122,-33,49)`) is called every tick from `AcademyManager.tick()` — not just once at boot — since a disk-persisted stray entity there only ever becomes visible to `getEntitiesOfClass` once a player walks close enough for that chunk to reach Minecraft's entity-ticking ring, so a boot-only scan could never actually catch her. `discardDuplicateCruz` calls `sweepStrayCruz` once at boot too, then — only if more than one legitimate `OFFICER_CRUZ` copy still remains — keeps the one nearest the briefing anchor (a lone survivor is never touched). `placeGreenMarks` is a permanent per-placement fixup: swaps the 4 floor blocks under `CruzRoomManager.GREEN_MARKS` to lime concrete (the schematic has no green blocks in the briefing zone), re-run after every placement since `SchemLoader` restores the original floor each boot. `placeFireAlarm` places a `FireAlarmBlock` at `ReyesRoomManager.ALARM_POS` (-143,-33,40) every boot for Sgt. Reyes's alarm checkpoint — same idiom as `placeGreenMarks`. |
 | `SimulationStatusPayload` | Server→client packet (record + `StreamCodec`, channel v2) carrying `status`, `timeLeft`, and `intensity` |
 | `DropAndRollPayload` | Client→server packet (channel v3) — the mod's first serverbound payload; empty record, `StreamCodec.unit(...)`, sent when the player presses the "Drop and Roll" key. Handler calls `DropAndRollManager.onDropAndRollRequest`. |
 | `DropAndRollManager` | Static per-UUID transient state (`droppedTicksRemaining`, same idiom as `TutorialManager.holdOnTimers`) driving the "stop, drop, and roll" fire response: reduces the requester's remaining fire ticks by 30/press if on fire, opens/extends a 100-tick "dropped" window during which `MobEffects.SLOWNESS` is continuously refreshed (crawl stand-in). `tick()` runs from `SimulationManager.onServerTick`. |
