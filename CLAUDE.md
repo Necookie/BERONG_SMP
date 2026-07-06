@@ -518,6 +518,16 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   `promptExpiresAtMillis` client-side and clears its own prompt once past it — no extra server
   round trip, and dialogue sequences are unaffected since they're overwritten well before expiry.
 
+**Pacing fix (2026-07-06):** `SANTOS_LINES.NOT_STARTED` was 7 sequential lines (~55-60s of
+uninterrupted lecture, by the sequencer's own word-count-based `ticksFor` pacing) before the drill's
+first interactive rep — the single longest unbroken monologue in the Academy. Trimmed to 4 lines
+(intro, one dense safety-facts line, one line merging the table/DROP-COVER-HOLD-ON mnemonic, the
+"ready?" prompt); the aftershock fact (previously its own line 6, before the drill even started) now
+lands in `SantosPhase.DONE`'s wrap-up instead, right after the player has actually felt the shake
+stop — better-timed for a fact about *not* stopping too early. `REYES_LINES.ALARM_CHECKPOINT`'s
+opening line did two jobs in one sentence (praise + the alarm rule); split into two single-purpose
+lines so the rule itself isn't buried mid-compliment.
+
 **Logout safety net** — a player who disconnects mid-effect doesn't just lose transient timers, they
   can end up with the effect itself silently resuming (or literally still burning) on reconnect:
   `SantosRoomManager.clearPlayer` rolls `PRE_DRILL`/`QUAKE_ACTIVE` back to `NOT_STARTED` on logout
@@ -548,6 +558,17 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   (clearTransientState) + teleport to currentRoomAnchor instead of world spawn.
 ```
 
+**Academy telemetry (2026-07-06):** every other subsystem in this mod (fire, quake, alarm presses,
+extinguisher use) persists its events to `TelemetryCsvWriter`/Turso — the Academy previously recorded
+nothing durable at all, only the in-memory `AcademyProgress` blob Capt. Morfe's evaluation reads once.
+`AcademyTelemetry` (own per-attempt session id, since the Academy has no `SimulationSession`) now
+writes `academy_start`/`academy_movement_mistake`/`academy_room1_complete` (Cruz),
+`academy_prevention_fixed`/`academy_fire_correct`/`academy_fire_wrong`/`academy_alarm_pressed`/
+`academy_room2_complete`/`academy_drop_and_roll` (Reyes), `academy_room3_complete`/
+`academy_quake_hold_broken` (Santos), and `academy_certified`/`academy_failed` (Morfe, carrying
+`score=NN` and, on fail, `;weak=...` in the existing `interaction_target` column) via
+`TelemetryCsvWriter.writeRow` — no CSV schema changes, `scenario_type` is always `"ACADEMY"`.
+
 **Key classes**: `AcademyManager` (the single `PlayerInteractEvent.EntityInteract` handler for
 `CustomNpcEntity` — none existed anywhere else in the mod; dispatches by `NpcType`, ignores the
 schematic's 5 other decorative NPCs) + the shared dialogue sequencer
@@ -558,7 +579,8 @@ state — 4 phases + Capt. Morfe's scoring inputs, `SavedData`+`Codec` pattern-c
 `AcademySavedData.mutate` so `setDirty()` is never forgotten); `AcademyDialogue`
 (Cruz/Reyes/Santos/Morfe static line content — non-gamer voice, exact key names in §e — plus
 `REYES_HAZARD_LINES` per-hazard explanations and `MORFE_LINES`/`MORFE_PASS_LINES`/
-`MORFE_FAIL_LINES`, transcribed from `docs/new_tutorial_script.md`);
+`MORFE_FAIL_LINES`, transcribed from `docs/new_tutorial_script.md`); `AcademyTelemetry` (own
+per-attempt session id + `TelemetryCsvWriter.writeRow` adapter — see "Academy telemetry" above);
 `AcademyGuardrails` (block protection + out-of-bounds rescue + death/respawn recovery — see
 Guardrails above); `AcademyStatusPayload`/`AcademyHud` (own caption channel, pattern-cloned from
 `TutorialStatusPayload`/`TutorialHud`, deferring to either if already showing — carries **no**
@@ -881,6 +903,7 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 | T-14 | 🟡 Medium | Contract doc used `move` but mod emitted `move_tick` | ✅ Done | Updated `telemetry_contract.md` §3, §4, §6, §7 to say `move_tick` throughout |
 | T-15 | 🟡 Medium | CCS scenario types (`ccs_fire`/`ccs_earthquake`) missing from contract and DB | ✅ Done | Updated `telemetry_contract.md` §2/§3/§5; `endSimulation` stores `session.getState().name()` so CCS sessions write `CCS_FIRE`/`CCS_EARTHQUAKE` to Turso; dashboard `simulation_type` type and SQL aggregations updated |
 | T-16 | 🟢 Low | New `duck_cover_hold` event type (live duck/cover/hold drill) not in contract/dashboard | ⏳ Pending | Emitted by `SimulationManager.applyDuckCoverHold` via `session.logger.log()` + `TelemetryCsvWriter.writeRow()`, same shape as `fire_alarm_activate` (x/y/z, no `hazard_distance`). Dashboard session-timeline event rendering needs to account for it — tracked as a follow-up in the `BERONG_SMP_WEB` repo. |
+| T-17 | 🔴 Critical | The Academy (new tutorial) emitted **no telemetry at all** — verified by grepping the whole `academy` package for `Telemetry`/`TursoClient`/`SessionManager` (zero matches) | ✅ Done | Added `AcademyTelemetry` + wired `academy_*` event rows into all 4 room managers — see "Academy telemetry" note above. `scenario_type="ACADEMY"` rows land in the same `gameplay_logs_*.csv`; dashboard ingestion/visualization for this scenario type is a follow-up in `BERONG_SMP_WEB`, same as T-16. |
 
 ---
 
@@ -929,8 +952,23 @@ A dedicated Plan-agent review (model `claude-fable-5`) of `CruzRoomManager.java`
 `CustomNpcEntity.java`'s navigation setup, requested explicitly as a standalone deliverable rather
 than another one-line tweak. The small/trivial items (path-aware stuck detection, target-change
 resets, `nearPlayerTarget` on `GOSTOP_RUN`/`DONE`, `getNavigation().stop()` on escort-off, stale
-comment fixes) were implemented the same day — see the Room 1 section above. **Not implemented**,
-kept as a documented recommendation for a future dedicated pass:
+comment fixes) were implemented the same day — see the Room 1 section above.
+
+**Escort state moved onto the entity (2026-07-06):** `nextEscortMoveTick`/`lastCruzPos`/`lastTarget`/
+`stuckCycles`/`lastTooFarNudgeTick` used to be `static` fields on `CruzRoomManager` itself — harmless
+while exactly one `OFFICER_CRUZ` instance exists (duplicates are swept every tick, see
+`NewTutBuildingManager.sweepStrayCruz`), but state describing "the escort in progress" rather than
+"this specific NPC," and a latent trap if that one-instance invariant were ever violated (two
+entities would silently corrupt each other's bookkeeping). Moved onto `CustomNpcEntity` itself
+(`getNextEscortMoveTick`/`getLastEscortPos`/`getLastEscortTarget`/`getEscortStuckCycles`/
+`getLastTooFarNudgeTick` + setters) so it travels with the object it describes. **This is a defensive
+hygiene fix only — it does not enable escorting two students at once.** There is still exactly one
+physical Cruz entity, so a second concurrent student in Room 1 still isn't escorted; that remains the
+already-accepted "single-station-at-a-time" limitation documented in `CruzRoomManager.updateCruzEscort`'s
+own javadoc, and would need spawning multiple building/NPC instances to actually fix — a much larger
+feature, not attempted here.
+
+**Not implemented**, kept as a documented recommendation for a future dedicated pass:
 
 - **Move the escort mechanics into a proper `Goal`** (`EscortGoal`/`setEscortTarget(...)` API on
   `CustomNpcEntity`) instead of `CruzRoomManager` externally calling `getNavigation().moveTo(...)`
