@@ -460,6 +460,16 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. Morfe speaks through 
   Cruz welcome-back prompt greets them) fires from the fail sequence's onComplete — only after the
   player has read Morfe's send-off where they stand.
 
+**Scoring scope is deliberate (confirmed 2026-07-06):** Reyes's `PREVENTION_DEMO` and
+`ALARM_CHECKPOINT`/`EVACUATION_BRIEF` phases earn zero points in `AcademyScoring` — only movement,
+fire correct/wrong ratio, drop-and-roll, and quake compliance feed the 0-100 rubric. Raised during a
+full audit and explicitly decided, not an oversight: expanding the rubric to those two phases would
+require inventing new fail/mistake criteria for steps that are currently non-punitive by design (Reyes
+never tells the player they're graded on prevention or the alarm), which is a pass/fail-bar decision
+for the thesis instrument, not something to pick unilaterally. Both phases remain mandatory to
+progress and are now fully covered by `AcademyTelemetry` (see above) for later analysis — just not
+part of certification. Revisit only if a future rubric redesign is explicitly requested.
+
 World-space navigation, "compass" style ("follow the green floor arrows", said literally in
   several lines): a real client-rendered HUD needle (`client.AcademyCompassHud`), not particles —
   a concave 4-point dart (not a plain triangle — reads as a distinct compass needle) drawn over a
