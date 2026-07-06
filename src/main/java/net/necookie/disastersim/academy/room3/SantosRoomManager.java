@@ -8,6 +8,7 @@ import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.AcademyTelemetry;
 import net.necookie.disastersim.academy.AcademyVisuals;
 import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.ReyesPhase;
@@ -157,6 +158,7 @@ public final class SantosRoomManager {
                     p.setSantosPhase(SantosPhase.DONE);
                     p.setQuakeCompliant(true);
                 });
+                AcademyTelemetry.record(player, "academy_room3_complete", null);
                 AcademyVisuals.setShake(player, 0f);
                 AcademyManager.sendPrompt(player, "§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, "
                         + "covered, and held on like a pro! One last stop: follow the glowing arrow to "
@@ -185,6 +187,7 @@ public final class SantosRoomManager {
         // Cover broken: reset the hold — breaking cover mid-hold restarts the full 5 seconds,
         // exactly like the old tutorial's QUAKE_HOLDON break-cover reset.
         if (tableHoldTicks.remove(id) != null) {
+            AcademyTelemetry.record(player, "academy_quake_hold_broken", null);
             AcademyManager.sendPrompt(player, "§c✗ You left cover — the countdown reset! Get back under "
                     + "the table, hold §eShift§f, and stay put for the full 5 seconds.");
         }

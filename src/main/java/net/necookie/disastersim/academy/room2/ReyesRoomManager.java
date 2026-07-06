@@ -17,6 +17,7 @@ import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.AcademyTelemetry;
 import net.necookie.disastersim.academy.AcademyVisuals;
 import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
@@ -73,6 +74,9 @@ public final class ReyesRoomManager {
             new HazardStep(ELECTRICAL_POS, () -> BerongSMP.COMPUTER.get().defaultBlockState(), CO2ExtinguisherItem.class),
             new HazardStep(KITCHEN_POS, () -> BerongSMP.UNATTENDED_GREASE_PAN.get().defaultBlockState(), WetChemicalExtinguisherItem.class)
     );
+
+    /** Telemetry labels for {@link #HAZARDS}, same fixed index order — used only for the detail column. */
+    private static final List<String> HAZARD_LABELS = List.of("class_a_archive", "electrical_computer", "kitchen_grease");
 
     private static final double NEAR_RANGE_SQ = 6.0 * 6.0;
     private static final int IDLE_NUDGE_INTERVAL_TICKS = 100;
@@ -237,6 +241,7 @@ public final class ReyesRoomManager {
         }
 
         if (checkAndHandlePrevention(player, hazard)) {
+            AcademyTelemetry.record(player, "academy_prevention_fixed", HAZARD_LABELS.get(idx));
             currentHazard.put(id, idx + 1);
         }
     }
@@ -314,6 +319,7 @@ public final class ReyesRoomManager {
         if (Boolean.TRUE.equals(alarmRinging.get(id))) return true; // already ringing, absorb the click
 
         alarmRinging.put(id, true);
+        AcademyTelemetry.record(player, "academy_alarm_pressed", null);
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof FireAlarmBlock && state.hasProperty(FireAlarmBlock.ACTIVATED)) {
             level.setBlock(pos, state.setValue(FireAlarmBlock.ACTIVATED, true), 3);
@@ -476,9 +482,11 @@ public final class ReyesRoomManager {
         if (!wasActive || activeNow) return false;
         if (player.position().distanceToSqr(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5) > NEAR_RANGE_SQ) return false;
 
+        String label = HAZARD_LABELS.get(HAZARDS.indexOf(hazard));
         boolean usedCorrectTool = hazard.correctTool().isInstance(player.getMainHandItem().getItem());
         if (usedCorrectTool) {
             data.mutate(player.getUUID(), AcademyProgress::addFireCorrectUse);
+            AcademyTelemetry.record(player, "academy_fire_correct", label);
             // Sweep any vanilla fire this hazard's failure/re-ignitions left lying around before
             // moving on -- HazardManager.defuse only resets the prop's OWN block state, it never
             // removes the real fire igniteAdjacent/ComputerBlock.randomTick already placed beside
@@ -494,6 +502,7 @@ public final class ReyesRoomManager {
         }
 
         data.mutate(player.getUUID(), AcademyProgress::addFireWrongUse);
+        AcademyTelemetry.record(player, "academy_fire_wrong", label);
         AcademyManager.sendPrompt(player, AcademyManager.pick(player,
                 "§6[Sgt. Reyes] §cNot that one — the fire flared back up! §7No harm done. Look at "
                         + "what's burning, press the matching extinguisher's §enumber key§7, and "
@@ -559,6 +568,7 @@ public final class ReyesRoomManager {
         if (held >= ROLL_REQUIRED_TICKS) {
             player.clearFire();
             data.mutate(id, p -> p.setDropAndRollPerformed(true));
+            AcademyTelemetry.record(player, "academy_drop_and_roll", null);
             igniteWindow.remove(id);
             rollHeldTicks.remove(id);
             AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §aFlames out — beautifully done! §fYou just "
@@ -599,6 +609,7 @@ public final class ReyesRoomManager {
         UUID id = player.getUUID();
         alarmRinging.remove(id);
         data.mutate(id, p -> p.setReyesPhase(ReyesPhase.DONE));
+        AcademyTelemetry.record(player, "academy_room2_complete", null);
         AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fFollow the glowing arrow to §6Sgt. Santos§f "
                 + "for the Earthquake Drill whenever you're ready.");
     }

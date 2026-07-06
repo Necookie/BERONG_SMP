@@ -8,6 +8,7 @@ import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.AcademyTelemetry;
 import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.academy.room1.CruzRoomManager;
@@ -67,6 +68,7 @@ public final class MorfeRoomManager {
 
         if (passed) {
             data.mutate(player.getUUID(), p -> p.setMorfePhase(MorfePhase.EVALUATED_PASS));
+            AcademyTelemetry.record(player, "academy_certified", "score=" + result.score());
             AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_PASS_LINES, () -> { });
             return;
         }
@@ -77,6 +79,7 @@ public final class MorfeRoomManager {
             gaps.append(area);
         }
         player.sendSystemMessage(Component.literal("§eThings to practice: §f" + gaps));
+        AcademyTelemetry.record(player, "academy_failed", "score=" + result.score() + ";weak=" + gaps);
 
         AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_FAIL_LINES, () -> {
             data.mutate(player.getUUID(), AcademyProgress::resetAll);

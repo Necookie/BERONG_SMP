@@ -13,6 +13,7 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.AcademyTelemetry;
 import net.necookie.disastersim.academy.AcademyVisuals;
 import net.necookie.disastersim.academy.CruzPhase;
 import net.necookie.disastersim.academy.ReyesPhase;
@@ -200,11 +201,6 @@ public final class CruzRoomManager {
 
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
-    private static long nextEscortMoveTick;
-    private static Vec3 lastCruzPos = Vec3.ZERO;
-    private static Vec3 lastTarget;
-    private static int stuckCycles;
-    private static long lastTooFarNudgeTick = Long.MIN_VALUE;
     private static long lastStartingLineNudgeTick = Long.MIN_VALUE;
 
     private CruzRoomManager() {}
@@ -232,6 +228,9 @@ public final class CruzRoomManager {
             if (next == phase) return;
 
             data.mutate(player.getUUID(), p -> p.setCruzPhase(next));
+            if (next == CruzPhase.BRIEFING) {
+                AcademyTelemetry.startAttempt(player);
+            }
             if (next == CruzPhase.GOSTOP_RUN) {
                 startGoStop(level, player);
             }
@@ -308,8 +307,8 @@ public final class CruzRoomManager {
         cruz.setEscorting(true);
 
         long now = level.getGameTime();
-        if (now < nextEscortMoveTick) return;
-        nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
+        if (now < cruz.getNextEscortMoveTick()) return;
+        cruz.setNextEscortMoveTick(now + ESCORT_MOVE_INTERVAL_TICKS);
 
         // Safety net: if she somehow ended up outside Room 1 entirely, don't bother pathing —
         // poof her straight back to the escorted player.
@@ -326,9 +325,9 @@ public final class CruzRoomManager {
             // position — reads as "catching up to" them rather than walking through them.
             target = clampToRoom1Bounds(nearPlayerTarget(cruz.position(), escortTarget.position()));
             long gameTime = level.getGameTime();
-            if (gameTime - lastTooFarNudgeTick >= TOO_FAR_NUDGE_COOLDOWN_TICKS
+            if (gameTime - cruz.getLastTooFarNudgeTick() >= TOO_FAR_NUDGE_COOLDOWN_TICKS
                     && !AcademyManager.isDialogueActive(escortTarget.getUUID())) {
-                lastTooFarNudgeTick = gameTime;
+                cruz.setLastTooFarNudgeTick(gameTime);
                 AcademyManager.sendPrompt(escortTarget, AcademyManager.pick(escortTarget,
                         "§a[Officer Cruz] §7Hey, don't wander off! Come back this way, trainee!",
                         "§a[Officer Cruz] §7Whoa there — come on back, we're not done yet!",
@@ -360,13 +359,14 @@ public final class CruzRoomManager {
         if (target == null) return;
 
         // A genuine target change (new phase, new waypoint, or the too-far chase toggling on/off)
-        // resets stall history -- otherwise stuckCycles/lastCruzPos accumulated chasing one target
+        // resets stall history -- otherwise stuck-cycle bookkeeping accumulated chasing one target
         // could trigger a spurious poof seconds into pursuing a completely different one.
+        Vec3 lastTarget = cruz.getLastEscortTarget();
         if (lastTarget == null || lastTarget.distanceToSqr(target) > TARGET_CHANGE_EPSILON_SQ) {
-            stuckCycles = 0;
-            lastCruzPos = cruz.position();
+            cruz.setEscortStuckCycles(0);
+            cruz.setLastEscortPos(cruz.position());
         }
-        lastTarget = target;
+        cruz.setLastEscortTarget(target);
 
         boolean issued = cruz.getNavigation().moveTo(target.x, target.y, target.z, 1.0);
         net.minecraft.world.level.pathfinder.Path path = cruz.getNavigation().getPath();
@@ -377,9 +377,10 @@ public final class CruzRoomManager {
         // progress (navigator-reported stuck, or no net displacement) — unless she's already
         // essentially at the target.
         double distToTargetSq = cruz.position().distanceToSqr(target);
-        boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
-        lastCruzPos = cruz.position();
+        boolean movedThisCycle = cruz.position().distanceToSqr(cruz.getLastEscortPos()) >= ESCORT_PROGRESS_EPSILON_SQ;
+        cruz.setLastEscortPos(cruz.position());
 
+        int stuckCycles = cruz.getEscortStuckCycles();
         if (distToTargetSq <= ESCORT_ARRIVED_RANGE_SQ) {
             stuckCycles = 0;
         } else if (unreachable) {
@@ -389,9 +390,10 @@ public final class CruzRoomManager {
         } else {
             stuckCycles = 0;
         }
+        cruz.setEscortStuckCycles(stuckCycles);
 
         if (stuckCycles >= ESCORT_STUCK_CYCLES_MAX) {
-            stuckCycles = 0;
+            cruz.setEscortStuckCycles(0);
             recoverCruz(level, cruz, escortTarget);
         }
     }
@@ -427,26 +429,27 @@ public final class CruzRoomManager {
     private static void tickReturnHome(ServerLevel level, CustomNpcEntity cruz) {
         if (cruz.position().distanceToSqr(BRIEFING_ANCHOR) <= ESCORT_ARRIVED_RANGE_SQ) {
             cruz.setEscorting(false);
-            lastTarget = null;
+            cruz.setLastEscortTarget(null);
             return;
         }
         cruz.setEscorting(true);
 
-        // Coming straight off an escort leg (lastTarget still set to wherever that left off):
-        // don't let its stall history count against this completely different walk.
+        // Coming straight off an escort leg (lastEscortTarget still set to wherever that left
+        // off): don't let its stall history count against this completely different walk.
+        Vec3 lastTarget = cruz.getLastEscortTarget();
         if (lastTarget == null || lastTarget.distanceToSqr(BRIEFING_ANCHOR) > TARGET_CHANGE_EPSILON_SQ) {
-            stuckCycles = 0;
-            lastCruzPos = cruz.position();
+            cruz.setEscortStuckCycles(0);
+            cruz.setLastEscortPos(cruz.position());
         }
-        lastTarget = BRIEFING_ANCHOR;
+        cruz.setLastEscortTarget(BRIEFING_ANCHOR);
 
         long now = level.getGameTime();
-        if (now < nextEscortMoveTick) return;
-        nextEscortMoveTick = now + ESCORT_MOVE_INTERVAL_TICKS;
+        if (now < cruz.getNextEscortMoveTick()) return;
+        cruz.setNextEscortMoveTick(now + ESCORT_MOVE_INTERVAL_TICKS);
 
         cruz.getNavigation().moveTo(BRIEFING_ANCHOR.x, BRIEFING_ANCHOR.y, BRIEFING_ANCHOR.z, 1.0);
-        boolean movedThisCycle = cruz.position().distanceToSqr(lastCruzPos) >= ESCORT_PROGRESS_EPSILON_SQ;
-        lastCruzPos = cruz.position();
+        boolean movedThisCycle = cruz.position().distanceToSqr(cruz.getLastEscortPos()) >= ESCORT_PROGRESS_EPSILON_SQ;
+        cruz.setLastEscortPos(cruz.position());
 
         // Deliberately never teleports on this leg: it's a straightforward, verified-open walk
         // back to a fixed point, so she should always just walk it for realism. Simply re-issuing
@@ -455,10 +458,14 @@ public final class CruzRoomManager {
         // flags the rare case where she's made no progress for an unusually long stretch, purely
         // for debugging -- it takes no action and never falls back to a teleport.
         if (movedThisCycle) {
-            stuckCycles = 0;
-        } else if (++stuckCycles == RETURN_HOME_STALL_WARNING_CYCLES) {
-            BerongSMP.LOGGER.warn("Officer Cruz has made no progress walking back to her anchor for {} cycles",
-                    stuckCycles);
+            cruz.setEscortStuckCycles(0);
+        } else {
+            int cycles = cruz.getEscortStuckCycles() + 1;
+            cruz.setEscortStuckCycles(cycles);
+            if (cycles == RETURN_HOME_STALL_WARNING_CYCLES) {
+                BerongSMP.LOGGER.warn("Officer Cruz has made no progress walking back to her anchor for {} cycles",
+                        cycles);
+            }
         }
     }
 
@@ -470,7 +477,7 @@ public final class CruzRoomManager {
     public static void resetCruz(ServerLevel level) {
         CustomNpcEntity cruz = findCruz(level);
         if (cruz == null) return;
-        stuckCycles = 0;
+        cruz.setEscortStuckCycles(0);
         teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
         cruz.setEscorting(false);
     }
@@ -764,6 +771,7 @@ public final class CruzRoomManager {
                 player.teleportTo(level, STAGING_POS.x, STAGING_POS.y, STAGING_POS.z,
                         Collections.emptySet(), player.getYRot(), player.getXRot(), true);
                 data.mutate(id, p -> { p.setCruzPhase(CruzPhase.GOSTOP_STAGE); p.addMovementMistake(); });
+                AcademyTelemetry.record(player, "academy_movement_mistake", "gostop_violation");
                 goStopStates.remove(id);
                 AcademyManager.cancelDialogue(player);
                 AcademyManager.sendPrompt(player, "§c[Officer Cruz] §7Oops — you moved after STOP! That's okay, "
@@ -775,6 +783,7 @@ public final class CruzRoomManager {
 
         if (player.getX() <= GOSTOP_FINISH_X) {
             data.mutate(id, p -> p.setCruzPhase(CruzPhase.DONE));
+            AcademyTelemetry.record(player, "academy_room1_complete", null);
             goStopStates.remove(id);
             // No teleport here on purpose: DONE keeps counting as escortable (see tick()/
             // updateCruzEscort), targeting the player's own live position every re-issue, exactly

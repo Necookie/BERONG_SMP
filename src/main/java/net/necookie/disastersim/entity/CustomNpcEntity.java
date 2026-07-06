@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * A static, invulnerable humanoid NPC that displays one of the five BFP instructor skins.
@@ -234,6 +235,38 @@ public class CustomNpcEntity extends Mob {
         this.setPose(crouching ? Pose.CROUCHING : Pose.STANDING);
         this.refreshDimensions();
     }
+
+    // -----------------------------------------------------------------------
+    // Escort bookkeeping — owned by the entity itself, not by whichever room manager is driving it
+    // -----------------------------------------------------------------------
+
+    /**
+     * Per-tick escort pathing state, formerly kept as {@code static} fields on {@code
+     * CruzRoomManager} (the only current caller). Living on the manager class meant this state
+     * described "the escort in progress" rather than "this specific NPC" — harmless while exactly
+     * one {@code OFFICER_CRUZ} instance exists (duplicates are swept on boot and every tick, see
+     * {@code NewTutBuildingManager.sweepStrayCruz}), but a latent trap if that invariant were ever
+     * violated: two entities would silently corrupt each other's stuck-cycle/target bookkeeping.
+     * Moving it here means it travels with the object it actually describes. This does NOT enable
+     * escorting two students at once — there is still exactly one physical NPC, so a second student
+     * in the same room still isn't escorted (an already-accepted limitation, not a bug this closes).
+     */
+    private long nextEscortMoveTick;
+    private Vec3 lastEscortPos = Vec3.ZERO;
+    private Vec3 lastEscortTarget;
+    private int escortStuckCycles;
+    private long lastTooFarNudgeTick = Long.MIN_VALUE;
+
+    public long getNextEscortMoveTick() { return nextEscortMoveTick; }
+    public void setNextEscortMoveTick(long tick) { this.nextEscortMoveTick = tick; }
+    public Vec3 getLastEscortPos() { return lastEscortPos; }
+    public void setLastEscortPos(Vec3 pos) { this.lastEscortPos = pos; }
+    public Vec3 getLastEscortTarget() { return lastEscortTarget; }
+    public void setLastEscortTarget(Vec3 target) { this.lastEscortTarget = target; }
+    public int getEscortStuckCycles() { return escortStuckCycles; }
+    public void setEscortStuckCycles(int cycles) { this.escortStuckCycles = cycles; }
+    public long getLastTooFarNudgeTick() { return lastTooFarNudgeTick; }
+    public void setLastTooFarNudgeTick(long tick) { this.lastTooFarNudgeTick = tick; }
 
     @Override
     protected void addAdditionalSaveData(ValueOutput output) {
