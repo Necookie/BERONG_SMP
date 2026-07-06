@@ -81,7 +81,8 @@ public final class AcademyDialogue {
             new DialogueLine("§6[Sgt. Reyes] §7To use an extinguisher: press its §enumber key (1-9)§7 to hold it, aim at the §ebase§7 of the fire, and §ehold the right mouse button§7. Match the color to what's burning — you can do it!", false)
         ),
         ReyesPhase.ALARM_CHECKPOINT, List.of(
-            new DialogueLine("§6[Sgt. Reyes] §fWell fought — but here's the one step people forget: the §cmoment§f a fire starts, before anything else, §c§lring the alarm§r§f. It warns everyone else in the building, even if you already put the fire out.", false),
+            new DialogueLine("§6[Sgt. Reyes] §fWell fought!", false),
+            new DialogueLine("§6[Sgt. Reyes] §fBut here's what people forget: the §cmoment§f a fire starts, §c§lring the alarm§r§f — before anything else. It warns everyone else in the building, even if you already put the fire out.", false),
             new DialogueLine("§6[Sgt. Reyes] §fFollow the glowing arrow to the fire alarm and press it. Once it's ringing, come straight back to me.", false)
         ),
         ReyesPhase.EVACUATION_BRIEF, List.of(
@@ -176,11 +177,8 @@ public final class AcademyDialogue {
     public static final Map<SantosPhase, List<DialogueLine>> SANTOS_LINES = Map.of(
         SantosPhase.NOT_STARTED, List.of(
             new DialogueLine("§6[Sgt. Santos] §fWell done getting this far! I'm Sergeant Santos. Earthquakes are different from fires — they give §cno warning at all§f. So we practice until the right move is automatic.", false),
-            new DialogueLine("§6[Sgt. Santos] §fA few things to know before the ground even moves: stay §caway from windows and glass§f — they shatter. Stay clear of tall shelves or anything heavy that isn't bolted down — it can tip.", false),
-            new DialogueLine("§6[Sgt. Santos] §fAnd whatever you do, §cdon't run outside mid-shake§f, and never use an elevator during or right after — stairs only, once it's safe to move at all.", false),
-            new DialogueLine("§6[Sgt. Santos] §fSee that sturdy table glowing green? That's your safe spot. When the shaking starts, walk under it — hold the §eW key§f to move, then press and hold §eShift§f to crouch down low.", false),
-            new DialogueLine("§6[Sgt. Santos] §fRemember three words: §e§lDROP — COVER — HOLD ON!§r§f DROP down low (hold §eShift§f), take COVER under the table, and HOLD ON — stay there until the shaking completely stops.", false),
-            new DialogueLine("§6[Sgt. Santos] §fOne more thing — real quakes often have §caftershocks§f. Don't jump up the second the first shake fades; hold your position a little longer, just in case.", false),
+            new DialogueLine("§6[Sgt. Santos] §fBefore it even starts: stay §caway from windows and heavy unsecured furniture§f — and never run outside or use an elevator mid-shake.", false),
+            new DialogueLine("§6[Sgt. Santos] §fSee that glowing table? That's your cover. Remember §e§lDROP§r§f (hold §eShift§f) — §e§lCOVER§r§f (walk under it with §eW§f) — §e§lHOLD ON§r§f until the shaking fully stops.", false),
             new DialogueLine("§6[Sgt. Santos] §fReady to try? The floor is about to shake — it's only practice, you're completely safe. Head for that glowing table the moment it starts!", true)
         ),
         SantosPhase.PRE_DRILL, List.of(
@@ -191,7 +189,8 @@ public final class AcademyDialogue {
             new DialogueLine("§6[Sgt. Santos] §7Get under the glowing table! Hold §eW§7 to walk there, then press and hold §eShift§7 to crouch — and stay put!", false)
         ),
         SantosPhase.DONE, List.of(
-            new DialogueLine("§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, covered, and held on like a pro! In a real quake you'd still watch for aftershocks and check the path out before moving.", false),
+            new DialogueLine("§6[Sgt. Santos] §fAnd... the shaking has stopped. You dropped, covered, and held on like a pro!", false),
+            new DialogueLine("§6[Sgt. Santos] §fReal quakes have aftershocks too — don't jump up the second it fades. You just felt why holding a bit longer matters.", false),
             new DialogueLine("§6[Sgt. Santos] §fOne last stop: follow the glowing arrow to §cCaptain Morfe§f for your results. Stand tall — you've earned it. Congratulations, trainee!", false)
         )
     );
