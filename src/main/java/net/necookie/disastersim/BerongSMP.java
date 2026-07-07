@@ -1,112 +1,58 @@
 package net.necookie.disastersim;
 
-import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.gamerules.GameRules;
-import net.minecraft.world.level.material.MapColor;
-import net.necookie.disastersim.block.BulletinBoardBlock;
-import net.necookie.disastersim.block.CeilingFanBlock;
-import net.necookie.disastersim.block.ChairBlock;
-import net.necookie.disastersim.block.ComputerBlock;
-import net.necookie.disastersim.block.ComputerTableBlock;
-import net.necookie.disastersim.block.DrawersBlock;
-import net.necookie.disastersim.block.FilingCabinetBlock;
-import net.necookie.disastersim.block.FireAlarmBlock;
-import net.necookie.disastersim.block.LightBulbBlock;
-import net.necookie.disastersim.block.LockerBlock;
-import net.necookie.disastersim.block.SinkBlock;
-import net.necookie.disastersim.block.TableBlock;
-import net.necookie.disastersim.block.ToiletBlock;
-import net.necookie.disastersim.block.TrashCanBlock;
-import net.necookie.disastersim.block.FireHoseCabinetBlock;
-import net.necookie.disastersim.block.WhiteboardBlock;
-import net.necookie.disastersim.common.hazard.*;
-import net.minecraft.world.level.storage.LevelData;
-
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
-import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredItem;
-import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.necookie.disastersim.entity.CustomNpcEntity;
-import net.necookie.disastersim.entity.NpcType;
-import net.necookie.disastersim.item.NpcSpawnerItem;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.equipment.ArmorMaterial;
-import net.minecraft.world.item.equipment.ArmorType;
-import net.minecraft.world.item.equipment.EquipmentAsset;
-import net.minecraft.world.item.equipment.EquipmentAssets;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.level.storage.LevelData;
 import net.necookie.disastersim.command.ModCommands;
-import net.necookie.disastersim.common.structure.LobbyManager;
+import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.common.structure.AcademyBuildingManager;
+import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
-import net.necookie.disastersim.item.CO2ExtinguisherItem;
-import net.necookie.disastersim.item.FireExtinguisherItem;
-import net.necookie.disastersim.item.HazardWandItem;
-import net.necookie.disastersim.item.WetChemicalExtinguisherItem;
 import net.necookie.disastersim.network.AcademyCompassPayload;
 import net.necookie.disastersim.network.AcademyShakePayload;
 import net.necookie.disastersim.network.AcademyStatusPayload;
 import net.necookie.disastersim.network.DropAndRollPayload;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.network.TutorialStatusPayload;
-import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.registry.ModAttachments;
 import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.registry.ModCreativeTabs;
-import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModEntities;
+import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.session.SessionManager;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import org.slf4j.Logger;
 
 /**
- * Main entry point for the BerongSMP mod.
- * This class handles the registration of blocks, items, and other game elements,
- * as well as setting up common mod logic and server-side initialization.
+ * Main entry point for the BerongSMP mod — a thin bootstrap. All game-object registrations live
+ * in {@code registry/} (ModBlocks, ModItems, ModCreativeTabs, ModEntities, ModSounds,
+ * ModAttachments); this class wires them to the mod event bus, registers network payloads and
+ * lifecycle listeners, and performs one-time world setup on server start.
  */
 @Mod(BerongSMP.MODID)
 public class BerongSMP {
@@ -116,16 +62,8 @@ public class BerongSMP {
     /** Logger instance for mod-specific logging. */
     public static final Logger LOGGER = LogUtils.getLogger();
     
-    // ── NPC spawner items (one per instructor) ───────────────────────────────
-
-    // ── Furniture blocks ─────────────────────────────────────────────────────
-
-    // ── Hazard prop blocks (20 items — populated below as blocks are declared) ──
-
-    // ── Classroom Zone (5 blocks) ─────────────────────────────────────────────
-
     /**
-     * Constructor for BerongSMP. Registers registers and listeners to the mod event bus.
+     * Wires all registries, network payloads, and lifecycle listeners to the event buses.
      *
      * <p>NeoForge has two separate event buses:
      * <ul>
@@ -186,7 +124,7 @@ public class BerongSMP {
 
         // Load berongsmp-common.toml and bind it to our Config class.
         // COMMON type means the file lives server-side; values sync to clients on join.
-        modContainer.registerConfig(ModConfig.Type.COMMON, net.necookie.disastersim.Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     /**
