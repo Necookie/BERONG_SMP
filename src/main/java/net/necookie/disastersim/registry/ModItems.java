@@ -287,6 +287,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("reagent_storage_shelf", ModBlocks.REAGENT_STORAGE_SHELF);
     static { HAZARD_ITEM_MAP.put("reagent_storage_shelf", REAGENT_STORAGE_SHELF_ITEM); }
 
+    public static final DeferredItem<BlockItem> OVERLOADED_BREAKER_PANEL_ITEM =
+            ITEMS.registerSimpleBlockItem("overloaded_breaker_panel", ModBlocks.OVERLOADED_BREAKER_PANEL);
+    static { HAZARD_ITEM_MAP.put("overloaded_breaker_panel", OVERLOADED_BREAKER_PANEL_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 

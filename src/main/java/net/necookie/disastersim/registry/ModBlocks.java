@@ -343,6 +343,13 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
 
+    /** Overloaded Breaker Panel (Electrical Hazard) — see {@link OverloadedBreakerPanelBlock}. */
+    public static final DeferredBlock<OverloadedBreakerPanelBlock> OVERLOADED_BREAKER_PANEL = BLOCKS.registerBlock(
+            "overloaded_breaker_panel", OverloadedBreakerPanelBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {
