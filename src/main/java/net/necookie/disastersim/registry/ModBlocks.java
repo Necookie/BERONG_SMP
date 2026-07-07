@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.TeachersDeskBlock;
 import net.necookie.disastersim.block.CeilingFanBlock;
 import net.necookie.disastersim.block.ChairBlock;
 import net.necookie.disastersim.block.ComputerBlock;
@@ -389,6 +390,12 @@ public final class ModBlocks {
             "clogged_exhaust_fan", CloggedExhaustFanBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Teacher's Desk — see {@link TeachersDeskBlock}. */
+    public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
+            "teachers_desk", TeachersDeskBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
 
     private ModBlocks() {}
 

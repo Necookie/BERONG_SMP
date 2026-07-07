@@ -315,6 +315,9 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("clogged_exhaust_fan", ModBlocks.CLOGGED_EXHAUST_FAN);
     static { HAZARD_ITEM_MAP.put("clogged_exhaust_fan", CLOGGED_EXHAUST_FAN_ITEM); }
 
+    public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
+            ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -352,6 +355,7 @@ public final class ModItems {
         ALL_ITEM_MAP.put("trash_can", TRASH_CAN_ITEM);
         ALL_ITEM_MAP.put("ceiling_fan", CEILING_FAN_ITEM);
         ALL_ITEM_MAP.put("light_bulb", LIGHT_BULB_ITEM);
+        ALL_ITEM_MAP.put("teachers_desk", TEACHERS_DESK_ITEM);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 

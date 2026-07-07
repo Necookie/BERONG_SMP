@@ -1,0 +1,42 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/teacher_desk_top",
+    "top": "berongsmp:block/teacher_desk_top",
+    "front": "berongsmp:block/teacher_desk_front",
+    "side": "berongsmp:block/teacher_desk_side"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        1
+      ],
+      "to": [
+        16,
+        12,
+        15
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      }
+    }
+  ]
+}

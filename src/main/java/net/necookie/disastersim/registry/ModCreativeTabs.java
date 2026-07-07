@@ -66,6 +66,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TRASH_CAN_ITEM.get());
                 output.accept(ModItems.CEILING_FAN_ITEM.get());
                 output.accept(ModItems.LIGHT_BULB_ITEM.get());
+                output.accept(ModItems.TEACHERS_DESK_ITEM.get());
             }).build());
 
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
