@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
@@ -91,7 +92,7 @@ public class ItemCommands {
         ServerLevel level = source.getLevel();
         BlockPos pos = player.blockPosition();
 
-        CustomNpcEntity npc = new CustomNpcEntity(BerongSMP.CUSTOM_NPC.get(), level);
+        CustomNpcEntity npc = new CustomNpcEntity(ModEntities.CUSTOM_NPC.get(), level);
         npc.setNpcType(npcType);
         npc.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
         double dx = player.getX() - (pos.getX() + 0.5);

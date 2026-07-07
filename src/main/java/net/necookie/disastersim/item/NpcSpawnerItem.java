@@ -6,6 +6,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
+import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
@@ -32,7 +33,7 @@ public class NpcSpawnerItem extends Item {
         BlockPos spawnPos = ctx.getClickedPos().relative(ctx.getClickedFace());
         Player player = ctx.getPlayer();
 
-        CustomNpcEntity npc = new CustomNpcEntity(BerongSMP.CUSTOM_NPC.get(), level);
+        CustomNpcEntity npc = new CustomNpcEntity(ModEntities.CUSTOM_NPC.get(), level);
         npc.setNpcType(npcType);
         npc.setPos(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5);
 

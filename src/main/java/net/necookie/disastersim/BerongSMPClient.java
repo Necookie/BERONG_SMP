@@ -1,5 +1,6 @@
 package net.necookie.disastersim;
 
+import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.client.SimulationHud;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -78,7 +79,7 @@ public class BerongSMPClient {
      */
     @SubscribeEvent
     static void onRegisterEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(BerongSMP.CUSTOM_NPC.get(), CustomNpcRenderer::new);
+        event.registerEntityRenderer(ModEntities.CUSTOM_NPC.get(), CustomNpcRenderer::new);
     }
 
     @SubscribeEvent

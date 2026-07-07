@@ -93,6 +93,7 @@ import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.registry.ModAttachments;
+import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.session.SessionManager;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -120,18 +121,6 @@ public class BerongSMP {
     
     /** Deferred Register for Creative Mode Tabs. */
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
-
-    /** Deferred Register for Entity Types. */
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
-
-    // ── NPC entity ───────────────────────────────────────────────────────────
-
-    /** Single entity type shared by all instructor/character NPCs; NpcType stored in NBT selects the skin. */
-    public static final DeferredHolder<EntityType<?>, EntityType<CustomNpcEntity>> CUSTOM_NPC =
-            ENTITY_TYPES.register("custom_npc", id ->
-                    EntityType.Builder.<CustomNpcEntity>of(CustomNpcEntity::new, MobCategory.MISC)
-                            .sized(0.6f, 1.8f)
-                            .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
 
     // ── NPC spawner items (one per instructor) ───────────────────────────────
 
@@ -728,11 +717,10 @@ public class BerongSMP {
         // vanilla registries when NeoForge fires the matching RegistryEvent.
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
-        ENTITY_TYPES.register(modEventBus);
+        ModEntities.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         ModSounds.register(modEventBus);
         ModAttachments.register(modEventBus);
-        modEventBus.addListener(this::onEntityAttributes);
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
         // on the mod bus — it must be registered here so NeoForge picks it up.
@@ -812,11 +800,6 @@ public class BerongSMP {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(EXAMPLE_BLOCK_ITEM);
         }
-    }
-
-    /** Registers attribute defaults for the custom NPC entity (every {@code Mob} EntityType needs them). */
-    private void onEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(CUSTOM_NPC.get(), CustomNpcEntity.createAttributes().build());
     }
 
     /**
