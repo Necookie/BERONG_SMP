@@ -15,12 +15,12 @@ import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.academy.room3.SantosRoomManager;
 import net.necookie.disastersim.academy.room4.MorfeRoomManager;
+import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.network.AcademyStatusPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -45,6 +45,23 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class AcademyManager {
 
     private AcademyManager() {}
+
+    /**
+     * The logout hook is the primary mid-effect cleanup, but it only runs on a clean disconnect —
+     * a server crash (or force-kill) mid-drill persists {@code SantosPhase.PRE_DRILL}/
+     * {@code QUAKE_ACTIVE} (or a mid-demo Reyes phase) in {@link AcademySavedData} with the logout
+     * rollback never having run, and the room's tick loop would re-enter the effect the moment the
+     * player rejoins: a full-strength earthquake out of nowhere, with no dialogue and no context.
+     * Running the same (idempotent, phase-gated) rollback on login closes that path; for players
+     * whose logout hook already ran, every step is a no-op.
+     */
+    static {
+        PlayerLifecycleRegistry.registerLogoutHook(player -> {
+            cancelDialogue(player);
+            clearTransientState(player);
+        });
+        PlayerLifecycleRegistry.registerLoginHook(AcademyManager::clearTransientState);
+    }
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
@@ -78,30 +95,6 @@ public final class AcademyManager {
         MorfeRoomManager.tick(level);
     }
 
-    @SubscribeEvent
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            cancelDialogue(player);
-            clearTransientState(player);
-        }
-    }
-
-    /**
-     * The logout hook above is the primary mid-effect cleanup, but it only runs on a clean
-     * disconnect — a server crash (or force-kill) mid-drill persists {@code SantosPhase.PRE_DRILL}/
-     * {@code QUAKE_ACTIVE} (or a mid-demo Reyes phase) in {@link AcademySavedData} with the logout
-     * rollback never having run, and the room's tick loop would re-enter the effect the moment the
-     * player rejoins: a full-strength earthquake out of nowhere, with no dialogue and no context.
-     * Running the same (idempotent, phase-gated) rollback on login closes that path; for players
-     * whose logout hook already ran, every step is a no-op.
-     */
-    @SubscribeEvent
-    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) {
-            clearTransientState(player);
-        }
-    }
-
     /**
      * Drops every room manager's leak-prone per-player transient state (marks hit, Go/Stop
      * timers, ignite windows, the compass dedupe cache, ...) without touching persisted
@@ -113,8 +106,8 @@ public final class AcademyManager {
      * re-triggered and no clear sign to the player of why it's happening again — reported as "the
      * earthquake is still going after exiting and reloading the world." Both room managers roll
      * their own phase back to a safe re-enterable point internally; see their {@code clearPlayer}.
-     * Shared by the logout hook above and {@code /bfp new_tutorial reset}, which needs the same
-     * cleanup while the player stays connected.
+     * Shared by the {@link PlayerLifecycleRegistry} hooks registered above and
+     * {@code /bfp new_tutorial reset}, which needs the same cleanup while the player stays connected.
      */
     public static void clearTransientState(ServerPlayer player) {
         UUID id = player.getUUID();
