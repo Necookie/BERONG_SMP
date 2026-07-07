@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/blackboard_surface",
+    "board": "berongsmp:block/blackboard_surface",
+    "frame": "berongsmp:block/blackboard_frame_wood"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        1,
+        13
+      ],
+      "to": [
+        16,
+        15,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#frame"
+        },
+        "down": {
+          "texture": "#frame"
+        },
+        "north": {
+          "texture": "#board"
+        },
+        "south": {
+          "texture": "#frame"
+        },
+        "east": {
+          "texture": "#frame"
+        },
+        "west": {
+          "texture": "#frame"
+        }
+      }
+    }
+  ]
+}
