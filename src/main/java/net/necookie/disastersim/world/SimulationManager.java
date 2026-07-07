@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.session.TursoClient;
 import net.neoforged.bus.api.SubscribeEvent;

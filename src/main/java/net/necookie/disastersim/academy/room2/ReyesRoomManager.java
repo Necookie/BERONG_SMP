@@ -31,7 +31,7 @@ import net.necookie.disastersim.item.CO2ExtinguisherItem;
 import net.necookie.disastersim.item.FireExtinguisherItem;
 import net.necookie.disastersim.item.WetChemicalExtinguisherItem;
 import net.necookie.disastersim.player.DropAndRollManager;
-import net.necookie.disastersim.world.HazardManager;
+import net.necookie.disastersim.common.hazard.HazardManager;
 
 import java.util.List;
 import java.util.Map;

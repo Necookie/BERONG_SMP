@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -15,6 +15,7 @@ import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.block.hazard.HazardBlock;
 import net.necookie.disastersim.block.hazard.HazardFacingBlock;
 import net.necookie.disastersim.block.hazard.WoodshopSawdustLayerBlock;
+import net.necookie.disastersim.world.SimulationSession;
 
 import java.util.ArrayList;
 import java.util.Iterator;

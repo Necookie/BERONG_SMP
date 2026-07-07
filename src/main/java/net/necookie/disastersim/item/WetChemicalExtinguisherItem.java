@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
-import net.necookie.disastersim.world.HazardManager;
+import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 import net.necookie.disastersim.world.TelemetryCsvWriter;

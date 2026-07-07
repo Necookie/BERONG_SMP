@@ -71,12 +71,12 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
         } else if (isKitchenHazard(state.getBlock())) {
-            if (net.necookie.disastersim.world.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+            if (net.necookie.disastersim.common.hazard.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
                 warnWrongTool(sp, "§c✗ Dry chemical won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
             }
         } else {
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
-            extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
+            extinguished = net.necookie.disastersim.common.hazard.HazardManager.defuse(level, hazardSession, pos);
         }
 
         if (extinguished && user instanceof ServerPlayer serverPlayer) {

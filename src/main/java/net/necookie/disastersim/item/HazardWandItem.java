@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.block.hazard.HazardBlock;
 import net.necookie.disastersim.block.hazard.WoodshopSawdustLayerBlock;
-import net.necookie.disastersim.world.HazardManager;
+import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
 

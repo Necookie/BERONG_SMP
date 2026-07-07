@@ -68,11 +68,11 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                         "§a✓ Electrical fire suppressed! §7(Computer destroyed — replace it)"));
             }
         } else if (isKitchenHazard(state.getBlock())) {
-            if (net.necookie.disastersim.world.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+            if (net.necookie.disastersim.common.hazard.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
                 warnWrongTool(sp, "§c✗ CO2 won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
             }
         } else {
-            extinguished = net.necookie.disastersim.world.HazardManager.defuse(level, hazardSession, pos);
+            extinguished = net.necookie.disastersim.common.hazard.HazardManager.defuse(level, hazardSession, pos);
         }
 
         if (extinguished) {
