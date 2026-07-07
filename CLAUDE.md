@@ -23,6 +23,8 @@ This file is a lean index; deep-dive content lives under `docs/`:
   [hazard-state-management-log.md](docs/history/hazard-state-management-log.md)
 - **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
 - **`docs/academy_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
+- **`docs/hazard_props_spec.md`** — design spec for the 20 hazard prop blocks (zones, rationale, failure consequences)
+- **`docs/skills_manual.md`** — the project skills in `.claude/skills/` and when/how to invoke each
 
 When a change touches a system with its own doc, update that doc — not a growing section here.
 
