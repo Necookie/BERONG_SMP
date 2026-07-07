@@ -14,8 +14,8 @@ import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.common.hazard.HazardBlock;
 import net.necookie.disastersim.common.hazard.WoodshopSawdustLayerBlock;
 import net.necookie.disastersim.common.hazard.HazardManager;
-import net.necookie.disastersim.world.SimulationManager;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 import java.util.function.Consumer;
 

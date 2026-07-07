@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.simulation;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;

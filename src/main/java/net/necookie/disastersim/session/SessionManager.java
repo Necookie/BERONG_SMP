@@ -5,8 +5,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
-import net.necookie.disastersim.world.SimulationManager;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 import java.time.Instant;
 import java.util.Map;

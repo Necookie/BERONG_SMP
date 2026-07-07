@@ -17,7 +17,7 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.registration.RegistrationManager;
 import net.necookie.disastersim.tutorial.NpcRole;
-import net.necookie.disastersim.world.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
 import net.necookie.disastersim.tutorial.TutorialStage;

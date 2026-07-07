@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.simulation;
 
 import com.google.gson.Gson;
 

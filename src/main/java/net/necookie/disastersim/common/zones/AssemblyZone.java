@@ -8,7 +8,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 /**
  * Defines assembly (safe) zones outside the LSPU Library and CCS Admin Building.

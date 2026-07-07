@@ -11,8 +11,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.Map;
 import java.util.UUID;
-import net.necookie.disastersim.world.SimulationManager;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 public class SimulationCommands {
 

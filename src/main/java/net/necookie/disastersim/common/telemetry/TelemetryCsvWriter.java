@@ -6,7 +6,7 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.FireAlarmBlock;
 import net.necookie.disastersim.common.zones.AssemblyZone;
 import net.necookie.disastersim.common.zones.ExitZones;
-import net.necookie.disastersim.world.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

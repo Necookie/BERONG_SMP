@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.block.ComputerBlock;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 import java.util.ArrayList;
 import java.util.Iterator;

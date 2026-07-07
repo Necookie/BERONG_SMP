@@ -1,6 +1,6 @@
 package net.necookie.disastersim;
 
-import net.necookie.disastersim.world.SimulationManager.SimulationState;
+import net.necookie.disastersim.common.simulation.SimulationManager.SimulationState;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

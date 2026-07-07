@@ -18,8 +18,8 @@ import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.hazard.HazardManager;
-import net.necookie.disastersim.world.SimulationManager;
-import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.function.Consumer;

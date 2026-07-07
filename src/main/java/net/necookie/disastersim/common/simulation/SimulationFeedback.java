@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.simulation;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
