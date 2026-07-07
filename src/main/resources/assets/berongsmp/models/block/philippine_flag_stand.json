@@ -1,0 +1,73 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/flag_pole_brass",
+    "pole": "berongsmp:block/flag_pole_brass",
+    "flag": "berongsmp:block/flag_ph_panel"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        16,
+        9
+      ],
+      "faces": {
+        "up": {
+          "texture": "#pole"
+        },
+        "down": {
+          "texture": "#pole"
+        },
+        "north": {
+          "texture": "#pole"
+        },
+        "south": {
+          "texture": "#pole"
+        },
+        "east": {
+          "texture": "#pole"
+        },
+        "west": {
+          "texture": "#pole"
+        }
+      }
+    },
+    {
+      "from": [
+        9,
+        9,
+        7.5
+      ],
+      "to": [
+        16,
+        15,
+        8.5
+      ],
+      "faces": {
+        "up": {
+          "texture": "#flag"
+        },
+        "down": {
+          "texture": "#flag"
+        },
+        "north": {
+          "texture": "#flag"
+        },
+        "south": {
+          "texture": "#flag"
+        },
+        "east": {
+          "texture": "#flag"
+        },
+        "west": {
+          "texture": "#flag"
+        }
+      }
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.PhilippineFlagStandBlock;
 import net.necookie.disastersim.block.TallBookshelfBlock;
 import net.necookie.disastersim.block.ArmchairDeskBlock;
 import net.necookie.disastersim.block.TeachersDeskBlock;
@@ -410,6 +411,12 @@ public final class ModBlocks {
             "tall_bookshelf", TallBookshelfBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Philippine Flag Stand — see {@link PhilippineFlagStandBlock}. */
+    public static final DeferredBlock<PhilippineFlagStandBlock> PHILIPPINE_FLAG_STAND = BLOCKS.registerBlock(
+            "philippine_flag_stand", PhilippineFlagStandBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.GOLD)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 
