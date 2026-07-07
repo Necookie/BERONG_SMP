@@ -377,6 +377,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> EMERGENCY_LIGHT_ITEM =
             ITEMS.registerSimpleBlockItem("emergency_light", ModBlocks.EMERGENCY_LIGHT);
 
+    public static final DeferredItem<BlockItem> EVACUATION_MAP_ITEM =
+            ITEMS.registerSimpleBlockItem("evacuation_map", ModBlocks.EVACUATION_MAP);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -433,6 +436,7 @@ public final class ModItems {
         ALL_ITEM_MAP.put("smoke_detector", SMOKE_DETECTOR_ITEM);
         ALL_ITEM_MAP.put("sprinkler_head", SPRINKLER_HEAD_ITEM);
         ALL_ITEM_MAP.put("emergency_light", EMERGENCY_LIGHT_ITEM);
+        ALL_ITEM_MAP.put("evacuation_map", EVACUATION_MAP_ITEM);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 

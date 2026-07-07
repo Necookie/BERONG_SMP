@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/evacuation_map"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/evacuation_map",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/evacuation_map",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/evacuation_map",
+      "y": 270
+    }
+  }
+}

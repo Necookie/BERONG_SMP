@@ -40,6 +40,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.FIRE_BLANKET.get());
                 output.accept(ModItems.COMPUTER_ITEM.get());
                 output.accept(ModItems.FIRE_ALARM_ITEM.get());
+                output.accept(ModItems.EVACUATION_MAP_ITEM.get());
                 output.accept(ModItems.EMERGENCY_LIGHT_ITEM.get());
                 output.accept(ModItems.SPRINKLER_HEAD_ITEM.get());
                 output.accept(ModItems.SMOKE_DETECTOR_ITEM.get());

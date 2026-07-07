@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.EvacuationMapBlock;
 import net.necookie.disastersim.block.EmergencyLightBlock;
 import net.necookie.disastersim.block.SprinklerHeadBlock;
 import net.necookie.disastersim.block.SmokeDetectorBlock;
@@ -490,6 +491,12 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
+
+    /** Evacuation Map — see {@link EvacuationMapBlock}. */
+    public static final DeferredBlock<EvacuationMapBlock> EVACUATION_MAP = BLOCKS.registerBlock(
+            "evacuation_map", EvacuationMapBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion());
 
     private ModBlocks() {}
 
