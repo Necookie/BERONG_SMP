@@ -357,6 +357,13 @@ public final class ModBlocks {
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
 
+    /** Jammed Laser Printer (Overheat Hazard) — see {@link JammedLaserPrinterBlock}. */
+    public static final DeferredBlock<JammedLaserPrinterBlock> JAMMED_LASER_PRINTER = BLOCKS.registerBlock(
+            "jammed_laser_printer", JammedLaserPrinterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

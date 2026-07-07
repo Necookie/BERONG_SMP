@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/printer_body",
+    "body": "berongsmp:block/printer_body",
+    "front": "berongsmp:block/printer_jam_scorched"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        10,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}
