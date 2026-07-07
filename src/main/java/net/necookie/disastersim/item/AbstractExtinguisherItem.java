@@ -231,7 +231,7 @@ public abstract class AbstractExtinguisherItem extends Item {
     }
 
     /** True if {@code block} is one of the five Class F/K cafeteria/kitchen hazard props. */
-    protected static boolean isKitchenHazard(Block block) {
+    public static boolean isKitchenHazard(Block block) {
         return KITCHEN_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
     }
 
