@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/microwave_body",
+    "body": "berongsmp:block/microwave_body",
+    "front": "berongsmp:block/microwave_door_glow"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        3,
+        2
+      ],
+      "to": [
+        14,
+        12,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

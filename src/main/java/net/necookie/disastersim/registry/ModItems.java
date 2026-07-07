@@ -275,6 +275,10 @@ public final class ModItems {
 
     static { HAZARD_ITEM_MAP.put("commercial_deep_fryer", COMMERCIAL_DEEP_FRYER_ITEM); }
 
+    public static final DeferredItem<BlockItem> OVERLOADED_MICROWAVE_ITEM =
+            ITEMS.registerSimpleBlockItem("overloaded_microwave", ModBlocks.OVERLOADED_MICROWAVE);
+    static { HAZARD_ITEM_MAP.put("overloaded_microwave", OVERLOADED_MICROWAVE_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
