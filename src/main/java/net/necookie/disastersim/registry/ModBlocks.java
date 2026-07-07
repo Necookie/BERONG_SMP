@@ -364,6 +364,13 @@ public final class ModBlocks {
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
 
+    /** Unattended Shrine Candle (Open Flame Hazard) — see {@link UnattendedShrineCandleBlock}. */
+    public static final DeferredBlock<UnattendedShrineCandleBlock> UNATTENDED_SHRINE_CANDLE = BLOCKS.registerBlock(
+            "unattended_shrine_candle", UnattendedShrineCandleBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
+                    .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

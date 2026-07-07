@@ -1,0 +1,42 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/candle_wax",
+    "body": "berongsmp:block/candle_wax",
+    "top": "berongsmp:block/candle_wax",
+    "bottom": "berongsmp:block/shrine_cloth"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        10,
+        11
+      ],
+      "faces": {
+        "down": {
+          "texture": "#bottom"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

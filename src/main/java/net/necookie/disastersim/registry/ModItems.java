@@ -299,6 +299,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("jammed_laser_printer", ModBlocks.JAMMED_LASER_PRINTER);
     static { HAZARD_ITEM_MAP.put("jammed_laser_printer", JAMMED_LASER_PRINTER_ITEM); }
 
+    public static final DeferredItem<BlockItem> UNATTENDED_SHRINE_CANDLE_ITEM =
+            ITEMS.registerSimpleBlockItem("unattended_shrine_candle", ModBlocks.UNATTENDED_SHRINE_CANDLE);
+    static { HAZARD_ITEM_MAP.put("unattended_shrine_candle", UNATTENDED_SHRINE_CANDLE_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
