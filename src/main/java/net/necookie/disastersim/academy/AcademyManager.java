@@ -70,7 +70,7 @@ public final class AcademyManager {
     /** Called once per server tick from {@code SimulationManager.onServerTick}. */
     public static void tick(ServerLevel level) {
         tickDialogues(level);
-        net.necookie.disastersim.world.NewTutBuildingManager.sweepStrayCruz(level);
+        net.necookie.disastersim.common.structure.NewTutBuildingManager.sweepStrayCruz(level);
         AcademyGuardrails.tickRescue(level);
         CruzRoomManager.tick(level);
         ReyesRoomManager.tick(level);

@@ -31,8 +31,8 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
-import net.necookie.disastersim.world.NewTutBuildingManager;
-import net.necookie.disastersim.world.TutorialLobbyManager;
+import net.necookie.disastersim.common.structure.NewTutBuildingManager;
+import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 
 public class BfpAdminCommands {
 

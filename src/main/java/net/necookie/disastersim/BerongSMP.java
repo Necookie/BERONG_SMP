@@ -62,8 +62,8 @@ import net.necookie.disastersim.item.NpcSpawnerItem;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.necookie.disastersim.world.LobbyManager;
-import net.necookie.disastersim.world.TutorialLobbyManager;
+import net.necookie.disastersim.common.structure.LobbyManager;
+import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 
 /**
  * Main entry point for the BerongSMP mod.
@@ -847,7 +847,7 @@ public class BerongSMP {
         TutorialLobbyManager.initNpcs(event.getServer().overworld());
         // Also bakes in its own NPCs/armor stands from the schematic's Entities tag — same
         // entity-storage-must-be-ready requirement as the call above.
-        net.necookie.disastersim.world.NewTutBuildingManager.place(event.getServer().overworld());
+        net.necookie.disastersim.common.structure.NewTutBuildingManager.place(event.getServer().overworld());
     }
 
     @SubscribeEvent
