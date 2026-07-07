@@ -22,6 +22,7 @@ import net.necookie.disastersim.common.simulation.SimulationSession;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.function.Consumer;
+import net.necookie.disastersim.common.hazard.HazardManager;
 
 /**
  * CO2 (clean-agent) extinguisher: the correct Class-C tool for the CCS electrical-fire scenario.
@@ -68,11 +69,11 @@ public class CO2ExtinguisherItem extends AbstractExtinguisherItem {
                         "§a✓ Electrical fire suppressed! §7(Computer destroyed — replace it)"));
             }
         } else if (isKitchenHazard(state.getBlock())) {
-            if (net.necookie.disastersim.common.hazard.HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+            if (HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
                 warnWrongTool(sp, "§c✗ CO2 won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
             }
         } else {
-            extinguished = net.necookie.disastersim.common.hazard.HazardManager.defuse(level, hazardSession, pos);
+            extinguished = HazardManager.defuse(level, hazardSession, pos);
         }
 
         if (extinguished) {

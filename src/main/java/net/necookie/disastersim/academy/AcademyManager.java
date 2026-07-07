@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.necookie.disastersim.common.structure.NewTutBuildingManager;
 
 /**
  * Entry point for the Academy (new tutorial building): dispatches NPC right-clicks to the
@@ -89,7 +90,7 @@ public final class AcademyManager {
     /** Called once per server tick from {@code SimulationManager.onServerTick}. */
     public static void tick(ServerLevel level) {
         tickDialogues(level);
-        net.necookie.disastersim.common.structure.NewTutBuildingManager.sweepStrayCruz(level);
+        NewTutBuildingManager.sweepStrayCruz(level);
         AcademyGuardrails.tickRescue(level);
         CruzRoomManager.tick(level);
         ReyesRoomManager.tick(level);

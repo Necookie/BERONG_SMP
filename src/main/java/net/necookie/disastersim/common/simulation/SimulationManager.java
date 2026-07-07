@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.necookie.disastersim.session.SessionManager;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 
 /**
  * Central registry and tick driver for all active disaster simulations.
@@ -323,7 +325,7 @@ public class SimulationManager {
 
         ServerPlayer player = session.getPlayer();
         if (player != null) {
-            net.necookie.disastersim.session.SessionManager.onSimulationEnd(player, session);
+            SessionManager.onSimulationEnd(player, session);
         }
         if (player == null) return;
 
@@ -363,7 +365,7 @@ public class SimulationManager {
     public static void onServerTick(ServerTickEvent.Post event) {
         net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            net.necookie.disastersim.common.scheduling.TickScheduler.tick(server.overworld());
+            TickScheduler.tick(server.overworld());
         }
 
         // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.
@@ -612,8 +614,8 @@ public class SimulationManager {
             net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
             boolean isHazard = bs.is(net.minecraft.world.level.block.Blocks.FIRE)
                     || bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)
-                    || (bs.getBlock() instanceof net.necookie.disastersim.block.ComputerBlock
-                        && bs.getValue(net.necookie.disastersim.block.ComputerBlock.BURNING));
+                    || (bs.getBlock() instanceof ComputerBlock
+                        && bs.getValue(ComputerBlock.BURNING));
             if (isHazard) {
                 double d = origin.distSqr(check);
                 if (d < minSq) minSq = d;

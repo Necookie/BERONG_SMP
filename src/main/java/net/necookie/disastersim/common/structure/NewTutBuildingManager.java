@@ -13,6 +13,7 @@ import net.necookie.disastersim.entity.NpcType;
 
 import java.util.List;
 import java.util.Map;
+import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 
 /**
  * Places {@code new_tut_building1.0.schem} — a WorldEdit {@code //copy -e} capture of the
@@ -117,7 +118,7 @@ public final class NewTutBuildingManager {
             placeGreenMarks(level);
             // Self-healing: make sure the Tool Selection Wall's 3 extinguisher frames exist and
             // are filled, even if the schematic's own copies failed to spawn for any reason.
-            net.necookie.disastersim.academy.room2.ReyesRoomManager.restockExtinguisherFrames(level);
+            ReyesRoomManager.restockExtinguisherFrames(level);
         } else {
             BerongSMP.LOGGER.error("Failed to place new tutorial building ({}) at {}", SCHEM_PATH, POS);
         }

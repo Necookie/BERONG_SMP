@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.necookie.disastersim.session.SessionManager;
 
 /**
  * Manages the per-player safety tutorial that gates access to the disaster simulations.
@@ -323,7 +324,7 @@ public class TutorialManager {
     }
 
     private static void completeTutorial(ServerPlayer player, ServerLevel level) {
-        net.necookie.disastersim.session.SessionManager.onTutorialComplete(player);
+        SessionManager.onTutorialComplete(player);
         advanceTo(player, TutorialStage.COMPLETED);
         sendPrompt(player, "§eDrill complete! Talk to §c[Capt. Santos]§e to finish.", 0f);
         level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING,

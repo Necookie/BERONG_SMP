@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import net.necookie.disastersim.command.BfpAdminCommands;
+import net.necookie.disastersim.session.SessionManager;
 
 @EventBusSubscriber(modid = BerongSMP.MODID)
 public class LobbyManager {
@@ -196,12 +198,12 @@ public class LobbyManager {
      * otherwise messages the reason, cancels the interaction with FAIL, and returns {@code false}.
      */
     private static boolean gatesPassed(ServerPlayer player, PlayerInteractEvent.RightClickBlock event) {
-        if (net.necookie.disastersim.command.BfpAdminCommands.isTestBypass(player.getUUID())) return true;
+        if (BfpAdminCommands.isTestBypass(player.getUUID())) return true;
         if (!RegistrationManager.isRegistered(player)) {
             return denyGate(player, event,
                 "§cPlease /register first! Usage: /register <student_id> <section> <full_name>");
         }
-        if (net.necookie.disastersim.session.SessionManager.getActiveSession(player.getUUID()) == null) {
+        if (SessionManager.getActiveSession(player.getUUID()) == null) {
             return denyGate(player, event,
                 "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one.");
         }

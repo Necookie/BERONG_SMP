@@ -27,6 +27,7 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
+import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 
 /**
  * Wall-mounted fire alarm pull station.
@@ -95,7 +96,7 @@ public class FireAlarmBlock extends Block {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         if (player instanceof ServerPlayer sp
-                && net.necookie.disastersim.academy.room2.ReyesRoomManager.tryHandleAlarmPress(sp, pos)) {
+                && ReyesRoomManager.tryHandleAlarmPress(sp, pos)) {
             return InteractionResult.SUCCESS;
         }
 
