@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.EmergencyLightBlock;
 import net.necookie.disastersim.block.SprinklerHeadBlock;
 import net.necookie.disastersim.block.SmokeDetectorBlock;
 import net.necookie.disastersim.block.ExitSignBlock;
@@ -482,6 +483,13 @@ public final class ModBlocks {
             "sprinkler_head", SprinklerHeadBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.GOLD)
                     .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Emergency Light — see {@link EmergencyLightBlock}. */
+    public static final DeferredBlock<EmergencyLightBlock> EMERGENCY_LIGHT = BLOCKS.registerBlock(
+            "emergency_light", EmergencyLightBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
 
     private ModBlocks() {}
 
