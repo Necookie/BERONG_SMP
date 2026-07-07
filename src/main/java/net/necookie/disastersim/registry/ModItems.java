@@ -303,6 +303,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("unattended_shrine_candle", ModBlocks.UNATTENDED_SHRINE_CANDLE);
     static { HAZARD_ITEM_MAP.put("unattended_shrine_candle", UNATTENDED_SHRINE_CANDLE_ITEM); }
 
+    public static final DeferredItem<BlockItem> LEAKING_GAS_VALVE_ITEM =
+            ITEMS.registerSimpleBlockItem("leaking_gas_valve", ModBlocks.LEAKING_GAS_VALVE);
+    static { HAZARD_ITEM_MAP.put("leaking_gas_valve", LEAKING_GAS_VALVE_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 

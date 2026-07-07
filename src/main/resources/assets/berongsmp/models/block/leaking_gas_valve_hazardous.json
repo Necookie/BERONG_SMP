@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/gas_pipe_metal",
+    "body": "berongsmp:block/gas_pipe_metal",
+    "front": "berongsmp:block/gas_leak_stain"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        4,
+        12
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

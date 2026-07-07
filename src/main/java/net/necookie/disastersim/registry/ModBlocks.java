@@ -371,6 +371,12 @@ public final class ModBlocks {
                     .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
 
+    /** Leaking Gas Valve (Kitchen Gas Hazard) — see {@link LeakingGasValveBlock}. */
+    public static final DeferredBlock<LeakingGasValveBlock> LEAKING_GAS_VALVE = BLOCKS.registerBlock(
+            "leaking_gas_valve", LeakingGasValveBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {
