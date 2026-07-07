@@ -3,7 +3,7 @@ package net.necookie.disastersim.common.structure.building.modules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.necookie.disastersim.api.building.BuildingComponent;
+import net.necookie.disastersim.common.structure.building.BuildingComponent;
 
 /**
  * A modular laboratory room component representing a CCS computer lab.
