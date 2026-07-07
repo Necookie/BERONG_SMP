@@ -64,6 +64,15 @@ The `run/` directory is the working directory for dev runs and contains world sa
 
 ## Architecture
 
+### Package Layout
+
+- **`registry/`** — all game-object registrations (`ModBlocks`, `ModItems`, `ModCreativeTabs`, `ModEntities`, `ModSounds`, `ModAttachments`); `BerongSMP` is a thin bootstrap that wires them to the mod event bus.
+- **Type-based packages** — `block/` (furniture + interactive blocks and their shared bases), `item/`, `entity/`, `network/` (payloads), `client/` (client-only, see Client–Server Split), `command/`.
+- **`common/`** — cross-cutting server subsystems: `common/simulation/`, `common/hazard/` (hazard prop blocks + `HazardManager`), `common/structure/` (loaders, building managers, and the programmatic `building/` modules), `common/player/` (per-player managers + `PlayerLifecycleRegistry`), `common/scheduling/` (`TickScheduler`), `common/telemetry/`, `common/zones/`.
+- **Feature packages** — `academy/` (rooms under `room1..room4`), `tutorial/`, `session/`, `registration/`.
+
+New per-tick handlers must self-register via `TickScheduler.register(...)` in a static block **and** be class-loaded by a real code path — Javadoc `{@code}` mentions don't count. If a class has no natural caller, add a `bootstrap()` no-op invoked from `BerongSMP.commonSetup` (see `DuckCoverHoldManager` for the precedent and the bug that motivated it).
+
 ### Event Bus Duality
 
 NeoForge uses two separate event buses — a core pattern throughout this codebase:
@@ -94,7 +103,13 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 
 | Class | Responsibility |
 |---|---|
-| `BerongSMP` | Mod entry point, item/block registration, server startup init. Three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm), `FURN_TAB` (furn_tab — all 11 furniture blocks), and `HAZARD_TAB` (hazards_tab — all 20 hazard prop blocks, icon = daisy_chain_extension). `HAZARD_ITEM_MAP` (LinkedHashMap) keeps hazard items in insertion order for the tab and `/item hazard` command. `ALL_ITEM_MAP` (LinkedHashMap, superset including `HAZARD_ITEM_MAP`) covers every custom item (extinguishers, hazard wand, computer/fire alarm, NPC spawners, furniture, hazards) for `/item get` and `/item kit`. |
+| `BerongSMP` | Mod entry point — a thin bootstrap since the registry extraction. Wires the `registry/Mod*` classes to the mod event bus, registers network payloads and lifecycle listeners, calls `DuckCoverHoldManager.bootstrap()` in `commonSetup` (forces the class load that registers its tick handler), and performs one-time world setup (`onServerStarting`/`onServerStarted`). Still owns `MODID` + `LOGGER`. |
+| `registry/ModBlocks` | All 37 `DeferredBlock` registrations: computer, fire alarm, furniture, and the 20 hazard props. |
+| `registry/ModItems` | All `DeferredItem` registrations (NPC spawners, block items, extinguishers, hazard wand, firefighter uniform + `ArmorMaterial`). Owns `HAZARD_ITEM_MAP` (LinkedHashMap; hazard-tab + `/item hazard` insertion order) and `ALL_ITEM_MAP` (superset for `/item get` / `/item kit`). |
+| `registry/ModCreativeTabs` | The three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm, NPC spawners), `FURN_TAB` (furn_tab — furniture), `HAZARD_TAB` (hazards_tab — all 20 hazard props, icon = daisy_chain_extension). |
+| `registry/ModEntities` | `CUSTOM_NPC` entity type + its attribute-creation listener. |
+| `registry/ModSounds` | `FIRE_ALARM_RING` sound event. |
+| `registry/ModAttachments` | `DROPPED_TICKS` synced attachment driving the client drop-and-roll animation. |
 | `SimulationManager` | Session registry (`ConcurrentHashMap<UUID, SimulationSession>`), tick driver, event handlers for tick/respawn/logout |
 | `SimulationSession` | Per-player mutable state: timer ticks, disaster type, fires extinguished count, earthquake epicenter/phase/cascade queue/magnitude/aftershockCount/aftershockMagnitudeScale; `arenaOrigin/spanX/spanZ/height` set by SimulationManager to target the correct building |
 | `SimulationSession.EarthquakePhase` | Inner enum: `RUMBLE → PEAK → AFTERSHOCK(×2–4) → END`; AFTERSHOCK loops with a random magnitude scale before advancing to END |
@@ -168,9 +183,9 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | `JammedPaniniPressBlock` | Countertop panini press with burning food; LARGE_SMOKE + SMOKE. Low profile (Y:0–6). |
 | `CommercialDeepFryerBlock` | Commercial deep fryer; FLAME + LARGE_SMOKE + LAVA; light level 12 when hazardous. |
 | `SimRoom` | Enum mapping player position to a named room (LSPU Library or CCS). Holds `CcsRoom` record + `CCS_UPPER_ROOMS` (9 rooms, Y −25 to −22) and `CCS_GROUND_ROOMS` (7 rooms, Y −32 to −29) — all F3-verified absolute world AABBs. `fromPos()` / `fromCCSPos()` used for telemetry room labels. |
-| `AssemblyZone` | Static utility in `world/`; defines assembly-zone AABBs for both buildings. `ZONE = AABB(30,-35,64,76,-28,82)` (LSPU Library, verified north of building) + `CCS_ZONE = AABB(76,-35,73,136,-28,90)` (open area immediately south of CCS Admin Building, Z:73–90). `spawnBorderParticles(level, isCCS)` and `isInside(pos, isCCS)` select the correct zone. Fires `assembly_area_reached` telemetry + ends simulation. |
+| `AssemblyZone` | Static utility in `common/zones/`; defines assembly-zone AABBs for both buildings. `ZONE = AABB(30,-35,64,76,-28,82)` (LSPU Library, verified north of building) + `CCS_ZONE = AABB(76,-35,73,136,-28,90)` (open area immediately south of CCS Admin Building, Z:73–90). `spawnBorderParticles(level, isCCS)` and `isInside(pos, isCCS)` select the correct zone. Fires `assembly_area_reached` telemetry + ends simulation. |
 | `TelemetryCsvWriter` | Writes per-tick and event rows to `run/telemetry/gameplay_logs_<YYYYMMDD>.csv` per telemetry contract v1.1 (§3). Also writes session-level sidecar `sessions_<YYYYMMDD>.csv` (§5) and one-time `map_metadata.json` on first server start. Buffered, synchronous, server-thread only. CSV event types: `session_start`, `move_tick` (10 Hz, x/y/z + hazard_distance), `extinguisher_use`, `fire_alarm_activate`, `assembly_area_reached`, `emergency_exit`, `door_open`, `session_end`. |
-| `ExitZones` | Static record list in `world/`; defines named AABB exit zones for both buildings. `ZONES` (LSPU Library, `main_exit = AABB(50,-34,93,54,-30,96)` tuned) + `CCS_ZONES` (`ccs_main_exit = AABB(95,-33,68,125,-29,74)` — centre of south wall). `find(pos, isCCS)` searches the correct list. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. |
+| `ExitZones` | Static record list in `common/zones/`; defines named AABB exit zones for both buildings. `ZONES` (LSPU Library, `main_exit = AABB(50,-34,93,54,-30,96)` tuned) + `CCS_ZONES` (`ccs_main_exit = AABB(95,-33,68,125,-29,74)` — centre of south wall). `find(pos, isCCS)` searches the correct list. Per-tick check in `SimulationManager` fires `emergency_exit` CSV event once per session crossing. |
 
 ### World Coordinates
 
@@ -331,7 +346,7 @@ Reuse these instead of re-copying boilerplate:
 
 ### Custom Texture Assets (Hazard Props + Computer/Fire Alarm)
 
-All block models are now **custom-texture models** — hand-drawn 16×16 PNGs under `textures/block/` instead of stretched vanilla textures. The 11 furniture blocks (`WhiteboardBlock`, `ToiletBlock`, `SinkBlock`, `DrawersBlock`, `ComputerTableBlock`, `ChairBlock`, `FilingCabinetBlock`, `LockerBlock`, `TrashCanBlock`, `BulletinBoardBlock`, `CeilingFanBlock`) moved off vanilla-texture reuse in the Furniture Visual Remediation Log below (`scripts/generate_furniture_textures.py`), joining `ComputerBlock`, `FireAlarmBlock`, and all 20 `block/hazard/*` blocks (`scripts/generate_hazard_textures.py`) — the same way `computer_block.json` uses `computer_case`/`computer_screen_off`/`computer_keyboard`/`computer_mouse` instead of vanilla blocks.
+All block models are now **custom-texture models** — hand-drawn 16×16 PNGs under `textures/block/` instead of stretched vanilla textures. The 11 furniture blocks (`WhiteboardBlock`, `ToiletBlock`, `SinkBlock`, `DrawersBlock`, `ComputerTableBlock`, `ChairBlock`, `FilingCabinetBlock`, `LockerBlock`, `TrashCanBlock`, `BulletinBoardBlock`, `CeilingFanBlock`) moved off vanilla-texture reuse in the Furniture Visual Remediation Log below (`scripts/generate_furniture_textures.py`), joining `ComputerBlock`, `FireAlarmBlock`, and all 20 `common/hazard/*` blocks (`scripts/generate_hazard_textures.py`) — the same way `computer_block.json` uses `computer_case`/`computer_screen_off`/`computer_keyboard`/`computer_mouse` instead of vanilla blocks.
 
 All 20 hazard prop textures are generated by **`scripts/generate_hazard_textures.py`** (Pillow/PIL, deterministic via a fixed RNG seed) — re-run it after editing to regenerate the full set:
 ```bash
