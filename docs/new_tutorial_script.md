@@ -1,7 +1,7 @@
 # New Tutorial Building — "The Academy" Script & Flow
 
 This document is the full dialogue script, storyboard, and flow diagram for the new tutorial
-building (`new_tut_building1.0.schem`, placed via `AcademyBuildingManager` at
+building (`academy_building.schem`, placed via `AcademyBuildingManager` at
 `BlockPos(-177,-34,8)`). It is a **new, independent tutorial** ("the Academy") — it does not reuse
 or replace the old tutorial (`tutorial/TutorialManager`, `tutorial/NpcDialogue`, the BFP Fire
 Training Center lobby at `TutorialLobbyManager.TUTORIAL_LOBBY_POS`), which keeps functioning

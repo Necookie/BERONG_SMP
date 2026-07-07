@@ -39,7 +39,7 @@ import net.necookie.disastersim.common.structure.AcademyBuildingManager;
  * — no interact handler exists for {@code CustomNpcEntity} anywhere else in the mod.
  *
  * <p>Only 4 of the schematic's {@code custom_npc} entities are wired here (Officer Cruz, Sgt.
- * Reyes, Sgt. Santos, Capt. Morfe); the other 5 NPC types found in {@code new_tut_building1.0.schem}
+ * Reyes, Sgt. Santos, Capt. Morfe); the other 5 NPC types found in {@code academy_building.schem}
  * (student, security_tuazon, dm_orlanda, necookie, sir_bookmark) are decorative and intentionally
  * left unhandled.
  */

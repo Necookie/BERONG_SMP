@@ -16,7 +16,7 @@ import java.util.Map;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 
 /**
- * Places {@code new_tut_building1.0.schem} — a WorldEdit {@code //copy -e} capture of the
+ * Places {@code academy_building.schem} — a WorldEdit {@code //copy -e} capture of the
  * redesigned tutorial building, baked-in NPCs ({@code berongsmp:custom_npc}), gear-display
  * armor stands, item frames and a painting all included — at its fixed world position.
  *
@@ -34,7 +34,7 @@ public final class AcademyBuildingManager {
     /** Exact world position requested for the schematic's minimum (0,0,0) corner. */
     public static final BlockPos POS = new BlockPos(-177, -34, 8);
 
-    private static final String SCHEM_PATH = "structure/new_tut_building1.0.schem";
+    private static final String SCHEM_PATH = "structure/academy_building.schem";
 
     /**
      * The Academy routes all of Room 1's dialogue and escorting through a single Officer Cruz

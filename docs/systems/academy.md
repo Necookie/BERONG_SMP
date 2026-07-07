@@ -1,6 +1,6 @@
 # New Tutorial Building (Academy)
 
-A second, **fully independent** tutorial — "the Academy" — lives in `new_tut_building1.0.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
+A second, **fully independent** tutorial — "the Academy" — lives in `academy_building.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
 
 ```
 Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — physical lime
@@ -68,7 +68,7 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   (2026-07-05)**: `CruzPhase.DONE` used to immediately drop the player from escort selection the
   instant the Go/Stop finish line was crossed — well inside Room 1 — sending Cruz into
   `tickReturnHome` before the player had gone anywhere near actually leaving (read by the user as
-  her "instantly banishing" herself). Parsed `new_tut_building1.0.schem`'s raw block data directly
+  her "instantly banishing" herself). Parsed `academy_building.schem`'s raw block data directly
   to find the real wall gap into Sgt. Reyes's room (world X=-162, verified — not guessed) and
   widened `ROOM1_BOUNDS` to that threshold; `DONE` now keeps counting as escortable (targeting the
   player's live position, same idiom as `GOSTOP_RUN`) for as long as the player is still physically
@@ -171,7 +171,7 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     specific frame (compass+beacon, via `nextUncollectedFrame`), then teaching the pop-off-the-wall
     pickup mechanic — played once per frame (`explainedFrame`) the instant it becomes the player's
     target, instead of everything being explained at once regardless of which frame is next. The 3
-    glow item frames' positions/facings/items are schem-verified against `new_tut_building1.0.schem`
+    glow item frames' positions/facings/items are schem-verified against `academy_building.schem`
     directly (`-170/-168/-166,-32,10`, facing south, fire/CO2/wet-chemical respectively) — they were
     already correct. **Reyes never hands out an extinguisher (2026-07-05):** entering
     `TOOL_SELECTION` now calls `stripExistingExtinguishers`, removing any of the 3 the player already
@@ -226,7 +226,7 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     first" and points the compass at the fire alarm at `ALARM_POS = (-143,-32,40)`. **Duplicate
     alarm fix (2026-07-05):** the schematic actually already bakes a
     `berongsmp:fire_alarm[activated=false,facing=south]` in at this exact spot (confirmed by
-    parsing `new_tut_building1.0.schem`'s raw block data) — a since-removed
+    parsing `academy_building.schem`'s raw block data) — a since-removed
     `AcademyBuildingManager.placeFireAlarm` was placing a second one one block below every boot,
     which was the "two fire alarms stacked on top of each other" report. `ALARM_POS` now points at
     the schem's real alarm and nothing places a second one. `FireAlarmBlock.useWithoutItem` calls
