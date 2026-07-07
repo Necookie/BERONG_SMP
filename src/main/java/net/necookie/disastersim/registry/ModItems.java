@@ -291,6 +291,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("overloaded_breaker_panel", ModBlocks.OVERLOADED_BREAKER_PANEL);
     static { HAZARD_ITEM_MAP.put("overloaded_breaker_panel", OVERLOADED_BREAKER_PANEL_ITEM); }
 
+    public static final DeferredItem<BlockItem> OVERHEATING_WALL_AIRCON_ITEM =
+            ITEMS.registerSimpleBlockItem("overheating_wall_aircon", ModBlocks.OVERHEATING_WALL_AIRCON);
+    static { HAZARD_ITEM_MAP.put("overheating_wall_aircon", OVERHEATING_WALL_AIRCON_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 

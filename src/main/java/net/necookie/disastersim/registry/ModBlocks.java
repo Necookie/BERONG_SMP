@@ -350,6 +350,13 @@ public final class ModBlocks {
                     .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
 
+    /** Overheating Wall Aircon (Electrical Hazard) — see {@link OverheatingWallAirconBlock}. */
+    public static final DeferredBlock<OverheatingWallAirconBlock> OVERHEATING_WALL_AIRCON = BLOCKS.registerBlock(
+            "overheating_wall_aircon", OverheatingWallAirconBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

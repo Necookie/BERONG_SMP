@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/aircon_side_metal",
+    "body": "berongsmp:block/aircon_side_metal",
+    "front": "berongsmp:block/aircon_front_clean"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        5,
+        10
+      ],
+      "to": [
+        15,
+        13,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}
