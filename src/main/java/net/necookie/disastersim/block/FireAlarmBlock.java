@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
@@ -115,7 +116,7 @@ public class FireAlarmBlock extends Block {
         player.sendSystemMessage(Component.literal("§c🔔 FIRE ALARM ACTIVATED — Evacuate immediately!"));
 
         // Play the alarm immediately, then start the repeating tick chain.
-        level.playSound(null, pos, BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
+        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
         ((ServerLevel) level).scheduleTick(pos, this, BEEP_INTERVAL);
 
         double t = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
@@ -146,7 +147,7 @@ public class FireAlarmBlock extends Block {
         if (!state.getValue(ACTIVATED)) return;
         // Vary pitch slightly each ring for a more realistic clapper-bell feel.
         float pitch = 1.7f + random.nextFloat() * 0.2f;
-        level.playSound(null, pos, BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, pitch);
+        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, pitch);
         level.scheduleTick(pos, this, BEEP_INTERVAL);
     }
 

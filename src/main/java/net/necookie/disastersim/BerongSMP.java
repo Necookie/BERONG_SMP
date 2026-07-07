@@ -92,6 +92,7 @@ import net.necookie.disastersim.network.DropAndRollPayload;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.common.player.DuckCoverHoldManager;
+import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.session.SessionManager;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
@@ -121,9 +122,6 @@ public class BerongSMP {
 
     /** Deferred Register for Entity Types. */
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
-
-    /** Deferred Register for Sound Events. */
-    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, MODID);
 
     /** Deferred Register for Attachment Types (per-entity synced client-visible state). */
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES =
@@ -185,12 +183,6 @@ public class BerongSMP {
     public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT =
             ITEMS.registerItem("npc_student",
                     p -> new NpcSpawnerItem(NpcType.STUDENT, p.stacksTo(16)));
-
-    /** Fire alarm ringing sound — loops via scheduled block ticks while ACTIVATED=true. */
-    public static final DeferredHolder<SoundEvent, SoundEvent> FIRE_ALARM_RING =
-            SOUND_EVENTS.register("block.fire_alarm.ring",
-                    () -> SoundEvent.createVariableRangeEvent(
-                            Identifier.fromNamespaceAndPath(MODID, "block.fire_alarm.ring")));
 
     /** Example block registration. */
     public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
@@ -751,7 +743,7 @@ public class BerongSMP {
         ITEMS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
-        SOUND_EVENTS.register(modEventBus);
+        ModSounds.register(modEventBus);
         ATTACHMENT_TYPES.register(modEventBus);
         modEventBus.addListener(this::onEntityAttributes);
 

@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.academy.AcademyDialogue;
 import net.necookie.disastersim.academy.AcademyManager;
@@ -323,7 +324,7 @@ public final class ReyesRoomManager {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof FireAlarmBlock && state.hasProperty(FireAlarmBlock.ACTIVATED)) {
             level.setBlock(pos, state.setValue(FireAlarmBlock.ACTIVATED, true), 3);
-            level.playSound(null, pos, net.necookie.disastersim.BerongSMP.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
+            level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
             level.scheduleTick(pos, state.getBlock(), 25);
         }
         AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
