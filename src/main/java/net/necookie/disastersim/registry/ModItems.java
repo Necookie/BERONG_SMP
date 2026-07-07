@@ -16,6 +16,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.item.CO2ExtinguisherItem;
+import net.necookie.disastersim.item.FlashlightItem;
 import net.necookie.disastersim.item.SafetyWhistleItem;
 import net.necookie.disastersim.item.MegaphoneItem;
 import net.necookie.disastersim.item.FirstAidKitItem;
@@ -361,6 +362,9 @@ public final class ModItems {
     public static final DeferredItem<SafetyWhistleItem> SAFETY_WHISTLE = ITEMS.registerItem("safety_whistle",
             props -> new SafetyWhistleItem(props.stacksTo(1)));
 
+    public static final DeferredItem<FlashlightItem> FLASHLIGHT = ITEMS.registerItem("flashlight",
+            props -> new FlashlightItem(props.stacksTo(1)));
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -412,6 +416,7 @@ public final class ModItems {
         ALL_ITEM_MAP.put("first_aid_kit", FIRST_AID_KIT);
         ALL_ITEM_MAP.put("megaphone", MEGAPHONE);
         ALL_ITEM_MAP.put("safety_whistle", SAFETY_WHISTLE);
+        ALL_ITEM_MAP.put("flashlight", FLASHLIGHT);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 

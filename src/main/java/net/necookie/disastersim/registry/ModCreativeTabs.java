@@ -33,6 +33,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.FIREFIGHTER_COAT.get());
                 output.accept(ModItems.FIREFIGHTER_PANTS.get());
                 output.accept(ModItems.FIREFIGHTER_BOOTS.get());
+                output.accept(ModItems.FLASHLIGHT.get());
                 output.accept(ModItems.SAFETY_WHISTLE.get());
                 output.accept(ModItems.MEGAPHONE.get());
                 output.accept(ModItems.FIRST_AID_KIT.get());
