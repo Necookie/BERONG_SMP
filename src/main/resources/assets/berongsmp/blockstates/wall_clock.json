@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/wall_clock"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/wall_clock",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/wall_clock",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/wall_clock",
+      "y": 270
+    }
+  }
+}

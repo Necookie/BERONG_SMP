@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.WallClockBlock;
 import net.necookie.disastersim.block.WaterDispenserBlock;
 import net.necookie.disastersim.block.TrophyCabinetBlock;
 import net.necookie.disastersim.block.PhilippineFlagStandBlock;
@@ -432,6 +433,12 @@ public final class ModBlocks {
             "water_dispenser", WaterDispenserBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Wall Clock — see {@link WallClockBlock}. */
+    public static final DeferredBlock<WallClockBlock> WALL_CLOCK = BLOCKS.registerBlock(
+            "wall_clock", WallClockBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 

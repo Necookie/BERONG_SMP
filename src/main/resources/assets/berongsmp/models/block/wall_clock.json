@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/wall_clock_face",
+    "face": "berongsmp:block/wall_clock_face"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        4,
+        13
+      ],
+      "to": [
+        12,
+        12,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#face"
+        },
+        "down": {
+          "texture": "#face"
+        },
+        "north": {
+          "texture": "#face"
+        },
+        "south": {
+          "texture": "#face"
+        },
+        "east": {
+          "texture": "#face"
+        },
+        "west": {
+          "texture": "#face"
+        }
+      }
+    }
+  ]
+}
