@@ -235,6 +235,8 @@ Stored under `src/main/resources/data/berongsmp/structure/`:
 - `ssc_building.schem` — SSC building adjacent to the arena (Sponge Schematic v3, placed/restored each session with 1 CCW rotation)
 - `ccs_admin_building.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 0 CCW rotations)
 
+- `academy_building.schem` — the Academy tutorial building (Sponge Schematic v3, placed once at server start by `AcademyBuildingManager`, 0 CCW rotations, NPCs/armor stands baked in)
+
 `SimulationManager.BUILDINGS` holds the full list of `StructurePlacer`+`BlockPos` pairs iterated on session start and end.
 
 ### Config Knobs (`berongsmp-common.toml`)
