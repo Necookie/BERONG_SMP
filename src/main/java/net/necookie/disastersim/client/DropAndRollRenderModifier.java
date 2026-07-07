@@ -7,13 +7,14 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
+import net.necookie.disastersim.registry.ModAttachments;
 import net.necookie.disastersim.BerongSMP;
 import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 import net.neoforged.neoforge.client.renderstate.AvatarRenderStateModifier;
 import net.minecraft.world.entity.Avatar;
 
 /**
- * Purely cosmetic "stop, drop, and roll" visual: while {@link BerongSMP#DROPPED_TICKS} is nonzero
+ * Purely cosmetic "stop, drop, and roll" visual: while {@link ModAttachments#DROPPED_TICKS} is nonzero
  * for a player (synced from {@code DropAndRollManager}), bends their rendered model into a
  * crouched/prone look by overwriting the same {@link AvatarRenderState} fields vanilla itself uses
  * to drive crouch/swim poses — never the real entity {@code Pose}, hitbox, or collision.
@@ -36,7 +37,7 @@ public class DropAndRollRenderModifier extends AvatarRenderStateModifier {
     @Override
     public <T extends Avatar & ClientAvatarEntity> void accept(T entity, AvatarRenderState state) {
         if (!(entity instanceof AbstractClientPlayer player)) return;
-        int ticks = player.getData(BerongSMP.DROPPED_TICKS.get());
+        int ticks = player.getData(ModAttachments.DROPPED_TICKS.get());
         if (ticks <= 0) return;
 
         float progress = easedProgress(ticks);
