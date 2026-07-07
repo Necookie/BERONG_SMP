@@ -10,9 +10,9 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Pose;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.TableBlock;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
-import net.necookie.disastersim.world.TelemetryCsvWriter;
 
 import java.util.Map;
 import java.util.Set;

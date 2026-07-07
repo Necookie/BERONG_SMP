@@ -20,7 +20,7 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.world.SimulationManager;
 import net.necookie.disastersim.world.SimulationSession;
-import net.necookie.disastersim.world.TelemetryCsvWriter;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.function.Consumer;
 

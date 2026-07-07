@@ -1,7 +1,7 @@
 package net.necookie.disastersim.academy;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.necookie.disastersim.world.TelemetryCsvWriter;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.Map;
 import java.util.UUID;

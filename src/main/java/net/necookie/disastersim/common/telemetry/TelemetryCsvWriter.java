@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.telemetry;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -6,6 +6,7 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.FireAlarmBlock;
 import net.necookie.disastersim.common.zones.AssemblyZone;
 import net.necookie.disastersim.common.zones.ExitZones;
+import net.necookie.disastersim.world.SimulationManager;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

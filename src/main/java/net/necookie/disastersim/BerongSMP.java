@@ -853,7 +853,7 @@ public class BerongSMP {
     @SubscribeEvent
     public void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         net.necookie.disastersim.session.SessionManager.shutdown();
-        net.necookie.disastersim.world.TelemetryCsvWriter.shutdown();
+        net.necookie.disastersim.common.telemetry.TelemetryCsvWriter.shutdown();
     }
 
     /**
@@ -889,7 +889,7 @@ public class BerongSMP {
         TutorialLobbyManager.buildLobby(level); // structure only — NPCs need entity storage loaded first
         net.necookie.disastersim.session.SessionManager.init(server);
         net.necookie.disastersim.command.ModCommands.clearAuthorizations();
-        net.necookie.disastersim.world.TelemetryCsvWriter.init(server.getServerDirectory());
+        net.necookie.disastersim.common.telemetry.TelemetryCsvWriter.init(server.getServerDirectory());
 
         String bfpPin = Config.BFP_ADMIN_PIN.get();
         if (bfpPin.isBlank()) {
