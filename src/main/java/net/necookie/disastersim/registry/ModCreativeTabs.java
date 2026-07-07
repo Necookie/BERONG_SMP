@@ -88,7 +88,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TEACHERS_DESK_ITEM.get());
             }).build());
 
-    /** Creative tab: all 20 hazard prop blocks for the simulation building. */
+    /** Creative tab: all 30 hazard prop blocks for the simulation building. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.hazards"))
             .withTabsBefore(FURN_TAB.getKey())
