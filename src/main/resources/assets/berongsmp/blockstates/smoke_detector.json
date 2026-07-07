@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "alarming=false": {
+      "model": "berongsmp:block/smoke_detector"
+    },
+    "alarming=true": {
+      "model": "berongsmp:block/smoke_detector_on"
+    }
+  }
+}

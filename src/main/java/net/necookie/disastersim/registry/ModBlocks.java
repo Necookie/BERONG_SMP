@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.SmokeDetectorBlock;
 import net.necookie.disastersim.block.ExitSignBlock;
 import net.necookie.disastersim.block.ClassroomGlobeBlock;
 import net.necookie.disastersim.block.PodiumLecternBlock;
@@ -468,6 +469,12 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.EMERALD)
                     .strength(0.5f, 2.0f).sound(SoundType.GLASS).noOcclusion()
                     .lightLevel(s -> 7));
+
+    /** Smoke Detector — see {@link SmokeDetectorBlock}. */
+    public static final DeferredBlock<SmokeDetectorBlock> SMOKE_DETECTOR = BLOCKS.registerBlock(
+            "smoke_detector", SmokeDetectorBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 
