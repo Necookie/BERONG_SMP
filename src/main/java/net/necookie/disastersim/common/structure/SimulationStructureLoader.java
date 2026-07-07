@@ -29,7 +29,7 @@ public class SimulationStructureLoader implements StructurePlacer {
      * Creates a loader bound to a specific structure template.
      *
      * @param structureId The namespaced resource path of the NBT structure file
-     *                    (e.g., {@code berongsmp:lspulibrarymain}).
+     *                    (e.g., {@code berongsmp:lspu_library_main}).
      */
     public SimulationStructureLoader(Identifier structureId) {
         this.structureId = structureId;

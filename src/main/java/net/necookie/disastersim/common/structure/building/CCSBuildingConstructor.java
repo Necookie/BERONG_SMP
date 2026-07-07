@@ -6,7 +6,7 @@ import net.necookie.disastersim.common.structure.building.modules.CcsLabModule;
 import net.necookie.disastersim.common.structure.building.modules.LspuFacadeModule;
 import net.necookie.disastersim.common.structure.building.modules.LspuHallwayModule;
 
-// Not wired into the active simulation path — the live sim uses lspulibrarymain.nbt instead.
+// Not wired into the active simulation path — the live sim uses lspu_library_main.nbt instead.
 public class CCSBuildingConstructor {
 
     private static final int FLOOR_HEIGHT = 5;

@@ -94,7 +94,7 @@ public class SimulationManager {
 
     private static final List<Map.Entry<StructurePlacer, BlockPos>> BUILDINGS = List.of(
             Map.entry(new SimulationStructureLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspulibrarymain")), SIM_POS),
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspu_library_main")), SIM_POS),
             Map.entry(new SchemLoader(
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS),
             Map.entry(new SchemLoader(

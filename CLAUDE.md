@@ -231,7 +231,7 @@ Floor Y=−25, ceiling Y=−22 (3 blocks tall). Absolute world coords verified w
 
 Stored under `src/main/resources/data/berongsmp/structure/`:
 - `lobby_structure.nbt` — lobby building with two buttons (NBT, placed once at server start)
-- `lspulibrarymain.nbt` — simulation arena (NBT, placed/restored each session)
+- `lspu_library_main.nbt` — simulation arena (NBT, placed/restored each session)
 - `ssc_building.schem` — SSC building adjacent to the arena (Sponge Schematic v3, placed/restored each session with 1 CCW rotation)
 - `ccs_admin_building.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 0 CCW rotations)
 
