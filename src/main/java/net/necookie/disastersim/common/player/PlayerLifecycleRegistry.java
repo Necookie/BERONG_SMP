@@ -7,7 +7,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -47,14 +46,12 @@ public final class PlayerLifecycleRegistry {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        UUID uuid = player.getUUID();
-        for (ClearsOnLogout hook : LOGOUT_HOOKS) hook.onLogout(uuid);
+        for (ClearsOnLogout hook : LOGOUT_HOOKS) hook.onLogout(player);
     }
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        UUID uuid = player.getUUID();
-        for (ClearsOnLogout hook : LOGIN_HOOKS) hook.onLogout(uuid);
+        for (ClearsOnLogout hook : LOGIN_HOOKS) hook.onLogout(player);
     }
 }
