@@ -1,0 +1,73 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/globe_sphere",
+    "sphere": "berongsmp:block/globe_sphere",
+    "stand": "berongsmp:block/globe_stand_dark"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ],
+      "faces": {
+        "up": {
+          "texture": "#stand"
+        },
+        "down": {
+          "texture": "#stand"
+        },
+        "north": {
+          "texture": "#stand"
+        },
+        "south": {
+          "texture": "#stand"
+        },
+        "east": {
+          "texture": "#stand"
+        },
+        "west": {
+          "texture": "#stand"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        3,
+        4
+      ],
+      "to": [
+        12,
+        11,
+        12
+      ],
+      "faces": {
+        "up": {
+          "texture": "#sphere"
+        },
+        "down": {
+          "texture": "#stand"
+        },
+        "north": {
+          "texture": "#sphere"
+        },
+        "south": {
+          "texture": "#sphere"
+        },
+        "east": {
+          "texture": "#sphere"
+        },
+        "west": {
+          "texture": "#sphere"
+        }
+      }
+    }
+  ]
+}

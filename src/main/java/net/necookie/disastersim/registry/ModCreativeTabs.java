@@ -66,6 +66,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TRASH_CAN_ITEM.get());
                 output.accept(ModItems.CEILING_FAN_ITEM.get());
                 output.accept(ModItems.LIGHT_BULB_ITEM.get());
+                output.accept(ModItems.CLASSROOM_GLOBE_ITEM.get());
                 output.accept(ModItems.PODIUM_LECTERN_ITEM.get());
                 output.accept(ModItems.BLACKBOARD_ITEM.get());
                 output.accept(ModItems.WALL_CLOCK_ITEM.get());

@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.ClassroomGlobeBlock;
 import net.necookie.disastersim.block.PodiumLecternBlock;
 import net.necookie.disastersim.block.BlackboardBlock;
 import net.necookie.disastersim.block.WallClockBlock;
@@ -453,6 +454,12 @@ public final class ModBlocks {
             "podium_lectern", PodiumLecternBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Classroom Globe — see {@link ClassroomGlobeBlock}. */
+    public static final DeferredBlock<ClassroomGlobeBlock> CLASSROOM_GLOBE = BLOCKS.registerBlock(
+            "classroom_globe", ClassroomGlobeBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLUE)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 
