@@ -6,6 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 See **`docs/major_plan.md`** for the full phased implementation plan, architecture overview, Turso schema, and phase status tracking. All phases (1–5) are complete.
 
+## Documentation Map
+
+This file is a lean index; deep-dive content lives under `docs/`:
+
+- **`docs/systems/`** — living architecture reference for major subsystems:
+  [tutorial.md](docs/systems/tutorial.md), [simulation.md](docs/systems/simulation.md),
+  [academy.md](docs/systems/academy.md)
+- **`docs/history/`** — frozen remediation logs and point-in-time reviews, kept for context but not
+  updated going forward: [health-check-log.md](docs/history/health-check-log.md),
+  [telemetry-gap-log.md](docs/history/telemetry-gap-log.md),
+  [hazard-visual-log.md](docs/history/hazard-visual-log.md),
+  [furniture-visual-log.md](docs/history/furniture-visual-log.md),
+  [cruz-pathfinding-recommendations.md](docs/history/cruz-pathfinding-recommendations.md),
+  [hazard-3state-log.md](docs/history/hazard-3state-log.md),
+  [hazard-state-management-log.md](docs/history/hazard-state-management-log.md)
+- **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
+- **`docs/new_tutorial_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
+
+When a change touches a system with its own doc, update that doc — not a growing section here.
+
 ## Development Workflow
 
 **After completing any feature or phase goal:**
@@ -369,9 +389,13 @@ A dedicated Plan-agent review of `CruzRoomManager`'s escort logic and `CustomNpc
 setup. Full review, what was implemented, and what remains a documented-but-not-done recommendation:
 **[docs/history/cruz-pathfinding-recommendations.md](docs/history/cruz-pathfinding-recommendations.md)**.
 
+---
+
 ## Hazard Prop 3-State Log (2026-07-05)
 
 All 19 hazardous-property props gained a genuine 3-state lifecycle (normal → hazardous → on-fire). Full log: **[docs/history/hazard-3state-log.md](docs/history/hazard-3state-log.md)**.
+
+---
 
 ## Hazard Prop State Management Log
 
