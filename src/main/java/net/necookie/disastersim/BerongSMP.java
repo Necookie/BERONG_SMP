@@ -16,6 +16,7 @@ import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelData;
 import net.necookie.disastersim.command.ModCommands;
 import net.necookie.disastersim.common.player.DuckCoverHoldManager;
+import net.necookie.disastersim.common.safety.SafetyDeviceManager;
 import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
@@ -154,6 +155,9 @@ public class BerongSMP {
         // Javadoc {@code} mentions, which the JVM doesn't count. Without this, the crawl-under-
         // table pose-shrink assist (and duck/cover/hold tracking generally) silently never ticks.
         DuckCoverHoldManager.bootstrap();
+        // Same class-loading rule for the safety-device tick handler (smoke detectors,
+        // sprinklers, emergency lights) — see SafetyDeviceManager's javadoc.
+        SafetyDeviceManager.bootstrap();
     }
 
     /**
