@@ -16,11 +16,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.network.TutorialStatusPayload;
+import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.Collections;
@@ -38,10 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Progress is persisted to disk via {@link TutorialSavedData}. Transient per-player maps
  * (hold-on timers, extinguish counts, dialogue steps) are cleared on logout via
- * {@link #onPlayerLogout} — they do <em>not</em> survive a same-session "Save and Quit to Title"
- * the way the class comment here used to claim (that's only true of an actual JVM restart); the
- * integrated server's Java classes, including this one's static maps, stay loaded for the life of
- * the client. {@link #onPlayerLogout} also rolls {@code QUAKE_DROP}/{@code QUAKE_COVER}/
+ * {@link #rollbackOnLogout}, registered with {@link PlayerLifecycleRegistry} — they do
+ * <em>not</em> survive a same-session "Save and Quit to Title" the way the class comment here
+ * used to claim (that's only true of an actual JVM restart); the integrated server's Java
+ * classes, including this one's static maps, stay loaded for the life of the client.
+ * {@link #rollbackOnLogout} also rolls {@code QUAKE_DROP}/{@code QUAKE_COVER}/
  * {@code QUAKE_HOLDON} back to {@code QUAKE_INTRO} on logout — without that, {@link #tick} (which
  * runs unconditionally for every online player, every tick, based purely on the *persisted*
  * {@link TutorialStage}) would resume sending {@code sendPrompt(..., 1.5f)} every 10 ticks the
@@ -51,8 +50,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * tutorial's drill kept re-arming itself on its own 10-tick clock regardless of what the client's
  * HUD static fields were reset to.
  */
-@EventBusSubscriber(modid = BerongSMP.MODID)
 public class TutorialManager {
+
+    static {
+        PlayerLifecycleRegistry.registerLogoutHook(TutorialManager::rollbackOnLogout);
+    }
 
     /** Center of the practice fire cluster in the BFP tutorial lobby. */
     static final BlockPos PRACTICE_FIRE = TutorialLobbyManager.TUTORIAL_LOBBY_POS.offset(12, 2, 15);
@@ -266,9 +268,7 @@ public class TutorialManager {
      * dialogue instead of {@link #tick} silently resuming the shake prompt loop on its own 10-tick
      * clock. See the class doc for why this was the actual "earthquake never stops" bug.
      */
-    @SubscribeEvent
-    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+    private static void rollbackOnLogout(ServerPlayer player) {
         UUID id = player.getUUID();
         holdOnTimers.remove(id);
         extinguishCounts.remove(id);
