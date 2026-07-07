@@ -21,7 +21,7 @@ import java.util.Map;
 
 /**
  * Drives the normal→hazardous→failure state machine for the 20 hazard prop blocks (plus the
- * sawdust accumulation layer) placed inside an active FIRE-type arena, per {@code docs/md files/Items.md}.
+ * sawdust accumulation layer) placed inside an active FIRE-type arena, per {@code docs/hazard_props_spec.md}.
  *
  * <p>Positions are scanned once at session start ({@link #scanHazardProps}) and cached on the
  * session, mirroring {@code SimulationManager.findComputersInCCS}. Each subsequent tick only

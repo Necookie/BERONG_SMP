@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  * Wet chemical extinguisher: the correct Class F/K (Philippine BFP yellow-coded) tool for cooking-oil
  * and grease fires in the cafeteria/kitchen hazard props. Its potassium-acetate mist saponifies hot
  * fats into a foam blanket instead of blasting them apart — the opposite of what water does to a
- * grease fire (see {@code docs/md files/Items.md} #16: "Water triggers a 3x3 fiery explosion!").
+ * grease fire (see {@code docs/hazard_props_spec.md} #16: "Water triggers a 3x3 fiery explosion!").
  *
  * <p>Suppresses ordinary fire/soul fire like the other units, and defuses any hazard prop via
  * {@link HazardManager#defuse}, with distinct feedback (message + golden foam particles) when the

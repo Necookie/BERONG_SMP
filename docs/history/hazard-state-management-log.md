@@ -1,6 +1,6 @@
 # Hazard Prop State Management Log
 
-Tracks the rollout of gameplay-driven state management for the 20 hazard prop blocks. Previously, `HAZARDOUS` (and the sawdust layer's `ACCUMULATION`) was set once to its safe default at placement and never changed at runtime — see the 2026-07-01 audit that found no `HazardManager`/`HazardSpawner` and no `SimulationManager`/`SimulationEffects` references to the `block.hazard` package at all. All 20 items below now have a working normal→hazardous→failure lifecycle per `docs/md files/Items.md`, driven by the new `HazardManager`.
+Tracks the rollout of gameplay-driven state management for the 20 hazard prop blocks. Previously, `HAZARDOUS` (and the sawdust layer's `ACCUMULATION`) was set once to its safe default at placement and never changed at runtime — see the 2026-07-01 audit that found no `HazardManager`/`HazardSpawner` and no `SimulationManager`/`SimulationEffects` references to the `block.hazard` package at all. All 20 items below now have a working normal→hazardous→failure lifecycle per `docs/hazard_props_spec.md`, driven by the new `HazardManager`.
 
 | # | Item | Status | Failure consequence (Items.md) |
 |---|---|---|---|
