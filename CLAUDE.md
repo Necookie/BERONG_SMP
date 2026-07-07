@@ -919,14 +919,9 @@ Tracks fixes applied from the 2026-06-23 telemetry gap analysis (ranked Critical
 
 ## Hazard Prop Visual Remediation Log
 
-Tracks fixes applied after an in-game screenshot showed hazard prop blocks rendering with a missing-texture (magenta/black) face and looking like flat colored boxes rather than recognizable objects.
-
-| # | Item | Status | Notes |
-|---|---|---|---|
-| H-1 | `plastic_trash_bin_hazardous.json` `vape_glow` face used a raw `"minecraft:block/redstone_lamp_on"` string instead of a `"#variable"` reference | ✅ Done | Model faces can only resolve `#name` references — this rendered as the missing-texture placeholder in-game. Routed through a proper texture variable. |
-| H-2 | All 20 hazard blocks stretched plain vanilla concrete/andesite textures over cuboids, reading as abstract colored boxes | ✅ Done | Added `scripts/generate_hazard_textures.py` (53 hand-drawn 16×16 PNGs) and rewired every block/hazardous model pair to use them, matching the custom-texture quality bar set by `computer_block.json` / `fire_alarm_bell.png`. |
-| H-3 | Several models didn't match their Items.md state description (e.g. spotlight/projector lens always lit even in "normal/off" state; panini press lid always closed even when "open, safely cutting power") | ✅ Done | `stage_spotlight`/`ceiling_projector` normal state now shows a dark/idle lens; `jammed_panini_press` normal state now shows the lid propped open on its hinge; `dust_choked_pc` hazardous now models an actual backpack element wedged against the vent instead of a flat dust-textured slab; `swollen_phone_battery` hazardous now drapes an actual leather-jacket element over the phone. |
-| H-4 | Post-H-2 textures were still flat, single-tone color fields — the props read as generic colored boxes even with the right silhouette; several models were only 2 cuboids with no protruding detail | ✅ Done | `scripts/generate_hazard_textures.py` rewritten: every one of the 53 textures now uses a diagonal top-left light `gradient_shade`, a beveled `inset_edges` highlight/shadow pair, and object-specific iconography drawn directly into the pixels (visible plug prongs on `cord_strip_black`, screw heads on `spotlight_housing_black`/`projector_housing_white`, a power/fault LED strip on `pa_rack_metal`, a control dial on `press_body_metal`/`fryer_body_steel`, a camera-lens glint on `phone_body_black`, a torn-foil puncture on `lipo_foil_damaged`, corrugation ribs on `bin_plastic_gray`, product-column dividers on `vending_body_blue`) instead of flat `hbands`/`speckle` fills. `frayed_console_wire`(+hazardous) gained a `connector_plug` cuboid, `vape_in_iron_locker` gained a protruding `handle` cuboid, `swollen_phone_battery` gained a `bottom_port` cuboid, and `contaminated_kitchen_bin` gained `lid_handle` + `foot_pedal` cuboids — all four were previously flat 2-element boxes. |
+Tracks fixes applied after an in-game screenshot showed hazard prop blocks rendering with a
+missing-texture face and looking like flat colored boxes. Full log:
+**[docs/history/hazard-visual-log.md](docs/history/hazard-visual-log.md)**.
 
 ---
 
