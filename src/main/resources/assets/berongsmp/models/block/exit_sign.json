@@ -1,0 +1,40 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/exit_sign_green",
+    "all": "berongsmp:block/exit_sign_green"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        8,
+        14
+      ],
+      "to": [
+        13,
+        14,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#all"
+        },
+        "up": {
+          "texture": "#all"
+        },
+        "north": {
+          "texture": "#all"
+        },
+        "south": {
+          "texture": "#all"
+        },
+        "east": {
+          "texture": "#all"
+        },
+        "west": {
+          "texture": "#all"
+        }
+      }
+    }
+  ]
+}

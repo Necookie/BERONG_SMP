@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.ExitSignBlock;
 import net.necookie.disastersim.block.ClassroomGlobeBlock;
 import net.necookie.disastersim.block.PodiumLecternBlock;
 import net.necookie.disastersim.block.BlackboardBlock;
@@ -460,6 +461,13 @@ public final class ModBlocks {
             "classroom_globe", ClassroomGlobeBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.COLOR_BLUE)
                     .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Emergency Exit Sign — see {@link ExitSignBlock}. */
+    public static final DeferredBlock<ExitSignBlock> EXIT_SIGN = BLOCKS.registerBlock(
+            "exit_sign", ExitSignBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.EMERALD)
+                    .strength(0.5f, 2.0f).sound(SoundType.GLASS).noOcclusion()
+                    .lightLevel(s -> 7));
 
     private ModBlocks() {}
 

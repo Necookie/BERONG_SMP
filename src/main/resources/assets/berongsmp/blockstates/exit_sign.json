@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/exit_sign"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/exit_sign",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/exit_sign",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/exit_sign",
+      "y": 270
+    }
+  }
+}
