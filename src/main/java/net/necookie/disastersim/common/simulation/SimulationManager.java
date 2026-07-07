@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
+import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
@@ -181,12 +182,12 @@ public class SimulationManager {
         ));
 
         if (state == SimulationState.FIRE) {
-            ItemStack extinguisher = new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get());
+            ItemStack extinguisher = new ItemStack(ModItems.FIRE_EXTINGUISHER.get());
             player.getInventory().setItem(0, extinguisher);
             player.sendSystemMessage(Component.literal("§eYou have been given a Fire Extinguisher in slot 1. Remember: Pull the pin first before spraying! (PASS)"));
             player.sendSystemMessage(Component.literal("§6Starting FIRE Simulation!"));
         } else if (state == SimulationState.CCS_FIRE) {
-            ItemStack extinguisher = new ItemStack(BerongSMP.CO2_EXTINGUISHER.get());
+            ItemStack extinguisher = new ItemStack(ModItems.CO2_EXTINGUISHER.get());
             player.getInventory().setItem(0, extinguisher);
             player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
             player.sendSystemMessage(Component.literal("§c§l🔥  FIRE EMERGENCY — CCS Admin Building"));

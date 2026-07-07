@@ -10,6 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
@@ -23,8 +24,8 @@ import java.util.List;
 public class ItemCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        List<String> hazardIds = List.copyOf(BerongSMP.HAZARD_ITEM_MAP.keySet());
-        List<String> allIds = List.copyOf(BerongSMP.ALL_ITEM_MAP.keySet());
+        List<String> hazardIds = List.copyOf(ModItems.HAZARD_ITEM_MAP.keySet());
+        List<String> allIds = List.copyOf(ModItems.ALL_ITEM_MAP.keySet());
         dispatcher.register(Commands.literal("item")
                 .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .then(Commands.literal("hazard")
@@ -65,7 +66,7 @@ public class ItemCommands {
                 .executes(ctx -> {
                     ServerPlayer player = requirePlayer(ctx.getSource());
                     if (player == null) return 0;
-                    player.getInventory().add(BerongSMP.CO2_EXTINGUISHER.get().getDefaultInstance());
+                    player.getInventory().add(ModItems.CO2_EXTINGUISHER.get().getDefaultInstance());
                     ctx.getSource().sendSuccess(() -> Component.literal(
                             "§aCO2 Extinguisher added to your inventory! Use it on burning computer blocks."), true);
                     return 1;
@@ -75,7 +76,7 @@ public class ItemCommands {
                 .executes(ctx -> {
                     ServerPlayer player = requirePlayer(ctx.getSource());
                     if (player == null) return 0;
-                    player.getInventory().add(BerongSMP.WET_CHEMICAL_EXTINGUISHER.get().getDefaultInstance());
+                    player.getInventory().add(ModItems.WET_CHEMICAL_EXTINGUISHER.get().getDefaultInstance());
                     ctx.getSource().sendSuccess(() -> Component.literal(
                             "§aWet Chemical Extinguisher added to your inventory! Use it on kitchen grease fires."), true);
                     return 1;
@@ -120,7 +121,7 @@ public class ItemCommands {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = requirePlayer(source);
         if (player == null) return 0;
-        player.getInventory().add(BerongSMP.FIRE_EXTINGUISHER.get().getDefaultInstance());
+        player.getInventory().add(ModItems.FIRE_EXTINGUISHER.get().getDefaultInstance());
         source.sendSuccess(() -> Component.literal("Fire Extinguisher added to your inventory!"), true);
         return 1;
     }
@@ -130,7 +131,7 @@ public class ItemCommands {
         if (player == null) return 0;
         String name = StringArgumentType.getString(ctx, "name");
         net.neoforged.neoforge.registries.DeferredItem<? extends net.minecraft.world.item.Item> item =
-                BerongSMP.ALL_ITEM_MAP.get(name);
+                ModItems.ALL_ITEM_MAP.get(name);
         if (item == null) {
             ctx.getSource().sendFailure(Component.literal("§cUnknown item: §r" + name));
             return 0;
@@ -143,9 +144,9 @@ public class ItemCommands {
     private static int giveKit(CommandContext<CommandSourceStack> ctx) {
         ServerPlayer player = requirePlayer(ctx.getSource());
         if (player == null) return 0;
-        BerongSMP.ALL_ITEM_MAP.values().forEach(item -> player.getInventory().add(item.get().getDefaultInstance()));
+        ModItems.ALL_ITEM_MAP.values().forEach(item -> player.getInventory().add(item.get().getDefaultInstance()));
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "§aGave one of every BerongSMP item (§r" + BerongSMP.ALL_ITEM_MAP.size() + "§a)."), true);
+                "§aGave one of every BerongSMP item (§r" + ModItems.ALL_ITEM_MAP.size() + "§a)."), true);
         return 1;
     }
 
@@ -154,7 +155,7 @@ public class ItemCommands {
         if (player == null) return 0;
         String name = StringArgumentType.getString(ctx, "name");
         net.neoforged.neoforge.registries.DeferredItem<net.minecraft.world.item.BlockItem> item =
-                BerongSMP.HAZARD_ITEM_MAP.get(name);
+                ModItems.HAZARD_ITEM_MAP.get(name);
         if (item == null) {
             ctx.getSource().sendFailure(Component.literal("§cUnknown hazard prop: §r" + name));
             return 0;

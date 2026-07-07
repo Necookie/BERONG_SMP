@@ -14,6 +14,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
@@ -262,7 +263,7 @@ public class TutorialManager {
 
     /** Gives the player a fire extinguisher in hotbar slot 0. */
     public static void giveExtinguisher(ServerPlayer player) {
-        player.getInventory().setItem(0, new ItemStack(BerongSMP.FIRE_EXTINGUISHER.get()));
+        player.getInventory().setItem(0, new ItemStack(ModItems.FIRE_EXTINGUISHER.get()));
     }
 
     /**

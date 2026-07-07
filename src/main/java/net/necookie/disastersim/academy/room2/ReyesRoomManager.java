@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.BerongSMP;
@@ -625,9 +626,9 @@ public final class ReyesRoomManager {
 
     /** The three extinguisher glow item frames, schematic-verified positions. */
     private static final List<FrameSpec> EXTINGUISHER_FRAMES = List.of(
-            new FrameSpec(new BlockPos(-170, -32, 10), () -> BerongSMP.FIRE_EXTINGUISHER.get().asItem()),
-            new FrameSpec(new BlockPos(-168, -32, 10), () -> BerongSMP.CO2_EXTINGUISHER.get().asItem()),
-            new FrameSpec(new BlockPos(-166, -32, 10), () -> BerongSMP.WET_CHEMICAL_EXTINGUISHER.get().asItem())
+            new FrameSpec(new BlockPos(-170, -32, 10), () -> ModItems.FIRE_EXTINGUISHER.get().asItem()),
+            new FrameSpec(new BlockPos(-168, -32, 10), () -> ModItems.CO2_EXTINGUISHER.get().asItem()),
+            new FrameSpec(new BlockPos(-166, -32, 10), () -> ModItems.WET_CHEMICAL_EXTINGUISHER.get().asItem())
     );
 
     /**
