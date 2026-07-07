@@ -14,7 +14,7 @@ Call with the stage name and trigger type:
 1. Read these files in full before making any changes:
    - `src/main/java/net/necookie/disastersim/tutorial/TutorialStage.java`
    - `src/main/java/net/necookie/disastersim/tutorial/TutorialManager.java`
-   - `src/main/java/net/necookie/disastersim/world/LobbyManager.java` (for click dispatch)
+   - `src/main/java/net/necookie/disastersim/common/structure/LobbyManager.java` (for click dispatch)
 
 2. Add the new enum value to `TutorialStage.java` in the correct position in the progression sequence
 

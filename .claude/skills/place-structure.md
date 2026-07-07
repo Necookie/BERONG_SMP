@@ -26,7 +26,7 @@ Call with an argument specifying which structure to test:
 
 All under `src/main/resources/data/berongsmp/structure/`:
 - `lobby_structure.nbt`
-- `lspulibrarymain.nbt`
+- `lspu_library_main.nbt`
 - `ssc_building.schem`
 
 ## Common issues

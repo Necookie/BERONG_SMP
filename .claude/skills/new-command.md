@@ -1,6 +1,6 @@
 # new-command
 
-Scaffold a new Brigadier command in ModCommands.java with correct boilerplate for this project.
+Scaffold a new Brigadier command with correct boilerplate for this project. `ModCommands` is a thin registration shell — actual commands live in `RegistrationCommands`, `ItemCommands`, `SimulationCommands`, or `BfpAdminCommands`; pick the file whose domain matches the new command (or discuss if none fits).
 
 ## Usage
 
@@ -11,8 +11,8 @@ Call with the command name and optional details:
 
 ## Steps
 
-1. Read `src/main/java/net/necookie/disastersim/command/ModCommands.java` fully
-2. Add the new command block inside `ModCommands.register()` following the existing style:
+1. Read `src/main/java/net/necookie/disastersim/command/ModCommands.java` to see the delegation, then read the sub-file that matches the new command's domain (items -> ItemCommands, sim control -> SimulationCommands, /bfp admin -> BfpAdminCommands, registration -> RegistrationCommands)
+2. Add the new command block inside that file's `register()` following the existing style:
    - Use `Commands.literal("<name>")` as the root node
    - If `op`: chain `.requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))`
    - If argument: use `Commands.argument("<argName>", <TypeArgumentType>.type())` and retrieve with `<TypeArgumentType>.get<Type>(context, "<argName>")`

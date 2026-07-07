@@ -8,7 +8,7 @@ Station positions are **offsets from `TutorialLobbyManager.TUTORIAL_LOBBY_POS`**
 
 The constants that need tuning are in:
 - `src/main/java/net/necookie/disastersim/tutorial/TutorialManager.java` — `PRACTICE_FIRE` and any `STATION_*` constants
-- `src/main/java/net/necookie/disastersim/world/TutorialLobbyManager.java` — `TUTORIAL_LOBBY_POS` and NPC spawn offsets
+- `src/main/java/net/necookie/disastersim/common/structure/TutorialLobbyManager.java` — `TUTORIAL_LOBBY_POS` and NPC spawn offsets
 
 ## Steps
 
