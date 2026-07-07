@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "berongsmp:item/first_aid_kit"
+  }
+}

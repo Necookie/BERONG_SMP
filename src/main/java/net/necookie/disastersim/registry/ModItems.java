@@ -16,6 +16,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.item.CO2ExtinguisherItem;
+import net.necookie.disastersim.item.FirstAidKitItem;
 import net.necookie.disastersim.item.FireBlanketItem;
 import net.necookie.disastersim.item.FireExtinguisherItem;
 import net.necookie.disastersim.item.HazardWandItem;
@@ -349,6 +350,9 @@ public final class ModItems {
     public static final DeferredItem<FireBlanketItem> FIRE_BLANKET = ITEMS.registerItem("fire_blanket",
             props -> new FireBlanketItem(props.durability(3)));
 
+    public static final DeferredItem<FirstAidKitItem> FIRST_AID_KIT = ITEMS.registerItem("first_aid_kit",
+            props -> new FirstAidKitItem(props.durability(5)));
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -397,6 +401,7 @@ public final class ModItems {
         ALL_ITEM_MAP.put("podium_lectern", PODIUM_LECTERN_ITEM);
         ALL_ITEM_MAP.put("classroom_globe", CLASSROOM_GLOBE_ITEM);
         ALL_ITEM_MAP.put("fire_blanket", FIRE_BLANKET);
+        ALL_ITEM_MAP.put("first_aid_kit", FIRST_AID_KIT);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 
