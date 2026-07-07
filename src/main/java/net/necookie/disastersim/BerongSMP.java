@@ -776,13 +776,17 @@ public class BerongSMP {
      * Common setup logic that runs on both the physical client and dedicated server.
      * This phase is the right place for cross-side initialisation that doesn't depend
      * on the world being loaded (e.g., capability registration, recipe unlocking).
-     * Currently a no-op; expand here if shared setup is needed in future.
      *
      * @param event The FML common setup event (enqueued, not immediate).
      */
     private void commonSetup(FMLCommonSetupEvent event) {
-        // No cross-side setup required at this time.
         // Wood furniture flammability is handled via IBlockExtension overrides in each block class.
+
+        // Force DuckCoverHoldManager to class-load so its static TickScheduler.register block
+        // actually runs — nothing else in the codebase calls real code on that class, only
+        // Javadoc {@code} mentions, which the JVM doesn't count. Without this, the crawl-under-
+        // table pose-shrink assist (and duck/cover/hold tracking generally) silently never ticks.
+        net.necookie.disastersim.player.DuckCoverHoldManager.bootstrap();
     }
 
     /**
