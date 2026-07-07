@@ -1,0 +1,42 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/armchair_wood_seat",
+    "top": "berongsmp:block/armchair_tablet_top",
+    "seat": "berongsmp:block/armchair_wood_seat",
+    "frame": "berongsmp:block/armchair_frame_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        10,
+        14
+      ],
+      "faces": {
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#frame"
+        },
+        "north": {
+          "texture": "#frame"
+        },
+        "south": {
+          "texture": "#seat"
+        },
+        "east": {
+          "texture": "#seat"
+        },
+        "west": {
+          "texture": "#seat"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/armchair_desk"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/armchair_desk",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/armchair_desk",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/armchair_desk",
+      "y": 270
+    }
+  }
+}

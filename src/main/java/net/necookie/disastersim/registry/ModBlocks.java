@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.ArmchairDeskBlock;
 import net.necookie.disastersim.block.TeachersDeskBlock;
 import net.necookie.disastersim.block.CeilingFanBlock;
 import net.necookie.disastersim.block.ChairBlock;
@@ -396,6 +397,12 @@ public final class ModBlocks {
             "teachers_desk", TeachersDeskBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Armchair Desk — see {@link ArmchairDeskBlock}. */
+    public static final DeferredBlock<ArmchairDeskBlock> ARMCHAIR_DESK = BLOCKS.registerBlock(
+            "armchair_desk", ArmchairDeskBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
 
     private ModBlocks() {}
 
