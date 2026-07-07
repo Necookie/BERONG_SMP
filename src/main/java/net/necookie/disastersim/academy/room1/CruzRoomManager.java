@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Room 1 — Officer Cruz's Movement School. A single {@code CustomNpcEntity} (the schematic's
  * duplicate near the old Go/Stop tunnel finish is discarded by
- * {@code world.NewTutBuildingManager}) physically escorts the player through Briefing/Maze/Jump
+ * {@code world.AcademyBuildingManager}) physically escorts the player through Briefing/Maze/Jump
  * via real vanilla pathfinding (see {@link #updateCruzEscort}), then waits at the Go/Stop staging
  * line and calls out GO/STOP and the finish line from there — her fixed hitbox can't crouch
  * through the tunnel's low slabs the way a player can, so she supervises the last phase rather
@@ -589,7 +589,7 @@ public final class CruzRoomManager {
             return;
         }
         // Only the NEXT mark gets the particle marker — the physical lime concrete tiles
-        // (NewTutBuildingManager.placeGreenMarks) keep all four permanently visible.
+        // (AcademyBuildingManager.placeGreenMarks) keep all four permanently visible.
         if (nextMark >= 0) {
             if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
                 AcademyVisuals.highlightBlocks(level, List.of(GREEN_MARKS.get(nextMark)));

@@ -29,7 +29,7 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
  * NPCs colliding with the same-UUID copies the previous server run persisted to disk, once that
  * chunk's entity data finishes loading.
  */
-public final class NewTutBuildingManager {
+public final class AcademyBuildingManager {
 
     /** Exact world position requested for the schematic's minimum (0,0,0) corner. */
     public static final BlockPos POS = new BlockPos(-177, -34, 8);
@@ -106,7 +106,7 @@ public final class NewTutBuildingManager {
      */
     public static final String DEFAULT_VIEWPOINT = "officer_cruz";
 
-    private NewTutBuildingManager() {}
+    private AcademyBuildingManager() {}
 
     /** Call once from {@code ServerStartedEvent}. */
     public static void place(ServerLevel level) {

@@ -91,7 +91,7 @@ public final class ReyesRoomManager {
      * World position of the Academy's fire alarm, taught during {@code ALARM_CHECKPOINT}. The
      * schematic already bakes one in here (verified by parsing {@code new_tut_building1.0.schem}'s
      * raw block data: {@code berongsmp:fire_alarm[activated=false,facing=south]} at this exact
-     * spot) — {@code NewTutBuildingManager} used to also place a second one one block below this,
+     * spot) — {@code AcademyBuildingManager} used to also place a second one one block below this,
      * which is what the "two fire alarms stacked on top of each other" report was.
      */
     public static final BlockPos ALARM_POS = new BlockPos(-143, -32, 40);

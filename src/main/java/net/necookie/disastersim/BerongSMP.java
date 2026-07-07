@@ -78,7 +78,7 @@ import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.necookie.disastersim.command.ModCommands;
 import net.necookie.disastersim.common.structure.LobbyManager;
-import net.necookie.disastersim.common.structure.NewTutBuildingManager;
+import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.item.CO2ExtinguisherItem;
@@ -883,7 +883,7 @@ public class BerongSMP {
         TutorialLobbyManager.initNpcs(event.getServer().overworld());
         // Also bakes in its own NPCs/armor stands from the schematic's Entities tag — same
         // entity-storage-must-be-ready requirement as the call above.
-        NewTutBuildingManager.place(event.getServer().overworld());
+        AcademyBuildingManager.place(event.getServer().overworld());
     }
 
     @SubscribeEvent

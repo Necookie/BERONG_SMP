@@ -31,7 +31,7 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
-import net.necookie.disastersim.common.structure.NewTutBuildingManager;
+import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 
 public class BfpAdminCommands {
@@ -367,21 +367,21 @@ public class BfpAdminCommands {
      * {@code /bfp new_tutorial [player]} — mirrors {@code /bfp tutorial}'s "activate" behavior for
      * the old tutorial exactly: wipes the player's {@link AcademyProgress} back to a fresh start,
      * clears every room manager's transient state, and teleports to
-     * {@link NewTutBuildingManager#DEFAULT_VIEWPOINT} (Room 1). Previously this bare form only
+     * {@link AcademyBuildingManager#DEFAULT_VIEWPOINT} (Room 1). Previously this bare form only
      * teleported without resetting anything, which didn't actually "start" the Academy the way
      * {@code /bfp tutorial} starts the old one — a player already mid-progress would just get
      * dropped back into whatever phase they were last in instead of a clean run.
      *
      * <p>{@code /bfp new_tutorial <section> [player]} teleports to any other named F3-captured
-     * reference viewpoint ({@link NewTutBuildingManager#VIEWPOINTS}) as a pure dev-navigation jump
+     * reference viewpoint ({@link AcademyBuildingManager#VIEWPOINTS}) as a pure dev-navigation jump
      * — no reset — for eyeballing NPC placement. One literal subcommand per map entry, so adding a
      * new named viewpoint there automatically adds its own {@code /bfp new_tutorial <name>}
      * subcommand here. {@code /bfp new_tutorial reset [player]} is kept as an explicit, discoverable
      * alias for the same reset-and-teleport the bare command now performs.
      */
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
-        NewTutBuildingManager.Viewpoint defaultViewpoint =
-                NewTutBuildingManager.VIEWPOINTS.get(NewTutBuildingManager.DEFAULT_VIEWPOINT);
+        AcademyBuildingManager.Viewpoint defaultViewpoint =
+                AcademyBuildingManager.VIEWPOINTS.get(AcademyBuildingManager.DEFAULT_VIEWPOINT);
 
         var root = Commands.literal("new_tutorial")
                 .executes(ctx -> {
@@ -392,8 +392,8 @@ public class BfpAdminCommands {
                         .executes(ctx -> academyReset(
                                 ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint)));
 
-        for (Map.Entry<String, NewTutBuildingManager.Viewpoint> entry : NewTutBuildingManager.VIEWPOINTS.entrySet()) {
-            NewTutBuildingManager.Viewpoint viewpoint = entry.getValue();
+        for (Map.Entry<String, AcademyBuildingManager.Viewpoint> entry : AcademyBuildingManager.VIEWPOINTS.entrySet()) {
+            AcademyBuildingManager.Viewpoint viewpoint = entry.getValue();
             root.then(Commands.literal(entry.getKey())
                     .executes(ctx -> {
                         if (!ctx.getSource().isPlayer()) return 0;
@@ -417,7 +417,7 @@ public class BfpAdminCommands {
     }
 
     private static int academyReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
-                                     NewTutBuildingManager.Viewpoint startViewpoint) {
+                                     AcademyBuildingManager.Viewpoint startViewpoint) {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
         AcademySavedData.get(level).reset(target.getUUID());
         AcademyManager.cancelDialogue(target);
@@ -437,7 +437,7 @@ public class BfpAdminCommands {
     }
 
     private static int teleportToViewpoint(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
-                                            NewTutBuildingManager.Viewpoint viewpoint) {
+                                            AcademyBuildingManager.Viewpoint viewpoint) {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
         target.teleportTo(level, viewpoint.x(), viewpoint.y(), viewpoint.z(),
                 java.util.Collections.emptySet(), viewpoint.yaw(), viewpoint.pitch(), true);

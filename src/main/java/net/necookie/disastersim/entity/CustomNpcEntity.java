@@ -245,7 +245,7 @@ public class CustomNpcEntity extends Mob {
      * CruzRoomManager} (the only current caller). Living on the manager class meant this state
      * described "the escort in progress" rather than "this specific NPC" — harmless while exactly
      * one {@code OFFICER_CRUZ} instance exists (duplicates are swept on boot and every tick, see
-     * {@code NewTutBuildingManager.sweepStrayCruz}), but a latent trap if that invariant were ever
+     * {@code AcademyBuildingManager.sweepStrayCruz}), but a latent trap if that invariant were ever
      * violated: two entities would silently corrupt each other's stuck-cycle/target bookkeeping.
      * Moving it here means it travels with the object it actually describes. This does NOT enable
      * escorting two students at once — there is still exactly one physical NPC, so a second student
