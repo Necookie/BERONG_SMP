@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.structure;
 
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;

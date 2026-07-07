@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.common.structure.SimulationStructureLoader;
 import net.necookie.disastersim.tutorial.NpcRole;
 import net.necookie.disastersim.tutorial.TutorialManager;
 
