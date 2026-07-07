@@ -92,7 +92,7 @@ from `LobbyManager.LOBBY_POS = (0,-33,0)`. Verify each after loading the lobby s
 ## 6. Academy (New Tutorial Building) — Room 1 Sub-Coordinates
 
 **Why:** `AcademyBuildingManager.POS`, all 4 NPC anchors, and the Room 3 table row are confirmed
-against the schematic's actual placed entity data (see `docs/new_tutorial_script.md`'s coordinate
+against the schematic's actual placed entity data (see `docs/academy_script.md`'s coordinate
 table). The finer marks *inside* Room 1 (Officer Cruz's Movement School) were given descriptively
 by the user, not as exact F3 readings, and are currently placeholder positions in
 `academy/room1/CruzRoomManager.java`.

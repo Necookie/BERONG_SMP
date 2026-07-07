@@ -7,7 +7,7 @@ import java.util.Map;
  * Dialogue lines for Officer Cruz, Sgt. Reyes, Sgt. Santos, and Capt. Morfe, keyed by the player's
  * current phase in that NPC's room. Pattern-cloned from {@code tutorial/NpcDialogue}'s
  * {@code DialogueLine}/{@code Map<Stage, List<DialogueLine>>} shape, but per-room instead of one
- * shared global stage. Full script and voice notes: {@code docs/new_tutorial_script.md}.
+ * shared global stage. Full script and voice notes: {@code docs/academy_script.md}.
  *
  * <p>Voice rules (non-gamer friendly): the exact key/button is named in §e in every instruction
  * ("hold the §eW key§f", "press and hold §eShift§f"), one clear action per line, warm and

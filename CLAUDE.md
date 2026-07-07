@@ -22,7 +22,7 @@ This file is a lean index; deep-dive content lives under `docs/`:
   [hazard-3state-log.md](docs/history/hazard-3state-log.md),
   [hazard-state-management-log.md](docs/history/hazard-state-management-log.md)
 - **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
-- **`docs/new_tutorial_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
+- **`docs/academy_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
 
 When a change touches a system with its own doc, update that doc — not a growing section here.
 

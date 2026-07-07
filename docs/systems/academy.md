@@ -1,6 +1,6 @@
 # New Tutorial Building (Academy)
 
-A second, **fully independent** tutorial — "the Academy" — lives in `academy_building.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
+A second, **fully independent** tutorial — "the Academy" — lives in `academy_building.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/academy_script.md`.
 
 ```
 Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — physical lime
@@ -437,7 +437,7 @@ state — 4 phases + Capt. Morfe's scoring inputs, `SavedData`+`Codec` pattern-c
 `AcademySavedData.mutate` so `setDirty()` is never forgotten); `AcademyDialogue`
 (Cruz/Reyes/Santos/Morfe static line content — non-gamer voice, exact key names in §e — plus
 `REYES_HAZARD_LINES` per-hazard explanations and `MORFE_LINES`/`MORFE_PASS_LINES`/
-`MORFE_FAIL_LINES`, transcribed from `docs/new_tutorial_script.md`); `AcademyTelemetry` (own
+`MORFE_FAIL_LINES`, transcribed from `docs/academy_script.md`); `AcademyTelemetry` (own
 per-attempt session id + `TelemetryCsvWriter.writeRow` adapter — see "Academy telemetry" above);
 `AcademyGuardrails` (block protection + out-of-bounds rescue + death/respawn recovery — see
 Guardrails above); `AcademyStatusPayload`/`AcademyHud` (own caption channel, pattern-cloned from
