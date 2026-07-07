@@ -192,7 +192,7 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 - **Lobby**: origin `BlockPos(0, -33, 0)`, player spawn at `(8.8, -31, 8)`
 - **Simulation arena**: `SIM_POS = BlockPos(30, -34, 83)`, player entry offset `+5.5, +2, +5.5`
 - **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
-- **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 0 CCW rotations (`ccs_admin_building2.4.schem`)
+- **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 0 CCW rotations (`ccs_admin_building.schem`)
 - **New Tutorial Building**: `AcademyBuildingManager.POS = BlockPos(-177, -34, 8)`, placed with 0 CCW rotations (`academy_building.schem`) — far west of every other structure, its own standalone footprint
 
 #### CCS 1st Floor Named Rooms (`SimRoom.CCS_GROUND_ROOMS`)
@@ -233,7 +233,7 @@ Stored under `src/main/resources/data/berongsmp/structure/`:
 - `lobby_structure.nbt` — lobby building with two buttons (NBT, placed once at server start)
 - `lspulibrarymain.nbt` — simulation arena (NBT, placed/restored each session)
 - `ssc_building.schem` — SSC building adjacent to the arena (Sponge Schematic v3, placed/restored each session with 1 CCW rotation)
-- `ccs_admin_building2.4.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 0 CCW rotations)
+- `ccs_admin_building.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 0 CCW rotations)
 
 `SimulationManager.BUILDINGS` holds the full list of `StructurePlacer`+`BlockPos` pairs iterated on session start and end.
 
