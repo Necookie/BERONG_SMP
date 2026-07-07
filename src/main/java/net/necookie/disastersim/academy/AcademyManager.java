@@ -16,6 +16,7 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.academy.room3.SantosRoomManager;
 import net.necookie.disastersim.academy.room4.MorfeRoomManager;
 import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.network.AcademyStatusPayload;
@@ -61,6 +62,7 @@ public final class AcademyManager {
             clearTransientState(player);
         });
         PlayerLifecycleRegistry.registerLoginHook(AcademyManager::clearTransientState);
+        TickScheduler.register(AcademyManager::tick);
     }
 
     @SubscribeEvent

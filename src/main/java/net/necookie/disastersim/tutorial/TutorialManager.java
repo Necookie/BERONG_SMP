@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -54,6 +55,7 @@ public class TutorialManager {
 
     static {
         PlayerLifecycleRegistry.registerLogoutHook(TutorialManager::rollbackOnLogout);
+        TickScheduler.register(TutorialManager::tick);
     }
 
     /** Center of the practice fire cluster in the BFP tutorial lobby. */

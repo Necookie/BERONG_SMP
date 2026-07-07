@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -25,6 +26,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * to survive a server restart (see {@code TutorialManager.holdOnTimers}).
  */
 public final class DropAndRollManager {
+
+    static {
+        TickScheduler.register(DropAndRollManager::tick);
+    }
 
     private static final int FIRE_TICKS_REDUCED_PER_PRESS = 30; // 1.5s worth, vs. vanilla's 1/tick decay
     private static final int DROPPED_WINDOW_TICKS = 100;        // 5s

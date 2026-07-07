@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Pose;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.TableBlock;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -47,6 +48,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * this exact same compliance state, without duplicating any duck/cover/hold logic.
  */
 public final class DuckCoverHoldManager {
+
+    static {
+        TickScheduler.register(DuckCoverHoldManager::tick);
+    }
 
     /** Ticks of continuous compliance required to count the drill as performed correctly (5s). */
     public static final int TARGET_TICKS = 100;
