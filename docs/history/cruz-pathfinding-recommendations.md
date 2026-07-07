@@ -9,7 +9,7 @@ comment fixes) were implemented the same day — see the Room 1 section above.
 **Escort state moved onto the entity (2026-07-06):** `nextEscortMoveTick`/`lastCruzPos`/`lastTarget`/
 `stuckCycles`/`lastTooFarNudgeTick` used to be `static` fields on `CruzRoomManager` itself — harmless
 while exactly one `OFFICER_CRUZ` instance exists (duplicates are swept every tick, see
-`NewTutBuildingManager.sweepStrayCruz`), but state describing "the escort in progress" rather than
+`AcademyBuildingManager.sweepStrayCruz`), but state describing "the escort in progress" rather than
 "this specific NPC," and a latent trap if that one-instance invariant were ever violated (two
 entities would silently corrupt each other's bookkeeping). Moved onto `CustomNpcEntity` itself
 (`getNextEscortMoveTick`/`getLastEscortPos`/`getLastEscortTarget`/`getEscortStuckCycles`/

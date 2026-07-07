@@ -1,7 +1,7 @@
 # New Tutorial Building — "The Academy" Script & Flow
 
 This document is the full dialogue script, storyboard, and flow diagram for the new tutorial
-building (`new_tut_building1.0.schem`, placed via `NewTutBuildingManager` at
+building (`new_tut_building1.0.schem`, placed via `AcademyBuildingManager` at
 `BlockPos(-177,-34,8)`). It is a **new, independent tutorial** ("the Academy") — it does not reuse
 or replace the old tutorial (`tutorial/TutorialManager`, `tutorial/NpcDialogue`, the BFP Fire
 Training Center lobby at `TutorialLobbyManager.TUTORIAL_LOBBY_POS`), which keeps functioning
@@ -81,13 +81,13 @@ player's side (POOF particles at both ends, reads as an intentional catch-up). D
 briefing she waits at the staging line — her 1.8-block hitbox can't crouch under the 1.5-block slab
 headroom — but during the run she follows the player themselves, poofing past each slab barrier to
 keep pace. (The old second Cruz at `(-123.5,-33,49.5)` has been NBT-edited out of the .schem file
-itself — 29 → 28 entities; `NewTutBuildingManager.discardDuplicateCruz` remains only as a silent
+itself — 29 → 28 entities; `AcademyBuildingManager.discardDuplicateCruz` remains only as a silent
 safety net.)
 
 ### Phase 1 — Briefing Room (Mouse & WASD)
 **Zone:** `(-154,-33,38)` to `(-137,-33,25)`. **Gate:** all 4 green tiles visited.
 **The 4 marks are physical lime concrete floor tiles** placed by
-`NewTutBuildingManager.placeGreenMarks` at `(-150,34)`, `(-146,30)`, `(-142,34)`, `(-139,30)`
+`AcademyBuildingManager.placeGreenMarks` at `(-150,34)`, `(-146,30)`, `(-142,34)`, `(-139,30)`
 (floor layer Y=-34; the schematic itself contains no green blocks). The **next** unhit tile also
 gets the particle beacon (corner posts + pulsing ring + light beam), paired with the HUD compass
 needle pointing at it.
@@ -414,7 +414,7 @@ against `Config.ACADEMY_PASS_THRESHOLD` (default 70).
 Previously-open coordinate questions, now settled by parsing the schematic directly:
 
 - Room 1's 4 green marks: **did not exist as blocks** — now physical lime concrete tiles placed at
-  runtime (`NewTutBuildingManager.placeGreenMarks`) at the positions listed in §2 Phase 1.
+  runtime (`AcademyBuildingManager.placeGreenMarks`) at the positions listed in §2 Phase 1.
 - Maze wall layout: verified (walls at X=-131/-127/-124, gaps at Z=25/38/25) — drives the §2
   Phase 2 waypoint chain.
 - Jump hurdles: verified (1-block rows at X=-117/-114/-111) — drives the §2 Phase 3 waypoints.

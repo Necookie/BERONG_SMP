@@ -1,10 +1,10 @@
 # New Tutorial Building (Academy)
 
-A second, **fully independent** tutorial — "the Academy" — lives in `new_tut_building1.0.schem`, placed at `NewTutBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
+A second, **fully independent** tutorial — "the Academy" — lives in `new_tut_building1.0.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/new_tutorial_script.md`.
 
 ```
 Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — physical lime
-  concrete floor tiles placed at runtime by NewTutBuildingManager.placeGreenMarks, since the
+  concrete floor tiles placed at runtime by AcademyBuildingManager.placeGreenMarks, since the
   schematic contains no green blocks; the next unhit one also gets the particle beacon) → MAZE →
   JUMP → GOSTOP_STAGE/GOSTOP_RUN (Officer Cruz calls GO/STOP on a random 3-6s cadence; moving past
   Config.ACADEMY_GOSTOP_GRACE_TICKS after a STOP call warps the player back to the staging line
@@ -115,7 +115,7 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   never promoted to Minecraft's entity-ticking ring, since that requires an online player nearby.
   **A one-shot boot-time scan can never actually find her** (`getEntitiesOfClass` only sees
   entities the level has attached, which doesn't happen until her chunk activates) — that's why an
-  earlier position-targeted boot-only fix didn't work. `NewTutBuildingManager.sweepStrayCruz`
+  earlier position-targeted boot-only fix didn't work. `AcademyBuildingManager.sweepStrayCruz`
   (a tiny single-chunk-sized AABB query around `(-122,-33,49)`) is now called every tick from
   `AcademyManager.tick()` instead, so she's discarded the exact tick her chunk activates — which
   only happens because a player walked close enough to see her, so in practice she never renders
@@ -227,7 +227,7 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
     alarm fix (2026-07-05):** the schematic actually already bakes a
     `berongsmp:fire_alarm[activated=false,facing=south]` in at this exact spot (confirmed by
     parsing `new_tut_building1.0.schem`'s raw block data) — a since-removed
-    `NewTutBuildingManager.placeFireAlarm` was placing a second one one block below every boot,
+    `AcademyBuildingManager.placeFireAlarm` was placing a second one one block below every boot,
     which was the "two fire alarms stacked on top of each other" report. `ALARM_POS` now points at
     the schem's real alarm and nothing places a second one. `FireAlarmBlock.useWithoutItem` calls
     `ReyesRoomManager.tryHandleAlarmPress` first (returns true/short-circuits if handled), so the
@@ -454,5 +454,5 @@ alongside the existing `TutorialManager`/`DropAndRollManager`/`DuckCoverHoldMana
 All Academy coordinates are now **schematic-verified** (the `.schem` was parsed directly): building
 position, all 4 NPC anchors, the Room 3 table row, the maze wall gaps, the jump hurdles, the
 Go/Stop tunnel slabs, and the 4 WASD mark cells (which had no green blocks in the schematic at all
-— they're placed as lime concrete at runtime, see `NewTutBuildingManager.placeGreenMarks`).
+— they're placed as lime concrete at runtime, see `AcademyBuildingManager.placeGreenMarks`).
 
