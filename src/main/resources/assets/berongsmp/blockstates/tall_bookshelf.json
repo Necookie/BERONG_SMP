@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/tall_bookshelf"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/tall_bookshelf",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/tall_bookshelf",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/tall_bookshelf",
+      "y": 270
+    }
+  }
+}

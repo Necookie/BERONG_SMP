@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.TallBookshelfBlock;
 import net.necookie.disastersim.block.ArmchairDeskBlock;
 import net.necookie.disastersim.block.TeachersDeskBlock;
 import net.necookie.disastersim.block.CeilingFanBlock;
@@ -403,6 +404,12 @@ public final class ModBlocks {
             "armchair_desk", ArmchairDeskBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.WOOD)
                     .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Tall Bookshelf — see {@link TallBookshelfBlock}. */
+    public static final DeferredBlock<TallBookshelfBlock> TALL_BOOKSHELF = BLOCKS.registerBlock(
+            "tall_bookshelf", TallBookshelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
 
     private ModBlocks() {}
 
