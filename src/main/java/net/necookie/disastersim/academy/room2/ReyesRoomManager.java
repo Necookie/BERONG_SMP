@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.academy.AcademyDialogue;
@@ -71,9 +72,9 @@ public final class ReyesRoomManager {
 
     /** Fixed teaching order: Class A -> electrical -> kitchen. */
     private static final List<HazardStep> HAZARDS = List.of(
-            new HazardStep(CLASS_A_POS, () -> BerongSMP.ARCHIVE_BOX_STACK.get().defaultBlockState(), FireExtinguisherItem.class),
-            new HazardStep(ELECTRICAL_POS, () -> BerongSMP.COMPUTER.get().defaultBlockState(), CO2ExtinguisherItem.class),
-            new HazardStep(KITCHEN_POS, () -> BerongSMP.UNATTENDED_GREASE_PAN.get().defaultBlockState(), WetChemicalExtinguisherItem.class)
+            new HazardStep(CLASS_A_POS, () -> ModBlocks.ARCHIVE_BOX_STACK.get().defaultBlockState(), FireExtinguisherItem.class),
+            new HazardStep(ELECTRICAL_POS, () -> ModBlocks.COMPUTER.get().defaultBlockState(), CO2ExtinguisherItem.class),
+            new HazardStep(KITCHEN_POS, () -> ModBlocks.UNATTENDED_GREASE_PAN.get().defaultBlockState(), WetChemicalExtinguisherItem.class)
     );
 
     /** Telemetry labels for {@link #HAZARDS}, same fixed index order — used only for the detail column. */

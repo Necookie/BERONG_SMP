@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
+import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
@@ -740,7 +741,7 @@ public class SimulationManager {
             for (int dz = 0; dz < CCS_AREA_SPAN_Z; dz++) {
                 for (int dy = 0; dy < CCS_AREA_HEIGHT; dy++) {
                     BlockPos pos = CCS_FIRE_BASE.offset(dx, dy, dz);
-                    if (level.getBlockState(pos).getBlock() == BerongSMP.COMPUTER.get()) {
+                    if (level.getBlockState(pos).getBlock() == ModBlocks.COMPUTER.get()) {
                         computers.add(pos.immutable());
                     }
                 }

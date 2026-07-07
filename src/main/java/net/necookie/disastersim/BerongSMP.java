@@ -93,6 +93,7 @@ import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.network.TutorialStatusPayload;
 import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.registry.ModAttachments;
+import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.session.SessionManager;
@@ -112,9 +113,6 @@ public class BerongSMP {
     
     /** Logger instance for mod-specific logging. */
     public static final Logger LOGGER = LogUtils.getLogger();
-    
-    /** Deferred Register for Blocks. */
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     
     /** Deferred Register for Items. */
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
@@ -160,189 +158,45 @@ public class BerongSMP {
             ITEMS.registerItem("npc_student",
                     p -> new NpcSpawnerItem(NpcType.STUDENT, p.stacksTo(16)));
 
-    /** Example block registration. */
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
-
     /** Example block item registration. */
-    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
-
-    /** Computer/terminal block — can be set LIT=true for Class C electrical fire scenarios. */
-    public static final DeferredBlock<ComputerBlock> COMPUTER = BLOCKS.registerBlock("computer",
-            ComputerBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(1.5f, 6.0f)
-                    .sound(SoundType.METAL)
-                    .lightLevel(state -> {
-                        if (state.getValue(ComputerBlock.BURNING)) return 15;
-                        if (state.getValue(BlockStateProperties.LIT)) return 7;
-                        return 0;
-                    }));
+    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
 
     /** Computer block item. */
-    public static final DeferredItem<BlockItem> COMPUTER_ITEM = ITEMS.registerSimpleBlockItem("computer", COMPUTER);
-
-    /** Wall-mounted fire alarm pull station — activates during FIRE simulations, logs fire_alarm_activate telemetry. */
-    public static final DeferredBlock<FireAlarmBlock> FIRE_ALARM_BLOCK = BLOCKS.registerBlock(
-            "fire_alarm",
-            FireAlarmBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.COLOR_RED)
-                    .strength(0.5f, 4.0f)
-                    .sound(SoundType.METAL)
-                    .lightLevel(s -> s.getValue(FireAlarmBlock.ACTIVATED) ? 7 : 0));
+    public static final DeferredItem<BlockItem> COMPUTER_ITEM = ITEMS.registerSimpleBlockItem("computer", ModBlocks.COMPUTER);
 
     /** Fire alarm block item. */
     public static final DeferredItem<BlockItem> FIRE_ALARM_ITEM =
-            ITEMS.registerSimpleBlockItem("fire_alarm", FIRE_ALARM_BLOCK);
+            ITEMS.registerSimpleBlockItem("fire_alarm", ModBlocks.FIRE_ALARM_BLOCK);
 
     // ── Furniture blocks ─────────────────────────────────────────────────────
 
-    /** Classroom whiteboard — wall-mounted flat panel with marker tray. */
-    public static final DeferredBlock<WhiteboardBlock> WHITEBOARD = BLOCKS.registerBlock("whiteboard",
-            WhiteboardBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.SNOW)
-                    .strength(0.5f, 2.0f)
-                    .sound(SoundType.STONE)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> WHITEBOARD_ITEM = ITEMS.registerSimpleBlockItem("whiteboard", WHITEBOARD);
+    public static final DeferredItem<BlockItem> WHITEBOARD_ITEM = ITEMS.registerSimpleBlockItem("whiteboard", ModBlocks.WHITEBOARD);
 
-    /** Wall-mounted fire hose reel cabinet — decorative safety-equipment prop, not a hazard. */
-    public static final DeferredBlock<FireHoseCabinetBlock> FIRE_HOSE_CABINET = BLOCKS.registerBlock("fire_hose_cabinet",
-            FireHoseCabinetBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.COLOR_RED)
-                    .strength(1.0f, 4.0f)
-                    .sound(SoundType.METAL)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> FIRE_HOSE_CABINET_ITEM = ITEMS.registerSimpleBlockItem("fire_hose_cabinet", FIRE_HOSE_CABINET);
+    public static final DeferredItem<BlockItem> FIRE_HOSE_CABINET_ITEM = ITEMS.registerSimpleBlockItem("fire_hose_cabinet", ModBlocks.FIRE_HOSE_CABINET);
 
-    /** Toilet block — ceramic basin+tank; right-click to flush. */
-    public static final DeferredBlock<ToiletBlock> TOILET = BLOCKS.registerBlock("toilet",
-            ToiletBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.SNOW)
-                    .strength(1.0f, 4.0f)
-                    .sound(SoundType.STONE)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> TOILET_ITEM = ITEMS.registerSimpleBlockItem("toilet", TOILET);
+    public static final DeferredItem<BlockItem> TOILET_ITEM = ITEMS.registerSimpleBlockItem("toilet", ModBlocks.TOILET);
 
-    /** Wall-mounted sink with iron faucet and handles; right-click for water sound. */
-    public static final DeferredBlock<SinkBlock> SINK = BLOCKS.registerBlock("sink",
-            SinkBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.SNOW)
-                    .strength(1.0f, 4.0f)
-                    .sound(SoundType.STONE)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> SINK_ITEM = ITEMS.registerSimpleBlockItem("sink", SINK);
+    public static final DeferredItem<BlockItem> SINK_ITEM = ITEMS.registerSimpleBlockItem("sink", ModBlocks.SINK);
 
-    /** Office chest-of-drawers — dark oak body with birch drawer fronts and iron handles. */
-    public static final DeferredBlock<DrawersBlock> DRAWERS = BLOCKS.registerBlock("drawers",
-            DrawersBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> DRAWERS_ITEM = ITEMS.registerSimpleBlockItem("drawers", DRAWERS);
+    public static final DeferredItem<BlockItem> DRAWERS_ITEM = ITEMS.registerSimpleBlockItem("drawers", ModBlocks.DRAWERS);
 
-    /** Flammable oak computer desk with 4 legs and a back cable-management panel. */
-    public static final DeferredBlock<ComputerTableBlock> COMPUTER_TABLE = BLOCKS.registerBlock("computer_table",
-            ComputerTableBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> COMPUTER_TABLE_ITEM = ITEMS.registerSimpleBlockItem("computer_table", COMPUTER_TABLE);
+    public static final DeferredItem<BlockItem> COMPUTER_TABLE_ITEM = ITEMS.registerSimpleBlockItem("computer_table", ModBlocks.COMPUTER_TABLE);
 
-    /**
-     * Extendable study/library table, 2 blocks tall (HALF=LOWER/UPPER like a vanilla tall
-     * flower) with a walkable kneehole underneath — the first placeable prop that gives players
-     * a real "duck and cover" shelter (see {@code DuckCoverHoldManager}). Lining tables up
-     * side by side (NORTH/SOUTH/EAST/WEST connections) merges them into one continuous tabletop.
-     */
-    public static final DeferredBlock<TableBlock> TABLE = BLOCKS.registerBlock("table",
-            TableBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> TABLE_ITEM = ITEMS.registerSimpleBlockItem("table", TABLE);
+    public static final DeferredItem<BlockItem> TABLE_ITEM = ITEMS.registerSimpleBlockItem("table", ModBlocks.TABLE);
 
-    /** Dark oak classroom/office chair with gray cushion seat and backrest. */
-    public static final DeferredBlock<ChairBlock> CHAIR = BLOCKS.registerBlock("chair",
-            ChairBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> CHAIR_ITEM = ITEMS.registerSimpleBlockItem("chair", CHAIR);
+    public static final DeferredItem<BlockItem> CHAIR_ITEM = ITEMS.registerSimpleBlockItem("chair", ModBlocks.CHAIR);
 
-    /** Tall metal filing cabinet with 2 drawers, label slots, and pull handles. */
-    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.registerBlock("filing_cabinet",
-            FilingCabinetBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(2.0f, 6.0f)
-                    .sound(SoundType.METAL)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> FILING_CABINET_ITEM = ITEMS.registerSimpleBlockItem("filing_cabinet", FILING_CABINET);
+    public static final DeferredItem<BlockItem> FILING_CABINET_ITEM = ITEMS.registerSimpleBlockItem("filing_cabinet", ModBlocks.FILING_CABINET);
 
-    /** Tall metal school/office locker with vents, door seam, handle, and gold lock. */
-    public static final DeferredBlock<LockerBlock> LOCKER = BLOCKS.registerBlock("locker",
-            LockerBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(2.0f, 6.0f)
-                    .sound(SoundType.METAL)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> LOCKER_ITEM = ITEMS.registerSimpleBlockItem("locker", LOCKER);
+    public static final DeferredItem<BlockItem> LOCKER_ITEM = ITEMS.registerSimpleBlockItem("locker", ModBlocks.LOCKER);
 
-    /** Small cylindrical trash can — no facing, symmetric, open-top. */
-    public static final DeferredBlock<TrashCanBlock> TRASH_CAN = BLOCKS.registerBlock("trash_can",
-            TrashCanBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(0.5f, 2.0f)
-                    .sound(SoundType.METAL)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> TRASH_CAN_ITEM = ITEMS.registerSimpleBlockItem("trash_can", TRASH_CAN);
+    public static final DeferredItem<BlockItem> TRASH_CAN_ITEM = ITEMS.registerSimpleBlockItem("trash_can", ModBlocks.TRASH_CAN);
 
-    /** Wall-mounted cork bulletin board with pinned paper slips. */
-    public static final DeferredBlock<BulletinBoardBlock> BULLETIN_BOARD = BLOCKS.registerBlock("bulletin_board",
-            BulletinBoardBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.WOOD)
-                    .strength(0.5f, 2.0f)
-                    .sound(SoundType.WOOD)
-                    .noOcclusion());
-    public static final DeferredItem<BlockItem> BULLETIN_BOARD_ITEM = ITEMS.registerSimpleBlockItem("bulletin_board", BULLETIN_BOARD);
+    public static final DeferredItem<BlockItem> BULLETIN_BOARD_ITEM = ITEMS.registerSimpleBlockItem("bulletin_board", ModBlocks.BULLETIN_BOARD);
 
-    /** Ceiling fan — motor housing + 4 blades + glowstone light bowl; symmetric/no facing. */
-    public static final DeferredBlock<CeilingFanBlock> CEILING_FAN = BLOCKS.registerBlock("ceiling_fan",
-            CeilingFanBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.METAL)
-                    .strength(0.5f, 2.0f)
-                    .sound(SoundType.METAL)
-                    .noOcclusion()
-                    .lightLevel(s -> 5));
-    public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", CEILING_FAN);
+    public static final DeferredItem<BlockItem> CEILING_FAN_ITEM = ITEMS.registerSimpleBlockItem("ceiling_fan", ModBlocks.CEILING_FAN);
 
-    /** Full-cube glowing ceiling tile — max-brightness (level 15, vanilla cap) light source; tiles seamlessly with no gaps or visible seams when placed edge-to-edge, like a lit ceiling carpet. */
-    public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = BLOCKS.registerBlock("light_bulb",
-            LightBulbBlock::new,
-            () -> Block.Properties.of()
-                    .mapColor(MapColor.SNOW)
-                    .strength(0.3f)
-                    .sound(SoundType.GLASS)
-                    .lightLevel(s -> 15));
-    public static final DeferredItem<BlockItem> LIGHT_BULB_ITEM = ITEMS.registerSimpleBlockItem("light_bulb", LIGHT_BULB);
+    public static final DeferredItem<BlockItem> LIGHT_BULB_ITEM = ITEMS.registerSimpleBlockItem("light_bulb", ModBlocks.LIGHT_BULB);
 
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
@@ -460,191 +314,84 @@ public class BerongSMP {
 
     // ── Classroom Zone (5 blocks) ─────────────────────────────────────────────
 
-    /** Plastic waste bin — emits smoke when has_vape=true (hazardous). */
-    public static final DeferredBlock<PlasticTrashBinBlock> PLASTIC_TRASH_BIN = BLOCKS.registerBlock(
-            "plastic_trash_bin", PlasticTrashBinBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.QUARTZ)
-                    .strength(0.5f, 1.0f).sound(SoundType.STONE).noOcclusion());
     public static final DeferredItem<BlockItem> PLASTIC_TRASH_BIN_ITEM =
-            ITEMS.registerSimpleBlockItem("plastic_trash_bin", PLASTIC_TRASH_BIN);
+            ITEMS.registerSimpleBlockItem("plastic_trash_bin", ModBlocks.PLASTIC_TRASH_BIN);
     static { HAZARD_ITEM_MAP.put("plastic_trash_bin", PLASTIC_TRASH_BIN_ITEM); }
 
-    /** Overloaded daisy-chain extension cord — electric sparks when overloaded=true. */
-    public static final DeferredBlock<DaisyChainExtensionBlock> DAISY_CHAIN_EXTENSION = BLOCKS.registerBlock(
-            "daisy_chain_extension", DaisyChainExtensionBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.2f, 0.5f).sound(SoundType.STONE).noOcclusion());
     public static final DeferredItem<BlockItem> DAISY_CHAIN_EXTENSION_ITEM =
-            ITEMS.registerSimpleBlockItem("daisy_chain_extension", DAISY_CHAIN_EXTENSION);
+            ITEMS.registerSimpleBlockItem("daisy_chain_extension", ModBlocks.DAISY_CHAIN_EXTENSION);
     static { HAZARD_ITEM_MAP.put("daisy_chain_extension", DAISY_CHAIN_EXTENSION_ITEM); }
 
-    /** Floor sawdust accumulation layer — emits ash particles at accumulation >= 3. */
-    public static final DeferredBlock<WoodshopSawdustLayerBlock> WOODSHOP_SAWDUST_LAYER = BLOCKS.registerBlock(
-            "woodshop_sawdust_layer", WoodshopSawdustLayerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SAND)
-                    .strength(0.1f, 0.1f).sound(SoundType.SAND).noOcclusion());
     public static final DeferredItem<BlockItem> WOODSHOP_SAWDUST_LAYER_ITEM =
-            ITEMS.registerSimpleBlockItem("woodshop_sawdust_layer", WOODSHOP_SAWDUST_LAYER);
+            ITEMS.registerSimpleBlockItem("woodshop_sawdust_layer", ModBlocks.WOODSHOP_SAWDUST_LAYER);
     static { HAZARD_ITEM_MAP.put("woodshop_sawdust_layer", WOODSHOP_SAWDUST_LAYER_ITEM); }
 
-    /** Stage/theatre spotlight — overheating housing emits flame and smoke when hazardous. */
-    public static final DeferredBlock<StageSpotlightBlock> STAGE_SPOTLIGHT = BLOCKS.registerBlock(
-            "stage_spotlight", StageSpotlightBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
     public static final DeferredItem<BlockItem> STAGE_SPOTLIGHT_ITEM =
-            ITEMS.registerSimpleBlockItem("stage_spotlight", STAGE_SPOTLIGHT);
+            ITEMS.registerSimpleBlockItem("stage_spotlight", ModBlocks.STAGE_SPOTLIGHT);
     static { HAZARD_ITEM_MAP.put("stage_spotlight", STAGE_SPOTLIGHT_ITEM); }
 
-    /** Stack of flammable archive document boxes — fire proximity raises hazard. */
-    public static final DeferredBlock<ArchiveBoxStackBlock> ARCHIVE_BOX_STACK = BLOCKS.registerBlock(
-            "archive_box_stack", ArchiveBoxStackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BROWN)
-                    .strength(1.0f, 1.0f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> ARCHIVE_BOX_STACK_ITEM =
-            ITEMS.registerSimpleBlockItem("archive_box_stack", ARCHIVE_BOX_STACK);
+            ITEMS.registerSimpleBlockItem("archive_box_stack", ModBlocks.ARCHIVE_BOX_STACK);
     static { HAZARD_ITEM_MAP.put("archive_box_stack", ARCHIVE_BOX_STACK_ITEM); }
 
-    /** Desktop PC tower with dust-clogged vents — overheats and emits smoke when hazardous. */
-    public static final DeferredBlock<DustChokedPcBlock> DUST_CHOKED_PC = BLOCKS.registerBlock(
-            "dust_choked_pc", DustChokedPcBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
     public static final DeferredItem<BlockItem> DUST_CHOKED_PC_ITEM =
-            ITEMS.registerSimpleBlockItem("dust_choked_pc", DUST_CHOKED_PC);
+            ITEMS.registerSimpleBlockItem("dust_choked_pc", ModBlocks.DUST_CHOKED_PC);
     static { HAZARD_ITEM_MAP.put("dust_choked_pc", DUST_CHOKED_PC_ITEM); }
 
-    /** Rolling Chromebook/laptop charging cart — overloaded outlets spark when hazardous. */
-    public static final DeferredBlock<ChargingCartBlock> CHARGING_CART = BLOCKS.registerBlock(
-            "charging_cart", ChargingCartBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
     public static final DeferredItem<BlockItem> CHARGING_CART_ITEM =
-            ITEMS.registerSimpleBlockItem("charging_cart", CHARGING_CART);
+            ITEMS.registerSimpleBlockItem("charging_cart", ModBlocks.CHARGING_CART);
     static { HAZARD_ITEM_MAP.put("charging_cart", CHARGING_CART_ITEM); }
 
-    /** Frayed AV/console wire on the floor — exposed copper arcs blue sparks when hazardous. */
-    public static final DeferredBlock<FrayedConsoleWireBlock> FRAYED_CONSOLE_WIRE = BLOCKS.registerBlock(
-            "frayed_console_wire", FrayedConsoleWireBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> FRAYED_CONSOLE_WIRE_ITEM =
-            ITEMS.registerSimpleBlockItem("frayed_console_wire", FRAYED_CONSOLE_WIRE);
+            ITEMS.registerSimpleBlockItem("frayed_console_wire", ModBlocks.FRAYED_CONSOLE_WIRE);
     static { HAZARD_ITEM_MAP.put("frayed_console_wire", FRAYED_CONSOLE_WIRE_ITEM); }
 
-    /** Vending machine with shorted compressor — smokes from back vents when hazardous. */
-    public static final DeferredBlock<MalfunctioningVendingBlock> MALFUNCTIONING_VENDING = BLOCKS.registerBlock(
-            "malfunctioning_vending", MalfunctioningVendingBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> MALFUNCTIONING_VENDING_ITEM =
-            ITEMS.registerSimpleBlockItem("malfunctioning_vending", MALFUNCTIONING_VENDING);
+            ITEMS.registerSimpleBlockItem("malfunctioning_vending", ModBlocks.MALFUNCTIONING_VENDING);
     static { HAZARD_ITEM_MAP.put("malfunctioning_vending", MALFUNCTIONING_VENDING_ITEM); }
 
-    /** Ceiling-mounted projector with failed cooling fan — overheats and smokes. */
-    public static final DeferredBlock<CeilingProjectorBlock> CEILING_PROJECTOR = BLOCKS.registerBlock(
-            "ceiling_projector", CeilingProjectorBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
     public static final DeferredItem<BlockItem> CEILING_PROJECTOR_ITEM =
-            ITEMS.registerSimpleBlockItem("ceiling_projector", CEILING_PROJECTOR);
+            ITEMS.registerSimpleBlockItem("ceiling_projector", ModBlocks.CEILING_PROJECTOR);
     static { HAZARD_ITEM_MAP.put("ceiling_projector", CEILING_PROJECTOR_ITEM); }
 
-    /** Swollen Li-ion phone battery left on desk — thermal runaway risk; cyan soul-flame gas when hazardous. */
-    public static final DeferredBlock<SwollenPhoneBatteryBlock> SWOLLEN_PHONE_BATTERY = BLOCKS.registerBlock(
-            "swollen_phone_battery", SwollenPhoneBatteryBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 0.5f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> SWOLLEN_PHONE_BATTERY_ITEM =
-            ITEMS.registerSimpleBlockItem("swollen_phone_battery", SWOLLEN_PHONE_BATTERY);
+            ITEMS.registerSimpleBlockItem("swollen_phone_battery", ModBlocks.SWOLLEN_PHONE_BATTERY);
     static { HAZARD_ITEM_MAP.put("swollen_phone_battery", SWOLLEN_PHONE_BATTERY_ITEM); }
 
-    /** Damaged LiPo battery pack (drone/RC) — punctured cells off-gas smoke when hazardous. */
-    public static final DeferredBlock<DamagedLipoPackBlock> DAMAGED_LIPO_PACK = BLOCKS.registerBlock(
-            "damaged_lipo_pack", DamagedLipoPackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> DAMAGED_LIPO_PACK_ITEM =
-            ITEMS.registerSimpleBlockItem("damaged_lipo_pack", DAMAGED_LIPO_PACK);
+            ITEMS.registerSimpleBlockItem("damaged_lipo_pack", ModBlocks.DAMAGED_LIPO_PACK);
     static { HAZARD_ITEM_MAP.put("damaged_lipo_pack", DAMAGED_LIPO_PACK_ITEM); }
 
-    /** Iron locker with a vape device inside — sparks and smoke leak from vent slot when hazardous. */
-    public static final DeferredBlock<VapeInIronLockerBlock> VAPE_IN_IRON_LOCKER = BLOCKS.registerBlock(
-            "vape_in_iron_locker", VapeInIronLockerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> VAPE_IN_IRON_LOCKER_ITEM =
-            ITEMS.registerSimpleBlockItem("vape_in_iron_locker", VAPE_IN_IRON_LOCKER);
+            ITEMS.registerSimpleBlockItem("vape_in_iron_locker", ModBlocks.VAPE_IN_IRON_LOCKER);
     static { HAZARD_ITEM_MAP.put("vape_in_iron_locker", VAPE_IN_IRON_LOCKER_ITEM); }
 
-    /** PA/public-address backup amp rack — faulty capacitors spark and glow when hazardous. */
-    public static final DeferredBlock<PaSystemBackupBlock> PA_SYSTEM_BACKUP = BLOCKS.registerBlock(
-            "pa_system_backup", PaSystemBackupBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
     public static final DeferredItem<BlockItem> PA_SYSTEM_BACKUP_ITEM =
-            ITEMS.registerSimpleBlockItem("pa_system_backup", PA_SYSTEM_BACKUP);
+            ITEMS.registerSimpleBlockItem("pa_system_backup", ModBlocks.PA_SYSTEM_BACKUP);
     static { HAZARD_ITEM_MAP.put("pa_system_backup", PA_SYSTEM_BACKUP_ITEM); }
 
-    /** Smartboard power inverter — roof leak drips on live electronics when hazardous. */
-    public static final DeferredBlock<SmartboardInverterBlock> SMARTBOARD_INVERTER = BLOCKS.registerBlock(
-            "smartboard_inverter", SmartboardInverterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> SMARTBOARD_INVERTER_ITEM =
-            ITEMS.registerSimpleBlockItem("smartboard_inverter", SMARTBOARD_INVERTER);
+            ITEMS.registerSimpleBlockItem("smartboard_inverter", ModBlocks.SMARTBOARD_INVERTER);
     static { HAZARD_ITEM_MAP.put("smartboard_inverter", SMARTBOARD_INVERTER_ITEM); }
 
-    /** Stove with a grease pan left unattended — grease fire erupts when hazardous. */
-    public static final DeferredBlock<UnattendedGreasePanBlock> UNATTENDED_GREASE_PAN = BLOCKS.registerBlock(
-            "unattended_grease_pan", UnattendedGreasePanBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
     public static final DeferredItem<BlockItem> UNATTENDED_GREASE_PAN_ITEM =
-            ITEMS.registerSimpleBlockItem("unattended_grease_pan", UNATTENDED_GREASE_PAN);
+            ITEMS.registerSimpleBlockItem("unattended_grease_pan", ModBlocks.UNATTENDED_GREASE_PAN);
     static { HAZARD_ITEM_MAP.put("unattended_grease_pan", UNATTENDED_GREASE_PAN_ITEM); }
 
-    /** Kitchen range hood with clogged grease filters — backflow smoke when hazardous. */
-    public static final DeferredBlock<GreaseCloggedHoodBlock> GREASE_CLOGGED_HOOD = BLOCKS.registerBlock(
-            "grease_clogged_hood", GreaseCloggedHoodBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> GREASE_CLOGGED_HOOD_ITEM =
-            ITEMS.registerSimpleBlockItem("grease_clogged_hood", GREASE_CLOGGED_HOOD);
+            ITEMS.registerSimpleBlockItem("grease_clogged_hood", ModBlocks.GREASE_CLOGGED_HOOD);
     static { HAZARD_ITEM_MAP.put("grease_clogged_hood", GREASE_CLOGGED_HOOD_ITEM); }
 
-    /** Kitchen waste bin with oil-soaked contaminated rags — self-heating rags emit steam when hazardous. */
-    public static final DeferredBlock<ContaminatedKitchenBinBlock> CONTAMINATED_KITCHEN_BIN = BLOCKS.registerBlock(
-            "contaminated_kitchen_bin", ContaminatedKitchenBinBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
-                    .strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> CONTAMINATED_KITCHEN_BIN_ITEM =
-            ITEMS.registerSimpleBlockItem("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN);
+            ITEMS.registerSimpleBlockItem("contaminated_kitchen_bin", ModBlocks.CONTAMINATED_KITCHEN_BIN);
     static { HAZARD_ITEM_MAP.put("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN_ITEM); }
 
-    /** Panini press with jammed lid and burning food — smoking when hazardous. */
-    public static final DeferredBlock<JammedPaniniPressBlock> JAMMED_PANINI_PRESS = BLOCKS.registerBlock(
-            "jammed_panini_press", JammedPaniniPressBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> JAMMED_PANINI_PRESS_ITEM =
-            ITEMS.registerSimpleBlockItem("jammed_panini_press", JAMMED_PANINI_PRESS);
+            ITEMS.registerSimpleBlockItem("jammed_panini_press", ModBlocks.JAMMED_PANINI_PRESS);
     static { HAZARD_ITEM_MAP.put("jammed_panini_press", JAMMED_PANINI_PRESS_ITEM); }
 
-    /** Commercial deep fryer — overheated oil ignites and erupts smoke/flame when hazardous. */
-    public static final DeferredBlock<CommercialDeepFryerBlock> COMMERCIAL_DEEP_FRYER = BLOCKS.registerBlock(
-            "commercial_deep_fryer", CommercialDeepFryerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
     public static final DeferredItem<BlockItem> COMMERCIAL_DEEP_FRYER_ITEM =
-            ITEMS.registerSimpleBlockItem("commercial_deep_fryer", COMMERCIAL_DEEP_FRYER);
+            ITEMS.registerSimpleBlockItem("commercial_deep_fryer", ModBlocks.COMMERCIAL_DEEP_FRYER);
     static { HAZARD_ITEM_MAP.put("commercial_deep_fryer", COMMERCIAL_DEEP_FRYER_ITEM); }
 
     /** Creative tab: all 20 hazard prop blocks for the simulation building. */
@@ -715,7 +462,7 @@ public class BerongSMP {
 
         // DeferredRegisters batch-register objects (blocks, items, tabs) into the correct
         // vanilla registries when NeoForge fires the matching RegistryEvent.
-        BLOCKS.register(modEventBus);
+        ModBlocks.register(modEventBus);
         ITEMS.register(modEventBus);
         ModEntities.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
