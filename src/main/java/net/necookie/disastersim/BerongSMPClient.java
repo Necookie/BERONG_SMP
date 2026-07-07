@@ -13,8 +13,13 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.necookie.disastersim.client.AcademyCompassHud;
+import net.necookie.disastersim.client.AcademyHud;
+import net.necookie.disastersim.client.ClientEvents;
 import net.necookie.disastersim.client.CustomNpcRenderer;
 import net.necookie.disastersim.client.DropAndRollRenderModifier;
+import net.necookie.disastersim.client.KeyMappings;
+import net.necookie.disastersim.client.TutorialHud;
 
 /**
  * Client-only entry point for BerongSMP.
@@ -36,7 +41,7 @@ public class BerongSMPClient {
         // Register a factory to create the configuration screen for this mod
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
 
-        modEventBus.register(net.necookie.disastersim.client.KeyMappings.class);
+        modEventBus.register(KeyMappings.class);
     }
 
     /**
@@ -49,17 +54,17 @@ public class BerongSMPClient {
         BerongSMP.LOGGER.info("BerongSMP Client Setup Initialized");
         
         // Register client-specific tick listener to the NeoForge event bus
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onClientTick);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onClientTick);
         // Reset every HUD's static caption/shake/compass state on disconnect and reconnect, so
         // nothing (e.g. earthquake camera shake) can persist across a world exit/rejoin.
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onLoggingOut);
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.ClientEvents::onLoggingIn);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onLoggingOut);
+        NeoForge.EVENT_BUS.addListener(ClientEvents::onLoggingIn);
         // Drive camera shake for earthquake simulations
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.SimulationHud::onCameraAngles);
+        NeoForge.EVENT_BUS.addListener(SimulationHud::onCameraAngles);
         // Drive camera shake for QUAKE tutorial stages
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.TutorialHud::onCameraAngles);
+        NeoForge.EVENT_BUS.addListener(TutorialHud::onCameraAngles);
         // Drive camera shake for the Academy's earthquake drill (Sgt. Santos, Room 3)
-        NeoForge.EVENT_BUS.addListener(net.necookie.disastersim.client.AcademyHud::onCameraAngles);
+        NeoForge.EVENT_BUS.addListener(AcademyHud::onCameraAngles);
         // Supplementary whole-body rock for the drop-and-roll visual (crouch/tilt is registered
         // separately via RegisterRenderStateModifiersEvent, below)
         NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPre);
@@ -79,9 +84,9 @@ public class BerongSMPClient {
     @SubscribeEvent
     static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         SimulationHud.registerGuiLayers(event);
-        net.necookie.disastersim.client.TutorialHud.registerGuiLayers(event);
-        net.necookie.disastersim.client.AcademyHud.registerGuiLayers(event);
-        net.necookie.disastersim.client.AcademyCompassHud.registerGuiLayers(event);
+        TutorialHud.registerGuiLayers(event);
+        AcademyHud.registerGuiLayers(event);
+        AcademyCompassHud.registerGuiLayers(event);
     }
 
     /** Drives the purely cosmetic drop-and-roll crouch/tilt — see {@link DropAndRollRenderModifier}. */
