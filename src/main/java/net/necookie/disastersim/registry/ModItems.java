@@ -311,6 +311,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("alcohol_dispenser_station", ModBlocks.ALCOHOL_DISPENSER_STATION);
     static { HAZARD_ITEM_MAP.put("alcohol_dispenser_station", ALCOHOL_DISPENSER_STATION_ITEM); }
 
+    public static final DeferredItem<BlockItem> CLOGGED_EXHAUST_FAN_ITEM =
+            ITEMS.registerSimpleBlockItem("clogged_exhaust_fan", ModBlocks.CLOGGED_EXHAUST_FAN);
+    static { HAZARD_ITEM_MAP.put("clogged_exhaust_fan", CLOGGED_EXHAUST_FAN_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 

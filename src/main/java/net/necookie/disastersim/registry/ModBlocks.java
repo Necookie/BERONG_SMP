@@ -384,6 +384,12 @@ public final class ModBlocks {
                     .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 2 : 0));
 
+    /** Clogged Exhaust Fan (Dust Overheat Hazard) — see {@link CloggedExhaustFanBlock}. */
+    public static final DeferredBlock<CloggedExhaustFanBlock> CLOGGED_EXHAUST_FAN = BLOCKS.registerBlock(
+            "clogged_exhaust_fan", CloggedExhaustFanBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

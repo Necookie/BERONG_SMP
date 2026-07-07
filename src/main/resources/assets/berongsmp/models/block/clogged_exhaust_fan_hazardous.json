@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/exhaust_fan_dusty",
+    "body": "berongsmp:block/exhaust_fan_dusty",
+    "front": "berongsmp:block/exhaust_fan_dusty"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        13
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}
