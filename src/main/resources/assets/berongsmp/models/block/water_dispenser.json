@@ -1,0 +1,73 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/dispenser_body_white",
+    "body": "berongsmp:block/dispenser_body_white",
+    "jug": "berongsmp:block/water_jug_blue"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        11,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        11,
+        5
+      ],
+      "to": [
+        11,
+        15,
+        11
+      ],
+      "faces": {
+        "up": {
+          "texture": "#jug"
+        },
+        "down": {
+          "texture": "#jug"
+        },
+        "north": {
+          "texture": "#jug"
+        },
+        "south": {
+          "texture": "#jug"
+        },
+        "east": {
+          "texture": "#jug"
+        },
+        "west": {
+          "texture": "#jug"
+        }
+      }
+    }
+  ]
+}
