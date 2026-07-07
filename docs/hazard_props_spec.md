@@ -224,3 +224,105 @@
 - **Hazardous State (`thermostat_status=failed`):** The front display panel flashes red warning text indicating temperatures soaring past safe limits (`450°C`) along with an intermittent high-pitch alarm tone.
     
 - **Failure Consequence:** Oil reaches auto-ignition temperature, erupting into a massive kitchen grease fire.
+
+## 🏫 School Building Zone (Items 21–30, added 2026-07-08)
+
+### 21. Faculty Pantry Microwave (`berongsmp:overloaded_microwave`)
+
+- **Target Room:** Faculty Pantry / Break Room
+
+- **Normal State (`hazardous=false`):** A clean countertop microwave with a dark door and a green ready LED.
+
+- **Hazardous State (`hazardous=true`):** The interior glows orange-hot through the door glass on a runaway heating cycle, arcing sparks and leaking smoke.
+
+- **Failure Consequence (400 ticks):** The magnetron arcs over and sets the pantry counter alight — a **Class C (electrical)** fire.
+
+### 22. Unattended Bunsen Burner (`berongsmp:bunsen_burner_station`)
+
+- **Target Room:** Science Laboratory
+
+- **Normal State:** A lab burner base sitting cold on the bench, gas tap closed.
+
+- **Hazardous State:** An open blue flame burning with nobody at the bench — flame and blue soul-fire particles, light level 9.
+
+- **Failure Consequence (300 ticks):** The open flame ignites the lab bench — bare-hand prevention closes the gas tap.
+
+### 23. Leaking Reagent Shelf (`berongsmp:reagent_storage_shelf`)
+
+- **Target Room:** Science Laboratory / Chemical Storage
+
+- **Normal State:** A wall shelf of neatly sealed reagent bottles.
+
+- **Hazardous State:** A tipped bottle drips reactive liquid down the shelf — fizzing fumes and drip particles.
+
+- **Failure Consequence (500 ticks):** Mixing chemicals flash-ignite a **2-block radius** — the widest failure in the school set.
+
+### 24. Overloaded Breaker Panel (`berongsmp:overloaded_breaker_panel`)
+
+- **Target Room:** Utility Corridor / Electrical Room
+
+- **Normal State:** A closed gray steel distribution panel.
+
+- **Hazardous State:** The panel hangs open with one breaker row scorched black and glowing, throwing dense electric arcs (light 6).
+
+- **Failure Consequence (350 ticks):** The panel flashes over into a **Class C (electrical)** fire — prevention trips the main switch.
+
+### 25. Overheating Wall Aircon (`berongsmp:overheating_wall_aircon`)
+
+- **Target Room:** Any Classroom / Faculty Room
+
+- **Normal State:** A white window-type air conditioner humming normally.
+
+- **Hazardous State:** Rust-streaked and dripping condensation into its own wiring — water drips plus intermittent sparks.
+
+- **Failure Consequence (450 ticks):** The soaked wiring shorts and ignites — the classic water-plus-electricity lesson.
+
+### 26. Jammed Laser Printer (`berongsmp:jammed_laser_printer`)
+
+- **Target Room:** Faculty Room / Registrar's Office
+
+- **Normal State:** An idle gray office laser printer.
+
+- **Hazardous State:** Crumpled paper jammed against the hot fuser unit, billowing smoke from the output slot.
+
+- **Failure Consequence (400 ticks):** The jammed paper reaches the fuser's ignition point — prevention clears the jam.
+
+### 27. Unattended Shrine Candle (`berongsmp:unattended_shrine_candle`)
+
+- **Target Room:** Lobby Shrine / Prayer Corner
+
+- **Normal State:** A cream wax candle standing unlit on the red altar cloth.
+
+- **Hazardous State:** Burning unattended beside the cloth — open flame (light 10) with wisping smoke.
+
+- **Failure Consequence (250 ticks — the fastest in the set):** The candle tips onto the altar cloth, which catches instantly. Prevention snuffs the flame.
+
+### 28. Leaking LPG Gas Valve (`berongsmp:leaking_gas_valve`) — **Kitchen Class F/K**
+
+- **Target Room:** Cafeteria Kitchen Gas Line
+
+- **Normal State:** A steel gas pipe run with a red valve handwheel, sealed.
+
+- **Hazardous State:** Greenish gas haze hissing from the joint — invisible danger telegraphed only by the cloud and stain.
+
+- **Failure Consequence (300 ticks):** The gas cloud finds a spark and flash-fires a **2-block radius**. **Only the yellow wet chemical extinguisher may defuse it** — ABC/CO2 give the wrong-tool warning. Prevention wrenches the valve shut.
+
+### 29. Alcohol Dispenser Station (`berongsmp:alcohol_dispenser_station`)
+
+- **Target Room:** Hallway / Entrance (post-pandemic sanitizer stand)
+
+- **Normal State:** A pedestal stand holding a pump bottle of blue-tinted sanitizer.
+
+- **Hazardous State:** The bottle leaks alcohol down the stand and pools beside a power outlet — faint blue vapor wisps.
+
+- **Failure Consequence (500 ticks):** The pooled alcohol ignites in a ghostly blue flash fire.
+
+### 30. Clogged Exhaust Fan (`berongsmp:clogged_exhaust_fan`)
+
+- **Target Room:** Kitchen / Workshop Window
+
+- **Normal State:** A wall-mounted exhaust fan spinning behind a clean grille.
+
+- **Hazardous State:** The blades cake over with gray-brown dust, the stalled motor smoulders — smoke and ash particles.
+
+- **Failure Consequence (450 ticks):** The overheated motor ignites its own dust cake. Prevention clears the dust off the blades.
