@@ -14,7 +14,7 @@ import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.ReyesPhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.entity.CustomNpcEntity;
-import net.necookie.disastersim.player.DuckCoverHoldManager;
+import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package net.necookie.disastersim.player;
+package net.necookie.disastersim.common.player;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

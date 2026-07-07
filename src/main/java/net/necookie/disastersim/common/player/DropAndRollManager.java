@@ -1,4 +1,4 @@
-package net.necookie.disastersim.player;
+package net.necookie.disastersim.common.player;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;

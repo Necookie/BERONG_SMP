@@ -91,7 +91,7 @@ import net.necookie.disastersim.network.AcademyStatusPayload;
 import net.necookie.disastersim.network.DropAndRollPayload;
 import net.necookie.disastersim.network.SimulationStatusPayload;
 import net.necookie.disastersim.network.TutorialStatusPayload;
-import net.necookie.disastersim.player.DuckCoverHoldManager;
+import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
