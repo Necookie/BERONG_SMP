@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/podium_lectern"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/podium_lectern",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/podium_lectern",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/podium_lectern",
+      "y": 270
+    }
+  }
+}
