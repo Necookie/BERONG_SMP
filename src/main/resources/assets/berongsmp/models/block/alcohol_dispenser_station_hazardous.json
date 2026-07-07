@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/dispenser_stand_metal",
+    "body": "berongsmp:block/dispenser_stand_metal",
+    "front": "berongsmp:block/dispenser_bottle_leak"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        14,
+        11
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

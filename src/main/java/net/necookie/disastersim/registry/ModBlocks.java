@@ -377,6 +377,13 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
 
+    /** Alcohol Dispenser Station (Flammable Liquid Hazard) — see {@link AlcoholDispenserStationBlock}. */
+    public static final DeferredBlock<AlcoholDispenserStationBlock> ALCOHOL_DISPENSER_STATION = BLOCKS.registerBlock(
+            "alcohol_dispenser_station", AlcoholDispenserStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 2 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

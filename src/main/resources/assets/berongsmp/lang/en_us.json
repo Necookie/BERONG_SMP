@@ -1,4 +1,5 @@
 {
+  "block.berongsmp.alcohol_dispenser_station": "Alcohol Dispenser Station (Flammable Liquid Hazard)",
   "block.berongsmp.leaking_gas_valve": "Leaking Gas Valve (Kitchen Gas Hazard)",
   "block.berongsmp.unattended_shrine_candle": "Unattended Shrine Candle (Open Flame Hazard)",
   "block.berongsmp.jammed_laser_printer": "Jammed Laser Printer (Overheat Hazard)",
