@@ -1,4 +1,5 @@
 {
+  "block.berongsmp.reagent_storage_shelf": "Reagent Storage Shelf (Chemical Hazard)",
   "block.berongsmp.bunsen_burner_station": "Bunsen Burner Station (Open Flame Hazard)",
   "block.berongsmp.overloaded_microwave": "Overloaded Microwave (Electrical Hazard)",
   "itemGroup.berongsmp.simulation": "BerongSMP — Simulation",

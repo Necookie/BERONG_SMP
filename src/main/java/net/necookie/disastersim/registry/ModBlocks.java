@@ -337,6 +337,12 @@ public final class ModBlocks {
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 9 : 0));
 
+    /** Reagent Storage Shelf (Chemical Hazard) — see {@link ReagentStorageShelfBlock}. */
+    public static final DeferredBlock<ReagentStorageShelfBlock> REAGENT_STORAGE_SHELF = BLOCKS.registerBlock(
+            "reagent_storage_shelf", ReagentStorageShelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {

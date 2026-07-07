@@ -283,6 +283,10 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("bunsen_burner_station", ModBlocks.BUNSEN_BURNER_STATION);
     static { HAZARD_ITEM_MAP.put("bunsen_burner_station", BUNSEN_BURNER_STATION_ITEM); }
 
+    public static final DeferredItem<BlockItem> REAGENT_STORAGE_SHELF_ITEM =
+            ITEMS.registerSimpleBlockItem("reagent_storage_shelf", ModBlocks.REAGENT_STORAGE_SHELF);
+    static { HAZARD_ITEM_MAP.put("reagent_storage_shelf", REAGENT_STORAGE_SHELF_ITEM); }
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
