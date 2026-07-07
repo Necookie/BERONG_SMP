@@ -765,6 +765,395 @@ def tex_fryer_oil_hazard():
     save(im, "fryer_oil_hazard")
 
 
+# ---------------------------------------------------------------------------
+# 21. microwave (staff-room hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_microwave_body():
+    im = new_canvas((225, 220, 205))
+    gradient_shade(im, 1, 1, 14, 14, (225, 220, 205), light=1.12, dark=0.85)
+    inset_edges(im, 1, 1, 14, 14, (245, 240, 228), (150, 145, 130))
+    border(im, (140, 135, 120))
+    for y in (5, 10):
+        rect(im, 1, y, 14, y, (200, 195, 178))  # panel seam lines
+    screws(im, [(2, 2), (13, 2)], (120, 115, 100))
+    speckle(im, [(235, 230, 215), (205, 200, 185)], density=0.08, x0=1, y0=1, x1=14, y1=14)
+    save(im, "microwave_body")
+
+
+def tex_microwave_door_normal():
+    im = new_canvas((30, 30, 32))
+    gradient_shade(im, 1, 1, 12, 14, (30, 30, 32), light=1.3, dark=0.7)
+    rect(im, 1, 1, 12, 14, (22, 24, 26))  # dark glass window
+    grille_dots(im, 2, 2, 11, 13, (12, 14, 16), spacing=1)  # perforated viewing mesh
+    rect(im, 13, 1, 15, 14, (150, 150, 155))  # handle bar
+    rect(im, 13, 1, 13, 14, (190, 190, 195))  # handle highlight
+    set_px(im, 3, 13, (40, 190, 70))  # green ready LED
+    border(im, (10, 10, 12))
+    save(im, "microwave_door_normal")
+
+
+def tex_microwave_door_glow():
+    im = new_canvas((30, 30, 32))
+    gradient_shade(im, 1, 1, 12, 14, (60, 30, 10), light=1.3, dark=0.7)
+    rect(im, 2, 2, 11, 13, (200, 80, 15))  # glowing interior through the glass
+    rect(im, 4, 4, 9, 9, (255, 160, 40))
+    rect(im, 5, 5, 8, 8, (255, 220, 120))
+    grille_dots(im, 2, 2, 11, 13, (30, 12, 4), spacing=1)  # mesh silhouette over the glow
+    rect(im, 13, 1, 15, 14, (150, 150, 155))  # handle bar
+    rect(im, 13, 1, 13, 14, (190, 190, 195))
+    set_px(im, 3, 13, (230, 30, 20))  # red overheating LED
+    border(im, (10, 8, 6))
+    save(im, "microwave_door_glow")
+
+
+# ---------------------------------------------------------------------------
+# 22. bunsen burner (science lab hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_bunsen_base_metal():
+    im = new_canvas((110, 112, 115))
+    gradient_shade(im, 1, 1, 14, 14, (110, 112, 115), light=1.3, dark=0.72)
+    for y in range(1, H - 1, 2):
+        rect(im, 1, y, 14, y, scale((110, 112, 115), 1.1))  # brushed-metal streaks
+    inset_edges(im, 1, 1, 14, 14, (150, 152, 155), (55, 57, 60))
+    border(im, (50, 52, 55))
+    rect(im, 6, 4, 9, 14, (85, 87, 90))  # vertical stand post
+    line(im, 2, 13, 6, 10, (60, 90, 60))  # gas hose hint
+    line(im, 2, 14, 6, 11, (40, 65, 40))
+    save(im, "bunsen_base_metal")
+
+
+def tex_bunsen_flame_ring():
+    im = new_canvas((70, 72, 75))
+    gradient_shade(im, 1, 1, 14, 14, (70, 72, 75), light=1.2, dark=0.75)
+    rect(im, 3, 3, 12, 12, (40, 42, 45))  # burner collar ring
+    rect(im, 5, 5, 10, 10, (20, 20, 22))
+    for (x, y) in ((6, 5), (9, 5), (6, 10), (9, 10), (5, 6), (10, 6), (5, 9), (10, 9)):
+        set_px(im, x, y, (80, 140, 255))
+        set_px(im, x, y - 1, (190, 220, 255))
+    rect(im, 7, 6, 8, 9, (140, 190, 255))  # inner flame core
+    rect(im, 7, 7, 8, 8, (230, 240, 255))
+    border(im, (25, 26, 28))
+    save(im, "bunsen_flame_ring")
+
+
+# ---------------------------------------------------------------------------
+# 23. reagent shelf (science lab hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_reagent_shelf_body():
+    im = new_canvas((205, 200, 190))
+    gradient_shade(im, 1, 1, 14, 14, (205, 200, 190), light=1.15, dark=0.82)
+    inset_edges(im, 1, 1, 14, 14, (230, 226, 216), (140, 136, 126))
+    border(im, (130, 126, 116))
+    for y in (5, 10):
+        rect(im, 1, y, 14, y, (170, 165, 152))  # shelf ledges
+    speckle(im, [(215, 210, 200), (185, 180, 168)], density=0.08, x0=1, y0=1, x1=14, y1=14)
+    save(im, "reagent_shelf_body")
+
+
+def tex_reagent_bottles():
+    im = new_canvas((225, 222, 215))
+    for bx, liquid, glass in (
+        (2, (200, 140, 30), (230, 210, 160)),
+        (7, (60, 150, 80), (200, 225, 205)),
+        (11, (170, 195, 210), (225, 235, 240)),
+    ):
+        rect(im, bx, 8, bx + 2, 14, glass)
+        rect(im, bx, 11, bx + 2, 14, liquid)  # liquid fill, lower half
+        rect(im, bx + 1, 4, bx + 1, 8, glass)  # bottle neck
+        set_px(im, bx, 5, (140, 60, 40))  # cork/cap
+        set_px(im, bx + 1, 4, (140, 60, 40))
+        set_px(im, bx + 2, 5, (140, 60, 40))
+    border(im, (150, 146, 138))
+    save(im, "reagent_bottles")
+
+
+def tex_reagent_bottles_leaking():
+    im = new_canvas((225, 222, 215))
+    for bx, liquid, glass in (
+        (2, (60, 150, 80), (200, 225, 205)),
+        (11, (170, 195, 210), (225, 235, 240)),
+    ):
+        rect(im, bx, 8, bx + 2, 14, glass)
+        rect(im, bx, 11, bx + 2, 14, liquid)
+        rect(im, bx + 1, 4, bx + 1, 8, glass)
+        set_px(im, bx, 5, (140, 60, 40))
+        set_px(im, bx + 1, 4, (140, 60, 40))
+        set_px(im, bx + 2, 5, (140, 60, 40))
+    # tipped/spilled bottle lying on its side
+    rect(im, 5, 10, 10, 12, (215, 230, 210))
+    rect(im, 5, 11, 9, 12, (140, 200, 60))  # spilled liquid inside
+    line(im, 5, 12, 3, 15, (150, 210, 70))  # drip streak
+    line(im, 7, 13, 6, 15, (150, 210, 70))
+    speckle(im, [(190, 230, 90), (110, 170, 40)], density=0.35, x0=2, y0=13, x1=9, y1=15)  # fizzing stain
+    border(im, (150, 146, 138))
+    save(im, "reagent_bottles_leaking")
+
+
+# ---------------------------------------------------------------------------
+# 24. breaker panel (electrical hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_breaker_panel_body():
+    im = new_canvas((120, 122, 125))
+    gradient_shade(im, 1, 1, 14, 14, (120, 122, 125), light=1.25, dark=0.75)
+    inset_edges(im, 1, 1, 14, 14, (155, 157, 160), (60, 62, 65))
+    border(im, (55, 57, 60))
+    rect(im, 12, 6, 13, 9, (70, 72, 75))  # latch handle
+    rect(im, 12, 7, 12, 8, (25, 25, 28))
+    rect(im, 2, 2, 6, 6, (230, 190, 20))  # warning sticker background
+    for i in range(5):
+        set_px(im, 2 + i, 2 + i, (20, 20, 20))  # hazard glyph diagonal
+    rect(im, 2, 6, 6, 6, (20, 20, 20))
+    screws(im, [(2, 13), (13, 13)], (35, 37, 40))
+    save(im, "breaker_panel_body")
+
+
+def tex_breaker_panel_open_hot():
+    im = new_canvas((60, 60, 63))
+    gradient_shade(im, 1, 1, 14, 14, (60, 60, 63), light=1.3, dark=0.7)
+    inset_edges(im, 1, 1, 14, 14, (85, 85, 88), (18, 18, 20))
+    border(im, (30, 30, 32))
+    breaker_colors = [(40, 190, 70), (40, 190, 70), (15, 12, 10), (40, 190, 70)]
+    for i, c in enumerate(breaker_colors):
+        y = 3 + i * 3
+        rect(im, 3, y, 12, y + 1, (25, 25, 28))  # row housing
+        rect(im, 4, y, 5, y + 1, c)  # switch toggle
+    rect(im, 3, 9, 12, 10, (30, 15, 8))  # scorched breaker housing
+    rect(im, 4, 9, 5, 10, (255, 130, 30))  # overheating glow
+    speckle(im, [(255, 170, 60), (200, 80, 10)], density=0.2, x0=3, y0=9, x1=12, y1=10)
+    save(im, "breaker_panel_open_hot")
+
+
+# ---------------------------------------------------------------------------
+# 25. window-type aircon unit (hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_aircon_front_clean():
+    im = new_canvas((235, 235, 230))
+    gradient_shade(im, 1, 1, 14, 14, (235, 235, 230), light=1.1, dark=0.85)
+    inset_edges(im, 1, 1, 14, 14, (250, 250, 246), (170, 170, 165))
+    border(im, (160, 160, 155))
+    for y in (3, 4, 5, 6, 7):
+        rect(im, 2, y, 13, y, (205, 205, 200) if y % 2 == 0 else (190, 190, 185))  # vent slats
+    rect(im, 3, 10, 5, 12, (210, 210, 205))  # control knob
+    set_px(im, 4, 11, (100, 100, 95))
+    rect(im, 9, 10, 12, 12, (210, 210, 205))  # digital display
+    rect(im, 10, 11, 11, 11, (40, 190, 90))  # display glow
+    save(im, "aircon_front_clean")
+
+
+def tex_aircon_front_dripping():
+    im = new_canvas((205, 205, 195))
+    gradient_shade(im, 1, 1, 14, 14, (205, 205, 195), light=1.08, dark=0.8)
+    inset_edges(im, 1, 1, 14, 14, (220, 220, 210), (130, 128, 118))
+    border(im, (120, 118, 108))
+    for y in (3, 4, 5, 6, 7):
+        rect(im, 2, y, 13, y, (170, 168, 158) if y % 2 == 0 else (150, 148, 138))
+    rect(im, 3, 10, 5, 12, (180, 178, 168))
+    rect(im, 9, 10, 12, 12, (180, 178, 168))
+    rect(im, 10, 11, 11, 11, (200, 60, 40))  # faulty display, red now
+    for x in (4, 8, 11):
+        line(im, x, 8, x, 15, (120, 100, 60))  # rust streak
+        line(im, x, 9, x, 14, (90, 130, 140))  # water streak
+    speckle(im, [(80, 70, 40), (60, 90, 95)], density=0.15, x0=2, y0=9, x1=13, y1=15)
+    save(im, "aircon_front_dripping")
+
+
+def tex_aircon_side_metal():
+    im = new_canvas((190, 180, 155))
+    gradient_shade(im, 1, 1, 14, 14, (190, 180, 155), light=1.2, dark=0.78)
+    inset_edges(im, 1, 1, 14, 14, (215, 205, 180), (120, 112, 92))
+    border(im, (110, 102, 84))
+    for y in range(3, 13, 2):
+        rect(im, 2, y, 13, y, (150, 142, 118))  # vent slits
+    speckle(im, [(200, 190, 165), (170, 160, 138)], density=0.08, x0=1, y0=1, x1=14, y1=14)
+    save(im, "aircon_side_metal")
+
+
+# ---------------------------------------------------------------------------
+# 26. office laser printer (hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_printer_body():
+    im = new_canvas((100, 102, 105))
+    gradient_shade(im, 1, 1, 14, 14, (100, 102, 105), light=1.25, dark=0.78)
+    inset_edges(im, 1, 1, 14, 14, (135, 137, 140), (48, 50, 53))
+    border(im, (45, 47, 50))
+    rect(im, 1, 10, 14, 13, (75, 77, 80))  # paper output tray
+    for y in (11, 12):
+        rect(im, 2, y, 13, y, (60, 62, 65))  # tray ridge lines
+    rect(im, 2, 2, 6, 5, (150, 152, 155))  # control panel
+    set_px(im, 3, 3, (40, 190, 70))  # ready LED
+    set_px(im, 5, 3, (35, 37, 40))  # button
+    save(im, "printer_body")
+
+
+def tex_printer_jam_scorched():
+    im = new_canvas((70, 68, 65))
+    gradient_shade(im, 1, 1, 14, 14, (70, 68, 65), light=1.2, dark=0.75)
+    inset_edges(im, 1, 1, 14, 14, (95, 93, 88), (28, 27, 25))
+    border(im, (20, 19, 18))
+    rect(im, 1, 9, 14, 12, (35, 33, 30))  # scorched output slot
+    speckle(im, [(15, 14, 12), (55, 45, 35)], density=0.35, x0=1, y0=9, x1=14, y1=12)
+    rect(im, 3, 6, 11, 10, (225, 220, 200))  # crumpled jammed paper poking out
+    speckle(im, [(200, 195, 175), (150, 100, 60)], density=0.3, x0=3, y0=6, x1=11, y1=10)
+    speckle(im, [(255, 130, 30), (90, 50, 20)], density=0.08, x0=3, y0=6, x1=11, y1=10)  # scorch on paper
+    set_px(im, 3, 3, (200, 40, 30))  # error LED, red
+    save(im, "printer_jam_scorched")
+
+
+# ---------------------------------------------------------------------------
+# 27. shrine cloth + candle (unattended-candle hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_shrine_cloth():
+    im = new_canvas((110, 22, 28))
+    gradient_shade(im, 1, 1, 14, 14, (110, 22, 28), light=1.2, dark=0.75)
+    speckle(im, [(130, 30, 35), (90, 15, 20)], density=0.15, x0=1, y0=1, x1=14, y1=14)
+    for i in range(2, 14, 4):
+        line(im, i, 1, i, 14, scale((110, 22, 28), 0.85))  # fabric fold lines
+    border(im, (200, 165, 60))  # gold trim edge
+    inset_edges(im, 1, 1, 14, 14, (150, 40, 45), (70, 12, 16))
+    save(im, "shrine_cloth")
+
+
+def tex_candle_wax():
+    im = new_canvas((220, 210, 180))
+    gradient_shade(im, 0, 0, 15, 15, (235, 225, 195), light=1.15, dark=0.85)
+    rect(im, 1, 0, 2, 15, scale((220, 210, 180), 0.7))  # side shadow gap
+    rect(im, 13, 0, 14, 15, scale((220, 210, 180), 0.7))
+    inset_edges(im, 3, 0, 12, 15, (250, 242, 218), (195, 182, 148))  # pillar bevel
+    line(im, 4, 6, 3, 12, (245, 235, 205))  # wax drip
+    line(im, 10, 8, 11, 13, (245, 235, 205))
+    rect(im, 7, 0, 8, 2, (40, 35, 25))  # unlit wick
+    set_px(im, 7, 0, (20, 18, 12))
+    speckle(im, [(225, 215, 188), (210, 198, 168)], density=0.1, x0=3, y0=1, x1=12, y1=14)
+    save(im, "candle_wax")
+
+
+# ---------------------------------------------------------------------------
+# 28. gas pipe run (kitchen/lab hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_gas_pipe_metal():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 0, 15, 15, (150, 148, 140), light=1.08, dark=0.9)
+    rect(im, 0, 6, 15, 9, (95, 97, 100))  # horizontal pipe run
+    rect(im, 0, 6, 15, 6, (140, 142, 145))  # pipe top highlight
+    rect(im, 0, 9, 15, 9, (55, 57, 60))  # pipe underside shadow
+    rect(im, 6, 4, 9, 11, (75, 77, 80))  # wall bracket clamp
+    rect(im, 6, 4, 6, 11, (100, 102, 105))
+    screws(im, [(6, 4), (9, 11)], (30, 30, 32))
+    border(im, (100, 98, 90))
+    save(im, "gas_pipe_metal")
+
+
+def tex_gas_valve_wheel():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 0, 15, 15, (150, 148, 140), light=1.08, dark=0.9)
+    rect(im, 0, 12, 15, 15, (95, 97, 100))  # pipe stub
+    rect(im, 5, 2, 10, 11, (200, 40, 30))  # red handwheel
+    rect(im, 4, 3, 11, 10, (200, 40, 30))
+    rect(im, 3, 4, 12, 9, (200, 40, 30))
+    rect(im, 7, 4, 8, 9, (60, 60, 62))  # dark hub cutout
+    rect(im, 3, 6, 12, 7, (60, 60, 62))
+    rect(im, 6, 3, 9, 3, (230, 90, 70))  # highlight rim
+    rect(im, 7, 2, 8, 11, (230, 90, 70))
+    border(im, (100, 98, 90))
+    save(im, "gas_valve_wheel")
+
+
+def tex_gas_leak_stain():
+    im = new_canvas((140, 138, 128))
+    gradient_shade(im, 0, 0, 15, 15, (140, 138, 128), light=1.05, dark=0.88)
+    rect(im, 0, 6, 15, 9, (85, 87, 90))  # pipe run
+    rect(im, 6, 4, 9, 11, (65, 67, 70))  # joint bracket, grimed
+    speckle(im, [(45, 45, 42), (30, 30, 28)], density=0.3, x0=6, y0=4, x1=9, y1=11)
+    speckle(im, [(190, 210, 60), (150, 175, 40), (215, 230, 100)], density=0.3, x0=3, y0=2, x1=12, y1=13)  # leak haze
+    rect(im, 6, 5, 9, 6, (170, 195, 50))  # visible gas seep at joint seam
+    border(im, (90, 88, 78))
+    save(im, "gas_leak_stain")
+
+
+# ---------------------------------------------------------------------------
+# 29. hand sanitizer dispenser (hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_dispenser_stand_metal():
+    im = new_canvas((130, 132, 135))
+    gradient_shade(im, 5, 0, 10, 15, (130, 132, 135), light=1.25, dark=0.78)
+    rect(im, 0, 0, 4, 15, scale((130, 132, 135), 0.6))
+    rect(im, 11, 0, 15, 15, scale((130, 132, 135), 0.6))
+    inset_edges(im, 5, 0, 10, 15, (165, 167, 170), (75, 77, 80))
+    rect(im, 5, 13, 10, 15, (90, 92, 95))  # wide base foot
+    border(im, (65, 67, 70))
+    save(im, "dispenser_stand_metal")
+
+
+def tex_dispenser_bottle():
+    im = new_canvas((225, 235, 240))
+    rect(im, 3, 4, 12, 14, (210, 225, 232))  # clear bottle body
+    gradient_shade(im, 3, 8, 12, 14, (80, 160, 220), light=1.15, dark=0.8)  # blue sanitizer fill
+    rect(im, 4, 5, 5, 6, (240, 248, 250))  # glass glint
+    rect(im, 5, 1, 10, 4, (150, 150, 155))  # pump head
+    rect(im, 6, 0, 9, 1, (110, 110, 115))  # pump nozzle
+    inset_edges(im, 3, 4, 12, 14, (245, 250, 252), (170, 185, 195))
+    border(im, (140, 150, 158))
+    save(im, "dispenser_bottle")
+
+
+def tex_dispenser_bottle_leak():
+    im = new_canvas((225, 235, 240))
+    rect(im, 3, 4, 12, 12, (200, 215, 222))  # bottle body, running low
+    gradient_shade(im, 3, 10, 12, 12, (80, 160, 220), light=1.1, dark=0.8)  # low remaining liquid
+    rect(im, 5, 1, 10, 4, (150, 150, 155))  # pump head
+    rect(im, 6, 0, 9, 1, (110, 110, 115))
+    line(im, 4, 12, 3, 15, (100, 175, 225))  # drip
+    line(im, 10, 12, 11, 15, (100, 175, 225))
+    rect(im, 1, 14, 14, 15, (70, 130, 175))  # puddle at base
+    rect(im, 3, 14, 8, 14, (160, 205, 235))  # puddle sheen highlight
+    inset_edges(im, 3, 4, 12, 12, (235, 245, 248), (150, 165, 175))
+    border(im, (130, 140, 148))
+    save(im, "dispenser_bottle_leak")
+
+
+# ---------------------------------------------------------------------------
+# 30. wall exhaust fan (hazard prop)
+# ---------------------------------------------------------------------------
+
+def tex_exhaust_fan_clean():
+    im = new_canvas((195, 195, 190))
+    gradient_shade(im, 1, 1, 14, 14, (195, 195, 190), light=1.15, dark=0.82)
+    inset_edges(im, 1, 1, 14, 14, (220, 220, 214), (130, 130, 124))
+    border(im, (120, 120, 114))
+    rect(im, 3, 3, 12, 12, (70, 70, 72))  # square housing
+    for (x, y) in ((3, 3), (4, 3), (3, 4), (12, 3), (11, 3), (12, 4),
+                   (3, 12), (4, 12), (3, 11), (12, 12), (11, 12), (12, 11)):
+        set_px(im, x, y, (195, 195, 190))  # corner cuts to read as round
+    rect(im, 7, 4, 8, 11, (140, 140, 138))  # blade, vertical
+    rect(im, 4, 7, 11, 8, (140, 140, 138))  # blade, horizontal
+    rect(im, 6, 6, 9, 9, (40, 40, 42))  # center hub
+    screws(im, [(4, 4), (11, 4), (4, 11), (11, 11)], (100, 100, 95))
+    save(im, "exhaust_fan_clean")
+
+
+def tex_exhaust_fan_dusty():
+    im = new_canvas((170, 165, 150))
+    gradient_shade(im, 1, 1, 14, 14, (170, 165, 150), light=1.1, dark=0.85)
+    inset_edges(im, 1, 1, 14, 14, (190, 185, 168), (105, 100, 88))
+    border(im, (95, 90, 78))
+    rect(im, 3, 3, 12, 12, (95, 88, 68))  # dust-caked housing
+    for (x, y) in ((3, 3), (4, 3), (3, 4), (12, 3), (11, 3), (12, 4),
+                   (3, 12), (4, 12), (3, 11), (12, 12), (11, 12), (12, 11)):
+        set_px(im, x, y, (170, 165, 150))
+    speckle(im, [(150, 138, 105), (115, 105, 78), (175, 162, 125)], density=0.5, x0=3, y0=3, x1=12, y1=12)
+    rect(im, 6, 6, 9, 9, (60, 55, 42))  # center hub, dust-dulled, blades barely visible
+    save(im, "exhaust_fan_dusty")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -792,6 +1181,16 @@ ALL = [
     tex_bin_green_clean, tex_bin_grease_stained,
     tex_press_body_metal, tex_press_grill_ridged, tex_press_grill_charred,
     tex_fryer_body_steel, tex_fryer_oil_surface, tex_fryer_oil_hazard,
+    tex_microwave_body, tex_microwave_door_normal, tex_microwave_door_glow,
+    tex_bunsen_base_metal, tex_bunsen_flame_ring,
+    tex_reagent_shelf_body, tex_reagent_bottles, tex_reagent_bottles_leaking,
+    tex_breaker_panel_body, tex_breaker_panel_open_hot,
+    tex_aircon_front_clean, tex_aircon_front_dripping, tex_aircon_side_metal,
+    tex_printer_body, tex_printer_jam_scorched,
+    tex_shrine_cloth, tex_candle_wax,
+    tex_gas_pipe_metal, tex_gas_valve_wheel, tex_gas_leak_stain,
+    tex_dispenser_stand_metal, tex_dispenser_bottle, tex_dispenser_bottle_leak,
+    tex_exhaust_fan_clean, tex_exhaust_fan_dusty,
 ]
 
 if __name__ == "__main__":
