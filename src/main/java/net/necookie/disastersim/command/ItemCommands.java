@@ -14,7 +14,7 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.world.SimulationManager;
-import net.necookie.disastersim.world.building.CCSBuildingConstructor;
+import net.necookie.disastersim.common.structure.building.CCSBuildingConstructor;
 
 import java.util.Arrays;
 import java.util.List;

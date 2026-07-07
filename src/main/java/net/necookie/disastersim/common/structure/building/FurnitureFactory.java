@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world.building;
+package net.necookie.disastersim.common.structure.building;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

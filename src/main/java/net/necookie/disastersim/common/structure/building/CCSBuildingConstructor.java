@@ -1,10 +1,10 @@
-package net.necookie.disastersim.world.building;
+package net.necookie.disastersim.common.structure.building;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
-import net.necookie.disastersim.world.building.modules.CcsLabModule;
-import net.necookie.disastersim.world.building.modules.LspuFacadeModule;
-import net.necookie.disastersim.world.building.modules.LspuHallwayModule;
+import net.necookie.disastersim.common.structure.building.modules.CcsLabModule;
+import net.necookie.disastersim.common.structure.building.modules.LspuFacadeModule;
+import net.necookie.disastersim.common.structure.building.modules.LspuHallwayModule;
 
 // Not wired into the active simulation path — the live sim uses lspulibrarymain.nbt instead.
 public class CCSBuildingConstructor {

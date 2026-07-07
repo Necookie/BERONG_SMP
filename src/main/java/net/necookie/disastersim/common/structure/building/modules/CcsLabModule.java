@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world.building.modules;
+package net.necookie.disastersim.common.structure.building.modules;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
