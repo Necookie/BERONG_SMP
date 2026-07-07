@@ -14,6 +14,8 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.common.structure.LobbyManager;
+import net.necookie.disastersim.common.zones.AssemblyZone;
+import net.necookie.disastersim.common.zones.ExitZones;
 import net.necookie.disastersim.common.structure.SchemLoader;
 import net.necookie.disastersim.common.structure.SimulationStructureLoader;
 import net.necookie.disastersim.common.structure.StructurePlacer;

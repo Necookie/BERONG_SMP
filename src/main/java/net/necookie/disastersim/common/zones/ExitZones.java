@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.zones;
 
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;

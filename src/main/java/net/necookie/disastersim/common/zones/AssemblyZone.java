@@ -1,4 +1,4 @@
-package net.necookie.disastersim.world;
+package net.necookie.disastersim.common.zones;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.world.SimulationSession;
+import net.necookie.disastersim.world.TelemetryCsvWriter;
 
 /**
  * Defines assembly (safe) zones outside the LSPU Library and CCS Admin Building.
