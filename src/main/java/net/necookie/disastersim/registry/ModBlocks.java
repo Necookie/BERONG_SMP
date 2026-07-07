@@ -6,6 +6,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.TrophyCabinetBlock;
 import net.necookie.disastersim.block.PhilippineFlagStandBlock;
 import net.necookie.disastersim.block.TallBookshelfBlock;
 import net.necookie.disastersim.block.ArmchairDeskBlock;
@@ -417,6 +418,13 @@ public final class ModBlocks {
             "philippine_flag_stand", PhilippineFlagStandBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.GOLD)
                     .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Trophy Cabinet — see {@link TrophyCabinetBlock}. */
+    public static final DeferredBlock<TrophyCabinetBlock> TROPHY_CABINET = BLOCKS.registerBlock(
+            "trophy_cabinet", TrophyCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 4.0f).sound(SoundType.GLASS).noOcclusion()
+                    .lightLevel(s -> 3));
 
     private ModBlocks() {}
 

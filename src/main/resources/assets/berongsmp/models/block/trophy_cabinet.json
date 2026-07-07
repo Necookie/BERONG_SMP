@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/cabinet_wood_frame",
+    "front": "berongsmp:block/trophy_shelf_display",
+    "frame": "berongsmp:block/cabinet_wood_frame"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        4
+      ],
+      "to": [
+        15,
+        16,
+        12
+      ],
+      "faces": {
+        "up": {
+          "texture": "#frame"
+        },
+        "down": {
+          "texture": "#frame"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#frame"
+        },
+        "east": {
+          "texture": "#frame"
+        },
+        "west": {
+          "texture": "#frame"
+        }
+      }
+    }
+  ]
+}

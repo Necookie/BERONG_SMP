@@ -327,6 +327,9 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> PHILIPPINE_FLAG_STAND_ITEM =
             ITEMS.registerSimpleBlockItem("philippine_flag_stand", ModBlocks.PHILIPPINE_FLAG_STAND);
 
+    public static final DeferredItem<BlockItem> TROPHY_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("trophy_cabinet", ModBlocks.TROPHY_CABINET);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -368,6 +371,7 @@ public final class ModItems {
         ALL_ITEM_MAP.put("armchair_desk", ARMCHAIR_DESK_ITEM);
         ALL_ITEM_MAP.put("tall_bookshelf", TALL_BOOKSHELF_ITEM);
         ALL_ITEM_MAP.put("philippine_flag_stand", PHILIPPINE_FLAG_STAND_ITEM);
+        ALL_ITEM_MAP.put("trophy_cabinet", TROPHY_CABINET_ITEM);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 

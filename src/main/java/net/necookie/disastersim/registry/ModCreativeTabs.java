@@ -66,6 +66,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TRASH_CAN_ITEM.get());
                 output.accept(ModItems.CEILING_FAN_ITEM.get());
                 output.accept(ModItems.LIGHT_BULB_ITEM.get());
+                output.accept(ModItems.TROPHY_CABINET_ITEM.get());
                 output.accept(ModItems.PHILIPPINE_FLAG_STAND_ITEM.get());
                 output.accept(ModItems.TALL_BOOKSHELF_ITEM.get());
                 output.accept(ModItems.ARMCHAIR_DESK_ITEM.get());

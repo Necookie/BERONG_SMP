@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "berongsmp:block/trophy_cabinet"
+    },
+    "facing=south": {
+      "model": "berongsmp:block/trophy_cabinet",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "berongsmp:block/trophy_cabinet",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "berongsmp:block/trophy_cabinet",
+      "y": 270
+    }
+  }
+}
