@@ -60,10 +60,42 @@ import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.item.NpcSpawnerItem;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.necookie.disastersim.command.ModCommands;
 import net.necookie.disastersim.common.structure.LobbyManager;
+import net.necookie.disastersim.common.structure.NewTutBuildingManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
+import net.necookie.disastersim.item.CO2ExtinguisherItem;
+import net.necookie.disastersim.item.FireExtinguisherItem;
+import net.necookie.disastersim.item.HazardWandItem;
+import net.necookie.disastersim.item.WetChemicalExtinguisherItem;
+import net.necookie.disastersim.network.AcademyCompassPayload;
+import net.necookie.disastersim.network.AcademyShakePayload;
+import net.necookie.disastersim.network.AcademyStatusPayload;
+import net.necookie.disastersim.network.DropAndRollPayload;
+import net.necookie.disastersim.network.SimulationStatusPayload;
+import net.necookie.disastersim.network.TutorialStatusPayload;
+import net.necookie.disastersim.player.DuckCoverHoldManager;
+import net.necookie.disastersim.session.SessionManager;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 
 /**
  * Main entry point for the BerongSMP mod.
@@ -175,7 +207,7 @@ public class BerongSMP {
                     .sound(SoundType.METAL)
                     .lightLevel(state -> {
                         if (state.getValue(ComputerBlock.BURNING)) return 15;
-                        if (state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT)) return 7;
+                        if (state.getValue(BlockStateProperties.LIT)) return 7;
                         return 0;
                     }));
 
@@ -187,9 +219,9 @@ public class BerongSMP {
             "fire_alarm",
             FireAlarmBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+                    .mapColor(MapColor.COLOR_RED)
                     .strength(0.5f, 4.0f)
-                    .sound(net.minecraft.world.level.block.SoundType.METAL)
+                    .sound(SoundType.METAL)
                     .lightLevel(s -> s.getValue(FireAlarmBlock.ACTIVATED) ? 7 : 0));
 
     /** Fire alarm block item. */
@@ -202,7 +234,7 @@ public class BerongSMP {
     public static final DeferredBlock<WhiteboardBlock> WHITEBOARD = BLOCKS.registerBlock("whiteboard",
             WhiteboardBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .mapColor(MapColor.SNOW)
                     .strength(0.5f, 2.0f)
                     .sound(SoundType.STONE)
                     .noOcclusion());
@@ -212,7 +244,7 @@ public class BerongSMP {
     public static final DeferredBlock<FireHoseCabinetBlock> FIRE_HOSE_CABINET = BLOCKS.registerBlock("fire_hose_cabinet",
             FireHoseCabinetBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+                    .mapColor(MapColor.COLOR_RED)
                     .strength(1.0f, 4.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion());
@@ -222,7 +254,7 @@ public class BerongSMP {
     public static final DeferredBlock<ToiletBlock> TOILET = BLOCKS.registerBlock("toilet",
             ToiletBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .mapColor(MapColor.SNOW)
                     .strength(1.0f, 4.0f)
                     .sound(SoundType.STONE)
                     .noOcclusion());
@@ -232,7 +264,7 @@ public class BerongSMP {
     public static final DeferredBlock<SinkBlock> SINK = BLOCKS.registerBlock("sink",
             SinkBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .mapColor(MapColor.SNOW)
                     .strength(1.0f, 4.0f)
                     .sound(SoundType.STONE)
                     .noOcclusion());
@@ -242,7 +274,7 @@ public class BerongSMP {
     public static final DeferredBlock<DrawersBlock> DRAWERS = BLOCKS.registerBlock("drawers",
             DrawersBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion());
@@ -252,7 +284,7 @@ public class BerongSMP {
     public static final DeferredBlock<ComputerTableBlock> COMPUTER_TABLE = BLOCKS.registerBlock("computer_table",
             ComputerTableBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion());
@@ -267,7 +299,7 @@ public class BerongSMP {
     public static final DeferredBlock<TableBlock> TABLE = BLOCKS.registerBlock("table",
             TableBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .mapColor(MapColor.WOOD)
                     .strength(1.5f, 3.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion());
@@ -277,7 +309,7 @@ public class BerongSMP {
     public static final DeferredBlock<ChairBlock> CHAIR = BLOCKS.registerBlock("chair",
             ChairBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .mapColor(MapColor.WOOD)
                     .strength(1.0f, 2.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion());
@@ -287,7 +319,7 @@ public class BerongSMP {
     public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.registerBlock("filing_cabinet",
             FilingCabinetBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .mapColor(MapColor.METAL)
                     .strength(2.0f, 6.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion());
@@ -297,7 +329,7 @@ public class BerongSMP {
     public static final DeferredBlock<LockerBlock> LOCKER = BLOCKS.registerBlock("locker",
             LockerBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .mapColor(MapColor.METAL)
                     .strength(2.0f, 6.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion());
@@ -307,7 +339,7 @@ public class BerongSMP {
     public static final DeferredBlock<TrashCanBlock> TRASH_CAN = BLOCKS.registerBlock("trash_can",
             TrashCanBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .mapColor(MapColor.METAL)
                     .strength(0.5f, 2.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion());
@@ -317,7 +349,7 @@ public class BerongSMP {
     public static final DeferredBlock<BulletinBoardBlock> BULLETIN_BOARD = BLOCKS.registerBlock("bulletin_board",
             BulletinBoardBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.WOOD)
+                    .mapColor(MapColor.WOOD)
                     .strength(0.5f, 2.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion());
@@ -327,7 +359,7 @@ public class BerongSMP {
     public static final DeferredBlock<CeilingFanBlock> CEILING_FAN = BLOCKS.registerBlock("ceiling_fan",
             CeilingFanBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.METAL)
+                    .mapColor(MapColor.METAL)
                     .strength(0.5f, 2.0f)
                     .sound(SoundType.METAL)
                     .noOcclusion()
@@ -338,7 +370,7 @@ public class BerongSMP {
     public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = BLOCKS.registerBlock("light_bulb",
             LightBulbBlock::new,
             () -> Block.Properties.of()
-                    .mapColor(net.minecraft.world.level.material.MapColor.SNOW)
+                    .mapColor(MapColor.SNOW)
                     .strength(0.3f)
                     .sound(SoundType.GLASS)
                     .lightLevel(s -> 15));
@@ -349,20 +381,20 @@ public class BerongSMP {
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
 
     /** The Fire Extinguisher item registration. */
-    public static final DeferredItem<net.necookie.disastersim.item.FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
-            props -> new net.necookie.disastersim.item.FireExtinguisherItem(props.durability(300)));
+    public static final DeferredItem<FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
+            props -> new FireExtinguisherItem(props.durability(300)));
 
     /** CO2 extinguisher — for Class C (electrical) fires; targets lit ComputerBlocks. */
-    public static final DeferredItem<net.necookie.disastersim.item.CO2ExtinguisherItem> CO2_EXTINGUISHER = ITEMS.registerItem("co2_extinguisher",
-            props -> new net.necookie.disastersim.item.CO2ExtinguisherItem(props.durability(200)));
+    public static final DeferredItem<CO2ExtinguisherItem> CO2_EXTINGUISHER = ITEMS.registerItem("co2_extinguisher",
+            props -> new CO2ExtinguisherItem(props.durability(200)));
 
     /** Wet chemical extinguisher — Philippine BFP yellow-coded Class F/K tool for kitchen grease fires. */
-    public static final DeferredItem<net.necookie.disastersim.item.WetChemicalExtinguisherItem> WET_CHEMICAL_EXTINGUISHER = ITEMS.registerItem("wet_chemical_extinguisher",
-            props -> new net.necookie.disastersim.item.WetChemicalExtinguisherItem(props.durability(240)));
+    public static final DeferredItem<WetChemicalExtinguisherItem> WET_CHEMICAL_EXTINGUISHER = ITEMS.registerItem("wet_chemical_extinguisher",
+            props -> new WetChemicalExtinguisherItem(props.durability(240)));
 
     /** Dev-only tool: right-click a hazard prop to toggle its state, or shift+right-click to force its failure. */
-    public static final DeferredItem<net.necookie.disastersim.item.HazardWandItem> HAZARD_WAND = ITEMS.registerItem("hazard_wand",
-            props -> new net.necookie.disastersim.item.HazardWandItem(props.stacksTo(1)));
+    public static final DeferredItem<HazardWandItem> HAZARD_WAND = ITEMS.registerItem("hazard_wand",
+            props -> new HazardWandItem(props.stacksTo(1)));
 
     // ── Firefighter uniform (armor) ──────────────────────────────────────────
     // MC 26.1.2 has no ArmorItem class — armor is a plain Item built via
@@ -371,8 +403,8 @@ public class BerongSMP {
     // resource-only assets/berongsmp/equipment/firefighter_uniform.json file.
 
     /** Points at assets/berongsmp/equipment/firefighter_uniform.json — not a Java registration. */
-    public static final ResourceKey<net.minecraft.world.item.equipment.EquipmentAsset> FIREFIGHTER_UNIFORM_ASSET =
-            ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+    public static final ResourceKey<EquipmentAsset> FIREFIGHTER_UNIFORM_ASSET =
+            ResourceKey.create(EquipmentAssets.ROOT_ID,
                     Identifier.fromNamespaceAndPath(MODID, "firefighter_uniform"));
 
     /**
@@ -380,29 +412,29 @@ public class BerongSMP {
      * (comparable to leather/chainmail). Reuses vanilla's leather equip sound/repair tag rather
      * than registering new ones.
      */
-    public static final net.minecraft.world.item.equipment.ArmorMaterial FIREFIGHTER_MATERIAL =
-            new net.minecraft.world.item.equipment.ArmorMaterial(
+    public static final ArmorMaterial FIREFIGHTER_MATERIAL =
+            new ArmorMaterial(
                     15,
                     java.util.Map.of(
-                            net.minecraft.world.item.equipment.ArmorType.BOOTS, 2,
-                            net.minecraft.world.item.equipment.ArmorType.LEGGINGS, 4,
-                            net.minecraft.world.item.equipment.ArmorType.CHESTPLATE, 6,
-                            net.minecraft.world.item.equipment.ArmorType.HELMET, 2,
-                            net.minecraft.world.item.equipment.ArmorType.BODY, 0),
+                            ArmorType.BOOTS, 2,
+                            ArmorType.LEGGINGS, 4,
+                            ArmorType.CHESTPLATE, 6,
+                            ArmorType.HELMET, 2,
+                            ArmorType.BODY, 0),
                     9,
-                    net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER,
+                    SoundEvents.ARMOR_EQUIP_LEATHER,
                     0.0F, 0.0F,
-                    net.minecraft.tags.ItemTags.REPAIRS_LEATHER_ARMOR,
+                    ItemTags.REPAIRS_LEATHER_ARMOR,
                     FIREFIGHTER_UNIFORM_ASSET);
 
     public static final DeferredItem<Item> FIREFIGHTER_HELMET = ITEMS.registerItem("firefighter_helmet",
-            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.HELMET)));
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, ArmorType.HELMET)));
     public static final DeferredItem<Item> FIREFIGHTER_COAT = ITEMS.registerItem("firefighter_coat",
-            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.CHESTPLATE)));
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, ArmorType.CHESTPLATE)));
     public static final DeferredItem<Item> FIREFIGHTER_PANTS = ITEMS.registerItem("firefighter_pants",
-            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.LEGGINGS)));
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, ArmorType.LEGGINGS)));
     public static final DeferredItem<Item> FIREFIGHTER_BOOTS = ITEMS.registerItem("firefighter_boots",
-            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, net.minecraft.world.item.equipment.ArmorType.BOOTS)));
+            props -> new Item(props.humanoidArmor(FIREFIGHTER_MATERIAL, ArmorType.BOOTS)));
 
     /** Creative tab: simulation tools and interactive blocks. */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> SIM_TAB = CREATIVE_MODE_TABS.register("sim_tab", () -> CreativeModeTab.builder()
@@ -463,7 +495,7 @@ public class BerongSMP {
     /** Plastic waste bin — emits smoke when has_vape=true (hazardous). */
     public static final DeferredBlock<PlasticTrashBinBlock> PLASTIC_TRASH_BIN = BLOCKS.registerBlock(
             "plastic_trash_bin", PlasticTrashBinBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.QUARTZ)
+            () -> Block.Properties.of().mapColor(MapColor.QUARTZ)
                     .strength(0.5f, 1.0f).sound(SoundType.STONE).noOcclusion());
     public static final DeferredItem<BlockItem> PLASTIC_TRASH_BIN_ITEM =
             ITEMS.registerSimpleBlockItem("plastic_trash_bin", PLASTIC_TRASH_BIN);
@@ -472,7 +504,7 @@ public class BerongSMP {
     /** Overloaded daisy-chain extension cord — electric sparks when overloaded=true. */
     public static final DeferredBlock<DaisyChainExtensionBlock> DAISY_CHAIN_EXTENSION = BLOCKS.registerBlock(
             "daisy_chain_extension", DaisyChainExtensionBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(0.2f, 0.5f).sound(SoundType.STONE).noOcclusion());
     public static final DeferredItem<BlockItem> DAISY_CHAIN_EXTENSION_ITEM =
             ITEMS.registerSimpleBlockItem("daisy_chain_extension", DAISY_CHAIN_EXTENSION);
@@ -481,7 +513,7 @@ public class BerongSMP {
     /** Floor sawdust accumulation layer — emits ash particles at accumulation >= 3. */
     public static final DeferredBlock<WoodshopSawdustLayerBlock> WOODSHOP_SAWDUST_LAYER = BLOCKS.registerBlock(
             "woodshop_sawdust_layer", WoodshopSawdustLayerBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.SAND)
+            () -> Block.Properties.of().mapColor(MapColor.SAND)
                     .strength(0.1f, 0.1f).sound(SoundType.SAND).noOcclusion());
     public static final DeferredItem<BlockItem> WOODSHOP_SAWDUST_LAYER_ITEM =
             ITEMS.registerSimpleBlockItem("woodshop_sawdust_layer", WOODSHOP_SAWDUST_LAYER);
@@ -490,7 +522,7 @@ public class BerongSMP {
     /** Stage/theatre spotlight — overheating housing emits flame and smoke when hazardous. */
     public static final DeferredBlock<StageSpotlightBlock> STAGE_SPOTLIGHT = BLOCKS.registerBlock(
             "stage_spotlight", StageSpotlightBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
     public static final DeferredItem<BlockItem> STAGE_SPOTLIGHT_ITEM =
@@ -500,7 +532,7 @@ public class BerongSMP {
     /** Stack of flammable archive document boxes — fire proximity raises hazard. */
     public static final DeferredBlock<ArchiveBoxStackBlock> ARCHIVE_BOX_STACK = BLOCKS.registerBlock(
             "archive_box_stack", ArchiveBoxStackBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BROWN)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BROWN)
                     .strength(1.0f, 1.0f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> ARCHIVE_BOX_STACK_ITEM =
             ITEMS.registerSimpleBlockItem("archive_box_stack", ARCHIVE_BOX_STACK);
@@ -509,7 +541,7 @@ public class BerongSMP {
     /** Desktop PC tower with dust-clogged vents — overheats and emits smoke when hazardous. */
     public static final DeferredBlock<DustChokedPcBlock> DUST_CHOKED_PC = BLOCKS.registerBlock(
             "dust_choked_pc", DustChokedPcBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_GRAY)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
     public static final DeferredItem<BlockItem> DUST_CHOKED_PC_ITEM =
@@ -519,7 +551,7 @@ public class BerongSMP {
     /** Rolling Chromebook/laptop charging cart — overloaded outlets spark when hazardous. */
     public static final DeferredBlock<ChargingCartBlock> CHARGING_CART = BLOCKS.registerBlock(
             "charging_cart", ChargingCartBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
     public static final DeferredItem<BlockItem> CHARGING_CART_ITEM =
@@ -529,7 +561,7 @@ public class BerongSMP {
     /** Frayed AV/console wire on the floor — exposed copper arcs blue sparks when hazardous. */
     public static final DeferredBlock<FrayedConsoleWireBlock> FRAYED_CONSOLE_WIRE = BLOCKS.registerBlock(
             "frayed_console_wire", FrayedConsoleWireBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> FRAYED_CONSOLE_WIRE_ITEM =
             ITEMS.registerSimpleBlockItem("frayed_console_wire", FRAYED_CONSOLE_WIRE);
@@ -538,7 +570,7 @@ public class BerongSMP {
     /** Vending machine with shorted compressor — smokes from back vents when hazardous. */
     public static final DeferredBlock<MalfunctioningVendingBlock> MALFUNCTIONING_VENDING = BLOCKS.registerBlock(
             "malfunctioning_vending", MalfunctioningVendingBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_LIGHT_BLUE)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
                     .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> MALFUNCTIONING_VENDING_ITEM =
             ITEMS.registerSimpleBlockItem("malfunctioning_vending", MALFUNCTIONING_VENDING);
@@ -547,7 +579,7 @@ public class BerongSMP {
     /** Ceiling-mounted projector with failed cooling fan — overheats and smokes. */
     public static final DeferredBlock<CeilingProjectorBlock> CEILING_PROJECTOR = BLOCKS.registerBlock(
             "ceiling_projector", CeilingProjectorBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
     public static final DeferredItem<BlockItem> CEILING_PROJECTOR_ITEM =
@@ -557,7 +589,7 @@ public class BerongSMP {
     /** Swollen Li-ion phone battery left on desk — thermal runaway risk; cyan soul-flame gas when hazardous. */
     public static final DeferredBlock<SwollenPhoneBatteryBlock> SWOLLEN_PHONE_BATTERY = BLOCKS.registerBlock(
             "swollen_phone_battery", SwollenPhoneBatteryBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GRAY)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(0.5f, 0.5f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> SWOLLEN_PHONE_BATTERY_ITEM =
             ITEMS.registerSimpleBlockItem("swollen_phone_battery", SWOLLEN_PHONE_BATTERY);
@@ -566,7 +598,7 @@ public class BerongSMP {
     /** Damaged LiPo battery pack (drone/RC) — punctured cells off-gas smoke when hazardous. */
     public static final DeferredBlock<DamagedLipoPackBlock> DAMAGED_LIPO_PACK = BLOCKS.registerBlock(
             "damaged_lipo_pack", DamagedLipoPackBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_RED)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
                     .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
     public static final DeferredItem<BlockItem> DAMAGED_LIPO_PACK_ITEM =
             ITEMS.registerSimpleBlockItem("damaged_lipo_pack", DAMAGED_LIPO_PACK);
@@ -575,7 +607,7 @@ public class BerongSMP {
     /** Iron locker with a vape device inside — sparks and smoke leak from vent slot when hazardous. */
     public static final DeferredBlock<VapeInIronLockerBlock> VAPE_IN_IRON_LOCKER = BLOCKS.registerBlock(
             "vape_in_iron_locker", VapeInIronLockerBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> VAPE_IN_IRON_LOCKER_ITEM =
             ITEMS.registerSimpleBlockItem("vape_in_iron_locker", VAPE_IN_IRON_LOCKER);
@@ -584,7 +616,7 @@ public class BerongSMP {
     /** PA/public-address backup amp rack — faulty capacitors spark and glow when hazardous. */
     public static final DeferredBlock<PaSystemBackupBlock> PA_SYSTEM_BACKUP = BLOCKS.registerBlock(
             "pa_system_backup", PaSystemBackupBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
     public static final DeferredItem<BlockItem> PA_SYSTEM_BACKUP_ITEM =
@@ -594,7 +626,7 @@ public class BerongSMP {
     /** Smartboard power inverter — roof leak drips on live electronics when hazardous. */
     public static final DeferredBlock<SmartboardInverterBlock> SMARTBOARD_INVERTER = BLOCKS.registerBlock(
             "smartboard_inverter", SmartboardInverterBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_BLACK)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> SMARTBOARD_INVERTER_ITEM =
             ITEMS.registerSimpleBlockItem("smartboard_inverter", SMARTBOARD_INVERTER);
@@ -603,7 +635,7 @@ public class BerongSMP {
     /** Stove with a grease pan left unattended — grease fire erupts when hazardous. */
     public static final DeferredBlock<UnattendedGreasePanBlock> UNATTENDED_GREASE_PAN = BLOCKS.registerBlock(
             "unattended_grease_pan", UnattendedGreasePanBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
     public static final DeferredItem<BlockItem> UNATTENDED_GREASE_PAN_ITEM =
@@ -613,7 +645,7 @@ public class BerongSMP {
     /** Kitchen range hood with clogged grease filters — backflow smoke when hazardous. */
     public static final DeferredBlock<GreaseCloggedHoodBlock> GREASE_CLOGGED_HOOD = BLOCKS.registerBlock(
             "grease_clogged_hood", GreaseCloggedHoodBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> GREASE_CLOGGED_HOOD_ITEM =
             ITEMS.registerSimpleBlockItem("grease_clogged_hood", GREASE_CLOGGED_HOOD);
@@ -622,7 +654,7 @@ public class BerongSMP {
     /** Kitchen waste bin with oil-soaked contaminated rags — self-heating rags emit steam when hazardous. */
     public static final DeferredBlock<ContaminatedKitchenBinBlock> CONTAMINATED_KITCHEN_BIN = BLOCKS.registerBlock(
             "contaminated_kitchen_bin", ContaminatedKitchenBinBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.COLOR_GREEN)
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
                     .strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> CONTAMINATED_KITCHEN_BIN_ITEM =
             ITEMS.registerSimpleBlockItem("contaminated_kitchen_bin", CONTAMINATED_KITCHEN_BIN);
@@ -631,7 +663,7 @@ public class BerongSMP {
     /** Panini press with jammed lid and burning food — smoking when hazardous. */
     public static final DeferredBlock<JammedPaniniPressBlock> JAMMED_PANINI_PRESS = BLOCKS.registerBlock(
             "jammed_panini_press", JammedPaniniPressBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
     public static final DeferredItem<BlockItem> JAMMED_PANINI_PRESS_ITEM =
             ITEMS.registerSimpleBlockItem("jammed_panini_press", JAMMED_PANINI_PRESS);
@@ -640,7 +672,7 @@ public class BerongSMP {
     /** Commercial deep fryer — overheated oil ignites and erupts smoke/flame when hazardous. */
     public static final DeferredBlock<CommercialDeepFryerBlock> COMMERCIAL_DEEP_FRYER = BLOCKS.registerBlock(
             "commercial_deep_fryer", CommercialDeepFryerBlock::new,
-            () -> Block.Properties.of().mapColor(net.minecraft.world.level.material.MapColor.METAL)
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
     public static final DeferredItem<BlockItem> COMMERCIAL_DEEP_FRYER_ITEM =
@@ -725,16 +757,16 @@ public class BerongSMP {
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent
         // on the mod bus — it must be registered here so NeoForge picks it up.
-        modEventBus.register(net.necookie.disastersim.network.SimulationStatusPayload.class);
-        modEventBus.register(net.necookie.disastersim.network.TutorialStatusPayload.class);
-        modEventBus.register(net.necookie.disastersim.network.DropAndRollPayload.class);
-        modEventBus.register(net.necookie.disastersim.network.AcademyStatusPayload.class);
-        modEventBus.register(net.necookie.disastersim.network.AcademyCompassPayload.class);
-        modEventBus.register(net.necookie.disastersim.network.AcademyShakePayload.class);
+        modEventBus.register(SimulationStatusPayload.class);
+        modEventBus.register(TutorialStatusPayload.class);
+        modEventBus.register(DropAndRollPayload.class);
+        modEventBus.register(AcademyStatusPayload.class);
+        modEventBus.register(AcademyCompassPayload.class);
+        modEventBus.register(AcademyShakePayload.class);
 
         // BerongSMPClient is annotated @Mod(dist = CLIENT) so it only loads on the
         // physical client, keeping server JARs free of client-only Minecraft classes.
-        modEventBus.register(net.necookie.disastersim.BerongSMPClient.class);
+        modEventBus.register(BerongSMPClient.class);
 
         // NOTE: KeyMappings is intentionally NOT registered here. It holds a real KeyMapping
         // field, a client-only Minecraft type — registering it from this common constructor
@@ -761,15 +793,15 @@ public class BerongSMP {
     }
 
     /**
-     * Delegates command registration to {@link net.necookie.disastersim.command.ModCommands}.
+     * Delegates command registration to {@link ModCommands}.
      * This fires before the server opens for connections, so all commands are available
      * from the first tick.
      *
      * @param event Provides the Brigadier {@link com.mojang.brigadier.CommandDispatcher}
      *              that maps command literals to execution logic.
      */
-    private void onRegisterCommands(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
-        net.necookie.disastersim.command.ModCommands.register(event.getDispatcher());
+    private void onRegisterCommands(RegisterCommandsEvent event) {
+        ModCommands.register(event.getDispatcher());
     }
 
     /**
@@ -786,7 +818,7 @@ public class BerongSMP {
         // actually runs — nothing else in the codebase calls real code on that class, only
         // Javadoc {@code} mentions, which the JVM doesn't count. Without this, the crawl-under-
         // table pose-shrink assist (and duck/cover/hold tracking generally) silently never ticks.
-        net.necookie.disastersim.player.DuckCoverHoldManager.bootstrap();
+        DuckCoverHoldManager.bootstrap();
     }
 
     /**
@@ -817,28 +849,28 @@ public class BerongSMP {
      * <p>Covers both ItemFrame and GlowItemFrame (GlowItemFrame extends ItemFrame).
      */
     @SubscribeEvent
-    public void onAttackItemFrame(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
-        if (!(event.getTarget() instanceof net.minecraft.world.entity.decoration.ItemFrame frame)) return;
+    public void onAttackItemFrame(AttackEntityEvent event) {
+        if (!(event.getTarget() instanceof ItemFrame frame)) return;
         if (event.getEntity().level().isClientSide()) return;
 
-        net.minecraft.world.item.ItemStack frameItem = frame.getItem();
+        ItemStack frameItem = frame.getItem();
         if (frameItem.isEmpty()) return; // frame has no item — let vanilla handle frame breaking
 
         event.setCanceled(true);
 
-        net.minecraft.world.entity.player.Player player = event.getEntity();
-        net.minecraft.world.item.ItemStack toGive = frameItem.copy();
+        Player player = event.getEntity();
+        ItemStack toGive = frameItem.copy();
 
         // Clear the frame and notify clients via entity data sync
-        frame.setItem(net.minecraft.world.item.ItemStack.EMPTY);
+        frame.setItem(ItemStack.EMPTY);
         frame.level().playSound(null, frame.getX(), frame.getY(), frame.getZ(),
-                net.minecraft.sounds.SoundEvents.ITEM_FRAME_REMOVE_ITEM,
-                net.minecraft.sounds.SoundSource.BLOCKS, 1.0f, 1.0f);
+                SoundEvents.ITEM_FRAME_REMOVE_ITEM,
+                SoundSource.BLOCKS, 1.0f, 1.0f);
 
         // Give item directly — bypasses doEntityDrops
         if (!player.getInventory().add(toGive)) {
             // Inventory full: force-spawn item entity at player position
-            net.minecraft.world.entity.item.ItemEntity drop = new net.minecraft.world.entity.item.ItemEntity(
+            ItemEntity drop = new ItemEntity(
                     frame.level(), player.getX(), player.getY(), player.getZ(), toGive);
             drop.setDefaultPickUpDelay();
             frame.level().addFreshEntity(drop);
@@ -851,13 +883,13 @@ public class BerongSMP {
         TutorialLobbyManager.initNpcs(event.getServer().overworld());
         // Also bakes in its own NPCs/armor stands from the schematic's Entities tag — same
         // entity-storage-must-be-ready requirement as the call above.
-        net.necookie.disastersim.common.structure.NewTutBuildingManager.place(event.getServer().overworld());
+        NewTutBuildingManager.place(event.getServer().overworld());
     }
 
     @SubscribeEvent
-    public void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
-        net.necookie.disastersim.session.SessionManager.shutdown();
-        net.necookie.disastersim.common.telemetry.TelemetryCsvWriter.shutdown();
+    public void onServerStopping(ServerStoppingEvent event) {
+        SessionManager.shutdown();
+        TelemetryCsvWriter.shutdown();
     }
 
     /**
@@ -875,25 +907,25 @@ public class BerongSMP {
      *       regardless of how long a session has been running.</li>
      * </ol>
      *
-     * @param event Provides the running {@link net.minecraft.server.MinecraftServer}.
+     * @param event Provides the running {@link MinecraftServer}.
      */
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("=== BerongSMP session build: UUID-subquery writes (2026-06-21-v4) ===");
         LOGGER.info("Initializing Lobby and World Settings for BerongSMP...");
 
-        net.minecraft.server.MinecraftServer server = event.getServer();
+        MinecraftServer server = event.getServer();
 
         // The overworld is the dimension that hosts both the lobby and the simulation arena.
-        net.minecraft.server.level.ServerLevel level = server.overworld();
+        ServerLevel level = server.overworld();
 
         // Parse and place the lobby_structure NBT file, then scan it for ButtonBlock
         // instances to determine which button triggers fire vs. earthquake.
         LobbyManager.createLobby(level);
         TutorialLobbyManager.buildLobby(level); // structure only — NPCs need entity storage loaded first
-        net.necookie.disastersim.session.SessionManager.init(server);
-        net.necookie.disastersim.command.ModCommands.clearAuthorizations();
-        net.necookie.disastersim.common.telemetry.TelemetryCsvWriter.init(server.getServerDirectory());
+        SessionManager.init(server);
+        ModCommands.clearAuthorizations();
+        TelemetryCsvWriter.init(server.getServerDirectory());
 
         String bfpPin = Config.BFP_ADMIN_PIN.get();
         if (bfpPin.isBlank()) {
