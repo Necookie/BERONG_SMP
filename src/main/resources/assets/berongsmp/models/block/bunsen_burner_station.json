@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "berongsmp:block/bunsen_base_metal",
+    "body": "berongsmp:block/bunsen_base_metal",
+    "top": "berongsmp:block/bunsen_base_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        7,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    }
+  ]
+}

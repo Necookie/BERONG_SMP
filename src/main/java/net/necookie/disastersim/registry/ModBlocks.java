@@ -330,6 +330,13 @@ public final class ModBlocks {
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
 
+    /** Bunsen Burner Station (Open Flame Hazard) — see {@link BunsenBurnerStationBlock}. */
+    public static final DeferredBlock<BunsenBurnerStationBlock> BUNSEN_BURNER_STATION = BLOCKS.registerBlock(
+            "bunsen_burner_station", BunsenBurnerStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 9 : 0));
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {
