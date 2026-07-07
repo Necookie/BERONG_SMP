@@ -1,4 +1,4 @@
-package net.necookie.disastersim.block.hazard;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

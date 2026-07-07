@@ -35,7 +35,7 @@ import net.necookie.disastersim.block.ToiletBlock;
 import net.necookie.disastersim.block.TrashCanBlock;
 import net.necookie.disastersim.block.FireHoseCabinetBlock;
 import net.necookie.disastersim.block.WhiteboardBlock;
-import net.necookie.disastersim.block.hazard.*;
+import net.necookie.disastersim.common.hazard.*;
 import net.minecraft.world.level.storage.LevelData;
 
 import net.neoforged.bus.api.IEventBus;

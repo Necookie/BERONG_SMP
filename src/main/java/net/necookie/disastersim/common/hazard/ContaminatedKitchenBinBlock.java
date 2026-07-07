@@ -1,4 +1,4 @@
-package net.necookie.disastersim.block.hazard;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,22 +8,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class UnattendedGreasePanBlock extends HazardFacingBlock {
+public class ContaminatedKitchenBinBlock extends HazardFacingBlock {
 
-    private static final VoxelShape SHAPE = box(1, 0, 1, 15, 10, 15);
+    private static final VoxelShape SHAPE = box(2, 0, 2, 14, 14, 14);
 
     @Override
     protected VoxelShape shapeFor(Direction facing) { return SHAPE; }
 
-    public UnattendedGreasePanBlock(Properties props) { super(props); }
+    public ContaminatedKitchenBinBlock(Properties props) { super(props); }
 
     @Override
     protected void spawnHazardParticles(Level level, BlockPos pos, BlockState state, RandomSource rand) {
+        if (rand.nextInt(4) != 0) return;
         double x = pos.getX() + 0.3 + rand.nextDouble() * 0.4;
-        double y = pos.getY() + 0.65;
+        double y = pos.getY() + 0.9;
         double z = pos.getZ() + 0.3 + rand.nextDouble() * 0.4;
-        if (rand.nextInt(2) == 0) level.addParticle(ParticleTypes.FLAME, x, y, z, 0, 0.03, 0);
-        if (rand.nextInt(3) == 0) level.addParticle(ParticleTypes.LARGE_SMOKE, x, y + 0.1, z, 0, 0.04, 0);
+        level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.02, 0);
     }
 
     @Override
@@ -33,11 +33,11 @@ public class UnattendedGreasePanBlock extends HazardFacingBlock {
 
     @Override
     public String failureMessage() {
-        return "§4🍳 The unattended oil pan erupts into a Class F/K grease fire!";
+        return "§4🗑 Warm cooking oil dumped in the bin catches instantly, spreading unquenchable floor flames!";
     }
 
     @Override
     public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
-        igniteAdjacent(level, pos, 2);
+        igniteRadius(level, pos, 2, 3);
     }
 }

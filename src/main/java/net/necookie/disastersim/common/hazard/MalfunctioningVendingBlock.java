@@ -1,4 +1,4 @@
-package net.necookie.disastersim.block.hazard;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,32 +8,31 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class VapeInIronLockerBlock extends HazardFacingBlock {
+public class MalfunctioningVendingBlock extends HazardFacingBlock {
 
     private static final VoxelShape SHAPE = box(1, 0, 1, 15, 16, 15);
 
     @Override
     protected VoxelShape shapeFor(Direction facing) { return SHAPE; }
 
-    public VapeInIronLockerBlock(Properties props) { super(props); }
+    public MalfunctioningVendingBlock(Properties props) { super(props); }
 
     @Override
     protected void spawnHazardParticles(Level level, BlockPos pos, BlockState state, RandomSource rand) {
-        if (rand.nextInt(4) != 0) return;
-        double x = pos.getX() + 0.4 + rand.nextDouble() * 0.2;
+        if (rand.nextInt(5) != 0) return;
+        double x = pos.getX() + 0.3 + rand.nextDouble() * 0.4;
         double y = pos.getY() + 1.0;
         double z = pos.getZ() + 0.05;
-        level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0, 0.03, 0);
-        level.addParticle(ParticleTypes.SMOKE, x, y + 0.1, z, 0, 0.02, 0);
+        level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
     }
 
     @Override
     public String failureMessage() {
-        return "§4🚪 The device inside the locker explodes, superheating the metal and igniting the row!";
+        return "§c🥤 The shorted vending machine's plastics catch fire, filling the corridor with Class E smoke!";
     }
 
     @Override
     public void onHazardFailure(Level level, BlockPos pos, BlockState state) {
-        igniteRadius(level, pos, 2, 3);
+        igniteAdjacent(level, pos, 1);
     }
 }

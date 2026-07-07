@@ -1,4 +1,4 @@
-package net.necookie.disastersim.block.hazard;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -8,27 +8,32 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class MalfunctioningVendingBlock extends HazardFacingBlock {
+public class ArchiveBoxStackBlock extends HazardFacingBlock {
 
     private static final VoxelShape SHAPE = box(1, 0, 1, 15, 16, 15);
 
     @Override
     protected VoxelShape shapeFor(Direction facing) { return SHAPE; }
 
-    public MalfunctioningVendingBlock(Properties props) { super(props); }
+    public ArchiveBoxStackBlock(Properties props) { super(props); }
 
     @Override
     protected void spawnHazardParticles(Level level, BlockPos pos, BlockState state, RandomSource rand) {
-        if (rand.nextInt(5) != 0) return;
-        double x = pos.getX() + 0.3 + rand.nextDouble() * 0.4;
-        double y = pos.getY() + 1.0;
-        double z = pos.getZ() + 0.05;
-        level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
+        if (rand.nextInt(4) != 0) return;
+        double x = pos.getX() + 0.2 + rand.nextDouble() * 0.6;
+        double y = pos.getY() + 1.05;
+        double z = pos.getZ() + 0.2 + rand.nextDouble() * 0.6;
+        level.addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, y, z, 0, 0.03, 0);
+    }
+
+    @Override
+    public int failureDelayTicks() {
+        return 400;
     }
 
     @Override
     public String failureMessage() {
-        return "§c🥤 The shorted vending machine's plastics catch fire, filling the corridor with Class E smoke!";
+        return "§c📦 The boxes against the hot radiator finally ignite — a smoldering archive fire!";
     }
 
     @Override

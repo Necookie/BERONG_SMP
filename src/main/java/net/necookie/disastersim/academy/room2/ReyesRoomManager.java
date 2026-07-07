@@ -189,7 +189,7 @@ public final class ReyesRoomManager {
     /**
      * Bare-hand right-click "prevention" drill on the same 3 hazard props LIVE_FIRE_DEMO later
      * ignites for real — here they're merely set hazardous (never actually catch fire) and the
-     * player fixes each one with {@link net.necookie.disastersim.block.hazard.HazardBlock}'s
+     * player fixes each one with {@link net.necookie.disastersim.common.hazard.HazardBlock}'s
      * prevention interaction before moving to the next.
      */
     private static void tickPreventionDemo(ServerLevel level, ServerPlayer player, AcademySavedData data) {

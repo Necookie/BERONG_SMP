@@ -12,9 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.block.ComputerBlock;
-import net.necookie.disastersim.block.hazard.HazardBlock;
-import net.necookie.disastersim.block.hazard.HazardFacingBlock;
-import net.necookie.disastersim.block.hazard.WoodshopSawdustLayerBlock;
 import net.necookie.disastersim.world.SimulationSession;
 
 import java.util.ArrayList;

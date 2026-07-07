@@ -1,4 +1,4 @@
-package net.necookie.disastersim.block.hazard;
+package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -7,79 +7,34 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * Base for hazard prop blocks that carry a horizontal {@code FACING} alongside {@code hazardous}
- * and {@code on_fire}. Replicates the FACING boilerplate from
- * {@link net.necookie.disastersim.block.HorizontalFacingBlock} while adding the shared hazard
- * state machine, animateTick particle hook, and bare-hand "prevention" interaction.
+ * Base for symmetric (no-facing) hazard prop blocks. Adds the {@code hazardous} (developing
+ * danger) and {@code on_fire} (actually burning) boolean states, wires {@link #animateTick} to
+ * call {@link #spawnHazardParticles} and intensify while on fire, and offers a bare-hand
+ * "prevention" right-click that resets a hazardous-but-not-yet-burning prop back to safe.
  */
-public abstract class HazardFacingBlock extends Block {
+public abstract class HazardBlock extends Block {
 
-    public static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
-    public static final BooleanProperty HAZARDOUS = HazardBlock.HAZARDOUS;
-    public static final BooleanProperty ON_FIRE = HazardBlock.ON_FIRE;
+    public static final BooleanProperty HAZARDOUS = BooleanProperty.create("hazardous");
+    public static final BooleanProperty ON_FIRE = BooleanProperty.create("on_fire");
 
-    protected HazardFacingBlock(Properties props) {
+    protected HazardBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any()
-                .setValue(FACING, Direction.NORTH)
-                .setValue(HAZARDOUS, false)
-                .setValue(ON_FIRE, false));
+        registerDefaultState(stateDefinition.any().setValue(HAZARDOUS, false).setValue(ON_FIRE, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, HAZARDOUS, ON_FIRE);
-    }
-
-    @Override
-    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
-    }
-
-    @Override
-    public BlockState rotate(BlockState state, Rotation rotation) {
-        return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
-    }
-
-    @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
-        return state.setValue(FACING, mirror.mirror(state.getValue(FACING)));
-    }
-
-    @Override
-    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
-        return shapeFor(state.getValue(FACING));
-    }
-
-    /** Collision/outline shape for the given facing direction. */
-    protected abstract VoxelShape shapeFor(Direction facing);
-
-    /** Convenience helper: maps a facing to one of the four directional shapes. */
-    protected static VoxelShape byFacing(Direction facing, VoxelShape north, VoxelShape south,
-                                          VoxelShape east, VoxelShape west) {
-        return switch (facing) {
-            case SOUTH -> south;
-            case EAST  -> east;
-            case WEST  -> west;
-            default    -> north;
-        };
+        builder.add(HAZARDOUS, ON_FIRE);
     }
 
     /** Emit client-side particles that signal the hazardous state. Called every animateTick. */
@@ -141,7 +96,7 @@ public abstract class HazardFacingBlock extends Block {
         for (Direction dir : Direction.values()) {
             if (lit >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
-            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
@@ -154,10 +109,20 @@ public abstract class HazardFacingBlock extends Block {
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
             if (lit >= maxBlocks) break;
-            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
         }
+    }
+
+    /**
+     * True if any player occupies or is standing close enough to {@code pos} that placing fire
+     * there would touch them — vanilla fire both damages and ignites any entity standing in it, and
+     * nothing here previously checked for that, which is what let the Academy's scripted hazard
+     * failures set the player "randomly" alight while they were right there defusing the prop.
+     */
+    protected static boolean isPlayerNear(Level level, BlockPos pos) {
+        return !level.getEntitiesOfClass(Player.class, new AABB(pos).inflate(0.6)).isEmpty();
     }
 }
