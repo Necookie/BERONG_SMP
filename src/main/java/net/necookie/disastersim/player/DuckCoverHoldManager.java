@@ -53,6 +53,14 @@ public final class DuckCoverHoldManager {
         TickScheduler.register(DuckCoverHoldManager::tick);
     }
 
+    /**
+     * No-op. Nothing else in the codebase calls real (non-Javadoc) code on this class — Java only
+     * runs the {@code static} block above on first active use, so without a genuine caller
+     * somewhere, this class silently never loads and its tick handler never registers. Call this
+     * once at startup to force that load; see {@code BerongSMP.commonSetup}.
+     */
+    public static void bootstrap() {}
+
     /** Ticks of continuous compliance required to count the drill as performed correctly (5s). */
     public static final int TARGET_TICKS = 100;
 
