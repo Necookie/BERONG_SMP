@@ -3,7 +3,6 @@ package net.necookie.disastersim.common.simulation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.necookie.disastersim.tutorial.TutorialManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -364,10 +363,7 @@ public class SimulationManager {
     public static void onServerTick(ServerTickEvent.Post event) {
         net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
-            TutorialManager.tick(server.overworld());
-            net.necookie.disastersim.player.DropAndRollManager.tick(server.overworld());
-            net.necookie.disastersim.player.DuckCoverHoldManager.tick(server.overworld());
-            net.necookie.disastersim.academy.AcademyManager.tick(server.overworld());
+            net.necookie.disastersim.common.scheduling.TickScheduler.tick(server.overworld());
         }
 
         // Snapshot key set before iterating — endSimulation removes entries and would ConcurrentModify.
