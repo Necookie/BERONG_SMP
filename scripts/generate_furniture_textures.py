@@ -16,7 +16,11 @@ Outputs to src/main/resources/assets/berongsmp/textures/block/.
 """
 import os
 import random
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_material_signature
 
 random.seed(11)
 
@@ -128,6 +132,7 @@ def crack_lines(im, x0, y0, x1, y1, color, count=4):
 
 
 def save(im, name):
+    apply_material_signature(im)
     im.save(os.path.join(OUT, f"{name}.png"))
 
 
