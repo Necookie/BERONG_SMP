@@ -11,7 +11,11 @@ reused vanilla item. Run from repo root:
 Outputs to src/main/resources/assets/berongsmp/textures/item/hazard_wand.png.
 """
 import os
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_icon_signature
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources",
                     "assets", "berongsmp", "textures", "item")
@@ -78,6 +82,8 @@ def main():
     # Thin dark outline under the grip end for a finished silhouette.
     set_px(im, 0, 15, OUTLINE)
     set_px(im, 1, 14, OUTLINE)
+
+    apply_icon_signature(im)
 
     path = os.path.join(OUT, "hazard_wand.png")
     im.save(path)
