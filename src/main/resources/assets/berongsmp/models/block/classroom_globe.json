@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/globe_sphere",
     "sphere": "berongsmp:block/globe_sphere",
