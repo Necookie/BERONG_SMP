@@ -24,7 +24,11 @@ Outputs to:
 import math
 import os
 import random
+import sys
 from PIL import Image, ImageDraw
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_icon_signature, apply_material_signature
 
 random.seed(37)
 
@@ -151,10 +155,12 @@ def cross_band(im, x0, y0, x1, y1, r, t, color, width=1):
 
 
 def save_item(im, name):
+    apply_icon_signature(im)
     im.save(os.path.join(ITEM_OUT, f"{name}.png"))
 
 
 def save_block(im, name):
+    apply_material_signature(im)
     im.save(os.path.join(BLOCK_OUT, f"{name}.png"))
 
 
