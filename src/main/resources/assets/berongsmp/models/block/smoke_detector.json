@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/smoke_detector_white",
     "all": "berongsmp:block/smoke_detector_white"
