@@ -13,7 +13,11 @@ Outputs to src/main/resources/assets/berongsmp/textures/block/.
 """
 import os
 import random
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_material_signature
 
 random.seed(42)
 
@@ -136,6 +140,7 @@ def plug_prongs(im, x0, y0, color=(190, 175, 60), gap=4):
 
 
 def save(im, name):
+    apply_material_signature(im)
     im.save(os.path.join(OUT, f"{name}.png"))
 
 
