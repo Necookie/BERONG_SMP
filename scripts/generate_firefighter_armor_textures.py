@@ -18,7 +18,11 @@ Outputs to:
     src/main/resources/assets/berongsmp/textures/item/firefighter_{helmet,coat,pants,boots}.png
 """
 import os
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_icon_signature
 
 ASSETS = os.path.join(os.path.dirname(__file__), "..", "src", "main", "resources", "assets", "berongsmp")
 EQUIP_HUMANOID_OUT = os.path.join(ASSETS, "textures", "entity", "equipment", "humanoid")
@@ -144,6 +148,7 @@ def icon_helmet():
     hgradient(im, (6, 10, 26, 17), HELMET_YELLOW_LIGHT, HELMET_YELLOW)
     rect(im, (4, 22, 28, 25), HELMET_DARK)  # brim
     rect(im, (6, 18, 26, 20), HELMET_RED)   # trim stripe
+    apply_icon_signature(im)
     im.save(os.path.join(ITEM_ICON_OUT, "firefighter_helmet.png"))
 
 
@@ -156,6 +161,7 @@ def icon_coat():
     hstripe(im, (7, 4, 25, 28), 6, 2, REFLECTIVE)
     hstripe(im, (7, 4, 25, 28), 16, 2, REFLECTIVE_LIGHT)
     vseam(im, (7, 4, 25, 28), 9, NAVY_DARK)
+    apply_icon_signature(im)
     im.save(os.path.join(ITEM_ICON_OUT, "firefighter_coat.png"))
 
 
@@ -166,6 +172,7 @@ def icon_pants():
     hgradient(im, (17, 16, 23, 29), NAVY, NAVY_DARK)  # right leg (15-17 stays a transparent gap)
     hstripe(im, (9, 16, 15, 29), 6, 1, REFLECTIVE)
     hstripe(im, (17, 16, 23, 29), 6, 1, REFLECTIVE)
+    apply_icon_signature(im)
     im.save(os.path.join(ITEM_ICON_OUT, "firefighter_pants.png"))
 
 
@@ -178,6 +185,7 @@ def icon_boots():
     hgradient(im, (5, 8, 27, 29), BOOT_LIGHT, BOOT_BLACK)
     hstripe(im, (7, 8, 15, 26), 3, 1, REFLECTIVE)
     hstripe(im, (17, 8, 25, 26), 3, 1, REFLECTIVE)
+    apply_icon_signature(im)
     im.save(os.path.join(ITEM_ICON_OUT, "firefighter_boots.png"))
 
 
