@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/wall_clock_face",
     "face": "berongsmp:block/wall_clock_face"
