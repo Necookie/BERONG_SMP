@@ -45,3 +45,4 @@ repo/
 ### Stray tooling artifacts (this is a mod repo, not a web app) ###
 node_modules/
 .astro/
+scripts/__pycache__/
