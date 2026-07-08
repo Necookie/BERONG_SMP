@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/aircon_side_metal",
     "body": "berongsmp:block/aircon_side_metal",
