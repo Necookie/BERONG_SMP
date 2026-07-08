@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/bookshelf_frame_wood",
     "a": "berongsmp:block/bookshelf_spines_a",
