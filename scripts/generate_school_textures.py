@@ -16,7 +16,11 @@ Outputs to src/main/resources/assets/berongsmp/textures/block/.
 import math
 import os
 import random
+import sys
 from PIL import Image
+
+sys.path.insert(0, os.path.dirname(__file__))
+from _texture_style import apply_material_signature
 
 random.seed(27)
 
@@ -146,6 +150,7 @@ def diagonal_sheen(im, x0, y0, x1, y1, factor=1.25, band=2, offset=0):
 
 
 def save(im, name):
+    apply_material_signature(im)
     im.save(os.path.join(OUT, f"{name}.png"))
 
 
