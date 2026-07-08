@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/microwave_body",
     "body": "berongsmp:block/microwave_body",
