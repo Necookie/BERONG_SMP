@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/armchair_wood_seat",
     "top": "berongsmp:block/armchair_tablet_top",
