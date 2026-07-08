@@ -26,6 +26,9 @@ import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademyManager;
 import net.necookie.disastersim.academy.AcademyProgress;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.CruzPhase;
+import net.necookie.disastersim.academy.ReyesPhase;
+import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.session.SessionManager;
@@ -413,7 +416,64 @@ public class BfpAdminCommands {
                         .executes(ctx -> academyReset(
                                 ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint))));
 
+        root.then(Commands.literal("skipto")
+                .then(skipToLiteral("cruz", AcademyBuildingManager.VIEWPOINTS.get("officer_cruz"),
+                        false, false, false))
+                .then(skipToLiteral("reyes", AcademyBuildingManager.VIEWPOINTS.get("sgt_reyes"),
+                        true, false, false))
+                .then(skipToLiteral("santos", AcademyBuildingManager.VIEWPOINTS.get("sgt_santos"),
+                        true, true, false))
+                .then(skipToLiteral("morfe", AcademyBuildingManager.VIEWPOINTS.get("capt_morfe"),
+                        true, true, true)));
+
         return root;
+    }
+
+    /**
+     * {@code /bfp new_tutorial skipto <instructor> [player]} — dev shortcut so a room past the
+     * first doesn't require replaying every prior room by hand. Marks every room strictly before
+     * {@code instructor} as {@code DONE} (and the target room + everything after it back to
+     * {@code NOT_STARTED}, via {@link AcademyProgress#resetAll()}), applies the same transient-state
+     * cleanup {@code academyReset} does (dialogue cancel, room-manager transient maps, Cruz snapped
+     * to her anchor, Reyes's extinguisher frames restocked, leftover Room 2 hazard props cleared),
+     * then teleports straight to that instructor's {@link AcademyBuildingManager#VIEWPOINTS} entry.
+     * {@code skipto cruz} is equivalent to a full {@code reset}.
+     */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> skipToLiteral(
+            String instructor, AcademyBuildingManager.Viewpoint viewpoint,
+            boolean cruzDone, boolean reyesDone, boolean santosDone) {
+        return Commands.literal(instructor)
+                .executes(ctx -> {
+                    if (!ctx.getSource().isPlayer()) return 0;
+                    return academySkipTo(ctx, ctx.getSource().getPlayer(), instructor, viewpoint,
+                            cruzDone, reyesDone, santosDone);
+                })
+                .then(Commands.argument("player", EntityArgument.player())
+                        .executes(ctx -> academySkipTo(ctx, EntityArgument.getPlayer(ctx, "player"), instructor,
+                                viewpoint, cruzDone, reyesDone, santosDone)));
+    }
+
+    private static int academySkipTo(CommandContext<CommandSourceStack> ctx, ServerPlayer target, String instructor,
+                                      AcademyBuildingManager.Viewpoint viewpoint,
+                                      boolean cruzDone, boolean reyesDone, boolean santosDone) {
+        net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
+        AcademyManager.cancelDialogue(target);
+        AcademyManager.clearTransientState(target);
+        AcademySavedData.get(level).mutate(target.getUUID(), progress -> {
+            progress.resetAll();
+            if (cruzDone) progress.setCruzPhase(CruzPhase.DONE);
+            if (reyesDone) progress.setReyesPhase(ReyesPhase.DONE);
+            if (santosDone) progress.setSantosPhase(SantosPhase.DONE);
+        });
+        CruzRoomManager.resetCruz(level);
+        ReyesRoomManager.restockExtinguisherFrames(level);
+        ReyesRoomManager.cleanupHazardProps(level);
+        target.teleportTo(level, viewpoint.x(), viewpoint.y(), viewpoint.z(),
+                java.util.Collections.emptySet(), viewpoint.yaw(), viewpoint.pitch(), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§eAcademy progress set to start §f" + instructor
+                        + "§e for §f" + target.getName().getString() + "§e — teleported there."), true);
+        return 1;
     }
 
     private static int academyReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
