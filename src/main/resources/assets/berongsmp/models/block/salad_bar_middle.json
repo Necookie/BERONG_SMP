@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "glass": "berongsmp:block/sneeze_guard_glass",
+    "particle": "berongsmp:block/sneeze_guard_glass"
+  },
+  "elements": [
+    {
+      "name": "guard_column",
+      "from": [2, 0, 13], "to": [14, 16, 14],
+      "faces": {
+        "up": { "texture": "#glass" }, "down": { "texture": "#glass" },
+        "north": { "texture": "#glass" }, "south": { "texture": "#glass" },
+        "east": { "texture": "#glass" }, "west": { "texture": "#glass" }
+      }
+    }
+  ]
+}
