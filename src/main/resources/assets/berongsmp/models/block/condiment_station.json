@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "tray": "berongsmp:block/condiment_tray_metal",
+    "ketchup": "berongsmp:block/bottle_ketchup_red",
+    "mustard": "berongsmp:block/bottle_mustard_yellow",
+    "napkin": "berongsmp:block/napkin_holder_chrome",
+    "particle": "berongsmp:block/condiment_tray_metal"
+  },
+  "elements": [
+    {
+      "name": "tray",
+      "from": [2, 0, 2], "to": [14, 3, 14],
+      "faces": {
+        "up": { "texture": "#tray" }, "down": { "texture": "#tray" },
+        "north": { "texture": "#tray" }, "south": { "texture": "#tray" },
+        "east": { "texture": "#tray" }, "west": { "texture": "#tray" }
+      }
+    },
+    {
+      "name": "ketchup_bottle",
+      "from": [4, 3, 5], "to": [6, 9, 7],
+      "faces": {
+        "up": { "texture": "#ketchup" }, "down": { "texture": "#ketchup" },
+        "north": { "texture": "#ketchup" }, "south": { "texture": "#ketchup" },
+        "east": { "texture": "#ketchup" }, "west": { "texture": "#ketchup" }
+      }
+    },
+    {
+      "name": "mustard_bottle",
+      "from": [8, 3, 5], "to": [10, 9, 7],
+      "faces": {
+        "up": { "texture": "#mustard" }, "down": { "texture": "#mustard" },
+        "north": { "texture": "#mustard" }, "south": { "texture": "#mustard" },
+        "east": { "texture": "#mustard" }, "west": { "texture": "#mustard" }
+      }
+    },
+    {
+      "name": "napkin_holder",
+      "from": [5, 3, 9], "to": [11, 7, 12],
+      "faces": {
+        "up": { "texture": "#napkin" }, "down": { "texture": "#napkin" },
+        "north": { "texture": "#napkin" }, "south": { "texture": "#napkin" },
+        "east": { "texture": "#napkin" }, "west": { "texture": "#napkin" }
+      }
+    }
+  ]
+}
