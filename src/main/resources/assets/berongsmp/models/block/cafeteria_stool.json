@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "seat": "berongsmp:block/stool_seat_vinyl_red",
+    "chrome": "berongsmp:block/stool_pole_chrome",
+    "particle": "berongsmp:block/stool_seat_vinyl_red"
+  },
+  "elements": [
+    {
+      "name": "seat",
+      "from": [3, 9, 3], "to": [13, 11, 13],
+      "faces": {
+        "up": { "texture": "#seat" }, "down": { "texture": "#seat" },
+        "north": { "texture": "#seat" }, "south": { "texture": "#seat" },
+        "east": { "texture": "#seat" }, "west": { "texture": "#seat" }
+      }
+    },
+    {
+      "name": "pole",
+      "from": [6, 0, 6], "to": [10, 9, 10],
+      "faces": {
+        "up": { "texture": "#chrome" }, "down": { "texture": "#chrome" },
+        "north": { "texture": "#chrome" }, "south": { "texture": "#chrome" },
+        "east": { "texture": "#chrome" }, "west": { "texture": "#chrome" }
+      }
+    },
+    {
+      "name": "base",
+      "from": [4, 0, 4], "to": [12, 1, 12],
+      "faces": {
+        "up": { "texture": "#chrome" }, "down": { "texture": "#chrome" },
+        "north": { "texture": "#chrome" }, "south": { "texture": "#chrome" },
+        "east": { "texture": "#chrome" }, "west": { "texture": "#chrome" }
+      }
+    }
+  ]
+}
