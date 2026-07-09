@@ -106,9 +106,9 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | Class | Responsibility |
 |---|---|
 | `BerongSMP` | Mod entry point — a thin bootstrap since the registry extraction. Wires the `registry/Mod*` classes to the mod event bus, registers network payloads and lifecycle listeners, calls `DuckCoverHoldManager.bootstrap()` in `commonSetup` (forces the class load that registers its tick handler), and performs one-time world setup (`onServerStarting`/`onServerStarted`). Still owns `MODID` + `LOGGER`. |
-| `registry/ModBlocks` | All 62 `DeferredBlock` registrations: computer, fire alarm, furniture, the 30 hazard props, 10 school decor/furniture blocks, and the safety-equipment blocks (exit sign, smoke detector, sprinkler head, emergency light, evacuation map). |
+| `registry/ModBlocks` | All 72 `DeferredBlock` registrations: computer, fire alarm, furniture, the 30 hazard props, 10 school decor/furniture blocks, the safety-equipment blocks (exit sign, smoke detector, sprinkler head, emergency light, evacuation map), and the 10 cafeteria furniture blocks. |
 | `registry/ModItems` | All `DeferredItem` registrations (NPC spawners, block items, extinguishers, hazard wand, firefighter uniform + `ArmorMaterial`). Owns `HAZARD_ITEM_MAP` (LinkedHashMap; hazard-tab + `/item hazard` insertion order) and `ALL_ITEM_MAP` (superset for `/item get` / `/item kit`). |
-| `registry/ModCreativeTabs` | The three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm, NPC spawners, safety-equipment items), `FURN_TAB` (furn_tab — furniture + 10 school decor blocks), `HAZARD_TAB` (hazards_tab — all 30 hazard props via `HAZARD_ITEM_MAP`, icon = daisy_chain_extension). |
+| `registry/ModCreativeTabs` | The three creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm, NPC spawners, safety-equipment items), `FURN_TAB` (furn_tab — furniture + 10 school decor blocks + 10 cafeteria furniture blocks), `HAZARD_TAB` (hazards_tab — all 30 hazard props via `HAZARD_ITEM_MAP`, icon = daisy_chain_extension). |
 | `registry/ModEntities` | `CUSTOM_NPC` entity type + its attribute-creation listener. |
 | `registry/ModSounds` | `FIRE_ALARM_RING` sound event. |
 | `registry/ModAttachments` | `DROPPED_TICKS` synced attachment driving the client drop-and-roll animation. |
@@ -204,6 +204,16 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | `BlackboardBlock` | Green chalkboard with tray, `WhiteboardBlock`'s traditional sibling (extends `FlammableFacingBlock`, wood frame). |
 | `PodiumLecternBlock` | Wooden speaker's podium with the school seal (extends `FlammableFacingBlock`); stage/classroom front. |
 | `ClassroomGlobeBlock` | Desk globe on a dark stand; geography-corner decor, no FACING model split needed beyond orientation. |
+| `CafeteriaTableBlock` | Long lunch table with attached molded-plastic bench seats on both sides, laminate top, steel tube frame (extends `FlammableFacingBlock`). |
+| `TrayStackBlock` | Stack of glossy orange plastic lunch trays; symmetric, no facing. |
+| `ServingCounterBlock` | Brushed-steel steam-table serving counter with recessed food wells and a glass sneeze guard; FACING-only. |
+| `CafeteriaMenuBoardBlock` | Wall-mounted chalk-surface menu board with a bold "TODAY'S MENU" header stripe, wood frame (extends `FlammableFacingBlock`). |
+| `CondimentStationBlock` | Countertop condiment stand: ketchup + mustard squeeze bottles and a chrome napkin holder on a metal tray; FACING-only. |
+| `CafeteriaTrashBinBlock` | Dual recycle (green) / trash (gray) bin with swing-flap lids; symmetric, no facing. |
+| `SodaFountainMachineBlock` | Red-and-chrome soda dispenser with a drink-selection button panel and cup-fill nozzle; FACING-only. |
+| `CafeteriaStoolBlock` | Round red-vinyl-seat stool on a chrome center pole and base; symmetric, no facing. |
+| `SaladBarBlock` | Refrigerated salad bar: steel body, chilled produce wells, glass sneeze guard; FACING-only. |
+| `SnackVendingMachineBlock` | Glass-front snack vending machine showing rows of packaged snacks behind the glass, red frame, coin slot; FACING-only. |
 | `FireBlanketItem` | One-shot smothering tool: used while on fire clears the player's fire ticks instantly; used on a hazardous kitchen/grease prop (`AbstractExtinguisherItem.isKitchenHazard`) smothers it via `HazardManager.defuse` — a valid Class F/K response distinct from a dry-chemical blast. 3 uses (durability), not auto-issued. |
 | `FirstAidKitItem` | Heals 3 hearts, clears negative effects, applies a brief Slowness ("treatment time"). 5 uses. |
 | `MegaphoneItem` | Instructor tool (OP level 2): broadcasts an evacuation chat line + klaxon to every player within 30 blocks, 5s cooldown. |
