@@ -16,7 +16,7 @@ Outputs to src/main/resources/assets/berongsmp/textures/block/.
 import os
 import random
 import sys
-from PIL import Image
+from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(__file__))
 from _texture_style import apply_material_signature
@@ -138,17 +138,30 @@ def tex_steel_tube_frame():
 # Cafeteria tray stack — glossy molded plastic
 # ---------------------------------------------------------------------------
 
-def tex_tray_plastic_orange():
-    base = (224, 108, 24)
+def _tray_body(base, edge, name):
     im = new_canvas(base)
     gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.82)
-    # Baked-in stacked tray rim lines (reads as several trays stacked).
-    for y in (2, 6, 10, 13):
-        rect(im, 1, y, 14, y, scale(base, 1.35))
-        rect(im, 1, y + 1, 14, y + 1, scale(base, 0.7))
-    inset_edges(im, 0, 0, W - 1, H - 1, (255, 156, 74), (140, 58, 8))
-    border(im, (98, 40, 6))
-    save(im, "tray_plastic_orange")
+    # Molded-plastic cafeteria-tray compartment grooves (the recognizable
+    # divided-tray silhouette, not just a flat colored slab).
+    rect(im, 2, 2, 13, 2, scale(base, 1.4))
+    rect(im, 2, 6, 13, 6, scale(base, 0.65))
+    rect(im, 2, 10, 8, 10, scale(base, 0.65))
+    rect(im, 9, 10, 13, 10, scale(base, 0.65))
+    inset_edges(im, 0, 0, W - 1, H - 1, scale(base, 1.5), scale(base, 0.55))
+    border(im, edge)
+    save(im, name)
+
+
+def tex_tray_plastic_orange():
+    _tray_body((224, 108, 24), (98, 40, 6), "tray_plastic_orange")
+
+
+def tex_tray_plastic_blue():
+    _tray_body((36, 108, 186), (10, 40, 78), "tray_plastic_blue")
+
+
+def tex_tray_plastic_green():
+    _tray_body((54, 148, 76), (14, 62, 28), "tray_plastic_green")
 
 
 def tex_tray_plastic_orange_rim():
@@ -158,6 +171,15 @@ def tex_tray_plastic_orange_rim():
     diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.2, band=2, offset=2)
     border(im, (150, 74, 20))
     save(im, "tray_plastic_orange_rim")
+
+
+def tex_tray_rim_light():
+    base = (222, 224, 226)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.12, dark=0.92)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.15, band=2, offset=2)
+    border(im, (150, 152, 154))
+    save(im, "tray_rim_light")
 
 
 # ---------------------------------------------------------------------------
@@ -227,9 +249,17 @@ def tex_menu_board_header():
     red = (196, 30, 30)
     im = new_canvas(red)
     gradient_shade(im, 0, 0, W - 1, H - 1, red, light=1.15, dark=0.88)
-    # Bold "TODAY'S MENU" placeholder lettering block, yellow on red.
-    rect(im, 1, 5, 14, 10, (240, 200, 40))
-    rect(im, 1, 5, 14, 5, scale((240, 200, 40), 1.2))
+    cream = (250, 240, 220)
+    d = ImageDraw.Draw(im)
+    # Universal fork + knife "menu/dining" pictogram — instantly recognizable,
+    # unlike a vague lettering block.
+    d.line([(4, 1), (4, 7)], fill=cream, width=1)          # fork handle
+    d.line([(3, 1), (3, 4)], fill=cream, width=1)          # fork tine (left)
+    d.line([(5, 1), (5, 4)], fill=cream, width=1)          # fork tine (right)
+    d.line([(4, 7), (4, 14)], fill=cream, width=1)         # fork shaft
+    d.line([(11, 1), (11, 6)], fill=cream, width=1)        # knife blade
+    d.polygon([(10, 1), (12, 1), (11, 7)], fill=cream)     # knife blade taper
+    d.line([(11, 7), (11, 14)], fill=cream, width=1)       # knife handle
     inset_edges(im, 0, 0, W - 1, H - 1, (226, 70, 70), (110, 10, 10))
     border(im, (90, 8, 8))
     save(im, "menu_board_header")
@@ -254,6 +284,14 @@ def tex_bottle_ketchup_red():
     gradient_shade(im, 2, 2, 13, 15, base, light=1.3, dark=0.75)
     rect(im, 6, 0, 9, 2, (240, 240, 236))  # nozzle cap
     rect(im, 4, 5, 5, 13, scale(base, 1.4))  # highlight streak
+    # White oval-ish label with a bold "K" — reads as a labelled squeeze
+    # bottle rather than a plain red blob.
+    rect(im, 6, 7, 12, 12, (250, 248, 244))
+    rect(im, 7, 8, 8, 11, (188, 30, 30))
+    rect(im, 9, 8, 9, 8, (188, 30, 30))
+    rect(im, 9, 9, 10, 9, (188, 30, 30))
+    rect(im, 9, 10, 9, 10, (188, 30, 30))
+    rect(im, 9, 11, 10, 11, (188, 30, 30))
     inset_edges(im, 2, 3, 13, 15, scale(base, 1.2), scale(base, 0.7))
     border(im, (74, 8, 8))
     save(im, "bottle_ketchup_red")
@@ -265,6 +303,14 @@ def tex_bottle_mustard_yellow():
     gradient_shade(im, 2, 2, 13, 15, base, light=1.3, dark=0.78)
     rect(im, 6, 0, 9, 2, (240, 240, 236))  # nozzle cap
     rect(im, 4, 5, 5, 13, scale(base, 1.35))  # highlight streak
+    # White label with a bold "M", same layout as the ketchup bottle so the
+    # pair reads as a matched squeeze-bottle set.
+    rect(im, 6, 7, 12, 12, (250, 248, 244))
+    rect(im, 7, 8, 7, 11, (200, 160, 20))
+    rect(im, 11, 8, 11, 11, (200, 160, 20))
+    rect(im, 8, 8, 8, 9, (200, 160, 20))
+    rect(im, 10, 8, 10, 9, (200, 160, 20))
+    rect(im, 9, 9, 9, 10, (200, 160, 20))
     inset_edges(im, 2, 3, 13, 15, scale(base, 1.2), scale(base, 0.72))
     border(im, (110, 88, 8))
     save(im, "bottle_mustard_yellow")
@@ -289,10 +335,26 @@ def tex_bin_recycle_green():
     base = (46, 128, 64)
     im = new_canvas(base)
     gradient_shade(im, 1, 1, 14, 14, base, light=1.16, dark=0.82)
-    # Recycling arrows glyph hint (three angled strokes).
-    rect(im, 6, 5, 9, 6, scale(base, 1.5))
-    rect(im, 5, 8, 7, 9, scale(base, 1.5))
-    rect(im, 9, 8, 11, 9, scale(base, 1.5))
+    white = (240, 250, 240)
+    d = ImageDraw.Draw(im)
+    # The universal three-chasing-arrows recycling triangle, not an abstract hint.
+    cx, cy, r = 7.5, 8, 5.5
+    import math
+    for i in range(3):
+        ang = math.radians(-90 + i * 120)
+        ang_next = math.radians(-90 + i * 120 + 95)
+        x0, y0 = cx + r * math.cos(ang), cy + r * math.sin(ang)
+        x1, y1 = cx + r * math.cos(ang_next), cy + r * math.sin(ang_next)
+        d.line([(x0, y0), (x1, y1)], fill=white, width=2)
+        # Arrowhead at the end of each chasing stroke.
+        head_ang = ang_next
+        hx, hy = x1, y1
+        perp = head_ang + math.radians(90)
+        d.polygon([
+            (hx, hy),
+            (hx - 2.2 * math.cos(head_ang - 0.5), hy - 2.2 * math.sin(head_ang - 0.5)),
+            (hx - 1.0 * math.cos(perp), hy - 1.0 * math.sin(perp)),
+        ], fill=white)
     inset_edges(im, 0, 0, W - 1, H - 1, (78, 168, 96), (18, 62, 30))
     border(im, (14, 48, 22))
     save(im, "bin_recycle_green")
@@ -302,6 +364,14 @@ def tex_bin_trash_gray():
     base = (98, 100, 104)
     im = new_canvas(base)
     gradient_shade(im, 1, 1, 14, 14, base, light=1.14, dark=0.82)
+    dark = (52, 53, 56)
+    d = ImageDraw.Draw(im)
+    # Simple trash-can pictogram: lid + body + vertical rib lines.
+    d.rectangle((4, 2, 11, 3), fill=dark)     # lid
+    d.rectangle((6, 0, 9, 1), fill=dark)      # lid handle
+    d.polygon([(5, 4), (10, 4), (9, 13), (6, 13)], outline=dark, width=1)  # tapered can body
+    for x in (6, 7.5, 9):
+        d.line([(x, 5), (x - 0.3, 12)], fill=dark, width=1)
     inset_edges(im, 0, 0, W - 1, H - 1, (140, 142, 146), (46, 47, 50))
     border(im, (34, 35, 38))
     save(im, "bin_trash_gray")
@@ -334,12 +404,20 @@ def tex_soda_machine_panel_chrome():
     base = (190, 194, 198)
     im = new_canvas(base)
     vertical_brush(im, 0, 0, 15, 15, base, stripe=1.18)
-    # Row of colored drink-selection buttons.
+    d = ImageDraw.Draw(im)
+    # Red splash-drop brand badge at the top — the recognizable "soda logo"
+    # cue real dispensers always carry.
+    d.ellipse((5, 1, 10, 6), fill=(196, 24, 30))
+    d.polygon([(7.5, 0), (9.5, 3), (5.5, 3)], fill=(196, 24, 30))
+    d.ellipse((6.5, 2.3, 8.5, 4.3), fill=(240, 210, 210))
+    # Row of larger, clearly separated colored drink-selection buttons.
     colors = [(200, 30, 30), (230, 170, 20), (30, 110, 190), (40, 140, 70)]
     for i, c in enumerate(colors):
-        x0 = 2 + i * 3
-        rect(im, x0, 3, x0 + 1, 4, c)
-    rect(im, 2, 9, 13, 12, (60, 62, 66))  # dark cup-fill recess
+        x0 = 1 + i * 3
+        rect(im, x0, 8, x0 + 1, 9, c)
+        rect(im, x0, 8, x0, 8, scale(c, 1.4))
+    rect(im, 1, 11, 14, 14, (48, 50, 54))  # dark cup-fill recess
+    inset_edges(im, 1, 11, 14, 14, (30, 32, 35), (70, 72, 76))
     inset_edges(im, 0, 0, W - 1, H - 1, (224, 226, 228), (112, 114, 118))
     border(im, (80, 82, 86))
     save(im, "soda_machine_panel_chrome")
@@ -362,8 +440,14 @@ def tex_stool_seat_vinyl_red():
     base = (168, 26, 34)
     im = new_canvas(base)
     gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.25, dark=0.78)
-    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.2, band=2, offset=0)
-    # Stitched seam ring hint.
+    # Diamond-quilted diner-stool stitch pattern — a much more recognizable
+    # "padded vinyl seat" cue than a plain gradient disc.
+    stitch = scale(base, 0.6)
+    d = ImageDraw.Draw(im)
+    for i in range(-1, 5):
+        d.line([(i * 4 - 2, 15), (i * 4 + 6, -1)], fill=stitch, width=1)
+        d.line([(i * 4 + 6, 15), (i * 4 - 2, -1)], fill=stitch, width=1)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.15, band=1, offset=0)
     inset_edges(im, 1, 1, 14, 14, scale(base, 1.3), scale(base, 0.65))
     border(im, (64, 8, 12))
     save(im, "stool_seat_vinyl_red")
@@ -418,21 +502,46 @@ def tex_vending_body_red():
 
 
 def tex_vending_glass_front():
-    base = (60, 64, 70)
+    base = (48, 52, 58)
     im = new_canvas(base)
     gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.1, dark=0.85)
-    # Snack rows behind glass: 3 shelves of colorful packet blobs.
+    # Snack rows behind glass: each shelf gets a metal spiral coil (the
+    # unmistakable vending-machine cue) holding distinct, larger packets —
+    # clearer and more recognizable than loose colored blobs.
     snack_colors = [(230, 190, 40), (210, 60, 50), (60, 150, 90), (230, 140, 30), (90, 110, 200)]
-    for row_y in (2, 7, 12):
-        x = 1
-        while x <= 13:
-            wpk = random.choice([2, 3])
-            col = random.choice(snack_colors)
-            rect(im, x, row_y, min(x + wpk, 14), row_y + 3, col)
-            x += wpk + 1
-    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.3, band=1, offset=-6)
-    border(im, (24, 26, 30))
+    coil = (170, 172, 176)
+    for row_y in (1, 6, 11):
+        rect(im, 0, row_y + 4, 15, row_y + 4, scale(coil, 0.6))  # shelf ledge
+        x = 0
+        col_i = 0
+        while x <= 14:
+            wpk = 3
+            c = snack_colors[col_i % len(snack_colors)]
+            rect(im, x, row_y, min(x + wpk - 1, 15), row_y + 2, c)
+            rect(im, x, row_y, min(x + wpk - 1, 15), row_y, scale(c, 1.3))
+            for cx in range(x, min(x + wpk - 1, 15) + 1):
+                set_px(im, cx, row_y + 3, coil if cx % 2 == 0 else scale(coil, 0.7))
+            x += wpk
+            col_i += 1
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.25, band=1, offset=-6)
+    border(im, (18, 20, 24))
     save(im, "vending_glass_front")
+
+
+def tex_vending_marquee_header():
+    base = (196, 24, 30)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.2, dark=0.85)
+    d = ImageDraw.Draw(im)
+    # Illuminated marquee: a bright "lit panel" strip plus a bold snack-bag
+    # silhouette badge, reading as branded signage rather than a blank cap.
+    rect(im, 1, 3, 14, 9, (250, 236, 60))
+    inset_edges(im, 1, 3, 14, 9, (255, 250, 150), (196, 170, 20))
+    d.polygon([(6, 4), (10, 4), (11, 8), (5, 8)], fill=(196, 24, 30))
+    d.line([(6, 4), (5.3, 2.5)], fill=(120, 14, 18), width=1)
+    d.line([(10, 4), (10.7, 2.5)], fill=(120, 14, 18), width=1)
+    border(im, (110, 10, 12))
+    save(im, "vending_marquee_header")
 
 
 def tex_vending_coin_slot():
@@ -447,7 +556,8 @@ def tex_vending_coin_slot():
 
 ALL = [
     tex_cafeteria_table_top, tex_cafeteria_bench_seat, tex_steel_tube_frame,
-    tex_tray_plastic_orange, tex_tray_plastic_orange_rim,
+    tex_tray_plastic_orange, tex_tray_plastic_blue, tex_tray_plastic_green,
+    tex_tray_plastic_orange_rim, tex_tray_rim_light,
     tex_steel_counter_body, tex_food_well_metal, tex_sneeze_guard_glass,
     tex_menu_board_frame_wood, tex_menu_board_surface, tex_menu_board_header,
     tex_condiment_tray_metal, tex_bottle_ketchup_red, tex_bottle_mustard_yellow, tex_napkin_holder_chrome,
@@ -455,7 +565,7 @@ ALL = [
     tex_soda_machine_body_red, tex_soda_machine_panel_chrome, tex_soda_nozzle_dark,
     tex_stool_seat_vinyl_red, tex_stool_pole_chrome,
     tex_salad_bar_body_steel, tex_salad_bar_ice_well,
-    tex_vending_body_red, tex_vending_glass_front, tex_vending_coin_slot,
+    tex_vending_body_red, tex_vending_glass_front, tex_vending_coin_slot, tex_vending_marquee_header,
 ]
 
 if __name__ == "__main__":
