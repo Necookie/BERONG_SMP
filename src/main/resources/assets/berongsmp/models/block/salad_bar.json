@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "steel": "berongsmp:block/salad_bar_body_steel",
+    "well": "berongsmp:block/salad_bar_ice_well",
+    "glass": "berongsmp:block/sneeze_guard_glass",
+    "particle": "berongsmp:block/salad_bar_body_steel"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 9, 16],
+      "faces": {
+        "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "ice_well",
+      "from": [1, 9, 1], "to": [15, 11, 15],
+      "faces": {
+        "up": { "texture": "#well" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "sneeze_guard",
+      "from": [2, 11, 13], "to": [14, 16, 14],
+      "faces": {
+        "up": { "texture": "#glass" }, "down": { "texture": "#glass" },
+        "north": { "texture": "#glass" }, "south": { "texture": "#glass" },
+        "east": { "texture": "#glass" }, "west": { "texture": "#glass" }
+      }
+    }
+  ]
+}

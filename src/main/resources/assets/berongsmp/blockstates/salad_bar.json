@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/salad_bar" },
+    "facing=south": { "model": "berongsmp:block/salad_bar", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/salad_bar", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/salad_bar", "y": 270 }
+  }
+}
