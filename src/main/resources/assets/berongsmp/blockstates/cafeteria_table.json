@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/cafeteria_table" },
+    "facing=south": { "model": "berongsmp:block/cafeteria_table", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/cafeteria_table", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/cafeteria_table", "y": 270 }
+  }
+}

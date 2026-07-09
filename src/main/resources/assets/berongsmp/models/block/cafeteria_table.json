@@ -1,0 +1,50 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "top": "berongsmp:block/cafeteria_table_top",
+    "bench": "berongsmp:block/cafeteria_bench_seat",
+    "steel": "berongsmp:block/steel_tube_frame",
+    "particle": "berongsmp:block/cafeteria_table_top"
+  },
+  "elements": [
+    {
+      "name": "tabletop",
+      "from": [0, 11, 0], "to": [16, 13, 16],
+      "faces": {
+        "up":    { "texture": "#top" },
+        "down":  { "texture": "#top" },
+        "north": { "texture": "#steel" },
+        "south": { "texture": "#steel" },
+        "east":  { "texture": "#steel" },
+        "west":  { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "bench_north",
+      "from": [0, 5, 0], "to": [16, 8, 4],
+      "faces": {
+        "up": { "texture": "#bench" }, "down": { "texture": "#bench" },
+        "north": { "texture": "#bench" }, "south": { "texture": "#bench" },
+        "east": { "texture": "#bench" }, "west": { "texture": "#bench" }
+      }
+    },
+    {
+      "name": "bench_south",
+      "from": [0, 5, 12], "to": [16, 8, 16],
+      "faces": {
+        "up": { "texture": "#bench" }, "down": { "texture": "#bench" },
+        "north": { "texture": "#bench" }, "south": { "texture": "#bench" },
+        "east": { "texture": "#bench" }, "west": { "texture": "#bench" }
+      }
+    },
+    {
+      "name": "center_leg",
+      "from": [7, 0, 7], "to": [9, 11, 9],
+      "faces": {
+        "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    }
+  ]
+}
