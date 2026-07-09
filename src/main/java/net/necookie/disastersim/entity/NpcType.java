@@ -11,7 +11,7 @@ public enum NpcType {
     SIR_BOOKMARK    ("sir_bookmark",     "§eSir BookMark",           false),
     STUDENT         ("student",          "§fStudent",                true);
 
-    /** Matches the texture filename under entity/npc/ and item/npc/. */
+    /** Matches the texture filename under entity/npc/ — also reused as the item's inventory-icon head skin (see items/npc_*.json). */
     public final String id;
     /** Colored display name shown above the NPC's head. */
     public final String displayName;
