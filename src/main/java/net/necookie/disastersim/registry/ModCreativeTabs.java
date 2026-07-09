@@ -80,6 +80,10 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.COURT_LINE_ITEM.get());
                 output.accept(ModItems.BADMINTON_NET_POST_ITEM.get());
                 output.accept(ModItems.BADMINTON_NET_MESH_ITEM.get());
+                output.accept(ModItems.BASKETBALL_HOOP_POST_ITEM.get());
+                output.accept(ModItems.BASKETBALL_POLE_ITEM.get());
+                output.accept(ModItems.BASKETBALL_HOOP_ITEM.get());
+                output.accept(ModItems.BASKETBALL.get());
                 output.accept(ModItems.CLASSROOM_GLOBE_ITEM.get());
                 output.accept(ModItems.PODIUM_LECTERN_ITEM.get());
                 output.accept(ModItems.BLACKBOARD_ITEM.get());

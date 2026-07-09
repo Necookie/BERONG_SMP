@@ -81,6 +81,10 @@
   "block.berongsmp.court_line": "Court Line",
   "block.berongsmp.badminton_net_post": "Badminton Net Post",
   "block.berongsmp.badminton_net_mesh": "Badminton Net",
+  "block.berongsmp.basketball_hoop_post": "Basketball Hoop Post",
+  "block.berongsmp.basketball_pole": "Basketball Pole",
+  "block.berongsmp.basketball_hoop": "Basketball Hoop",
+  "item.berongsmp.basketball": "Basketball",
 
   "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
 

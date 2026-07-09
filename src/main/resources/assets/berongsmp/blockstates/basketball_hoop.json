@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/basketball_hoop" },
+    "facing=south": { "model": "berongsmp:block/basketball_hoop", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/basketball_hoop", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/basketball_hoop", "y": 270 }
+  }
+}

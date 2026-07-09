@@ -1,0 +1,55 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "pole": "berongsmp:block/basketball_pole_metal",
+    "board": "berongsmp:block/basketball_backboard_white",
+    "rim": "berongsmp:block/basketball_rim_orange",
+    "mesh": "berongsmp:block/badminton_net_mesh",
+    "edge": "berongsmp:block/badminton_net_mesh_edge",
+    "particle": "berongsmp:block/basketball_backboard_white"
+  },
+  "elements": [
+    {
+      "name": "mount_arm",
+      "from": [6, 12, 10], "to": [10, 15, 16],
+      "faces": {
+        "up": { "texture": "#pole" }, "down": { "texture": "#pole" },
+        "north": { "texture": "#pole" }, "south": { "texture": "#pole" },
+        "east": { "texture": "#pole" }, "west": { "texture": "#pole" }
+      }
+    },
+    {
+      "name": "backboard",
+      "from": [3, 8, 9], "to": [13, 16, 10],
+      "faces": {
+        "north": { "texture": "#board" },
+        "south": { "texture": "#pole" },
+        "up":    { "texture": "#pole" },
+        "down":  { "texture": "#pole" },
+        "east":  { "texture": "#pole" },
+        "west":  { "texture": "#pole" }
+      }
+    },
+    {
+      "name": "rim",
+      "from": [5, 7, 3], "to": [11, 8, 9],
+      "faces": {
+        "up": { "texture": "#rim" }, "down": { "texture": "#rim" },
+        "north": { "texture": "#rim" }, "south": { "texture": "#rim" },
+        "east": { "texture": "#rim" }, "west": { "texture": "#rim" }
+      }
+    },
+    {
+      "name": "net",
+      "from": [5, 3, 3], "to": [11, 7, 9],
+      "faces": {
+        "north": { "texture": "#mesh" },
+        "down":  { "texture": "#mesh" },
+        "south": { "texture": "#edge" },
+        "up":    { "texture": "#edge" },
+        "east":  { "texture": "#edge" },
+        "west":  { "texture": "#edge" }
+      }
+    }
+  ]
+}

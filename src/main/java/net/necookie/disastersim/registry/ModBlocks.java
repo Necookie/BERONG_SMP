@@ -7,6 +7,9 @@ import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.block.BadmintonNetMeshBlock;
 import net.necookie.disastersim.block.BadmintonNetPostBlock;
+import net.necookie.disastersim.block.BasketballHoopBlock;
+import net.necookie.disastersim.block.BasketballHoopPostBlock;
+import net.necookie.disastersim.block.BasketballPoleSegmentBlock;
 import net.necookie.disastersim.block.BulletinBoardBlock;
 import net.necookie.disastersim.block.CafeteriaMenuBoardBlock;
 import net.necookie.disastersim.block.CourtLineBlock;
@@ -597,6 +600,24 @@ public final class ModBlocks {
             "badminton_net_mesh", BadmintonNetMeshBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion());
+
+    /** Basketball hoop stand base (bottom anchor of the expandable pole) — see {@link BasketballHoopPostBlock}. */
+    public static final DeferredBlock<BasketballHoopPostBlock> BASKETBALL_HOOP_POST = BLOCKS.registerBlock(
+            "basketball_hoop_post", BasketballHoopPostBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Auto-filled basketball pole segment — see {@link BasketballPoleSegmentBlock}. */
+    public static final DeferredBlock<BasketballPoleSegmentBlock> BASKETBALL_POLE = BLOCKS.registerBlock(
+            "basketball_pole", BasketballPoleSegmentBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Basketball backboard + rim + net (top anchor of the expandable pole) — see {@link BasketballHoopBlock}. */
+    public static final DeferredBlock<BasketballHoopBlock> BASKETBALL_HOOP = BLOCKS.registerBlock(
+            "basketball_hoop", BasketballHoopBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 

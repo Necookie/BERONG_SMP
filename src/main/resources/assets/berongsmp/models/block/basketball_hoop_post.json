@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "pole": "berongsmp:block/basketball_pole_metal",
+    "base": "berongsmp:block/basketball_pole_base_plate",
+    "particle": "berongsmp:block/basketball_pole_metal"
+  },
+  "elements": [
+    {
+      "name": "base_plate",
+      "from": [2, 0, 2], "to": [14, 2, 14],
+      "faces": {
+        "up": { "texture": "#base" }, "down": { "texture": "#base" },
+        "north": { "texture": "#base" }, "south": { "texture": "#base" },
+        "east": { "texture": "#base" }, "west": { "texture": "#base" }
+      }
+    },
+    {
+      "name": "pole",
+      "from": [6, 2, 6], "to": [10, 16, 10],
+      "faces": {
+        "up": { "texture": "#pole" }, "down": { "texture": "#pole" },
+        "north": { "texture": "#pole" }, "south": { "texture": "#pole" },
+        "east": { "texture": "#pole" }, "west": { "texture": "#pole" }
+      }
+    }
+  ]
+}

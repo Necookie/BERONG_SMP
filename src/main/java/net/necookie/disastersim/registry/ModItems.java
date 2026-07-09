@@ -126,6 +126,19 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> BADMINTON_NET_MESH_ITEM =
             ITEMS.registerSimpleBlockItem("badminton_net_mesh", ModBlocks.BADMINTON_NET_MESH);
 
+    public static final DeferredItem<BlockItem> BASKETBALL_HOOP_POST_ITEM =
+            ITEMS.registerSimpleBlockItem("basketball_hoop_post", ModBlocks.BASKETBALL_HOOP_POST);
+
+    public static final DeferredItem<BlockItem> BASKETBALL_POLE_ITEM =
+            ITEMS.registerSimpleBlockItem("basketball_pole", ModBlocks.BASKETBALL_POLE);
+
+    public static final DeferredItem<BlockItem> BASKETBALL_HOOP_ITEM =
+            ITEMS.registerSimpleBlockItem("basketball_hoop", ModBlocks.BASKETBALL_HOOP);
+
+    /** Plain handheld basketball — decorative, no special behaviour. */
+    public static final DeferredItem<Item> BASKETBALL = ITEMS.registerSimpleItem("basketball",
+            p -> p.stacksTo(16));
+
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
@@ -463,6 +476,10 @@ public final class ModItems {
         ALL_ITEM_MAP.put("court_line", COURT_LINE_ITEM);
         ALL_ITEM_MAP.put("badminton_net_post", BADMINTON_NET_POST_ITEM);
         ALL_ITEM_MAP.put("badminton_net_mesh", BADMINTON_NET_MESH_ITEM);
+        ALL_ITEM_MAP.put("basketball_hoop_post", BASKETBALL_HOOP_POST_ITEM);
+        ALL_ITEM_MAP.put("basketball_pole", BASKETBALL_POLE_ITEM);
+        ALL_ITEM_MAP.put("basketball_hoop", BASKETBALL_HOOP_ITEM);
+        ALL_ITEM_MAP.put("basketball", BASKETBALL);
         ALL_ITEM_MAP.put("teachers_desk", TEACHERS_DESK_ITEM);
         ALL_ITEM_MAP.put("armchair_desk", ARMCHAIR_DESK_ITEM);
         ALL_ITEM_MAP.put("tall_bookshelf", TALL_BOOKSHELF_ITEM);
