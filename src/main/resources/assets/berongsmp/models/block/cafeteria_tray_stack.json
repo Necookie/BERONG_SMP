@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "tray": "berongsmp:block/tray_plastic_orange",
+    "rim": "berongsmp:block/tray_plastic_orange_rim",
+    "particle": "berongsmp:block/tray_plastic_orange"
+  },
+  "elements": [
+    {
+      "name": "tray_body",
+      "from": [2, 0, 2], "to": [14, 10, 14],
+      "faces": {
+        "up": { "texture": "#tray" }, "down": { "texture": "#tray" },
+        "north": { "texture": "#tray" }, "south": { "texture": "#tray" },
+        "east": { "texture": "#tray" }, "west": { "texture": "#tray" }
+      }
+    },
+    {
+      "name": "tray_rim",
+      "from": [2, 10, 2], "to": [14, 11, 14],
+      "faces": {
+        "up": { "texture": "#rim" }, "down": { "texture": "#rim" },
+        "north": { "texture": "#rim" }, "south": { "texture": "#rim" },
+        "east": { "texture": "#rim" }, "west": { "texture": "#rim" }
+      }
+    }
+  ]
+}
