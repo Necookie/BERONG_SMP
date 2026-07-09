@@ -5,8 +5,11 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.MapColor;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.block.BadmintonNetMeshBlock;
+import net.necookie.disastersim.block.BadmintonNetPostBlock;
 import net.necookie.disastersim.block.BulletinBoardBlock;
 import net.necookie.disastersim.block.CafeteriaMenuBoardBlock;
+import net.necookie.disastersim.block.CourtLineBlock;
 import net.necookie.disastersim.block.CafeteriaStoolBlock;
 import net.necookie.disastersim.block.CafeteriaTableBlock;
 import net.necookie.disastersim.block.CafeteriaTrashBinBlock;
@@ -576,6 +579,24 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.WOOD)
                     .strength(2.0f, 3.0f).sound(SoundType.WOOD)
                     .lightLevel(s -> 15));
+
+    /** Smooth white auto-connecting court-marking line — see {@link CourtLineBlock}. */
+    public static final DeferredBlock<CourtLineBlock> COURT_LINE = BLOCKS.registerBlock(
+            "court_line", CourtLineBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.2f, 0.5f).sound(SoundType.WOOL).noOcclusion());
+
+    /** Badminton net anchor post ("stitch") — see {@link BadmintonNetPostBlock}. */
+    public static final DeferredBlock<BadmintonNetPostBlock> BADMINTON_NET_POST = BLOCKS.registerBlock(
+            "badminton_net_post", BadmintonNetPostBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Auto-filled badminton net panel — see {@link BadmintonNetMeshBlock}. */
+    public static final DeferredBlock<BadmintonNetMeshBlock> BADMINTON_NET_MESH = BLOCKS.registerBlock(
+            "badminton_net_mesh", BadmintonNetMeshBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion());
 
     private ModBlocks() {}
 

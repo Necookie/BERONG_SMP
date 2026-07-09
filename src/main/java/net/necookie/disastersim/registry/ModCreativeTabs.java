@@ -77,6 +77,9 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CEILING_FAN_ITEM.get());
                 output.accept(ModItems.LIGHT_BULB_ITEM.get());
                 output.accept(ModItems.GLOWING_OAK_PLANKS_ITEM.get());
+                output.accept(ModItems.COURT_LINE_ITEM.get());
+                output.accept(ModItems.BADMINTON_NET_POST_ITEM.get());
+                output.accept(ModItems.BADMINTON_NET_MESH_ITEM.get());
                 output.accept(ModItems.CLASSROOM_GLOBE_ITEM.get());
                 output.accept(ModItems.PODIUM_LECTERN_ITEM.get());
                 output.accept(ModItems.BLACKBOARD_ITEM.get());

@@ -78,6 +78,9 @@
   "block.berongsmp.ceiling_fan":     "Ceiling Fan",
   "block.berongsmp.light_bulb":      "Light Bulb",
   "block.berongsmp.glowing_oak_planks": "Oak Planks",
+  "block.berongsmp.court_line": "Court Line",
+  "block.berongsmp.badminton_net_post": "Badminton Net Post",
+  "block.berongsmp.badminton_net_mesh": "Badminton Net",
 
   "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
 

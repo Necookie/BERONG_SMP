@@ -117,6 +117,15 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> GLOWING_OAK_PLANKS_ITEM =
             ITEMS.registerSimpleBlockItem("glowing_oak_planks", ModBlocks.GLOWING_OAK_PLANKS);
 
+    public static final DeferredItem<BlockItem> COURT_LINE_ITEM =
+            ITEMS.registerSimpleBlockItem("court_line", ModBlocks.COURT_LINE);
+
+    public static final DeferredItem<BlockItem> BADMINTON_NET_POST_ITEM =
+            ITEMS.registerSimpleBlockItem("badminton_net_post", ModBlocks.BADMINTON_NET_POST);
+
+    public static final DeferredItem<BlockItem> BADMINTON_NET_MESH_ITEM =
+            ITEMS.registerSimpleBlockItem("badminton_net_mesh", ModBlocks.BADMINTON_NET_MESH);
+
     /** Example food item registration. */
     public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
             .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
@@ -451,6 +460,9 @@ public final class ModItems {
         ALL_ITEM_MAP.put("ceiling_fan", CEILING_FAN_ITEM);
         ALL_ITEM_MAP.put("light_bulb", LIGHT_BULB_ITEM);
         ALL_ITEM_MAP.put("glowing_oak_planks", GLOWING_OAK_PLANKS_ITEM);
+        ALL_ITEM_MAP.put("court_line", COURT_LINE_ITEM);
+        ALL_ITEM_MAP.put("badminton_net_post", BADMINTON_NET_POST_ITEM);
+        ALL_ITEM_MAP.put("badminton_net_mesh", BADMINTON_NET_MESH_ITEM);
         ALL_ITEM_MAP.put("teachers_desk", TEACHERS_DESK_ITEM);
         ALL_ITEM_MAP.put("armchair_desk", ARMCHAIR_DESK_ITEM);
         ALL_ITEM_MAP.put("tall_bookshelf", TALL_BOOKSHELF_ITEM);
