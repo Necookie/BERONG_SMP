@@ -204,16 +204,16 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | `BlackboardBlock` | Green chalkboard with tray, `WhiteboardBlock`'s traditional sibling (extends `FlammableFacingBlock`, wood frame). |
 | `PodiumLecternBlock` | Wooden speaker's podium with the school seal (extends `FlammableFacingBlock`); stage/classroom front. |
 | `ClassroomGlobeBlock` | Desk globe on a dark stand; geography-corner decor, no FACING model split needed beyond orientation. |
-| `CafeteriaTableBlock` | Long lunch table with attached molded-plastic bench seats on both sides, laminate top, steel tube frame (extends `FlammableFacingBlock`). |
-| `TrayStackBlock` | Stack of glossy orange plastic lunch trays; symmetric, no facing. |
-| `ServingCounterBlock` | Brushed-steel steam-table serving counter with recessed food wells and a glass sneeze guard; FACING-only. |
+| `CafeteriaTableBlock` | Long lunch table with attached molded-plastic bench seats on both sides, laminate top, steel tube frame, two end legs + crossbar (extends `FlammableFacingBlock`). |
+| `TrayStackBlock` | Stack of 3 distinct colored (green/blue/orange) glossy plastic lunch trays with compartment-groove texture, divided by light plastic rims; symmetric, no facing. |
+| `ServingCounterBlock` | Brushed-steel steam-table serving counter with recessed food wells and a glass sneeze guard; FACING-only. Carries `CONNECTED_UP`/`CONNECTED_DOWN` (same idiom as `WhiteboardBlock`) — stacking a second counter directly on top swaps in `serving_counter_bottom`/`_top`/`_middle` models so the short standalone sneeze guard becomes one continuous full-height guard rising out of the counter below. |
 | `CafeteriaMenuBoardBlock` | Wall-mounted chalk-surface menu board with a bold "TODAY'S MENU" header stripe, wood frame (extends `FlammableFacingBlock`). |
 | `CondimentStationBlock` | Countertop condiment stand: ketchup + mustard squeeze bottles and a chrome napkin holder on a metal tray; FACING-only. |
 | `CafeteriaTrashBinBlock` | Dual recycle (green) / trash (gray) bin with swing-flap lids; symmetric, no facing. |
 | `SodaFountainMachineBlock` | Red-and-chrome soda dispenser with a drink-selection button panel and cup-fill nozzle; FACING-only. |
 | `CafeteriaStoolBlock` | Round red-vinyl-seat stool on a chrome center pole and base; symmetric, no facing. |
-| `SaladBarBlock` | Refrigerated salad bar: steel body, chilled produce wells, glass sneeze guard; FACING-only. |
-| `SnackVendingMachineBlock` | Glass-front snack vending machine showing rows of packaged snacks behind the glass, red frame, coin slot; FACING-only. |
+| `SaladBarBlock` | Refrigerated salad bar: steel body, chilled produce wells, glass sneeze guard; FACING-only. Same `CONNECTED_UP`/`CONNECTED_DOWN` stacking idiom as `ServingCounterBlock` for a full-height guard when stacked two tall. |
+| `SnackVendingMachineBlock` | Glass-front snack vending machine showing rows of packaged snacks behind the glass on metal coils, red frame, coin slot; FACING-only. `CONNECTED_UP`/`CONNECTED_DOWN` stacking (same idiom as `ServingCounterBlock`): a standalone unit is a small countertop machine, but stacking two turns it into one full-height vending machine topped with a lit `vending_marquee_header` cap (`ModBlocks.SNACK_VENDING_MACHINE`'s `lightLevel` reads `CONNECTED_DOWN` so only the top piece glows). |
 | `FireBlanketItem` | One-shot smothering tool: used while on fire clears the player's fire ticks instantly; used on a hazardous kitchen/grease prop (`AbstractExtinguisherItem.isKitchenHazard`) smothers it via `HazardManager.defuse` — a valid Class F/K response distinct from a dry-chemical blast. 3 uses (durability), not auto-issued. |
 | `FirstAidKitItem` | Heals 3 hearts, clears negative effects, applies a brief Slowness ("treatment time"). 5 uses. |
 | `MegaphoneItem` | Instructor tool (OP level 2): broadcasts an evacuation chat line + klaxon to every player within 30 blocks, 5s cooldown. |
