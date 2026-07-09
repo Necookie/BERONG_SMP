@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "recycle": "berongsmp:block/bin_recycle_green",
+    "trash": "berongsmp:block/bin_trash_gray",
+    "flap": "berongsmp:block/bin_flap_black",
+    "particle": "berongsmp:block/bin_trash_gray"
+  },
+  "elements": [
+    {
+      "name": "recycle_bin",
+      "from": [1, 0, 1], "to": [7, 12, 15],
+      "faces": {
+        "up": { "texture": "#recycle" }, "down": { "texture": "#recycle" },
+        "north": { "texture": "#recycle" }, "south": { "texture": "#recycle" },
+        "east": { "texture": "#recycle" }, "west": { "texture": "#recycle" }
+      }
+    },
+    {
+      "name": "trash_bin",
+      "from": [9, 0, 1], "to": [15, 12, 15],
+      "faces": {
+        "up": { "texture": "#trash" }, "down": { "texture": "#trash" },
+        "north": { "texture": "#trash" }, "south": { "texture": "#trash" },
+        "east": { "texture": "#trash" }, "west": { "texture": "#trash" }
+      }
+    },
+    {
+      "name": "flap_recycle",
+      "from": [1, 12, 1], "to": [7, 13, 15],
+      "faces": {
+        "up": { "texture": "#flap" }, "down": { "texture": "#flap" },
+        "north": { "texture": "#flap" }, "south": { "texture": "#flap" },
+        "east": { "texture": "#flap" }, "west": { "texture": "#flap" }
+      }
+    },
+    {
+      "name": "flap_trash",
+      "from": [9, 12, 1], "to": [15, 13, 15],
+      "faces": {
+        "up": { "texture": "#flap" }, "down": { "texture": "#flap" },
+        "north": { "texture": "#flap" }, "south": { "texture": "#flap" },
+        "east": { "texture": "#flap" }, "west": { "texture": "#flap" }
+      }
+    }
+  ]
+}
