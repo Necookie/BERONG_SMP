@@ -1,27 +1,56 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "tray": "berongsmp:block/tray_plastic_orange",
-    "rim": "berongsmp:block/tray_plastic_orange_rim",
+    "green": "berongsmp:block/tray_plastic_green",
+    "blue": "berongsmp:block/tray_plastic_blue",
+    "orange": "berongsmp:block/tray_plastic_orange",
+    "rim": "berongsmp:block/tray_rim_light",
     "particle": "berongsmp:block/tray_plastic_orange"
   },
   "elements": [
     {
-      "name": "tray_body",
-      "from": [2, 0, 2], "to": [14, 10, 14],
+      "name": "tray_green",
+      "from": [2, 0, 2], "to": [14, 3, 14],
       "faces": {
-        "up": { "texture": "#tray" }, "down": { "texture": "#tray" },
-        "north": { "texture": "#tray" }, "south": { "texture": "#tray" },
-        "east": { "texture": "#tray" }, "west": { "texture": "#tray" }
+        "up": { "texture": "#green" }, "down": { "texture": "#green" },
+        "north": { "texture": "#green" }, "south": { "texture": "#green" },
+        "east": { "texture": "#green" }, "west": { "texture": "#green" }
       }
     },
     {
-      "name": "tray_rim",
-      "from": [2, 10, 2], "to": [14, 11, 14],
+      "name": "rim_1",
+      "from": [1, 3, 1], "to": [15, 4, 15],
       "faces": {
         "up": { "texture": "#rim" }, "down": { "texture": "#rim" },
         "north": { "texture": "#rim" }, "south": { "texture": "#rim" },
         "east": { "texture": "#rim" }, "west": { "texture": "#rim" }
+      }
+    },
+    {
+      "name": "tray_blue",
+      "from": [2, 4, 2], "to": [14, 7, 14],
+      "faces": {
+        "up": { "texture": "#blue" }, "down": { "texture": "#blue" },
+        "north": { "texture": "#blue" }, "south": { "texture": "#blue" },
+        "east": { "texture": "#blue" }, "west": { "texture": "#blue" }
+      }
+    },
+    {
+      "name": "rim_2",
+      "from": [1, 7, 1], "to": [15, 8, 15],
+      "faces": {
+        "up": { "texture": "#rim" }, "down": { "texture": "#rim" },
+        "north": { "texture": "#rim" }, "south": { "texture": "#rim" },
+        "east": { "texture": "#rim" }, "west": { "texture": "#rim" }
+      }
+    },
+    {
+      "name": "tray_orange",
+      "from": [2, 8, 2], "to": [14, 11, 14],
+      "faces": {
+        "up": { "texture": "#orange" }, "down": { "texture": "#orange" },
+        "north": { "texture": "#orange" }, "south": { "texture": "#orange" },
+        "east": { "texture": "#orange" }, "west": { "texture": "#orange" }
       }
     }
   ]
