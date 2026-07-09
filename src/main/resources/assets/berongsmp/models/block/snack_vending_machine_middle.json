@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body": "berongsmp:block/vending_body_red",
+    "glass": "berongsmp:block/vending_glass_front",
+    "particle": "berongsmp:block/vending_body_red"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 16, 16],
+      "faces": {
+        "up": { "texture": "#body" }, "down": { "texture": "#body" },
+        "north": { "texture": "#glass" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

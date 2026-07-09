@@ -1,20 +1,79 @@
 package net.necookie.disastersim.block;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-/** Glass-front snack vending machine showing rows of packaged snacks, red frame, coin slot; FACING-only. */
+/**
+ * Glass-front snack vending machine showing rows of packaged snacks, red frame, coin slot;
+ * FACING-only. Real vending machines stand well over head height, so this carries the same
+ * {@link #CONNECTED_UP}/{@link #CONNECTED_DOWN} stacking idiom as {@link ServingCounterBlock}/
+ * {@link WhiteboardBlock}: stacking a second machine on top turns the standalone countertop-sized
+ * unit into one continuous full-height cabinet topped with a lit marquee header (see the
+ * {@code lightLevel} wiring in {@code ModBlocks.SNACK_VENDING_MACHINE}, which reads
+ * {@link #CONNECTED_DOWN} to glow only on the top piece).
+ */
 public class SnackVendingMachineBlock extends HorizontalFacingBlock {
+
+    public static final BooleanProperty CONNECTED_UP   = BooleanProperty.create("connected_up");
+    public static final BooleanProperty CONNECTED_DOWN = BooleanProperty.create("connected_down");
 
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
 
     public SnackVendingMachineBlock(Properties props) {
         super(props);
+        registerDefaultState(defaultBlockState()
+                .setValue(CONNECTED_UP, false)
+                .setValue(CONNECTED_DOWN, false));
     }
 
     @Override
     protected VoxelShape shapeFor(Direction facing) {
         return SHAPE;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(CONNECTED_UP, CONNECTED_DOWN);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockState base = super.getStateForPlacement(ctx);
+        BlockPos pos = ctx.getClickedPos();
+        return base
+                .setValue(CONNECTED_UP, connectsTo(ctx.getLevel(), pos.above()))
+                .setValue(CONNECTED_DOWN, connectsTo(ctx.getLevel(), pos.below()));
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks,
+            BlockPos pos, Direction dir, BlockPos neighbourPos, BlockState neighbourState,
+            RandomSource random) {
+        if (dir == Direction.UP) {
+            return state.setValue(CONNECTED_UP, connectsTo(neighbourState));
+        }
+        if (dir == Direction.DOWN) {
+            return state.setValue(CONNECTED_DOWN, connectsTo(neighbourState));
+        }
+        return super.updateShape(state, level, ticks, pos, dir, neighbourPos, neighbourState, random);
+    }
+
+    private static boolean connectsTo(BlockGetter level, BlockPos pos) {
+        return connectsTo(level.getBlockState(pos));
+    }
+
+    private static boolean connectsTo(BlockState neighbourState) {
+        return neighbourState.getBlock() instanceof SnackVendingMachineBlock;
     }
 }

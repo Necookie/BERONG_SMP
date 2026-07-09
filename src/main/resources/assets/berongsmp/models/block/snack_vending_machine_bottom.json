@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body": "berongsmp:block/vending_body_red",
+    "glass": "berongsmp:block/vending_glass_front",
+    "coin": "berongsmp:block/vending_coin_slot",
+    "particle": "berongsmp:block/vending_body_red"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 16, 16],
+      "faces": {
+        "up": { "texture": "#body" }, "down": { "texture": "#body" },
+        "north": { "texture": "#glass" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    },
+    {
+      "name": "coin_slot",
+      "from": [1, 8, 0], "to": [3, 10, 1],
+      "faces": {
+        "up": { "texture": "#coin" }, "down": { "texture": "#coin" },
+        "north": { "texture": "#coin" }, "south": { "texture": "#coin" },
+        "east": { "texture": "#coin" }, "west": { "texture": "#coin" }
+      }
+    }
+  ]
+}

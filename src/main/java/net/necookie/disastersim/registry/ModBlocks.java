@@ -566,7 +566,8 @@ public final class ModBlocks {
     public static final DeferredBlock<SnackVendingMachineBlock> SNACK_VENDING_MACHINE = BLOCKS.registerBlock(
             "snack_vending_machine", SnackVendingMachineBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(SnackVendingMachineBlock.CONNECTED_DOWN) ? 4 : 0));
 
     private ModBlocks() {}
 

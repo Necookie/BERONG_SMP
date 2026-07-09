@@ -1,8 +1,23 @@
 {
   "variants": {
-    "facing=north": { "model": "berongsmp:block/snack_vending_machine" },
-    "facing=south": { "model": "berongsmp:block/snack_vending_machine", "y": 180 },
-    "facing=east":  { "model": "berongsmp:block/snack_vending_machine", "y": 90 },
-    "facing=west":  { "model": "berongsmp:block/snack_vending_machine", "y": 270 }
+    "facing=north,connected_up=false,connected_down=false": { "model": "berongsmp:block/snack_vending_machine" },
+    "facing=north,connected_up=true,connected_down=false":  { "model": "berongsmp:block/snack_vending_machine_bottom" },
+    "facing=north,connected_up=false,connected_down=true":  { "model": "berongsmp:block/snack_vending_machine_top" },
+    "facing=north,connected_up=true,connected_down=true":   { "model": "berongsmp:block/snack_vending_machine_middle" },
+
+    "facing=south,connected_up=false,connected_down=false": { "model": "berongsmp:block/snack_vending_machine", "y": 180 },
+    "facing=south,connected_up=true,connected_down=false":  { "model": "berongsmp:block/snack_vending_machine_bottom", "y": 180 },
+    "facing=south,connected_up=false,connected_down=true":  { "model": "berongsmp:block/snack_vending_machine_top", "y": 180 },
+    "facing=south,connected_up=true,connected_down=true":   { "model": "berongsmp:block/snack_vending_machine_middle", "y": 180 },
+
+    "facing=east,connected_up=false,connected_down=false": { "model": "berongsmp:block/snack_vending_machine", "y": 90 },
+    "facing=east,connected_up=true,connected_down=false":  { "model": "berongsmp:block/snack_vending_machine_bottom", "y": 90 },
+    "facing=east,connected_up=false,connected_down=true":  { "model": "berongsmp:block/snack_vending_machine_top", "y": 90 },
+    "facing=east,connected_up=true,connected_down=true":   { "model": "berongsmp:block/snack_vending_machine_middle", "y": 90 },
+
+    "facing=west,connected_up=false,connected_down=false": { "model": "berongsmp:block/snack_vending_machine", "y": 270 },
+    "facing=west,connected_up=true,connected_down=false":  { "model": "berongsmp:block/snack_vending_machine_bottom", "y": 270 },
+    "facing=west,connected_up=false,connected_down=true":  { "model": "berongsmp:block/snack_vending_machine_top", "y": 270 },
+    "facing=west,connected_up=true,connected_down=true":   { "model": "berongsmp:block/snack_vending_machine_middle", "y": 270 }
   }
 }
