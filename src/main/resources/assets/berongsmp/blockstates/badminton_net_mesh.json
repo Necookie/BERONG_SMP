@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "axis=z": { "model": "berongsmp:block/badminton_net_mesh" },
+    "axis=x": { "model": "berongsmp:block/badminton_net_mesh", "y": 90 },
+    "axis=y": { "model": "berongsmp:block/badminton_net_mesh_horizontal" }
+  }
+}

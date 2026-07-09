@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "mesh": "berongsmp:block/badminton_net_mesh",
+    "edge": "berongsmp:block/badminton_net_mesh_edge",
+    "particle": "berongsmp:block/badminton_net_mesh_edge"
+  },
+  "elements": [
+    {
+      "name": "panel",
+      "from": [0, 0, 7], "to": [16, 16, 9],
+      "faces": {
+        "north": { "texture": "#mesh" },
+        "south": { "texture": "#mesh" },
+        "up":    { "texture": "#edge" },
+        "down":  { "texture": "#edge" },
+        "east":  { "texture": "#edge" },
+        "west":  { "texture": "#edge" }
+      }
+    }
+  ]
+}
