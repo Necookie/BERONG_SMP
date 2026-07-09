@@ -31,13 +31,13 @@ public class CustomNpcRenderer
     public void extractRenderState(CustomNpcEntity entity, NpcRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         state.texture = Identifier.fromNamespaceAndPath(
-                BerongSMP.MODID, "textures/entity/npc/" + entity.getNpcType().id + ".png");
+                BerongSMP.MODID, "textures/entity/npc/" + entity.getNpcType().texturePath + ".png");
     }
 
     @Override
     public Identifier getTextureLocation(NpcRenderState state) {
         return state.texture != null
                 ? state.texture
-                : Identifier.fromNamespaceAndPath(BerongSMP.MODID, "textures/entity/npc/sgt_reyes.png");
+                : Identifier.fromNamespaceAndPath(BerongSMP.MODID, "textures/entity/npc/new_tutorial_instructors/sgt_reyes.png");
     }
 }
