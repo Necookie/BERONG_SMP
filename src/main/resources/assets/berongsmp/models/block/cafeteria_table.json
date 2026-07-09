@@ -38,8 +38,26 @@
       }
     },
     {
-      "name": "center_leg",
-      "from": [7, 0, 7], "to": [9, 11, 9],
+      "name": "leg_west",
+      "from": [1, 0, 6], "to": [3, 11, 10],
+      "faces": {
+        "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "leg_east",
+      "from": [13, 0, 6], "to": [15, 11, 10],
+      "faces": {
+        "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "crossbar",
+      "from": [3, 4, 7], "to": [13, 5, 9],
       "faces": {
         "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
         "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
