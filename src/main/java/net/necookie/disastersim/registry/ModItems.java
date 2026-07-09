@@ -76,6 +76,70 @@ public final class ModItems {
             ITEMS.registerItem("npc_student",
                     p -> new NpcSpawnerItem(NpcType.STUDENT, p.stacksTo(16)));
 
+    // ── Sim building faculty spawners (npc_prof_* — tab-complete groups them) ──
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_INSTRUCTOR_DAVID =
+            ITEMS.registerItem("npc_prof_instructor_david",
+                    p -> new NpcSpawnerItem(NpcType.PROF_INSTRUCTOR_DAVID, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PRINCIPAL_BROWN =
+            ITEMS.registerItem("npc_prof_principal_brown",
+                    p -> new NpcSpawnerItem(NpcType.PROF_PRINCIPAL_BROWN, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_BALDWIN =
+            ITEMS.registerItem("npc_prof_professor_baldwin",
+                    p -> new NpcSpawnerItem(NpcType.PROF_PROFESSOR_BALDWIN, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_KEVIN =
+            ITEMS.registerItem("npc_prof_professor_kevin",
+                    p -> new NpcSpawnerItem(NpcType.PROF_PROFESSOR_KEVIN, p.stacksTo(16)));
+
+    // ── Sim building student spawners (npc_student_* — tab-complete groups them) ──
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_GOLDY =
+            ITEMS.registerItem("npc_student_goldy",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_GOLDY, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_HARVEY =
+            ITEMS.registerItem("npc_student_harvey",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_HARVEY, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_JENNY =
+            ITEMS.registerItem("npc_student_jenny",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_JENNY, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KAEFLA =
+            ITEMS.registerItem("npc_student_kaefla",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_KAEFLA, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KARL =
+            ITEMS.registerItem("npc_student_karl",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_KARL, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KATH =
+            ITEMS.registerItem("npc_student_kath",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_KATH, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KELLY =
+            ITEMS.registerItem("npc_student_kelly",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_KELLY, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NATH =
+            ITEMS.registerItem("npc_student_nath",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_NATH, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NECOOKIE =
+            ITEMS.registerItem("npc_student_necookie",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_NECOOKIE, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NELL =
+            ITEMS.registerItem("npc_student_nell",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_NELL, p.stacksTo(16)));
+
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_PRINCESS =
+            ITEMS.registerItem("npc_student_princess",
+                    p -> new NpcSpawnerItem(NpcType.STUDENT_PRINCESS, p.stacksTo(16)));
+
     /** Example block item registration. */
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
 
@@ -458,6 +522,21 @@ public final class ModItems {
         ALL_ITEM_MAP.put("npc_necookie", NPC_NECOOKIE);
         ALL_ITEM_MAP.put("npc_sir_bookmark", NPC_SIR_BOOKMARK);
         ALL_ITEM_MAP.put("npc_student", NPC_STUDENT);
+        ALL_ITEM_MAP.put("npc_prof_instructor_david", NPC_PROF_INSTRUCTOR_DAVID);
+        ALL_ITEM_MAP.put("npc_prof_principal_brown", NPC_PROF_PRINCIPAL_BROWN);
+        ALL_ITEM_MAP.put("npc_prof_professor_baldwin", NPC_PROF_PROFESSOR_BALDWIN);
+        ALL_ITEM_MAP.put("npc_prof_professor_kevin", NPC_PROF_PROFESSOR_KEVIN);
+        ALL_ITEM_MAP.put("npc_student_goldy", NPC_STUDENT_GOLDY);
+        ALL_ITEM_MAP.put("npc_student_harvey", NPC_STUDENT_HARVEY);
+        ALL_ITEM_MAP.put("npc_student_jenny", NPC_STUDENT_JENNY);
+        ALL_ITEM_MAP.put("npc_student_kaefla", NPC_STUDENT_KAEFLA);
+        ALL_ITEM_MAP.put("npc_student_karl", NPC_STUDENT_KARL);
+        ALL_ITEM_MAP.put("npc_student_kath", NPC_STUDENT_KATH);
+        ALL_ITEM_MAP.put("npc_student_kelly", NPC_STUDENT_KELLY);
+        ALL_ITEM_MAP.put("npc_student_nath", NPC_STUDENT_NATH);
+        ALL_ITEM_MAP.put("npc_student_necookie", NPC_STUDENT_NECOOKIE);
+        ALL_ITEM_MAP.put("npc_student_nell", NPC_STUDENT_NELL);
+        ALL_ITEM_MAP.put("npc_student_princess", NPC_STUDENT_PRINCESS);
         ALL_ITEM_MAP.put("whiteboard", WHITEBOARD_ITEM);
         ALL_ITEM_MAP.put("fire_hose_cabinet", FIRE_HOSE_CABINET_ITEM);
         ALL_ITEM_MAP.put("bulletin_board", BULLETIN_BOARD_ITEM);
