@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "body": "berongsmp:block/soda_machine_body_red",
+    "panel": "berongsmp:block/soda_machine_panel_chrome",
+    "nozzle": "berongsmp:block/soda_nozzle_dark",
+    "particle": "berongsmp:block/soda_machine_body_red"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [1, 0, 1], "to": [15, 16, 15],
+      "faces": {
+        "up": { "texture": "#body" }, "down": { "texture": "#body" },
+        "north": { "texture": "#panel" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    },
+    {
+      "name": "nozzle",
+      "from": [6, 2, 0], "to": [10, 4, 1],
+      "faces": {
+        "up": { "texture": "#nozzle" }, "down": { "texture": "#nozzle" },
+        "north": { "texture": "#nozzle" }, "south": { "texture": "#nozzle" },
+        "east": { "texture": "#nozzle" }, "west": { "texture": "#nozzle" }
+      }
+    }
+  ]
+}
