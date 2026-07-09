@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "line": "berongsmp:block/court_line",
+    "particle": "berongsmp:block/court_line"
+  },
+  "elements": [
+    {
+      "name": "dot",
+      "from": [6, 0, 6], "to": [10, 1, 10],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    }
+  ]
+}

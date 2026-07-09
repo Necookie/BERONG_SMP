@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "line": "berongsmp:block/court_line",
+    "particle": "berongsmp:block/court_line"
+  },
+  "elements": [
+    {
+      "name": "dot",
+      "from": [6, 0, 6], "to": [10, 1, 10],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    },
+    {
+      "name": "arm_north",
+      "from": [6, 0, 0], "to": [10, 1, 6],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    },
+    {
+      "name": "arm_south",
+      "from": [6, 0, 10], "to": [10, 1, 16],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    },
+    {
+      "name": "arm_east",
+      "from": [10, 0, 6], "to": [16, 1, 10],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    },
+    {
+      "name": "arm_west",
+      "from": [0, 0, 6], "to": [6, 1, 10],
+      "faces": {
+        "up": { "texture": "#line" }, "down": { "texture": "#line" },
+        "north": { "texture": "#line" }, "south": { "texture": "#line" },
+        "east": { "texture": "#line" }, "west": { "texture": "#line" }
+      }
+    }
+  ]
+}

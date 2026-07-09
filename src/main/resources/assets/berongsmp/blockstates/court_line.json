@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    { "apply": { "model": "berongsmp:block/court_line_dot" } },
+    { "when": { "north": "true" }, "apply": { "model": "berongsmp:block/court_line_side" } },
+    { "when": { "south": "true" }, "apply": { "model": "berongsmp:block/court_line_side", "y": 180 } },
+    { "when": { "east": "true" },  "apply": { "model": "berongsmp:block/court_line_side", "y": 90 } },
+    { "when": { "west": "true" },  "apply": { "model": "berongsmp:block/court_line_side", "y": 270 } }
+  ]
+}
