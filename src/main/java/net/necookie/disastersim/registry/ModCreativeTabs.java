@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.entity.NpcType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -45,15 +46,6 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SPRINKLER_HEAD_ITEM.get());
                 output.accept(ModItems.SMOKE_DETECTOR_ITEM.get());
                 output.accept(ModItems.EXIT_SIGN_ITEM.get());
-                output.accept(ModItems.NPC_SGT_REYES.get());
-                output.accept(ModItems.NPC_SGT_SANTOS.get());
-                output.accept(ModItems.NPC_OFFICER_CRUZ.get());
-                output.accept(ModItems.NPC_CAPT_MORFE.get());
-                output.accept(ModItems.NPC_SECURITY_TUAZON.get());
-                output.accept(ModItems.NPC_DM_ORLANDA.get());
-                output.accept(ModItems.NPC_NECOOKIE.get());
-                output.accept(ModItems.NPC_SIR_BOOKMARK.get());
-                output.accept(ModItems.NPC_STUDENT.get());
             }).build());
 
     /** Creative tab: furniture and props for building scenarios. */
@@ -113,6 +105,47 @@ public final class ModCreativeTabs {
             .icon(() -> ModItems.DAISY_CHAIN_EXTENSION_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> ModItems.HAZARD_ITEM_MAP.values().forEach(i -> output.accept(i.get())))
             .build());
+
+    /**
+     * Creative tab: every NPC spawner, pulled out of the crowded {@link #SIM_TAB} into its own
+     * space so all 24 characters are easy to browse/find. Grouped by role with the same ordering
+     * as {@link NpcType}: the 4 active New Tutorial (Academy) room instructors, the 5 Academy
+     * background NPCs, the 4 sim-building faculty, then the 11 sim-building students.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> NPC_TAB = CREATIVE_MODE_TABS.register("npc_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.npcs"))
+            .withTabsBefore(HAZARD_TAB.getKey())
+            .icon(() -> ModItems.NPC_OFFICER_CRUZ.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
+                // New Tutorial (Academy) — active room instructors
+                output.accept(ModItems.NPC_SGT_REYES.get());
+                output.accept(ModItems.NPC_SGT_SANTOS.get());
+                output.accept(ModItems.NPC_OFFICER_CRUZ.get());
+                output.accept(ModItems.NPC_CAPT_MORFE.get());
+                // New Tutorial (Academy) — decorative background NPCs
+                output.accept(ModItems.NPC_SECURITY_TUAZON.get());
+                output.accept(ModItems.NPC_DM_ORLANDA.get());
+                output.accept(ModItems.NPC_NECOOKIE.get());
+                output.accept(ModItems.NPC_SIR_BOOKMARK.get());
+                output.accept(ModItems.NPC_STUDENT.get());
+                // Sim building faculty
+                output.accept(ModItems.NPC_PROF_INSTRUCTOR_DAVID.get());
+                output.accept(ModItems.NPC_PROF_PRINCIPAL_BROWN.get());
+                output.accept(ModItems.NPC_PROF_PROFESSOR_BALDWIN.get());
+                output.accept(ModItems.NPC_PROF_PROFESSOR_KEVIN.get());
+                // Sim building students
+                output.accept(ModItems.NPC_STUDENT_GOLDY.get());
+                output.accept(ModItems.NPC_STUDENT_HARVEY.get());
+                output.accept(ModItems.NPC_STUDENT_JENNY.get());
+                output.accept(ModItems.NPC_STUDENT_KAEFLA.get());
+                output.accept(ModItems.NPC_STUDENT_KARL.get());
+                output.accept(ModItems.NPC_STUDENT_KATH.get());
+                output.accept(ModItems.NPC_STUDENT_KELLY.get());
+                output.accept(ModItems.NPC_STUDENT_NATH.get());
+                output.accept(ModItems.NPC_STUDENT_NECOOKIE.get());
+                output.accept(ModItems.NPC_STUDENT_NELL.get());
+                output.accept(ModItems.NPC_STUDENT_PRINCESS.get());
+            }).build());
 
     private ModCreativeTabs() {}
 
