@@ -380,6 +380,36 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> EVACUATION_MAP_ITEM =
             ITEMS.registerSimpleBlockItem("evacuation_map", ModBlocks.EVACUATION_MAP);
 
+    public static final DeferredItem<BlockItem> CAFETERIA_TABLE_ITEM =
+            ITEMS.registerSimpleBlockItem("cafeteria_table", ModBlocks.CAFETERIA_TABLE);
+
+    public static final DeferredItem<BlockItem> TRAY_STACK_ITEM =
+            ITEMS.registerSimpleBlockItem("cafeteria_tray_stack", ModBlocks.TRAY_STACK);
+
+    public static final DeferredItem<BlockItem> SERVING_COUNTER_ITEM =
+            ITEMS.registerSimpleBlockItem("serving_counter", ModBlocks.SERVING_COUNTER);
+
+    public static final DeferredItem<BlockItem> CAFETERIA_MENU_BOARD_ITEM =
+            ITEMS.registerSimpleBlockItem("cafeteria_menu_board", ModBlocks.CAFETERIA_MENU_BOARD);
+
+    public static final DeferredItem<BlockItem> CONDIMENT_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("condiment_station", ModBlocks.CONDIMENT_STATION);
+
+    public static final DeferredItem<BlockItem> CAFETERIA_TRASH_BIN_ITEM =
+            ITEMS.registerSimpleBlockItem("cafeteria_trash_bin", ModBlocks.CAFETERIA_TRASH_BIN);
+
+    public static final DeferredItem<BlockItem> SODA_FOUNTAIN_MACHINE_ITEM =
+            ITEMS.registerSimpleBlockItem("soda_fountain_machine", ModBlocks.SODA_FOUNTAIN_MACHINE);
+
+    public static final DeferredItem<BlockItem> CAFETERIA_STOOL_ITEM =
+            ITEMS.registerSimpleBlockItem("cafeteria_stool", ModBlocks.CAFETERIA_STOOL);
+
+    public static final DeferredItem<BlockItem> SALAD_BAR_ITEM =
+            ITEMS.registerSimpleBlockItem("salad_bar", ModBlocks.SALAD_BAR);
+
+    public static final DeferredItem<BlockItem> SNACK_VENDING_MACHINE_ITEM =
+            ITEMS.registerSimpleBlockItem("snack_vending_machine", ModBlocks.SNACK_VENDING_MACHINE);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -437,6 +467,16 @@ public final class ModItems {
         ALL_ITEM_MAP.put("sprinkler_head", SPRINKLER_HEAD_ITEM);
         ALL_ITEM_MAP.put("emergency_light", EMERGENCY_LIGHT_ITEM);
         ALL_ITEM_MAP.put("evacuation_map", EVACUATION_MAP_ITEM);
+        ALL_ITEM_MAP.put("cafeteria_table", CAFETERIA_TABLE_ITEM);
+        ALL_ITEM_MAP.put("cafeteria_tray_stack", TRAY_STACK_ITEM);
+        ALL_ITEM_MAP.put("serving_counter", SERVING_COUNTER_ITEM);
+        ALL_ITEM_MAP.put("cafeteria_menu_board", CAFETERIA_MENU_BOARD_ITEM);
+        ALL_ITEM_MAP.put("condiment_station", CONDIMENT_STATION_ITEM);
+        ALL_ITEM_MAP.put("cafeteria_trash_bin", CAFETERIA_TRASH_BIN_ITEM);
+        ALL_ITEM_MAP.put("soda_fountain_machine", SODA_FOUNTAIN_MACHINE_ITEM);
+        ALL_ITEM_MAP.put("cafeteria_stool", CAFETERIA_STOOL_ITEM);
+        ALL_ITEM_MAP.put("salad_bar", SALAD_BAR_ITEM);
+        ALL_ITEM_MAP.put("snack_vending_machine", SNACK_VENDING_MACHINE_ITEM);
         ALL_ITEM_MAP.putAll(HAZARD_ITEM_MAP);
     }
 
