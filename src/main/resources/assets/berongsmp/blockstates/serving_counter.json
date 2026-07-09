@@ -1,8 +1,23 @@
 {
   "variants": {
-    "facing=north": { "model": "berongsmp:block/serving_counter" },
-    "facing=south": { "model": "berongsmp:block/serving_counter", "y": 180 },
-    "facing=east":  { "model": "berongsmp:block/serving_counter", "y": 90 },
-    "facing=west":  { "model": "berongsmp:block/serving_counter", "y": 270 }
+    "facing=north,connected_up=false,connected_down=false": { "model": "berongsmp:block/serving_counter" },
+    "facing=north,connected_up=true,connected_down=false":  { "model": "berongsmp:block/serving_counter_bottom" },
+    "facing=north,connected_up=false,connected_down=true":  { "model": "berongsmp:block/serving_counter_top" },
+    "facing=north,connected_up=true,connected_down=true":   { "model": "berongsmp:block/serving_counter_middle" },
+
+    "facing=south,connected_up=false,connected_down=false": { "model": "berongsmp:block/serving_counter", "y": 180 },
+    "facing=south,connected_up=true,connected_down=false":  { "model": "berongsmp:block/serving_counter_bottom", "y": 180 },
+    "facing=south,connected_up=false,connected_down=true":  { "model": "berongsmp:block/serving_counter_top", "y": 180 },
+    "facing=south,connected_up=true,connected_down=true":   { "model": "berongsmp:block/serving_counter_middle", "y": 180 },
+
+    "facing=east,connected_up=false,connected_down=false": { "model": "berongsmp:block/serving_counter", "y": 90 },
+    "facing=east,connected_up=true,connected_down=false":  { "model": "berongsmp:block/serving_counter_bottom", "y": 90 },
+    "facing=east,connected_up=false,connected_down=true":  { "model": "berongsmp:block/serving_counter_top", "y": 90 },
+    "facing=east,connected_up=true,connected_down=true":   { "model": "berongsmp:block/serving_counter_middle", "y": 90 },
+
+    "facing=west,connected_up=false,connected_down=false": { "model": "berongsmp:block/serving_counter", "y": 270 },
+    "facing=west,connected_up=true,connected_down=false":  { "model": "berongsmp:block/serving_counter_bottom", "y": 270 },
+    "facing=west,connected_up=false,connected_down=true":  { "model": "berongsmp:block/serving_counter_top", "y": 270 },
+    "facing=west,connected_up=true,connected_down=true":   { "model": "berongsmp:block/serving_counter_middle", "y": 270 }
   }
 }

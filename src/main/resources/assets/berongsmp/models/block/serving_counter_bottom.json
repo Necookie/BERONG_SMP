@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "steel": "berongsmp:block/steel_counter_body",
+    "well": "berongsmp:block/food_well_metal",
+    "glass": "berongsmp:block/sneeze_guard_glass",
+    "particle": "berongsmp:block/steel_counter_body"
+  },
+  "elements": [
+    {
+      "name": "counter_body",
+      "from": [0, 0, 0], "to": [16, 10, 16],
+      "faces": {
+        "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "food_well",
+      "from": [2, 10, 3], "to": [14, 11, 13],
+      "faces": {
+        "up": { "texture": "#well" }, "down": { "texture": "#steel" },
+        "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
+        "east": { "texture": "#steel" }, "west": { "texture": "#steel" }
+      }
+    },
+    {
+      "name": "guard_riser",
+      "from": [2, 11, 12], "to": [14, 16, 13],
+      "faces": {
+        "up": { "texture": "#glass" }, "down": { "texture": "#glass" },
+        "north": { "texture": "#glass" }, "south": { "texture": "#glass" },
+        "east": { "texture": "#glass" }, "west": { "texture": "#glass" }
+      }
+    }
+  ]
+}
