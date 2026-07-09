@@ -39,6 +39,7 @@ import net.necookie.disastersim.block.DrawersBlock;
 import net.necookie.disastersim.block.FilingCabinetBlock;
 import net.necookie.disastersim.block.FireAlarmBlock;
 import net.necookie.disastersim.block.FireHoseCabinetBlock;
+import net.necookie.disastersim.block.GlowingOakPlanksBlock;
 import net.necookie.disastersim.block.LightBulbBlock;
 import net.necookie.disastersim.block.LockerBlock;
 import net.necookie.disastersim.block.SinkBlock;
@@ -568,6 +569,13 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(SnackVendingMachineBlock.CONNECTED_DOWN) ? 4 : 0));
+
+    /** Disguised light source — looks/sounds/burns exactly like vanilla oak planks — see {@link GlowingOakPlanksBlock}. */
+    public static final DeferredBlock<GlowingOakPlanksBlock> GLOWING_OAK_PLANKS = BLOCKS.registerBlock(
+            "glowing_oak_planks", GlowingOakPlanksBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(2.0f, 3.0f).sound(SoundType.WOOD)
+                    .lightLevel(s -> 15));
 
     private ModBlocks() {}
 
