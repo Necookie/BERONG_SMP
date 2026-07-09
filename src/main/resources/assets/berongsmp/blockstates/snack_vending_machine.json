@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/snack_vending_machine" },
+    "facing=south": { "model": "berongsmp:block/snack_vending_machine", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/snack_vending_machine", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/snack_vending_machine", "y": 270 }
+  }
+}
