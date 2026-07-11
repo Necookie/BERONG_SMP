@@ -376,3 +376,205 @@
 - **Hazardous State:** Gas leaking from the canister seam — haze and an intermittent flame lick, distinct from `leaking_gas_valve`'s fixed wall LPG line.
 
 - **Failure Consequence (300 ticks):** The leak catches and flashes a **2-block radius** fire. **Only the yellow wet chemical extinguisher may defuse it** — ABC/CO2 give the wrong-tool warning. Prevention seals the canister and shuts the valve.
+
+## 🍳 Culinary Classroom Zone (20 props)
+
+### 36. Chef's Prep Table (`berongsmp:chefs_prep_drawers`)
+
+- **Target Room:** Culinary Classroom / Kitchen Lab
+
+- **Normal State:** Stainless prep table, drawers closed.
+
+- **Hazardous State:** An open drawer with an oily dish-rag draped over the edge, right beside a nearby burner — radiant heat slowly cooks the rag toward ignition. Distinct from `contaminated_kitchen_bin` (a closed bin of rags, not exposed workstation fabric).
+
+- **Failure Consequence (400 ticks):** The rag self-ignites, spreading to nearby combustibles. Prevention moves the rag clear of the burner.
+
+### 37. Culinary Lab Refrigerator (`berongsmp:culinary_fridge`)
+
+- **Target Room:** Culinary Classroom / Kitchen Lab
+
+- **Normal State:** Tall reach-in fridge, running quietly.
+
+- **Hazardous State:** Dust-caked condenser coils and a failing start-relay overheat the compressor — sparks and light smoke at the base. The mod's first refrigerator; deliberately an electrical/compressor angle, not a coolant-gas leak.
+
+- **Failure Consequence (450 ticks):** The relay sparks and ignites — a **Class C** electrical fire. Prevention unplugs the fridge and clears the dust from the coils.
+
+### 38. Student Lab Microwave (`berongsmp:student_lab_microwave`)
+
+- **Target Room:** Culinary Classroom shared student bench
+
+- **Normal State:** A countertop microwave, door closed.
+
+- **Hazardous State:** Metal cutlery or foil left inside arcs violently — blue-white sparks behind the door glass. Distinct from `overloaded_microwave` (faculty-pantry unit, runaway orange-hot heating cycle) — this one is cold-but-arcing.
+
+- **Failure Consequence (350 ticks):** The arcing ignites — a **Class C** electrical fire. Prevention opens the door and pulls the foil out.
+
+### 39. Corroded Gas Line Joint (`berongsmp:corroded_gas_line_joint`) — **Kitchen Class F/K**
+
+- **Target Room:** Culinary Classroom kitchen wall
+
+- **Normal State:** A gas-line elbow joint, sealed.
+
+- **Hazardous State:** Rust and corrosion pinholes weep gas at the joint — haze telegraphs the invisible leak. Distinct from `leaking_gas_valve` (an opened handwheel valve) — here the permanent pipe infrastructure itself is failing from age.
+
+- **Failure Consequence (300 ticks):** The gas cloud flashes over a **2-block radius**. **Only the wet chemical extinguisher may defuse it.** Prevention shuts the upstream line and clamps the joint.
+
+### 40. Gas Range, Stuck Burner (`berongsmp:gas_range_stuck_burner`) — **Kitchen Class F/K**
+
+- **Target Room:** Culinary Classroom kitchen line
+
+- **Normal State:** A full 4-burner gas range, knobs responsive.
+
+- **Hazardous State:** A melted, jammed control knob leaves a burner running wild with no pan on it — flames lick up the side. Distinct from `unattended_grease_pan` (a pan of oil on a burner) — here the appliance's own control has failed.
+
+- **Failure Consequence (300 ticks):** The wild burner ignites the range and counter. **Only the wet chemical extinguisher may defuse it.** Prevention reaches behind and shuts the range's gas cock.
+
+### 41. Commercial Stand Mixer (`berongsmp:commercial_stand_mixer`)
+
+- **Target Room:** Culinary Classroom prep counter
+
+- **Normal State:** A planetary stand mixer, idle.
+
+- **Hazardous State:** The motor jams under stiff bread dough and overheats, smoking from the head housing.
+
+- **Failure Consequence (400 ticks):** The overheated motor ignites — a **Class C** fire. Prevention cuts power and clears the jammed dough.
+
+### 42. Gas Deck Oven (`berongsmp:gas_deck_oven`) — **Kitchen Class F/K**
+
+- **Target Room:** Culinary Classroom baking area
+
+- **Normal State:** A gas baking deck oven, door sealed.
+
+- **Hazardous State:** A stuck thermostat and a door cracked ajar radiate fierce heat onto nearby paper liners/proofing trays. Distinct from `commercial_deep_fryer` (an oil-vat auto-ignition, not radiant heat from an oven door).
+
+- **Failure Consequence (350 ticks):** Radiant heat ignites nearby combustibles. **Only the wet chemical extinguisher may defuse it.** Prevention closes the door and shuts the gas.
+
+### 43. Induction Cooktop (`berongsmp:induction_cooktop_station`)
+
+- **Target Room:** Culinary Classroom demo counter
+
+- **Normal State:** A glass-top induction hob, cooling fan running.
+
+- **Hazardous State:** The cooling fan fails and the power electronics overheat under a boiled-dry pan — no open flame, no oil; purely electrical/electromagnetic.
+
+- **Failure Consequence (400 ticks):** The overheated electronics ignite — a **Class C** fire. Prevention switches it off at the wall and lifts the pan.
+
+### 44. Rice Cooker Bank (`berongsmp:rice_cooker_bank`)
+
+- **Target Room:** Culinary Classroom counter
+
+- **Normal State:** A row of student rice cookers, cycling normally.
+
+- **Hazardous State:** One cooker boils dry — its exposed heating element scorches the plastic base, the "keep warm" cycle never cutting out.
+
+- **Failure Consequence (350 ticks):** The scorched base ignites — a **Class C** fire. Prevention unplugs the bank and adds water.
+
+### 45. Espresso Machine (`berongsmp:espresso_machine`)
+
+- **Target Room:** Culinary Classroom / Canteen café counter
+
+- **Normal State:** A café-style espresso machine, pressure nominal.
+
+- **Hazardous State:** A scale-blocked pressure-relief valve lets the boiler over-pressurize — steam blasts from the group head and the control board shorts.
+
+- **Failure Consequence (450 ticks):** The shorted board ignites — a **Class C** fire. Prevention bleeds the pressure and kills the power.
+
+### 46. Hot Water Urn (`berongsmp:hot_water_urn`)
+
+- **Target Room:** Canteen / Culinary Classroom counter
+
+- **Normal State:** A tall tea/coffee boiler urn, spigot sealed.
+
+- **Hazardous State:** The spigot drips water down onto the live base electrics — the classic water-meets-electricity short.
+
+- **Failure Consequence (400 ticks):** The base electrics spark and ignite — a **Class C** fire. Prevention unplugs it and wipes the base dry.
+
+### 47. Countertop Toaster Oven (`berongsmp:toaster_oven_crumb`)
+
+- **Target Room:** Culinary Classroom student counter
+
+- **Normal State:** A toaster oven, crumb tray clean.
+
+- **Hazardous State:** The crumb tray is packed with old crumbs and grease, igniting directly under the glowing element.
+
+- **Failure Consequence (350 ticks):** The crumb-tray fire spreads — a **Class A** ordinary-combustible fire. Prevention switches it off and empties the crumb tray.
+
+### 48. Dry Goods Pantry Shelf (`berongsmp:dry_goods_pantry_shelf`)
+
+- **Target Room:** Culinary Classroom pantry wall
+
+- **Normal State:** A shelf of sealed flour/sugar sacks.
+
+- **Hazardous State:** Open sacks beside a hot light-fixture ballast give off airborne flour dust — a real deflagration hazard, distinct from `reagent_storage_shelf` (chemicals) and `archive_box_stack` (paper).
+
+- **Failure Consequence (500 ticks):** The dust cloud flash-ignites a **2-block radius** — the widest culinary blast, matching the reagent shelf. Prevention seals the sacks and moves them from the hot fixture.
+
+### 49. Kitchen Exhaust Duct (`berongsmp:grease_duct_run`) — **Kitchen Class F/K**
+
+- **Target Room:** Culinary Classroom ceiling above the cooking line
+
+- **Normal State:** A ceiling exhaust duct, interior clean.
+
+- **Hazardous State:** Flammable grease cakes the duct interior — a hidden fire risk in the ceiling void, distinct from `grease_clogged_hood` (the hood canopy directly over the stove, not the overhead ductwork).
+
+- **Failure Consequence (450 ticks):** Flames travel the duct run. **Only the wet chemical extinguisher may defuse it.** Prevention scrapes the grease from the accessible duct panel.
+
+### 50. Dish Sanitizer (`berongsmp:commercial_dish_sanitizer`)
+
+- **Target Room:** Culinary Classroom under-counter run
+
+- **Normal State:** A high-temp under-counter dishwasher, wash cycle normal.
+
+- **Hazardous State:** The booster heating element boils dry while door-seal steam seeps into the control board.
+
+- **Failure Consequence (450 ticks):** Steam-shorted electronics ignite — a **Class C** fire. Prevention kills power and tops up the wash tank.
+
+### 51. Sink Garbage Disposal (`berongsmp:garbage_disposal_unit`)
+
+- **Target Room:** Culinary Classroom sink station (pairs with `sink`)
+
+- **Normal State:** An under-sink food-waste disposal, grinder free.
+
+- **Hazardous State:** A dropped utensil jams the grinder — the motor stalls and burns out its windings.
+
+- **Failure Consequence (350 ticks):** The burnt-out motor ignites — a **Class C** fire. Prevention cuts power and frees the jam.
+
+### 52. UV Knife Sterilizer (`berongsmp:knife_sterilizer_cabinet`)
+
+- **Target Room:** Culinary Classroom kitchen wall
+
+- **Normal State:** A wall-mounted UV knife/utensil sterilizing cabinet, lamp cycling normally.
+
+- **Hazardous State:** The UV-lamp ballast overheats, scorching the plastic housing — a violet glow leaks at the seams.
+
+- **Failure Consequence (400 ticks):** The scorched housing ignites — a **Class C** fire. Prevention switches off the lamp and lets it cool.
+
+### 53. Chafing Steam Table (`berongsmp:sterno_steam_table`)
+
+- **Target Room:** Culinary Classroom buffet/serving line
+
+- **Normal State:** A buffet steam table, chafing burners unlit.
+
+- **Hazardous State:** Canned gel-fuel (Sterno) burners left lit under a boiled-dry water pan — an open flammable-gel flame, distinct from every electric hazard in the set.
+
+- **Failure Consequence (300 ticks):** The gel-fuel flares up — a **Class B** flammable-liquid fire (any extinguisher). Prevention snuffs the gel-fuel cans and covers them.
+
+### 54. Electric Convection Oven (`berongsmp:convection_oven`)
+
+- **Target Room:** Culinary Classroom baking area
+
+- **Normal State:** An electric convection/combi oven, running normally.
+
+- **Hazardous State:** The heating element and circulation-fan motor short out behind a failed door gasket. Deliberately paired with `gas_deck_oven`'s matching full-height silhouette — same shape, different fuel/failure/extinguisher, teaching the gas-vs-electric distinction.
+
+- **Failure Consequence (400 ticks):** The shorted element/fan ignites — a **Class C** fire. Prevention trips its breaker and opens the door to vent.
+
+### 55. Lechon Rotisserie (`berongsmp:lechon_rotisserie_spit`) — **Kitchen Class F/K**
+
+- **Target Room:** Outdoor/covered culinary cooking area
+
+- **Normal State:** A charcoal rotisserie spit, coals banked low.
+
+- **Hazardous State:** Live coals left unattended — rendered fat dripping onto the coals threatens a flare-up. The only solid-fuel (charcoal) hazard in the mod.
+
+- **Failure Consequence (300 ticks):** Dripping fat flares the coals into a fire. **Only the wet chemical extinguisher may defuse it.** Prevention rakes the coals down and shields the drip pan.
