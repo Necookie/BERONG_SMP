@@ -2,15 +2,44 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/hood_steel_clean",
-    "duct": "berongsmp:block/hood_steel_clean"
+    "duct": "berongsmp:block/hood_steel_clean",
+    "hatch": "berongsmp:block/cabinet_body_graphite"
   },
   "elements": [
     {
-      "from": [0, 12, 0], "to": [16, 16, 16],
+      "name": "duct_body",
+      "from": [3, 12, 0], "to": [13, 16, 16],
       "faces": {
         "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
         "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
         "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+      }
+    },
+    {
+      "name": "flange_front",
+      "from": [2, 12, 3], "to": [14, 16, 4],
+      "faces": {
+        "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
+        "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
+        "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+      }
+    },
+    {
+      "name": "flange_back",
+      "from": [2, 12, 12], "to": [14, 16, 13],
+      "faces": {
+        "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
+        "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
+        "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+      }
+    },
+    {
+      "name": "access_hatch",
+      "from": [4, 11, 6], "to": [12, 12, 10],
+      "faces": {
+        "down": { "texture": "#hatch" }, "up": { "texture": "#hatch" },
+        "north": { "texture": "#hatch" }, "south": { "texture": "#hatch" },
+        "east": { "texture": "#hatch" }, "west": { "texture": "#hatch" }
       }
     }
   ]

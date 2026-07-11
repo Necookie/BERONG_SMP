@@ -1,18 +1,29 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_water_stain",
+    "particle": "berongsmp:block/hazard_warning_led",
     "body": "berongsmp:block/fryer_body_steel",
     "door": "berongsmp:block/dishmachine_door_steel",
-    "stain": "berongsmp:block/hazard_water_stain"
+    "stain": "berongsmp:block/hazard_water_stain",
+    "led": "berongsmp:block/hazard_warning_led",
+    "steam": "berongsmp:block/hazard_smoke_stain"
   },
   "elements": [
     {
       "from": [0, 0, 0], "to": [16, 14, 16],
       "faces": {
-        "down": { "texture": "#stain" }, "up": { "texture": "#body" },
+        "down": { "texture": "#stain" }, "up": { "texture": "#steam" },
         "north": { "texture": "#door" }, "south": { "texture": "#body" },
         "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "led_strip",
+      "from": [3, 11, -1], "to": [13, 12, 0],
+      "faces": {
+        "down": { "texture": "#led" }, "up": { "texture": "#led" },
+        "north": { "texture": "#led" }, "south": { "texture": "#led" },
+        "east": { "texture": "#led" }, "west": { "texture": "#led" }
       }
     }
   ]
