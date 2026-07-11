@@ -326,3 +326,53 @@
 - **Hazardous State:** The blades cake over with gray-brown dust, the stalled motor smoulders — smoke and ash particles.
 
 - **Failure Consequence (450 ticks):** The overheated motor ignites its own dust cake. Prevention clears the dust off the blades.
+
+### 31. Overloaded Wall Outlet (`berongsmp:overloaded_wall_outlet`)
+
+- **Target Room:** Classroom / Office wall, near student or teacher desks
+
+- **Normal State:** A plain white wall outlet faceplate, safely loaded.
+
+- **Hazardous State:** Too many devices drawing current at once — electric sparks and light smoke leak from the faceplate.
+
+- **Failure Consequence (350 ticks):** The outlet arcs and scorches the wall alight. Prevention unplugs the extra devices.
+
+### 32. Jammed Circuit Breaker Box (`berongsmp:jammed_circuit_breaker`) — distinct from #24 Overloaded Breaker Panel
+
+- **Target Room:** Utility Corridor / Electrical Room
+
+- **Normal State:** A grey breaker box, trip switch free to move.
+
+- **Hazardous State:** The trip lever has been physically jammed (a coin or matchstick wedged in it) so the breaker can't cut power on overload — dense sparking and the occasional ember drip. Unlike the *Overloaded Breaker Panel* (simply drawing more load than rated), here the safety device itself has been sabotaged.
+
+- **Failure Consequence (400 ticks):** With nothing left to trip it, the box overheats and flashes over. Prevention clears the jam so the breaker can trip again.
+
+### 33. Unsealed Solvent Shelf (`berongsmp:unsealed_solvent_shelf`) — Class B flammable liquid
+
+- **Target Room:** Art Room / Shop-Class Storage
+
+- **Normal State:** A wood shelf, solvent cans sealed and stored safely.
+
+- **Hazardous State:** Paint-thinner and lacquer cans left open on the shelf, giving off flammable vapor.
+
+- **Failure Consequence (500 ticks):** The vapor finds a spark and flashes over a **2-block radius** — the widest blast radius alongside the reagent shelf. Prevention seals the cans and moves them from any heat source.
+
+### 34. Unattended Welding Station (`berongsmp:unattended_welding_station`)
+
+- **Target Room:** Vocational Shop-Class Workshop
+
+- **Normal State:** A steel welding bench, torch off.
+
+- **Hazardous State:** The arc welder runs unattended, throwing a shower of hot spatter sparks.
+
+- **Failure Consequence (300 ticks):** Spatter ignites nearby combustibles within **2 blocks** — the widest adjacency radius of any hazard prop. Prevention shuts off the torch and clears the spatter zone.
+
+### 35. Leaking Butane Canister Stove (`berongsmp:leaking_butane_canister_stove`) — **Kitchen Class F/K**
+
+- **Target Room:** Kitchen / Canteen Prep Area
+
+- **Normal State:** A portable single-burner butane ("gasul") camp stove, canister sealed.
+
+- **Hazardous State:** Gas leaking from the canister seam — haze and an intermittent flame lick, distinct from `leaking_gas_valve`'s fixed wall LPG line.
+
+- **Failure Consequence (300 ticks):** The leak catches and flashes a **2-block radius** fire. **Only the yellow wet chemical extinguisher may defuse it** — ABC/CO2 give the wrong-tool warning. Prevention seals the canister and shuts the valve.
