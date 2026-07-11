@@ -2,15 +2,35 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/gas_pipe_metal",
-    "pipe": "berongsmp:block/gas_pipe_metal"
+    "pipe": "berongsmp:block/gas_pipe_metal",
+    "valve": "berongsmp:block/gas_valve_wheel"
   },
   "elements": [
     {
-      "from": [4, 4, 12], "to": [12, 10, 16],
+      "name": "pipe_run",
+      "from": [4, 4, 13], "to": [12, 8, 16],
       "faces": {
         "down": { "texture": "#pipe" }, "up": { "texture": "#pipe" },
         "north": { "texture": "#pipe" }, "south": { "texture": "#pipe" },
         "east": { "texture": "#pipe" }, "west": { "texture": "#pipe" }
+      }
+    },
+    {
+      "name": "elbow_rise",
+      "from": [6, 8, 13], "to": [10, 12, 16],
+      "faces": {
+        "down": { "texture": "#pipe" }, "up": { "texture": "#pipe" },
+        "north": { "texture": "#pipe" }, "south": { "texture": "#pipe" },
+        "east": { "texture": "#pipe" }, "west": { "texture": "#pipe" }
+      }
+    },
+    {
+      "name": "valve_wheel",
+      "from": [6, 5, 10], "to": [10, 9, 13],
+      "faces": {
+        "down": { "texture": "#valve" }, "up": { "texture": "#valve" },
+        "north": { "texture": "#valve" }, "south": { "texture": "#valve" },
+        "east": { "texture": "#valve" }, "west": { "texture": "#valve" }
       }
     }
   ]

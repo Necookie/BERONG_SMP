@@ -5,14 +5,16 @@
     "body": "berongsmp:block/locker_door_steel",
     "door": "berongsmp:block/fridge_door_white",
     "handle": "berongsmp:block/fixture_chrome",
-    "coils": "berongsmp:block/condenser_coil_dusty"
+    "coils": "berongsmp:block/condenser_coil_dusty",
+    "led": "berongsmp:block/hazard_warning_led",
+    "smoke": "berongsmp:block/hazard_smoke_stain"
   },
   "elements": [
     {
       "name": "body",
       "from": [1, 0, 1], "to": [15, 16, 15],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "down": { "texture": "#body" }, "up": { "texture": "#smoke" },
         "north": { "texture": "#door" }, "south": { "texture": "#body" },
         "east": { "texture": "#body" }, "west": { "texture": "#body" }
       }
@@ -23,6 +25,15 @@
       "faces": {
         "north": { "texture": "#handle" }, "south": { "texture": "#handle" },
         "east": { "texture": "#handle" }, "west": { "texture": "#handle" }
+      }
+    },
+    {
+      "name": "warning_led",
+      "from": [3, 13, 0], "to": [13, 14, 1],
+      "faces": {
+        "down": { "texture": "#led" }, "up": { "texture": "#led" },
+        "north": { "texture": "#led" }, "south": { "texture": "#led" },
+        "east": { "texture": "#led" }, "west": { "texture": "#led" }
       }
     },
     {

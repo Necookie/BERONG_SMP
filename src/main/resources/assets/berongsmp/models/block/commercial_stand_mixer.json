@@ -3,7 +3,9 @@
   "textures": {
     "particle": "berongsmp:block/mixer_body_metal",
     "body": "berongsmp:block/mixer_body_metal",
-    "bowl": "berongsmp:block/mixer_bowl_steel"
+    "bowl": "berongsmp:block/mixer_bowl_steel",
+    "dial": "berongsmp:block/hazard_ok_led",
+    "beater": "berongsmp:block/fixture_chrome"
   },
   "elements": [
     {
@@ -13,6 +15,23 @@
         "down": { "texture": "#body" }, "up": { "texture": "#body" },
         "north": { "texture": "#body" }, "south": { "texture": "#body" },
         "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "motor_dial",
+      "from": [4, 9, 1], "to": [10, 13, 2],
+      "faces": {
+        "north": { "texture": "#dial" }, "south": { "texture": "#dial" },
+        "east": { "texture": "#dial" }, "west": { "texture": "#dial" }
+      }
+    },
+    {
+      "name": "beater",
+      "from": [7, 7, 8], "to": [9, 9, 10],
+      "faces": {
+        "down": { "texture": "#beater" }, "up": { "texture": "#beater" },
+        "north": { "texture": "#beater" }, "south": { "texture": "#beater" },
+        "east": { "texture": "#beater" }, "west": { "texture": "#beater" }
       }
     },
     {
