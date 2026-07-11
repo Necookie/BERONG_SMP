@@ -14,7 +14,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class LechonRotisserieSpitBlock extends HazardFacingBlock {
 
-    private static final VoxelShape SHAPE = box(0, 0, 0, 16, 10, 16);
+    private static final VoxelShape SHAPE = box(0, 0, 0, 16, 12, 16);
 
     public LechonRotisserieSpitBlock(Properties props) { super(props); }
 

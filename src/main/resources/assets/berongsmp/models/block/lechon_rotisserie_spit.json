@@ -3,12 +3,31 @@
   "textures": {
     "particle": "berongsmp:block/rotisserie_frame",
     "frame": "berongsmp:block/rotisserie_frame",
-    "spit": "berongsmp:block/lechon_spit"
+    "spit": "berongsmp:block/lechon_spit",
+    "crank": "berongsmp:block/fixture_chrome"
   },
   "elements": [
     {
-      "name": "frame",
-      "from": [1, 0, 1], "to": [15, 6, 15],
+      "name": "trough",
+      "from": [1, 0, 1], "to": [15, 4, 15],
+      "faces": {
+        "down": { "texture": "#frame" }, "up": { "texture": "#frame" },
+        "north": { "texture": "#frame" }, "south": { "texture": "#frame" },
+        "east": { "texture": "#frame" }, "west": { "texture": "#frame" }
+      }
+    },
+    {
+      "name": "post_east",
+      "from": [1, 4, 6], "to": [3, 12, 10],
+      "faces": {
+        "down": { "texture": "#frame" }, "up": { "texture": "#frame" },
+        "north": { "texture": "#frame" }, "south": { "texture": "#frame" },
+        "east": { "texture": "#frame" }, "west": { "texture": "#frame" }
+      }
+    },
+    {
+      "name": "post_west",
+      "from": [13, 4, 6], "to": [15, 12, 10],
       "faces": {
         "down": { "texture": "#frame" }, "up": { "texture": "#frame" },
         "north": { "texture": "#frame" }, "south": { "texture": "#frame" },
@@ -17,11 +36,20 @@
     },
     {
       "name": "spit",
-      "from": [3, 6, 6], "to": [13, 10, 10],
+      "from": [1, 8, 7], "to": [15, 10, 9],
       "faces": {
         "down": { "texture": "#spit" }, "up": { "texture": "#spit" },
         "north": { "texture": "#spit" }, "south": { "texture": "#spit" },
         "east": { "texture": "#spit" }, "west": { "texture": "#spit" }
+      }
+    },
+    {
+      "name": "crank",
+      "from": [7, 8, 0], "to": [9, 10, 1],
+      "faces": {
+        "down": { "texture": "#crank" }, "up": { "texture": "#crank" },
+        "north": { "texture": "#crank" }, "south": { "texture": "#crank" },
+        "east": { "texture": "#crank" }, "west": { "texture": "#crank" }
       }
     }
   ]
