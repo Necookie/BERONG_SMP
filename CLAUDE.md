@@ -233,6 +233,11 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | `CafeteriaStoolBlock` | Round red-vinyl-seat stool on a chrome center pole and base; symmetric, no facing. |
 | `SaladBarBlock` | Refrigerated salad bar: steel body, chilled produce wells, glass sneeze guard; FACING-only. Same `CONNECTED_UP`/`CONNECTED_DOWN` stacking idiom as `ServingCounterBlock` for a full-height guard when stacked two tall. |
 | `SnackVendingMachineBlock` | Glass-front snack vending machine showing rows of packaged snacks behind the glass on metal coils, red frame, coin slot; FACING-only. `CONNECTED_UP`/`CONNECTED_DOWN` stacking (same idiom as `ServingCounterBlock`): a standalone unit is a small countertop machine, but stacking two turns it into one full-height vending machine topped with a lit `vending_marquee_header` cap (`ModBlocks.SNACK_VENDING_MACHINE`'s `lightLevel` reads `CONNECTED_DOWN` so only the top piece glows). |
+| `KitchenPrepCounterBlock` | Back-of-house stainless prep counter; FACING, not flammable. Distinct from `ServingCounterBlock` (front-line steam table + sneeze guard). |
+| `DishwashingSinkStationBlock` | Commercial triple-basin wash sink with a gooseneck sprayer; FACING, not flammable. Distinct from the small wall-mounted `SinkBlock`. |
+| `BeverageJuiceDispenserBlock` | Twin-tank gravity iced-tea/juice dispenser; FACING, not flammable. Distinct from the carbonated `SodaFountainMachineBlock` and the bottled `WaterDispenserBlock`. |
+| `CutleryNapkinCaddyBlock` | Small countertop cutlery-cup + napkin-holder caddy; symmetric, no facing. |
+| `ServingHatchWindowBlock` | Wall-mounted kitchen-to-line pass-through hatch; FACING, not flammable. A wall fixture, distinct from any freestanding counter. |
 | `FireBlanketItem` | One-shot smothering tool: used while on fire clears the player's fire ticks instantly; used on a hazardous kitchen/grease prop (`AbstractExtinguisherItem.isKitchenHazard`) smothers it via `HazardManager.defuse` — a valid Class F/K response distinct from a dry-chemical blast. 3 uses (durability), not auto-issued. |
 | `FirstAidKitItem` | Heals 3 hearts, clears negative effects, applies a brief Slowness ("treatment time"). 5 uses. |
 | `MegaphoneItem` | Instructor tool (OP level 2): broadcasts an evacuation chat line + klaxon to every player within 30 blocks, 5s cooldown. |
