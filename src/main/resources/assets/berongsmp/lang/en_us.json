@@ -149,6 +149,14 @@
   "block.berongsmp.basketball_hoop": "Basketball Hoop",
   "item.berongsmp.basketball": "Basketball",
   "block.berongsmp.table": "Table",
+  "block.berongsmp.table.desc": "An extendable study/library table. Push two together to merge them into one longer table.",
+  "block.berongsmp.court_line.desc": "A white court-marking line that auto-connects to neighboring lines.",
+  "block.berongsmp.badminton_net_post.desc": "Place two facing each other to auto-fill a net between them.",
+  "block.berongsmp.badminton_net_mesh.desc": "An auto-filled net panel — not normally placed by hand.",
+  "block.berongsmp.basketball_hoop_post.desc": "The base of a basketball hoop stand. Place a hoop above it to auto-fill the pole.",
+  "block.berongsmp.basketball_pole.desc": "An auto-filled pole segment — not normally placed by hand.",
+  "block.berongsmp.basketball_hoop.desc": "A backboard, rim, and net. Auto-fills the pole down to the nearest post below it.",
+  "item.berongsmp.basketball.desc": "A basketball for pickup games on the court.",
 
   "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
 
