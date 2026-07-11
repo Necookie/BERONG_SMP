@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "hazardous=false,on_fire=false": { "model": "berongsmp:block/garbage_disposal_unit" },
+    "hazardous=false,on_fire=true": { "model": "berongsmp:block/garbage_disposal_unit_hazardous" },
+    "hazardous=true,on_fire=false": { "model": "berongsmp:block/garbage_disposal_unit_hazardous" },
+    "hazardous=true,on_fire=true": { "model": "berongsmp:block/garbage_disposal_unit_hazardous" }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/uv_lamp_glow",
+    "body": "berongsmp:block/cabinet_body_graphite",
+    "window": "berongsmp:block/uv_lamp_glow"
+  },
+  "elements": [
+    {
+      "from": [2, 4, 13], "to": [14, 12, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#window" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

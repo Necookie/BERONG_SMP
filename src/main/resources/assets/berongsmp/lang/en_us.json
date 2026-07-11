@@ -293,5 +293,16 @@
   "block.berongsmp.grease_duct_run": "Kitchen Exhaust Duct",
   "block.berongsmp.grease_duct_run.desc": "Place on a kitchen ceiling above the cooking line. Grease caked inside the ductwork can catch fire — a hidden hazard distinct from the range hood below it. Requires the wet chemical extinguisher.",
   "block.berongsmp.commercial_dish_sanitizer": "Dish Sanitizer",
-  "block.berongsmp.commercial_dish_sanitizer.desc": "Place under a kitchen counter run. A dry-boiled heating element and steam seeping into the control board can spark a fire — a Class C fire. Any extinguisher defuses it."
+  "block.berongsmp.commercial_dish_sanitizer.desc": "Place under a kitchen counter run. A dry-boiled heating element and steam seeping into the control board can spark a fire — a Class C fire. Any extinguisher defuses it.",
+
+  "block.berongsmp.garbage_disposal_unit": "Sink Garbage Disposal",
+  "block.berongsmp.garbage_disposal_unit.desc": "Place beneath a sink block. A utensil-jammed grinder can burn out its motor — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.knife_sterilizer_cabinet": "UV Knife Sterilizer",
+  "block.berongsmp.knife_sterilizer_cabinet.desc": "Place on a kitchen wall to sanitize knives and utensils. An overheated UV-lamp ballast can scorch the housing — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.sterno_steam_table": "Chafing Steam Table",
+  "block.berongsmp.sterno_steam_table.desc": "Place on a buffet/serving line. Unattended gel-fuel (Sterno) chafing burners can flare up. Any extinguisher defuses it.",
+  "block.berongsmp.convection_oven": "Electric Convection Oven",
+  "block.berongsmp.convection_oven.desc": "Place in a culinary classroom baking area. A shorted heating element and fan motor behind a failed door gasket can catch fire — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.lechon_rotisserie_spit": "Lechon Rotisserie",
+  "block.berongsmp.lechon_rotisserie_spit.desc": "Place in an outdoor/covered cooking area for a charcoal spit roast. Fat dripping onto unattended coals can flare up. Requires the wet chemical extinguisher."
 }

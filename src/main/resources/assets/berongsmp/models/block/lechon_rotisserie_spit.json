@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/rotisserie_frame",
+    "frame": "berongsmp:block/rotisserie_frame",
+    "spit": "berongsmp:block/lechon_spit"
+  },
+  "elements": [
+    {
+      "name": "frame",
+      "from": [1, 0, 1], "to": [15, 6, 15],
+      "faces": {
+        "down": { "texture": "#frame" }, "up": { "texture": "#frame" },
+        "north": { "texture": "#frame" }, "south": { "texture": "#frame" },
+        "east": { "texture": "#frame" }, "west": { "texture": "#frame" }
+      }
+    },
+    {
+      "name": "spit",
+      "from": [3, 6, 6], "to": [13, 10, 10],
+      "faces": {
+        "down": { "texture": "#spit" }, "up": { "texture": "#spit" },
+        "north": { "texture": "#spit" }, "south": { "texture": "#spit" },
+        "east": { "texture": "#spit" }, "west": { "texture": "#spit" }
+      }
+    }
+  ]
+}

@@ -1381,6 +1381,76 @@ def tex_dishmachine_door_steel():
     save(im, "dishmachine_door_steel")
 
 
+def tex_disposal_unit_metal():
+    im = new_canvas((150, 152, 155))
+    gradient_shade(im, 0, 0, 15, 15, (150, 152, 155), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (180, 182, 185), (95, 97, 100))
+    rect(im, 5, 5, 10, 10, (100, 102, 105))
+    border(im, (80, 82, 85))
+    save(im, "disposal_unit_metal")
+
+
+def tex_uv_lamp_glow():
+    im = new_canvas((30, 10, 45))
+    rect(im, 2, 2, 13, 13, (60, 20, 90))
+    rect(im, 4, 4, 11, 11, (140, 60, 200))
+    rect(im, 6, 6, 9, 9, (210, 150, 255))
+    speckle(im, [(230, 190, 255), (100, 40, 160)], density=0.12, x0=2, y0=2, x1=13, y1=13)
+    border(im, (20, 8, 30))
+    save(im, "uv_lamp_glow")
+
+
+def tex_sterno_can_blue():
+    im = new_canvas((90, 92, 95))
+    gradient_shade(im, 0, 6, 15, 15, (90, 92, 95), light=1.1, dark=0.85)
+    rect(im, 3, 8, 12, 14, (110, 112, 116))  # can body
+    rect(im, 4, 3, 11, 8, (60, 130, 220))  # blue gel flame
+    rect(im, 6, 2, 9, 4, (140, 190, 255))
+    border(im, (50, 52, 55))
+    save(im, "sterno_can_blue")
+
+
+def tex_chafing_pan_steel():
+    im = new_canvas((175, 178, 182))
+    gradient_shade(im, 0, 0, 15, 15, (175, 178, 182), light=1.1, dark=0.88)
+    inset_edges(im, 0, 0, 15, 15, (205, 208, 212), (110, 113, 117))
+    rect(im, 2, 2, 13, 13, (195, 197, 200))
+    save(im, "chafing_pan_steel")
+
+
+def tex_convection_oven_door():
+    im = new_canvas((160, 163, 167))
+    gradient_shade(im, 0, 0, 15, 15, (160, 163, 167), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (195, 198, 202), (90, 93, 97))
+    rect(im, 3, 3, 12, 10, (50, 52, 56))  # window
+    rect(im, 6, 5, 9, 8, (110, 112, 116))  # fan hub visible through window
+    save(im, "convection_oven_door")
+
+
+def tex_charcoal_bed_glow():
+    im = new_canvas((30, 10, 4))
+    rect(im, 0, 0, 15, 15, (25, 8, 4))
+    speckle(im, [(230, 90, 20), (255, 160, 40), (120, 30, 8)], density=0.4)
+    rect(im, 4, 6, 11, 9, (255, 190, 90))
+    save(im, "charcoal_bed_glow")
+
+
+def tex_rotisserie_frame():
+    im = new_canvas((90, 90, 92))
+    gradient_shade(im, 0, 0, 15, 15, (90, 90, 92), light=1.15, dark=0.8)
+    inset_edges(im, 0, 0, 15, 15, (120, 120, 124), (50, 50, 52))
+    border(im, (40, 40, 42))
+    save(im, "rotisserie_frame")
+
+
+def tex_lechon_spit():
+    im = new_canvas((165, 130, 90))
+    gradient_shade(im, 2, 4, 13, 12, (165, 130, 90), light=1.15, dark=0.8)
+    speckle(im, [(190, 150, 100), (120, 90, 60), (210, 170, 120)], density=0.2, x0=2, y0=4, x1=13, y1=12)
+    rect(im, 6, 1, 9, 3, (90, 90, 92))  # spit rod
+    save(im, "lechon_spit")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -1434,6 +1504,11 @@ ALL = [
     tex_urn_body_steel,
     tex_flour_sacks_white,
     tex_dishmachine_door_steel,
+    tex_disposal_unit_metal,
+    tex_uv_lamp_glow,
+    tex_sterno_can_blue, tex_chafing_pan_steel,
+    tex_convection_oven_door,
+    tex_charcoal_bed_glow, tex_rotisserie_frame, tex_lechon_spit,
 ]
 
 if __name__ == "__main__":
