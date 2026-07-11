@@ -101,6 +101,11 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SNACK_VENDING_MACHINE_ITEM.get());
                 output.accept(ModItems.CAFETERIA_MENU_BOARD_ITEM.get());
                 output.accept(ModItems.CAFETERIA_TRASH_BIN_ITEM.get());
+                output.accept(ModItems.KITCHEN_PREP_COUNTER_ITEM.get());
+                output.accept(ModItems.DISHWASHING_SINK_STATION_ITEM.get());
+                output.accept(ModItems.BEVERAGE_JUICE_DISPENSER_ITEM.get());
+                output.accept(ModItems.CUTLERY_NAPKIN_CADDY_ITEM.get());
+                output.accept(ModItems.SERVING_HATCH_WINDOW_ITEM.get());
             }).build());
 
     /** Creative tab: all 30 hazard prop blocks for the simulation building. */

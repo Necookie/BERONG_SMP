@@ -534,6 +534,21 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> SNACK_VENDING_MACHINE_ITEM =
             ITEMS.registerSimpleBlockItem("snack_vending_machine", ModBlocks.SNACK_VENDING_MACHINE);
 
+    public static final DeferredItem<BlockItem> KITCHEN_PREP_COUNTER_ITEM =
+            ITEMS.registerSimpleBlockItem("kitchen_prep_counter", ModBlocks.KITCHEN_PREP_COUNTER);
+
+    public static final DeferredItem<BlockItem> DISHWASHING_SINK_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("dishwashing_sink_station", ModBlocks.DISHWASHING_SINK_STATION);
+
+    public static final DeferredItem<BlockItem> BEVERAGE_JUICE_DISPENSER_ITEM =
+            ITEMS.registerSimpleBlockItem("beverage_juice_dispenser", ModBlocks.BEVERAGE_JUICE_DISPENSER);
+
+    public static final DeferredItem<BlockItem> CUTLERY_NAPKIN_CADDY_ITEM =
+            ITEMS.registerSimpleBlockItem("cutlery_napkin_caddy", ModBlocks.CUTLERY_NAPKIN_CADDY);
+
+    public static final DeferredItem<BlockItem> SERVING_HATCH_WINDOW_ITEM =
+            ITEMS.registerSimpleBlockItem("serving_hatch_window", ModBlocks.SERVING_HATCH_WINDOW);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -609,6 +624,11 @@ public final class ModItems {
         ALL_ITEM_MAP.put("computer_lab_desk_row", COMPUTER_LAB_DESK_ROW_ITEM);
         ALL_ITEM_MAP.put("library_study_carrel", LIBRARY_STUDY_CARREL_ITEM);
         ALL_ITEM_MAP.put("rolling_book_cart", ROLLING_BOOK_CART_ITEM);
+        ALL_ITEM_MAP.put("kitchen_prep_counter", KITCHEN_PREP_COUNTER_ITEM);
+        ALL_ITEM_MAP.put("dishwashing_sink_station", DISHWASHING_SINK_STATION_ITEM);
+        ALL_ITEM_MAP.put("beverage_juice_dispenser", BEVERAGE_JUICE_DISPENSER_ITEM);
+        ALL_ITEM_MAP.put("cutlery_napkin_caddy", CUTLERY_NAPKIN_CADDY_ITEM);
+        ALL_ITEM_MAP.put("serving_hatch_window", SERVING_HATCH_WINDOW_ITEM);
         ALL_ITEM_MAP.put("fire_blanket", FIRE_BLANKET);
         ALL_ITEM_MAP.put("first_aid_kit", FIRST_AID_KIT);
         ALL_ITEM_MAP.put("megaphone", MEGAPHONE);

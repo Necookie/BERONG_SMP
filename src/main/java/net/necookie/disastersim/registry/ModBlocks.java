@@ -53,6 +53,11 @@ import net.necookie.disastersim.block.ScienceLabWorkbenchBlock;
 import net.necookie.disastersim.block.ComputerLabDeskRowBlock;
 import net.necookie.disastersim.block.LibraryStudyCarrelBlock;
 import net.necookie.disastersim.block.RollingBookCartBlock;
+import net.necookie.disastersim.block.KitchenPrepCounterBlock;
+import net.necookie.disastersim.block.DishwashingSinkStationBlock;
+import net.necookie.disastersim.block.BeverageJuiceDispenserBlock;
+import net.necookie.disastersim.block.CutleryNapkinCaddyBlock;
+import net.necookie.disastersim.block.ServingHatchWindowBlock;
 import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.block.ToiletBlock;
@@ -644,6 +649,36 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(SnackVendingMachineBlock.CONNECTED_DOWN) ? 4 : 0));
+
+    /** Kitchen Prep Counter — see {@link KitchenPrepCounterBlock}. */
+    public static final DeferredBlock<KitchenPrepCounterBlock> KITCHEN_PREP_COUNTER = BLOCKS.registerBlock(
+            "kitchen_prep_counter", KitchenPrepCounterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Dishwashing Sink Station — see {@link DishwashingSinkStationBlock}. */
+    public static final DeferredBlock<DishwashingSinkStationBlock> DISHWASHING_SINK_STATION = BLOCKS.registerBlock(
+            "dishwashing_sink_station", DishwashingSinkStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Iced-Tea / Juice Dispenser — see {@link BeverageJuiceDispenserBlock}. */
+    public static final DeferredBlock<BeverageJuiceDispenserBlock> BEVERAGE_JUICE_DISPENSER = BLOCKS.registerBlock(
+            "beverage_juice_dispenser", BeverageJuiceDispenserBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Cutlery & Napkin Caddy — see {@link CutleryNapkinCaddyBlock}. */
+    public static final DeferredBlock<CutleryNapkinCaddyBlock> CUTLERY_NAPKIN_CADDY = BLOCKS.registerBlock(
+            "cutlery_napkin_caddy", CutleryNapkinCaddyBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Serving Hatch Window — see {@link ServingHatchWindowBlock}. */
+    public static final DeferredBlock<ServingHatchWindowBlock> SERVING_HATCH_WINDOW = BLOCKS.registerBlock(
+            "serving_hatch_window", ServingHatchWindowBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
     /** Disguised light source — looks/sounds/burns exactly like vanilla oak planks — see {@link GlowingOakPlanksBlock}. */
     public static final DeferredBlock<GlowingOakPlanksBlock> GLOWING_OAK_PLANKS = BLOCKS.registerBlock(
