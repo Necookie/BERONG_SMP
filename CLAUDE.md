@@ -218,6 +218,11 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 | `BlackboardBlock` | Green chalkboard with tray, `WhiteboardBlock`'s traditional sibling (extends `FlammableFacingBlock`, wood frame). |
 | `PodiumLecternBlock` | Wooden speaker's podium with the school seal (extends `FlammableFacingBlock`); stage/classroom front. |
 | `ClassroomGlobeBlock` | Desk globe on a dark stand; geography-corner decor, no FACING model split needed beyond orientation. |
+| `ModernStudentDeskBlock` | Individual laminate-top student desk on slim black metal legs with a small under-desk book shelf, no built-in seat (pairs with the existing modern `ChairBlock`); FACING, flammable. Distinct from `ArmchairDeskBlock` (built-in seat + writing arm, classic PH wood style). |
+| `ScienceLabWorkbenchBlock` | Chemical-resistant lab bench (graphite epoxy-look top) with a corner gas-tap nub; FACING, not flammable. Surface for `BunsenBurnerStationBlock`/`ReagentStorageShelfBlock` to sit on. |
+| `ComputerLabDeskRowBlock` | Long laminate desk with a raised monitor-divider back edge; FACING, flammable. Simplified from the original self-connecting-run concept to a single-unit desk (no `TableBlock`-style neighbour state). |
+| `LibraryStudyCarrelBlock` | Partitioned individual study cubicle — desk surface with tall back+side privacy panels; FACING, flammable. |
+| `RollingBookCartBlock` | Wheeled two-shelf book-return trolley; FACING, flammable — extra fuel-load prop for library fire drills. |
 | `CafeteriaTableBlock` | Long lunch table with attached molded-plastic bench seats on both sides, laminate top, steel tube frame, two end legs + crossbar (extends `FlammableFacingBlock`). |
 | `TrayStackBlock` | Stack of 3 distinct colored (green/blue/orange) glossy plastic lunch trays with compartment-groove texture, divided by light plastic rims; symmetric, no facing. |
 | `ServingCounterBlock` | Brushed-steel steam-table serving counter with recessed food wells and a glass sneeze guard; FACING-only. Carries `CONNECTED_UP`/`CONNECTED_DOWN` (same idiom as `WhiteboardBlock`) — stacking a second counter directly on top swaps in `serving_counter_bottom`/`_top`/`_middle` models so the short standalone sneeze guard becomes one continuous full-height guard rising out of the counter below. |
