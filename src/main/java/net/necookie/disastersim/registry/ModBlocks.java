@@ -48,6 +48,11 @@ import net.necookie.disastersim.block.FireHoseCabinetBlock;
 import net.necookie.disastersim.block.GlowingOakPlanksBlock;
 import net.necookie.disastersim.block.LightBulbBlock;
 import net.necookie.disastersim.block.LockerBlock;
+import net.necookie.disastersim.block.ModernStudentDeskBlock;
+import net.necookie.disastersim.block.ScienceLabWorkbenchBlock;
+import net.necookie.disastersim.block.ComputerLabDeskRowBlock;
+import net.necookie.disastersim.block.LibraryStudyCarrelBlock;
+import net.necookie.disastersim.block.RollingBookCartBlock;
 import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.block.ToiletBlock;
@@ -516,6 +521,36 @@ public final class ModBlocks {
             "classroom_globe", ClassroomGlobeBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.COLOR_BLUE)
                     .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Modern Single-Seat Student Desk — see {@link ModernStudentDeskBlock}. */
+    public static final DeferredBlock<ModernStudentDeskBlock> MODERN_STUDENT_DESK = BLOCKS.registerBlock(
+            "modern_student_desk", ModernStudentDeskBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Science Lab Workbench — see {@link ScienceLabWorkbenchBlock}. */
+    public static final DeferredBlock<ScienceLabWorkbenchBlock> SCIENCE_LAB_WORKBENCH = BLOCKS.registerBlock(
+            "science_lab_workbench", ScienceLabWorkbenchBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(2.0f, 4.0f).sound(SoundType.STONE).noOcclusion());
+
+    /** Computer Lab Desk Row — see {@link ComputerLabDeskRowBlock}. */
+    public static final DeferredBlock<ComputerLabDeskRowBlock> COMPUTER_LAB_DESK_ROW = BLOCKS.registerBlock(
+            "computer_lab_desk_row", ComputerLabDeskRowBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Library Study Carrel — see {@link LibraryStudyCarrelBlock}. */
+    public static final DeferredBlock<LibraryStudyCarrelBlock> LIBRARY_STUDY_CARREL = BLOCKS.registerBlock(
+            "library_study_carrel", LibraryStudyCarrelBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Rolling Book Cart — see {@link RollingBookCartBlock}. */
+    public static final DeferredBlock<RollingBookCartBlock> ROLLING_BOOK_CART = BLOCKS.registerBlock(
+            "rolling_book_cart", RollingBookCartBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
 
     /** Emergency Exit Sign — see {@link ExitSignBlock}. */
     public static final DeferredBlock<ExitSignBlock> EXIT_SIGN = BLOCKS.registerBlock(

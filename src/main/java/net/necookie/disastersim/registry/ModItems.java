@@ -459,6 +459,21 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> CLASSROOM_GLOBE_ITEM =
             ITEMS.registerSimpleBlockItem("classroom_globe", ModBlocks.CLASSROOM_GLOBE);
 
+    public static final DeferredItem<BlockItem> MODERN_STUDENT_DESK_ITEM =
+            ITEMS.registerSimpleBlockItem("modern_student_desk", ModBlocks.MODERN_STUDENT_DESK);
+
+    public static final DeferredItem<BlockItem> SCIENCE_LAB_WORKBENCH_ITEM =
+            ITEMS.registerSimpleBlockItem("science_lab_workbench", ModBlocks.SCIENCE_LAB_WORKBENCH);
+
+    public static final DeferredItem<BlockItem> COMPUTER_LAB_DESK_ROW_ITEM =
+            ITEMS.registerSimpleBlockItem("computer_lab_desk_row", ModBlocks.COMPUTER_LAB_DESK_ROW);
+
+    public static final DeferredItem<BlockItem> LIBRARY_STUDY_CARREL_ITEM =
+            ITEMS.registerSimpleBlockItem("library_study_carrel", ModBlocks.LIBRARY_STUDY_CARREL);
+
+    public static final DeferredItem<BlockItem> ROLLING_BOOK_CART_ITEM =
+            ITEMS.registerSimpleBlockItem("rolling_book_cart", ModBlocks.ROLLING_BOOK_CART);
+
     public static final DeferredItem<FireBlanketItem> FIRE_BLANKET = ITEMS.registerItem("fire_blanket",
             props -> new FireBlanketItem(props.durability(3)));
 
@@ -589,6 +604,11 @@ public final class ModItems {
         ALL_ITEM_MAP.put("blackboard", BLACKBOARD_ITEM);
         ALL_ITEM_MAP.put("podium_lectern", PODIUM_LECTERN_ITEM);
         ALL_ITEM_MAP.put("classroom_globe", CLASSROOM_GLOBE_ITEM);
+        ALL_ITEM_MAP.put("modern_student_desk", MODERN_STUDENT_DESK_ITEM);
+        ALL_ITEM_MAP.put("science_lab_workbench", SCIENCE_LAB_WORKBENCH_ITEM);
+        ALL_ITEM_MAP.put("computer_lab_desk_row", COMPUTER_LAB_DESK_ROW_ITEM);
+        ALL_ITEM_MAP.put("library_study_carrel", LIBRARY_STUDY_CARREL_ITEM);
+        ALL_ITEM_MAP.put("rolling_book_cart", ROLLING_BOOK_CART_ITEM);
         ALL_ITEM_MAP.put("fire_blanket", FIRE_BLANKET);
         ALL_ITEM_MAP.put("first_aid_kit", FIRST_AID_KIT);
         ALL_ITEM_MAP.put("megaphone", MEGAPHONE);
