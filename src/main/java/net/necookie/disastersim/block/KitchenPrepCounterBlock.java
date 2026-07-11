@@ -7,7 +7,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** Back-of-house stainless prep counter with a cutting board; FACING-only, not flammable (steel). */
 public class KitchenPrepCounterBlock extends HorizontalFacingBlock {
 
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
+    private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 16, 12);
 
     public KitchenPrepCounterBlock(Properties props) {
         super(props);

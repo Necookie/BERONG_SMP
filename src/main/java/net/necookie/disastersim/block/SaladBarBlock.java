@@ -24,7 +24,7 @@ public class SaladBarBlock extends HorizontalFacingBlock {
     public static final BooleanProperty CONNECTED_UP   = BooleanProperty.create("connected_up");
     public static final BooleanProperty CONNECTED_DOWN = BooleanProperty.create("connected_down");
 
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
+    private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 16, 12);
 
     public SaladBarBlock(Properties props) {
         super(props);

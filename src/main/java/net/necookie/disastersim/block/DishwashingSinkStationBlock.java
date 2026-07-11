@@ -7,7 +7,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** Commercial triple-basin wash sink with a gooseneck sprayer; FACING-only, not flammable (steel/ceramic). */
 public class DishwashingSinkStationBlock extends HorizontalFacingBlock {
 
-    private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 16, 16);
+    private static final VoxelShape SHAPE = Block.box(4, 0, 4, 12, 16, 12);
 
     public DishwashingSinkStationBlock(Properties props) {
         super(props);
