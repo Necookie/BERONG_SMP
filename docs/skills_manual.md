@@ -16,6 +16,7 @@ How to drive Claude Code on this repo with the project skills in `.claude/skills
 | `/neoforge` | This repo's NeoForge 26.1.2 conventions and crash traps | Before any change to blocks/items/entities/packets/registrations |
 | **Content pipelines (thesis)** | | |
 | `/new-hazard-prop <name> [facing] [kitchen]` | Full checklist for a new 3-state hazard prop block | Adding a new campus fire hazard to the simulation |
+| `/new-furniture-prop <name> [facing] [flammable]` | Full checklist for a new furniture/decor block | Adding a new placeable prop with no hazard lifecycle |
 | `/new-extinguisher <name> <class>` | Full checklist for a new extinguisher item | Adding a new BFP-class suppression tool |
 | **Scaffolds & audits** | | |
 | `/new-command <name> [op] [arg:<type>]` | Scaffold a Brigadier command in the right command file | Adding any `/command` |
