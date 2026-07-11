@@ -75,6 +75,10 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
             if (HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
                 warnWrongTool(sp, "§c✗ Dry chemical won't safely smother a grease fire — use the §eyellow wet chemical extinguisher§c!");
             }
+        } else if (isOxidizerHazard(state.getBlock())) {
+            if (HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+                warnWrongTool(sp, "§c✗ Dry chemical isn't reliable on an oxidizer-enriched fire — use the §bCO2 extinguisher§c!");
+            }
         } else {
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;
             extinguished = HazardManager.defuse(level, hazardSession, pos);

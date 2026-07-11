@@ -62,6 +62,14 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
             level.destroyBlock(pos, false);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
+        } else if (isOxidizerHazard(state.getBlock())) {
+            if (HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+                warnWrongTool(sp, "§c✗ Wet chemical is doubly wrong on an oxidizer-enriched fire — use the §bCO2 extinguisher§c!");
+            }
+        } else if (isWetChemicalUnsafe(state.getBlock())) {
+            if (HazardManager.isHazardous(state) && user instanceof ServerPlayer sp) {
+                warnWrongTool(sp, "§c✗ Wet chemical is for grease fires — this is a live electrical/vapor hazard, use §eABC or CO2§c!");
+            }
         } else {
             wasKitchenHazard = isKitchenHazard(state.getBlock());
             SimulationSession hazardSession = user instanceof ServerPlayer sp ? SimulationManager.getSession(sp.getUUID()) : null;

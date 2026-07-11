@@ -68,6 +68,34 @@ public abstract class AbstractExtinguisherItem extends Item {
             "leaking_butane_canister_stove", "corroded_gas_line_joint", "gas_range_stuck_burner",
             "gas_deck_oven", "grease_duct_run", "lechon_rotisserie_spit");
 
+    /**
+     * The 28 Conference Room / Office / Laboratory hazard props (props 56–85, minus
+     * {@code smoldering_planter} and {@code leaking_oxygen_cylinder}) that are energized-electrical
+     * or flammable-vapor hazards — real-world Class C/B fires where an aqueous wet-chemical agent
+     * is the wrong (and unsafe, conductive) tool. {@link WetChemicalExtinguisherItem} refuses these;
+     * ABC and CO2 remain valid, mirroring how {@link #KITCHEN_HAZARD_IDS} inverts the exclusion for
+     * grease fires.
+     */
+    protected static final Set<String> WET_CHEMICAL_UNSAFE_IDS = Set.of(
+            "portable_space_heater", "halogen_floor_lamp", "jammed_projection_screen",
+            "overheating_video_wall", "aerosol_freshener_dispenser", "smothered_laptop",
+            "pinched_tv_cord", "venting_ups_battery", "faulty_dimmer_switch",
+            "jammed_paper_shredder", "overheated_network_cabinet", "ebike_charging_station",
+            "failing_fluorescent_ballast", "dry_aquarium_heater", "unattended_mug_warmer",
+            "dusty_crt_monitor", "rodent_chewed_wiring", "overheating_cctv_dvr",
+            "faulty_parol_lantern", "unbalanced_centrifuge", "runaway_3d_printer",
+            "unattended_soldering_iron", "unshielded_test_laser", "shorted_bench_supply",
+            "overheated_vacuum_pump", "stuck_environment_chamber", "solvent_drying_oven",
+            "faulty_dehumidifier");
+
+    /**
+     * {@code leaking_oxygen_cylinder} (prop 80) — an oxidizer-enrichment hazard, not a fuel-gas leak.
+     * Real-world guidance: dry-chemical agents are not reliable against an oxidizer-fed fire, and a
+     * wet-chemical agent is doubly wrong. Only CO2 (dilutes/displaces the excess oxygen) may defuse
+     * it — both {@link FireExtinguisherItem} and {@link WetChemicalExtinguisherItem} refuse.
+     */
+    protected static final Set<String> OXIDIZER_HAZARD_IDS = Set.of("leaking_oxygen_cylinder");
+
     private static final Map<UUID, Long> lastWrongToolWarningTick = new ConcurrentHashMap<>();
     private static final long WRONG_TOOL_WARNING_COOLDOWN_TICKS = 60L;
 
@@ -235,6 +263,16 @@ public abstract class AbstractExtinguisherItem extends Item {
     /** True if {@code block} is one of the five Class F/K cafeteria/kitchen hazard props. */
     public static boolean isKitchenHazard(Block block) {
         return KITCHEN_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
+    }
+
+    /** True if {@code block} is an energized-electrical/flammable-vapor prop unsafe for wet chemical. */
+    public static boolean isWetChemicalUnsafe(Block block) {
+        return WET_CHEMICAL_UNSAFE_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
+    }
+
+    /** True if {@code block} is an oxidizer-enrichment hazard (CO2 only). */
+    public static boolean isOxidizerHazard(Block block) {
+        return OXIDIZER_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
     }
 
     /** Sends a "wrong tool" chat warning, throttled per-player to once every {@link #WRONG_TOOL_WARNING_COOLDOWN_TICKS}. */
