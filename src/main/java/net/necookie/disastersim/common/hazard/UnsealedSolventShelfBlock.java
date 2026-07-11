@@ -1,15 +1,24 @@
 package net.necookie.disastersim.common.hazard;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /** Art/shop-room shelf of unsealed paint-thinner and lacquer cans, giving off flammable vapor. */
-public class UnsealedSolventShelfBlock extends HazardBlock {
+public class UnsealedSolventShelfBlock extends HazardFacingBlock {
+
+    private static final VoxelShape SHAPE = box(1, 0, 8, 15, 16, 16);
 
     public UnsealedSolventShelfBlock(Properties props) { super(props); }
+
+    @Override
+    protected VoxelShape shapeFor(Direction facing) {
+        return SHAPE;
+    }
 
     @Override
     protected void spawnHazardParticles(Level level, BlockPos pos, BlockState state, RandomSource rand) {

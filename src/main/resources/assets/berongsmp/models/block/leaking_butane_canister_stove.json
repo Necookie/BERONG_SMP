@@ -16,8 +16,17 @@
       }
     },
     {
+      "name": "burner_top",
+      "from": [4, 4, 4], "to": [12, 6, 12],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
       "name": "canister",
-      "from": [5, 4, 5], "to": [11, 8, 11],
+      "from": [13, 1, 5], "to": [16, 4, 11],
       "faces": {
         "down": { "texture": "#canister" }, "up": { "texture": "#canister" },
         "north": { "texture": "#canister" }, "south": { "texture": "#canister" },

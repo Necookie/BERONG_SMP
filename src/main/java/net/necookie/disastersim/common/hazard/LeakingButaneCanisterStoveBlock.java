@@ -14,7 +14,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  */
 public class LeakingButaneCanisterStoveBlock extends HazardFacingBlock {
 
-    private static final VoxelShape SHAPE = box(3, 0, 3, 13, 8, 13);
+    // Full-footprint bounding box: the canister now protrudes asymmetrically toward one side
+    // (to make FACING visually legible), so a single conservative box avoids per-rotation math.
+    private static final VoxelShape SHAPE = box(0, 0, 0, 16, 6, 16);
 
     public LeakingButaneCanisterStoveBlock(Properties props) { super(props); }
 

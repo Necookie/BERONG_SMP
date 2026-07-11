@@ -2,16 +2,36 @@
   "parent": "minecraft:block/block",
   "textures": {
     "particle": "berongsmp:block/hood_steel_clean",
-    "body": "berongsmp:block/hood_steel_clean"
+    "body": "berongsmp:block/hood_steel_clean",
+    "panel": "berongsmp:block/breaker_panel_body",
+    "torch": "berongsmp:block/gas_pipe_metal"
   },
   "elements": [
     {
       "name": "bench",
-      "from": [1, 0, 1], "to": [15, 10, 15],
+      "from": [1, 0, 1], "to": [15, 8, 15],
       "faces": {
         "down": { "texture": "#body" }, "up": { "texture": "#body" },
         "north": { "texture": "#body" }, "south": { "texture": "#body" },
         "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "welder_unit",
+      "from": [3, 8, 3], "to": [9, 13, 9],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#panel" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "torch_head",
+      "from": [10, 8, 10], "to": [12, 14, 12],
+      "faces": {
+        "down": { "texture": "#torch" }, "up": { "texture": "#torch" },
+        "north": { "texture": "#torch" }, "south": { "texture": "#torch" },
+        "east": { "texture": "#torch" }, "west": { "texture": "#torch" }
       }
     }
   ]
