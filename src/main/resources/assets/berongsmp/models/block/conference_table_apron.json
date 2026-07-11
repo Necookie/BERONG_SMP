@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "apron": "berongsmp:block/conf_table_leg",
+    "particle": "berongsmp:block/conf_table_leg"
+  },
+  "elements": [
+    {
+      "name": "apron_north",
+      "from": [1, 8, 0], "to": [15, 12, 1],
+      "faces": {
+        "north": { "texture": "#apron", "uv": [1, 4, 15, 8] },
+        "south": { "texture": "#apron", "uv": [1, 4, 15, 8] },
+        "east":  { "texture": "#apron", "uv": [0, 4, 1, 8] },
+        "west":  { "texture": "#apron", "uv": [0, 4, 1, 8] },
+        "up":    { "texture": "#apron", "uv": [1, 0, 15, 1] },
+        "down":  { "texture": "#apron", "uv": [1, 0, 15, 1] }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/conf_credenza_wood",
+    "wood": "berongsmp:block/conf_credenza_wood",
+    "front": "berongsmp:block/conf_credenza_front"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 1], "to": [16, 10, 15],
+      "faces": {
+        "up":    { "texture": "#wood" },
+        "down":  { "texture": "#wood" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#wood" },
+        "east":  { "texture": "#wood" },
+        "west":  { "texture": "#wood" }
+      }
+    }
+  ]
+}

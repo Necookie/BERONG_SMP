@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/window_blinds_slats",
+    "slats": "berongsmp:block/window_blinds_slats"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 15], "to": [16, 16, 16],
+      "faces": {
+        "up":    { "texture": "#slats" },
+        "down":  { "texture": "#slats" },
+        "north": { "texture": "#slats" },
+        "south": { "texture": "#slats" },
+        "east":  { "texture": "#slats" },
+        "west":  { "texture": "#slats" }
+      }
+    }
+  ]
+}

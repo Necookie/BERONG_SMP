@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/window_blinds" },
+    "facing=south": { "model": "berongsmp:block/window_blinds", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/window_blinds", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/window_blinds", "y": 270 }
+  }
+}

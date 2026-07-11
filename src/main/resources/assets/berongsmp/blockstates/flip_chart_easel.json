@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/flip_chart_easel" },
+    "facing=south": { "model": "berongsmp:block/flip_chart_easel", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/flip_chart_easel", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/flip_chart_easel", "y": 270 }
+  }
+}

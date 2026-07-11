@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/glass_partition_pane",
+    "pane": "berongsmp:block/glass_partition_pane"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 7], "to": [16, 16, 9],
+      "faces": {
+        "up":    { "texture": "#pane" },
+        "down":  { "texture": "#pane" },
+        "north": { "texture": "#pane" },
+        "south": { "texture": "#pane" },
+        "east":  { "texture": "#pane" },
+        "west":  { "texture": "#pane" }
+      }
+    }
+  ]
+}

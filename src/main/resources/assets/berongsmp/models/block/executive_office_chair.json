@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/exec_chair_leather",
+    "leather": "berongsmp:block/exec_chair_leather",
+    "frame": "berongsmp:block/exec_chair_frame"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 16, 13],
+      "faces": {
+        "up":    { "texture": "#leather" },
+        "down":  { "texture": "#frame" },
+        "north": { "texture": "#leather" },
+        "south": { "texture": "#frame" },
+        "east":  { "texture": "#frame" },
+        "west":  { "texture": "#frame" }
+      }
+    }
+  ]
+}

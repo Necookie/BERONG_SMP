@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/sofa_fabric_cushion",
+    "cushion": "berongsmp:block/sofa_fabric_cushion",
+    "side": "berongsmp:block/sofa_fabric_side"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 1], "to": [16, 11, 15],
+      "faces": {
+        "up":    { "texture": "#cushion" },
+        "down":  { "texture": "#side" },
+        "north": { "texture": "#cushion" },
+        "south": { "texture": "#side" },
+        "east":  { "texture": "#side" },
+        "west":  { "texture": "#side" }
+      }
+    }
+  ]
+}

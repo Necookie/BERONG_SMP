@@ -134,7 +134,176 @@ def save(im, name):
 ALL = []
 
 # ---------------------------------------------------------------------------
-# Phase 1: Conference Room furniture textures appended here.
+# Phase 1: Conference Room furniture
+# ---------------------------------------------------------------------------
+
+def tex_conf_table_top():
+    base = (38, 38, 44)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.25, dark=0.85)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.3, band=1, offset=2)
+    inset_edges(im, 0, 0, W - 1, H - 1, (66, 66, 74), (18, 18, 22))
+    border(im, (14, 14, 17))
+    save(im, "conf_table_top")
+
+
+def tex_conf_table_leg():
+    base = (176, 181, 189)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.18)
+    rect(im, 7, 0, 8, 15, scale(base, 1.4))
+    inset_edges(im, 0, 0, W - 1, H - 1, (218, 222, 228), (110, 114, 122))
+    save(im, "conf_table_leg")
+
+
+def tex_exec_chair_leather():
+    base = (92, 28, 30)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.82)
+    for y in (3, 7, 11):
+        for x in (2, 6, 10, 14):
+            set_px(im, x, y, scale(base, 0.6))  # tufted-button dimples
+    inset_edges(im, 0, 0, W - 1, H - 1, (140, 52, 54), (48, 12, 14))
+    border(im, (40, 10, 12))
+    save(im, "exec_chair_leather")
+
+
+def tex_exec_chair_frame():
+    base = (36, 38, 42)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.2)
+    inset_edges(im, 0, 0, W - 1, H - 1, (70, 74, 80), (10, 11, 13))
+    save(im, "exec_chair_frame")
+
+
+def tex_conf_credenza_wood():
+    base = (96, 62, 40)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    wood_grain(im, 1, 1, 14, 14, base, rows=[3, 7, 11], variance=0.05)
+    inset_edges(im, 0, 0, W - 1, H - 1, (128, 88, 58), (58, 36, 22))
+    border(im, (50, 30, 18))
+    save(im, "conf_credenza_wood")
+
+
+def tex_conf_credenza_front():
+    base = (78, 48, 30)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.1, dark=0.9)
+    border(im, (40, 22, 12))
+    rect(im, 8, 1, 8, 14, scale(base, 0.55))  # sliding-door seam
+    for x in (5, 11):
+        rect(im, x, 7, x, 8, (22, 20, 18))  # handles
+    save(im, "conf_credenza_front")
+
+
+def tex_conf_display_frame():
+    base = (28, 28, 31)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.85)
+    inset_edges(im, 0, 0, W - 1, H - 1, (52, 52, 56), (8, 8, 10))
+    border(im, (10, 10, 12))
+    save(im, "conf_display_frame")
+
+
+def tex_flip_chart_paper():
+    base = (232, 227, 212)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.06, dark=0.94)
+    palette = [(60, 90, 160), (170, 50, 50), (50, 130, 80)]
+    for i, y in enumerate((4, 7, 10)):
+        rect(im, 2, y, 2 + 6 + i * 2, y, random.choice(palette))
+    inset_edges(im, 0, 0, W - 1, H - 1, (250, 246, 232), (170, 165, 150))
+    border(im, (150, 144, 128))
+    save(im, "flip_chart_paper")
+
+
+def tex_conf_speakerphone_body():
+    base = (46, 46, 50)
+    im = new_canvas(base)
+    disc_fill(im, 7.5, 7.5, 7, base)
+    disc_ring(im, 7.5, 7.5, 6, scale(base, 1.4), thickness=1.0)
+    disc_ring(im, 7.5, 7.5, 3, scale(base, 0.6), thickness=1.0)
+    indicator_dots(im, [(7, 7), (8, 7), (7, 8), (8, 8)], (60, 200, 90))
+    save(im, "conf_speakerphone_body")
+
+
+def tex_glass_partition_pane():
+    base = (196, 212, 218)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.94)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.25, band=2, offset=-3)
+    inset_edges(im, 0, 0, W - 1, H - 1, (60, 66, 70), (60, 66, 70))
+    border(im, (58, 64, 68))
+    save(im, "glass_partition_pane")
+
+
+def tex_sofa_fabric_cushion():
+    base = (122, 110, 98)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    for y in (4, 10):
+        for x in (3, 7, 11):
+            set_px(im, x, y, scale(base, 0.6))
+    inset_edges(im, 0, 0, W - 1, H - 1, (156, 142, 128), (70, 60, 50))
+    border(im, (62, 52, 44))
+    save(im, "sofa_fabric_cushion")
+
+
+def tex_sofa_fabric_side():
+    base = (96, 86, 76)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (124, 112, 98), (54, 46, 38))
+    save(im, "sofa_fabric_side")
+
+
+def tex_office_plant_leaves():
+    base = (58, 96, 52)
+    im = new_canvas(base)
+    palette = [(46, 110, 54), (70, 128, 60), (38, 90, 46)]
+    for _ in range(24):
+        x = random.randint(1, 14)
+        y = random.randint(1, 14)
+        set_px(im, x, y, random.choice(palette))
+    border(im, (30, 64, 34))
+    save(im, "office_plant_leaves")
+
+
+def tex_office_planter_pot():
+    base = (150, 90, 55)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.8)
+    rect(im, 0, 0, 15, 1, scale(base, 1.3))  # rim highlight
+    inset_edges(im, 0, 0, W - 1, H - 1, (188, 122, 78), (94, 52, 28))
+    border(im, (80, 44, 24))
+    save(im, "office_planter_pot")
+
+
+def tex_window_blinds_slats():
+    base = (222, 218, 205)
+    im = new_canvas(base)
+    for y in range(0, H, 2):
+        rect(im, 0, y, W - 1, y, scale(base, 1.1))
+        rect(im, 0, y + 1, W - 1, y + 1, scale(base, 0.7))
+    border(im, (150, 146, 132))
+    save(im, "window_blinds_slats")
+
+
+ALL += [
+    tex_conf_table_top, tex_conf_table_leg,
+    tex_exec_chair_leather, tex_exec_chair_frame,
+    tex_conf_credenza_wood, tex_conf_credenza_front,
+    tex_conf_display_frame,
+    tex_flip_chart_paper,
+    tex_conf_speakerphone_body,
+    tex_glass_partition_pane,
+    tex_sofa_fabric_cushion, tex_sofa_fabric_side,
+    tex_office_plant_leaves, tex_office_planter_pot,
+    tex_window_blinds_slats,
+]
+
+# ---------------------------------------------------------------------------
 # Phase 2: Conference Room hazard textures appended here.
 # Phase 3: Office furniture textures appended here.
 # Phase 4: Office hazard textures appended here.

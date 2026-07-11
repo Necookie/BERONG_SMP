@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/conference_credenza" },
+    "facing=south": { "model": "berongsmp:block/conference_credenza", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/conference_credenza", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/conference_credenza", "y": 270 }
+  }
+}

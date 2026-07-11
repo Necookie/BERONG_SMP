@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/conference_wall_display" },
+    "facing=south": { "model": "berongsmp:block/conference_wall_display", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/conference_wall_display", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/conference_wall_display", "y": 270 }
+  }
+}

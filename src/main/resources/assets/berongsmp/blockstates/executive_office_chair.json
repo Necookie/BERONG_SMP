@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/executive_office_chair" },
+    "facing=south": { "model": "berongsmp:block/executive_office_chair", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/executive_office_chair", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/executive_office_chair", "y": 270 }
+  }
+}

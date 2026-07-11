@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "top": "berongsmp:block/conf_table_top",
+    "leg": "berongsmp:block/conf_table_leg",
+    "particle": "berongsmp:block/conf_table_top"
+  },
+  "elements": [
+    {
+      "name": "tabletop",
+      "from": [0, 12, 0], "to": [16, 15, 16],
+      "faces": {
+        "north": { "texture": "#top", "uv": [0, 0, 16, 3] },
+        "south": { "texture": "#top", "uv": [0, 0, 16, 3] },
+        "east":  { "texture": "#top", "uv": [0, 0, 16, 3] },
+        "west":  { "texture": "#top", "uv": [0, 0, 16, 3] },
+        "up":    { "texture": "#top", "uv": [0, 0, 16, 16] },
+        "down":  { "texture": "#leg", "uv": [0, 0, 16, 16] }
+      }
+    }
+  ]
+}

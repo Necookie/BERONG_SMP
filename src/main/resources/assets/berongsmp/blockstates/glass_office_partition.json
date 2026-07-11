@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/glass_office_partition" },
+    "facing=south": { "model": "berongsmp:block/glass_office_partition", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/glass_office_partition", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/glass_office_partition", "y": 270 }
+  }
+}

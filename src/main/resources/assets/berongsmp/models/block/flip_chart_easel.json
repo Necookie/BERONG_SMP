@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/flip_chart_paper",
+    "paper": "berongsmp:block/flip_chart_paper",
+    "wood": "berongsmp:block/table_leg_wood_dark"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 6], "to": [13, 16, 10],
+      "faces": {
+        "up":    { "texture": "#wood" },
+        "down":  { "texture": "#wood" },
+        "north": { "texture": "#paper" },
+        "south": { "texture": "#wood" },
+        "east":  { "texture": "#wood" },
+        "west":  { "texture": "#wood" }
+      }
+    }
+  ]
+}
