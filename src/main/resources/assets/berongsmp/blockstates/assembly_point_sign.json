@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/assembly_point_sign" },
+    "facing=south": { "model": "berongsmp:block/assembly_point_sign", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/assembly_point_sign", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/assembly_point_sign", "y": 270 }
+  }
+}

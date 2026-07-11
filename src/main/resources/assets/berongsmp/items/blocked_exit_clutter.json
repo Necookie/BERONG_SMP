@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "berongsmp:item/blocked_exit_clutter"
+  }
+}

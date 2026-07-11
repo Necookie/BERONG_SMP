@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/first_aid_wall_cabinet" },
+    "facing=south": { "model": "berongsmp:block/first_aid_wall_cabinet", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/first_aid_wall_cabinet", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/first_aid_wall_cabinet", "y": 270 }
+  }
+}

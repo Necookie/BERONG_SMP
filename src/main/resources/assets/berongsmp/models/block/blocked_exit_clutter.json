@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cardboard_box",
+    "box": "berongsmp:block/cardboard_box",
+    "chair_frame": "berongsmp:block/chair_frame_black",
+    "chair_seat": "berongsmp:block/chair_cushion_fabric"
+  },
+  "elements": [
+    {
+      "name": "box_pile",
+      "from": [1, 0, 1], "to": [15, 8, 15],
+      "faces": {
+        "down": { "texture": "#box" }, "up": { "texture": "#box" },
+        "north": { "texture": "#box" }, "south": { "texture": "#box" },
+        "east": { "texture": "#box" }, "west": { "texture": "#box" }
+      }
+    },
+    {
+      "name": "chair_stack",
+      "from": [3, 8, 3], "to": [13, 14, 13],
+      "faces": {
+        "down": { "texture": "#chair_frame" }, "up": { "texture": "#chair_seat" },
+        "north": { "texture": "#chair_seat" }, "south": { "texture": "#chair_seat" },
+        "east": { "texture": "#chair_frame" }, "west": { "texture": "#chair_frame" }
+      }
+    },
+    {
+      "name": "chair_legs",
+      "from": [4, 14, 4], "to": [12, 16, 12],
+      "faces": {
+        "down": { "texture": "#chair_frame" }, "up": { "texture": "#chair_frame" },
+        "north": { "texture": "#chair_frame" }, "south": { "texture": "#chair_frame" },
+        "east": { "texture": "#chair_frame" }, "west": { "texture": "#chair_frame" }
+      }
+    }
+  ]
+}

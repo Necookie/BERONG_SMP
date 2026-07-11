@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hose_cabinet_body_red",
+    "body": "berongsmp:block/hose_cabinet_body_red",
+    "glass": "berongsmp:block/fire_hose_window"
+  },
+  "elements": [
+    {
+      "from": [2, 2, 12], "to": [14, 15, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#glass" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/ceramic_glossy_white",
+    "body": "berongsmp:block/ceramic_glossy_white",
+    "cross": "berongsmp:block/hazard_ok_led"
+  },
+  "elements": [
+    {
+      "name": "cabinet",
+      "from": [3, 3, 13], "to": [13, 14, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "cross",
+      "from": [6, 6, 12], "to": [10, 11, 13],
+      "faces": {
+        "north": { "texture": "#cross" }, "south": { "texture": "#cross" },
+        "east": { "texture": "#cross" }, "west": { "texture": "#cross" }
+      }
+    }
+  ]
+}

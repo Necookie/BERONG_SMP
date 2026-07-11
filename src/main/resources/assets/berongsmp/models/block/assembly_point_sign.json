@@ -1,0 +1,17 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/exit_sign_green",
+    "sign": "berongsmp:block/exit_sign_green"
+  },
+  "elements": [
+    {
+      "from": [6, 0, 6], "to": [10, 16, 10],
+      "faces": {
+        "down": { "texture": "#sign" }, "up": { "texture": "#sign" },
+        "north": { "texture": "#sign" }, "south": { "texture": "#sign" },
+        "east": { "texture": "#sign" }, "west": { "texture": "#sign" }
+      }
+    }
+  ]
+}

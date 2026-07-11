@@ -249,5 +249,16 @@
   "block.berongsmp.cutlery_napkin_caddy": "Cutlery & Napkin Caddy",
   "block.berongsmp.cutlery_napkin_caddy.desc": "Place on a cafeteria table or serving counter as a small tabletop accent. Decor only, no interaction.",
   "block.berongsmp.serving_hatch_window": "Serving Hatch Window",
-  "block.berongsmp.serving_hatch_window.desc": "Place on a kitchen wall as a pass-through hatch to the serving line, distinct from a freestanding counter. Decor only, no interaction."
+  "block.berongsmp.serving_hatch_window.desc": "Place on a kitchen wall as a pass-through hatch to the serving line, distinct from a freestanding counter. Decor only, no interaction.",
+
+  "block.berongsmp.fire_extinguisher_cabinet": "Fire Extinguisher Cabinet",
+  "block.berongsmp.fire_extinguisher_cabinet.desc": "Place on a corridor or classroom wall to display an extinguisher, distinct from the hose-reel Fire Hose Cabinet. Decor only, no interaction.",
+  "block.berongsmp.assembly_point_sign": "Evacuation Assembly Point Sign",
+  "block.berongsmp.assembly_point_sign.desc": "Place standing at your building's outdoor assembly area to mark the evacuation muster point, distinct from the Emergency Exit Sign which marks doors. Always lit. Decor only, no interaction.",
+  "block.berongsmp.first_aid_wall_cabinet": "First-Aid Wall Cabinet",
+  "block.berongsmp.first_aid_wall_cabinet.desc": "Place on a classroom, corridor, or clinic wall as a fixed first-aid station. Decor only, no interaction.",
+  "block.berongsmp.fire_safety_poster": "Fire Safety Poster",
+  "block.berongsmp.fire_safety_poster.desc": "Place on any classroom or corridor wall to teach the PASS extinguisher technique and the fire triangle. Decor only, no interaction.",
+  "block.berongsmp.blocked_exit_clutter": "Blocked Exit Clutter Pile",
+  "block.berongsmp.blocked_exit_clutter.desc": "Place jammed against a doorway as a training prop illustrating an obstructed emergency exit. Flammable — it will burn if a nearby fire reaches it, but does not ignite on its own."
 }

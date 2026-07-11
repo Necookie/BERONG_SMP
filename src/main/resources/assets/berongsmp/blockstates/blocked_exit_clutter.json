@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/blocked_exit_clutter" },
+    "facing=south": { "model": "berongsmp:block/blocked_exit_clutter", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/blocked_exit_clutter", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/blocked_exit_clutter", "y": 270 }
+  }
+}
