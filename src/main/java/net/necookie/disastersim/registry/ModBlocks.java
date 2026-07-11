@@ -422,6 +422,40 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
 
+    /** Overloaded Wall Outlet — see {@link OverloadedWallOutletBlock}. */
+    public static final DeferredBlock<OverloadedWallOutletBlock> OVERLOADED_WALL_OUTLET = BLOCKS.registerBlock(
+            "overloaded_wall_outlet", OverloadedWallOutletBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 2.0f).sound(SoundType.STONE).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
+    /** Jammed Circuit Breaker Box — see {@link JammedCircuitBreakerBlock}. */
+    public static final DeferredBlock<JammedCircuitBreakerBlock> JAMMED_CIRCUIT_BREAKER = BLOCKS.registerBlock(
+            "jammed_circuit_breaker", JammedCircuitBreakerBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
+
+    /** Unsealed Solvent Shelf — see {@link UnsealedSolventShelfBlock}. */
+    public static final DeferredBlock<UnsealedSolventShelfBlock> UNSEALED_SOLVENT_SHELF = BLOCKS.registerBlock(
+            "unsealed_solvent_shelf", UnsealedSolventShelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Unattended Welding Station — see {@link UnattendedWeldingStationBlock}. */
+    public static final DeferredBlock<UnattendedWeldingStationBlock> UNATTENDED_WELDING_STATION = BLOCKS.registerBlock(
+            "unattended_welding_station", UnattendedWeldingStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
+
+    /** Leaking Butane Canister Stove — see {@link LeakingButaneCanisterStoveBlock}. */
+    public static final DeferredBlock<LeakingButaneCanisterStoveBlock> LEAKING_BUTANE_CANISTER_STOVE = BLOCKS.registerBlock(
+            "leaking_butane_canister_stove", LeakingButaneCanisterStoveBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
+
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
             "teachers_desk", TeachersDeskBlock::new,

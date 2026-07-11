@@ -64,7 +64,8 @@ public abstract class AbstractExtinguisherItem extends Item {
      */
     protected static final Set<String> KITCHEN_HAZARD_IDS = Set.of(
             "unattended_grease_pan", "grease_clogged_hood", "contaminated_kitchen_bin",
-            "jammed_panini_press", "commercial_deep_fryer", "leaking_gas_valve");
+            "jammed_panini_press", "commercial_deep_fryer", "leaking_gas_valve",
+            "leaking_butane_canister_stove");
 
     private static final Map<UUID, Long> lastWrongToolWarningTick = new ConcurrentHashMap<>();
     private static final long WRONG_TOOL_WARNING_COOLDOWN_TICKS = 60L;

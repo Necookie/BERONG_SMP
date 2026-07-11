@@ -409,6 +409,26 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("clogged_exhaust_fan", ModBlocks.CLOGGED_EXHAUST_FAN);
     static { HAZARD_ITEM_MAP.put("clogged_exhaust_fan", CLOGGED_EXHAUST_FAN_ITEM); }
 
+    public static final DeferredItem<BlockItem> OVERLOADED_WALL_OUTLET_ITEM =
+            ITEMS.registerSimpleBlockItem("overloaded_wall_outlet", ModBlocks.OVERLOADED_WALL_OUTLET);
+    static { HAZARD_ITEM_MAP.put("overloaded_wall_outlet", OVERLOADED_WALL_OUTLET_ITEM); }
+
+    public static final DeferredItem<BlockItem> JAMMED_CIRCUIT_BREAKER_ITEM =
+            ITEMS.registerSimpleBlockItem("jammed_circuit_breaker", ModBlocks.JAMMED_CIRCUIT_BREAKER);
+    static { HAZARD_ITEM_MAP.put("jammed_circuit_breaker", JAMMED_CIRCUIT_BREAKER_ITEM); }
+
+    public static final DeferredItem<BlockItem> UNSEALED_SOLVENT_SHELF_ITEM =
+            ITEMS.registerSimpleBlockItem("unsealed_solvent_shelf", ModBlocks.UNSEALED_SOLVENT_SHELF);
+    static { HAZARD_ITEM_MAP.put("unsealed_solvent_shelf", UNSEALED_SOLVENT_SHELF_ITEM); }
+
+    public static final DeferredItem<BlockItem> UNATTENDED_WELDING_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("unattended_welding_station", ModBlocks.UNATTENDED_WELDING_STATION);
+    static { HAZARD_ITEM_MAP.put("unattended_welding_station", UNATTENDED_WELDING_STATION_ITEM); }
+
+    public static final DeferredItem<BlockItem> LEAKING_BUTANE_CANISTER_STOVE_ITEM =
+            ITEMS.registerSimpleBlockItem("leaking_butane_canister_stove", ModBlocks.LEAKING_BUTANE_CANISTER_STOVE);
+    static { HAZARD_ITEM_MAP.put("leaking_butane_canister_stove", LEAKING_BUTANE_CANISTER_STOVE_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 
