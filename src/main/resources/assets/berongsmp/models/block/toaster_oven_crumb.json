@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/press_body_metal",
+    "body": "berongsmp:block/press_body_metal",
+    "door": "berongsmp:block/hazard_glass_screen_off"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 3], "to": [14, 8, 13],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#door" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

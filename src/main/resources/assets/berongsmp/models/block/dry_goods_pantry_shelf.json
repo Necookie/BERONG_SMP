@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/reagent_shelf_body",
+    "shelf": "berongsmp:block/reagent_shelf_body",
+    "sacks": "berongsmp:block/flour_sacks_white"
+  },
+  "elements": [
+    {
+      "name": "shelf_frame",
+      "from": [0, 0, 12], "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#shelf" }, "up": { "texture": "#shelf" },
+        "north": { "texture": "#shelf" }, "south": { "texture": "#shelf" },
+        "east": { "texture": "#shelf" }, "west": { "texture": "#shelf" }
+      }
+    },
+    {
+      "name": "sacks",
+      "from": [1, 3, 8], "to": [15, 13, 12],
+      "faces": {
+        "down": { "texture": "#sacks" }, "up": { "texture": "#sacks" },
+        "north": { "texture": "#sacks" }, "south": { "texture": "#sacks" },
+        "east": { "texture": "#sacks" }, "west": { "texture": "#sacks" }
+      }
+    }
+  ]
+}

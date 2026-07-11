@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "hazardous=false,on_fire=false": { "model": "berongsmp:block/hot_water_urn" },
+    "hazardous=false,on_fire=true": { "model": "berongsmp:block/hot_water_urn_hazardous" },
+    "hazardous=true,on_fire=false": { "model": "berongsmp:block/hot_water_urn_hazardous" },
+    "hazardous=true,on_fire=true": { "model": "berongsmp:block/hot_water_urn_hazardous" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_water_stain",
+    "body": "berongsmp:block/fryer_body_steel",
+    "door": "berongsmp:block/dishmachine_door_steel",
+    "stain": "berongsmp:block/hazard_water_stain"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0], "to": [16, 14, 16],
+      "faces": {
+        "down": { "texture": "#stain" }, "up": { "texture": "#body" },
+        "north": { "texture": "#door" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

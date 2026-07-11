@@ -1353,6 +1353,34 @@ def tex_espresso_group_head():
     save(im, "espresso_group_head")
 
 
+def tex_urn_body_steel():
+    im = new_canvas((175, 178, 182))
+    gradient_shade(im, 0, 0, 15, 15, (175, 178, 182), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (205, 208, 212), (110, 113, 117))
+    rect(im, 6, 12, 9, 14, (60, 60, 62))  # spigot
+    rect(im, 5, 2, 10, 3, (150, 152, 156))  # lid rim
+    save(im, "urn_body_steel")
+
+
+def tex_flour_sacks_white():
+    im = new_canvas((235, 230, 215))
+    gradient_shade(im, 0, 4, 15, 15, (235, 230, 215), light=1.1, dark=0.85)
+    speckle(im, [(220, 214, 195), (245, 240, 228)], density=0.15, x0=0, y0=4, x1=15, y1=15)
+    rect(im, 0, 4, 15, 5, (150, 60, 50))  # sack tie band
+    rect(im, 0, 10, 15, 11, (60, 90, 140))  # second sack tie band
+    border(im, (150, 140, 110))
+    save(im, "flour_sacks_white")
+
+
+def tex_dishmachine_door_steel():
+    im = new_canvas((160, 163, 167))
+    gradient_shade(im, 0, 0, 15, 15, (160, 163, 167), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (195, 198, 202), (90, 93, 97))
+    rect(im, 3, 3, 12, 8, (60, 90, 130))  # small window, wash-cycle blue
+    rect(im, 4, 12, 11, 13, (80, 82, 86))  # handle
+    save(im, "dishmachine_door_steel")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -1403,6 +1431,9 @@ ALL = [
     tex_induction_glass_top,
     tex_rice_cooker_body,
     tex_espresso_body_steel, tex_espresso_group_head,
+    tex_urn_body_steel,
+    tex_flour_sacks_white,
+    tex_dishmachine_door_steel,
 ]
 
 if __name__ == "__main__":

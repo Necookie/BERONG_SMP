@@ -282,5 +282,16 @@
   "block.berongsmp.rice_cooker_bank": "Rice Cooker Bank",
   "block.berongsmp.rice_cooker_bank.desc": "Place on a counter as a row of student rice cookers. Boiling one dry can scorch its base — a Class C fire. Any extinguisher defuses it.",
   "block.berongsmp.espresso_machine": "Espresso Machine",
-  "block.berongsmp.espresso_machine.desc": "Place on a café/canteen counter. A scale-blocked pressure valve can over-pressurize the boiler and short the controls — a Class C fire. Any extinguisher defuses it."
+  "block.berongsmp.espresso_machine.desc": "Place on a café/canteen counter. A scale-blocked pressure valve can over-pressurize the boiler and short the controls — a Class C fire. Any extinguisher defuses it.",
+
+  "block.berongsmp.hot_water_urn": "Hot Water Urn",
+  "block.berongsmp.hot_water_urn.desc": "Place on a canteen counter for tea/coffee service. A dripping spigot can short the base electrics — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.toaster_oven_crumb": "Countertop Toaster Oven",
+  "block.berongsmp.toaster_oven_crumb.desc": "Place on a counter for student snack use. A packed crumb tray can ignite under the heating element — a Class A fire. Any extinguisher defuses it.",
+  "block.berongsmp.dry_goods_pantry_shelf": "Dry Goods Pantry Shelf",
+  "block.berongsmp.dry_goods_pantry_shelf.desc": "Place against a pantry wall. Open flour/sugar sacks near a hot light fixture can flash-ignite airborne dust across a 2-block radius. Any extinguisher defuses it.",
+  "block.berongsmp.grease_duct_run": "Kitchen Exhaust Duct",
+  "block.berongsmp.grease_duct_run.desc": "Place on a kitchen ceiling above the cooking line. Grease caked inside the ductwork can catch fire — a hidden hazard distinct from the range hood below it. Requires the wet chemical extinguisher.",
+  "block.berongsmp.commercial_dish_sanitizer": "Dish Sanitizer",
+  "block.berongsmp.commercial_dish_sanitizer.desc": "Place under a kitchen counter run. A dry-boiled heating element and steam seeping into the control board can spark a fire — a Class C fire. Any extinguisher defuses it."
 }

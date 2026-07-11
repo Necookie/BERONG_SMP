@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_ember_glow",
+    "body": "berongsmp:block/press_body_metal",
+    "door": "berongsmp:block/hazard_ember_glow",
+    "scorch": "berongsmp:block/hazard_scorch_char"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 3], "to": [14, 8, 13],
+      "faces": {
+        "down": { "texture": "#scorch" }, "up": { "texture": "#body" },
+        "north": { "texture": "#door" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}
