@@ -238,5 +238,16 @@
   "block.berongsmp.library_study_carrel": "Library Study Carrel",
   "block.berongsmp.library_study_carrel.desc": "Place in the library for an individual partitioned study spot. Decor only, no interaction.",
   "block.berongsmp.rolling_book_cart": "Rolling Book Cart",
-  "block.berongsmp.rolling_book_cart.desc": "Place in the library as a mobile stack of returned books — extra fuel load for a library fire drill. Decor only, no interaction."
+  "block.berongsmp.rolling_book_cart.desc": "Place in the library as a mobile stack of returned books — extra fuel load for a library fire drill. Decor only, no interaction.",
+
+  "block.berongsmp.kitchen_prep_counter": "Kitchen Prep Counter",
+  "block.berongsmp.kitchen_prep_counter.desc": "Place in the back-of-house kitchen area for food prep, distinct from the front-line Serving Counter. Decor only, no interaction.",
+  "block.berongsmp.dishwashing_sink_station": "Dishwashing Sink Station",
+  "block.berongsmp.dishwashing_sink_station.desc": "Place in the kitchen for a commercial triple-basin wash sink. Decor only, no interaction.",
+  "block.berongsmp.beverage_juice_dispenser": "Iced-Tea / Juice Dispenser",
+  "block.berongsmp.beverage_juice_dispenser.desc": "Place on a canteen serving line for a gravity-fed drink dispenser, distinct from the carbonated Soda Fountain Machine and the bottled Water Dispenser. Decor only, no interaction.",
+  "block.berongsmp.cutlery_napkin_caddy": "Cutlery & Napkin Caddy",
+  "block.berongsmp.cutlery_napkin_caddy.desc": "Place on a cafeteria table or serving counter as a small tabletop accent. Decor only, no interaction.",
+  "block.berongsmp.serving_hatch_window": "Serving Hatch Window",
+  "block.berongsmp.serving_hatch_window.desc": "Place on a kitchen wall as a pass-through hatch to the serving line, distinct from a freestanding counter. Decor only, no interaction."
 }

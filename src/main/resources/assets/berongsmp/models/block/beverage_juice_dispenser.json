@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/water_jug_blue",
+    "stand": "berongsmp:block/dispenser_stand_metal",
+    "tank": "berongsmp:block/water_jug_blue",
+    "cap": "berongsmp:block/dispenser_body_white"
+  },
+  "elements": [
+    {
+      "name": "stand",
+      "from": [2, 0, 2], "to": [14, 5, 14],
+      "faces": {
+        "down": { "texture": "#stand" }, "up": { "texture": "#stand" },
+        "north": { "texture": "#stand" }, "south": { "texture": "#stand" },
+        "east": { "texture": "#stand" }, "west": { "texture": "#stand" }
+      }
+    },
+    {
+      "name": "tank_left",
+      "from": [2, 5, 2], "to": [7, 14, 14],
+      "faces": {
+        "down": { "texture": "#tank" }, "up": { "texture": "#tank" },
+        "north": { "texture": "#tank" }, "south": { "texture": "#tank" },
+        "east": { "texture": "#tank" }, "west": { "texture": "#tank" }
+      }
+    },
+    {
+      "name": "tank_right",
+      "from": [9, 5, 2], "to": [14, 14, 14],
+      "faces": {
+        "down": { "texture": "#tank" }, "up": { "texture": "#tank" },
+        "north": { "texture": "#tank" }, "south": { "texture": "#tank" },
+        "east": { "texture": "#tank" }, "west": { "texture": "#tank" }
+      }
+    },
+    {
+      "name": "cap",
+      "from": [2, 14, 2], "to": [14, 16, 14],
+      "faces": {
+        "down": { "texture": "#cap" }, "up": { "texture": "#cap" },
+        "north": { "texture": "#cap" }, "south": { "texture": "#cap" },
+        "east": { "texture": "#cap" }, "west": { "texture": "#cap" }
+      }
+    }
+  ]
+}

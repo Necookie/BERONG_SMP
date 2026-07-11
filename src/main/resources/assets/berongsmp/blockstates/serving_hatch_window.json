@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/serving_hatch_window" },
+    "facing=south": { "model": "berongsmp:block/serving_hatch_window", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/serving_hatch_window", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/serving_hatch_window", "y": 270 }
+  }
+}

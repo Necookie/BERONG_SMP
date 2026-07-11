@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/steel_counter_body",
+    "body": "berongsmp:block/steel_counter_body",
+    "basin": "berongsmp:block/ceramic_glossy_white",
+    "trim": "berongsmp:block/fixture_chrome"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 12, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "basins",
+      "from": [1, 12, 2], "to": [15, 14, 14],
+      "faces": {
+        "down": { "texture": "#basin" }, "up": { "texture": "#basin" },
+        "north": { "texture": "#basin" }, "south": { "texture": "#basin" },
+        "east": { "texture": "#basin" }, "west": { "texture": "#basin" }
+      }
+    },
+    {
+      "name": "gooseneck",
+      "from": [7, 14, 13], "to": [9, 16, 15],
+      "faces": {
+        "down": { "texture": "#trim" }, "up": { "texture": "#trim" },
+        "north": { "texture": "#trim" }, "south": { "texture": "#trim" },
+        "east": { "texture": "#trim" }, "west": { "texture": "#trim" }
+      }
+    }
+  ]
+}

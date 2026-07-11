@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/kitchen_prep_counter" },
+    "facing=south": { "model": "berongsmp:block/kitchen_prep_counter", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/kitchen_prep_counter", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/kitchen_prep_counter", "y": 270 }
+  }
+}

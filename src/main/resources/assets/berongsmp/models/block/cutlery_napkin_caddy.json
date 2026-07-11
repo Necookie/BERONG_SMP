@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/condiment_tray_metal",
+    "tray": "berongsmp:block/condiment_tray_metal",
+    "holder": "berongsmp:block/napkin_holder_chrome"
+  },
+  "elements": [
+    {
+      "name": "tray",
+      "from": [3, 0, 3], "to": [13, 2, 13],
+      "faces": {
+        "down": { "texture": "#tray" }, "up": { "texture": "#tray" },
+        "north": { "texture": "#tray" }, "south": { "texture": "#tray" },
+        "east": { "texture": "#tray" }, "west": { "texture": "#tray" }
+      }
+    },
+    {
+      "name": "napkin_holder",
+      "from": [4, 2, 4], "to": [8, 6, 8],
+      "faces": {
+        "down": { "texture": "#holder" }, "up": { "texture": "#holder" },
+        "north": { "texture": "#holder" }, "south": { "texture": "#holder" },
+        "east": { "texture": "#holder" }, "west": { "texture": "#holder" }
+      }
+    },
+    {
+      "name": "cutlery_cup",
+      "from": [9, 2, 6], "to": [12, 6, 9],
+      "faces": {
+        "down": { "texture": "#tray" }, "up": { "texture": "#tray" },
+        "north": { "texture": "#tray" }, "south": { "texture": "#tray" },
+        "east": { "texture": "#tray" }, "west": { "texture": "#tray" }
+      }
+    }
+  ]
+}

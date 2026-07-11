@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/beverage_juice_dispenser" },
+    "facing=south": { "model": "berongsmp:block/beverage_juice_dispenser", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/beverage_juice_dispenser", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/beverage_juice_dispenser", "y": 270 }
+  }
+}
