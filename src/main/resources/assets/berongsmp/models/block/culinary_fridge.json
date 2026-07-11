@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/fridge_door_white",
+    "body": "berongsmp:block/locker_door_steel",
+    "door": "berongsmp:block/fridge_door_white",
+    "handle": "berongsmp:block/fixture_chrome"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [1, 0, 1], "to": [15, 16, 15],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#door" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "handle",
+      "from": [12, 6, 0], "to": [13, 11, 1],
+      "faces": {
+        "north": { "texture": "#handle" }, "south": { "texture": "#handle" },
+        "east": { "texture": "#handle" }, "west": { "texture": "#handle" }
+      }
+    }
+  ]
+}

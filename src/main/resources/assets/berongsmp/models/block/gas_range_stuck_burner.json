@@ -1,0 +1,29 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/fryer_body_steel",
+    "body": "berongsmp:block/fryer_body_steel",
+    "burner": "berongsmp:block/stove_burner_metal",
+    "knob": "berongsmp:block/gas_valve_wheel"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 12, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#burner" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "backguard",
+      "from": [0, 12, 13], "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#knob" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

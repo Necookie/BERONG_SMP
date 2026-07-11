@@ -260,5 +260,16 @@
   "block.berongsmp.fire_safety_poster": "Fire Safety Poster",
   "block.berongsmp.fire_safety_poster.desc": "Place on any classroom or corridor wall to teach the PASS extinguisher technique and the fire triangle. Decor only, no interaction.",
   "block.berongsmp.blocked_exit_clutter": "Blocked Exit Clutter Pile",
-  "block.berongsmp.blocked_exit_clutter.desc": "Place jammed against a doorway as a training prop illustrating an obstructed emergency exit. Flammable — it will burn if a nearby fire reaches it, but does not ignite on its own."
+  "block.berongsmp.blocked_exit_clutter.desc": "Place jammed against a doorway as a training prop illustrating an obstructed emergency exit. Flammable — it will burn if a nearby fire reaches it, but does not ignite on its own.",
+
+  "block.berongsmp.chefs_prep_drawers": "Chef's Prep Table",
+  "block.berongsmp.chefs_prep_drawers.desc": "Place in a culinary classroom near a stove. An oily rag left draped by the burner can self-ignite. Any extinguisher defuses it.",
+  "block.berongsmp.culinary_fridge": "Culinary Lab Refrigerator",
+  "block.berongsmp.culinary_fridge.desc": "Place in a culinary classroom or kitchen. Dust-caked coils and a failing relay can overheat the compressor — a Class C electrical fire. Any extinguisher defuses it.",
+  "block.berongsmp.student_lab_microwave": "Student Lab Microwave",
+  "block.berongsmp.student_lab_microwave.desc": "Place on a counter or prep table for student use. Metal or foil left inside can arc violently — a Class C electrical fire. Any extinguisher defuses it.",
+  "block.berongsmp.corroded_gas_line_joint": "Corroded Gas Line Joint",
+  "block.berongsmp.corroded_gas_line_joint.desc": "Place on a kitchen wall as fixed gas piping. A rusted-through elbow joint can weep gas and flash over. Requires the wet chemical extinguisher.",
+  "block.berongsmp.gas_range_stuck_burner": "Gas Range",
+  "block.berongsmp.gas_range_stuck_burner.desc": "Place in a culinary classroom kitchen line. A melted control knob can jam a burner open, flaring across the range. Requires the wet chemical extinguisher."
 }

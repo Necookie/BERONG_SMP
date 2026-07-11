@@ -1,0 +1,17 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/gas_pipe_metal",
+    "pipe": "berongsmp:block/gas_pipe_metal"
+  },
+  "elements": [
+    {
+      "from": [4, 4, 12], "to": [12, 10, 16],
+      "faces": {
+        "down": { "texture": "#pipe" }, "up": { "texture": "#pipe" },
+        "north": { "texture": "#pipe" }, "south": { "texture": "#pipe" },
+        "east": { "texture": "#pipe" }, "west": { "texture": "#pipe" }
+      }
+    }
+  ]
+}

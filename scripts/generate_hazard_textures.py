@@ -1229,6 +1229,63 @@ def tex_butane_canister_leaking():
     save(im, "butane_canister_leaking")
 
 
+def tex_prep_table_top_steel():
+    im = new_canvas((175, 178, 182))
+    gradient_shade(im, 0, 0, 15, 15, (175, 178, 182), light=1.1, dark=0.88)
+    inset_edges(im, 0, 0, 15, 15, (205, 208, 212), (110, 113, 117))
+    speckle(im, [(190, 193, 197), (150, 153, 157)], density=0.08)
+    save(im, "prep_table_top_steel")
+
+
+def tex_draped_rag_cloth():
+    im = new_canvas((205, 195, 160))
+    gradient_shade(im, 2, 4, 13, 14, (205, 195, 160), light=1.1, dark=0.8)
+    speckle(im, [(160, 120, 60), (140, 100, 45)], density=0.22, x0=2, y0=4, x1=13, y1=14)
+    rect(im, 2, 4, 13, 5, (90, 60, 30))
+    border(im, (90, 82, 60))
+    save(im, "draped_rag_cloth")
+
+
+def tex_fridge_door_white():
+    im = new_canvas((235, 235, 232))
+    gradient_shade(im, 1, 1, 14, 14, (235, 235, 232), light=1.1, dark=0.9)
+    inset_edges(im, 1, 1, 14, 14, (250, 250, 248), (170, 170, 166))
+    rect(im, 12, 6, 13, 10, (150, 150, 146))  # handle
+    border(im, (140, 140, 136))
+    save(im, "fridge_door_white")
+
+
+def tex_condenser_coil_dusty():
+    im = new_canvas((110, 105, 95))
+    gradient_shade(im, 0, 0, 15, 15, (110, 105, 95), light=1.1, dark=0.85)
+    for y in range(2, 14, 2):
+        rect(im, 1, y, 14, y, (70, 66, 58))
+    speckle(im, [(150, 140, 110), (90, 85, 72)], density=0.3)
+    border(im, (60, 57, 50))
+    save(im, "condenser_coil_dusty")
+
+
+def tex_gas_pipe_corroded():
+    im = new_canvas((120, 95, 70))
+    gradient_shade(im, 0, 6, 15, 9, (120, 95, 70), light=1.1, dark=0.8)
+    rect(im, 0, 6, 15, 9, (120, 95, 70))
+    rect(im, 5, 3, 10, 12, (100, 78, 55))  # bulged corroded elbow
+    speckle(im, [(160, 90, 40), (70, 50, 30), (190, 120, 60)], density=0.35, x0=4, y0=2, x1=11, y1=13)
+    border(im, (60, 45, 30))
+    save(im, "gas_pipe_corroded")
+
+
+def tex_range_knob_melted():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 0, 15, 15, (150, 148, 140), light=1.08, dark=0.9)
+    rect(im, 4, 8, 11, 14, (40, 40, 40))  # scorched control panel
+    speckle(im, [(80, 30, 10), (200, 90, 20)], density=0.15, x0=4, y0=8, x1=11, y1=14)
+    rect(im, 6, 4, 9, 8, (60, 60, 62))  # melted, drooping knob shape
+    rect(im, 7, 2, 8, 4, (60, 60, 62))
+    border(im, (100, 98, 90))
+    save(im, "range_knob_melted")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -1270,6 +1327,10 @@ ALL = [
     tex_solvent_can_open,
     tex_welder_spark_hot,
     tex_butane_canister_blue, tex_butane_canister_leaking,
+    tex_prep_table_top_steel, tex_draped_rag_cloth,
+    tex_fridge_door_white, tex_condenser_coil_dusty,
+    tex_gas_pipe_corroded,
+    tex_range_knob_melted,
 ]
 
 if __name__ == "__main__":

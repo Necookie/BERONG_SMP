@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/prep_table_top_steel",
+    "top": "berongsmp:block/prep_table_top_steel",
+    "cabinet": "berongsmp:block/cabinet_body_graphite"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 10, 16],
+      "faces": {
+        "down": { "texture": "#cabinet" }, "up": { "texture": "#top" },
+        "north": { "texture": "#cabinet" }, "south": { "texture": "#cabinet" },
+        "east": { "texture": "#cabinet" }, "west": { "texture": "#cabinet" }
+      }
+    },
+    {
+      "name": "drawer",
+      "from": [10, 2, -2], "to": [15, 8, 0],
+      "faces": {
+        "down": { "texture": "#cabinet" }, "up": { "texture": "#cabinet" },
+        "north": { "texture": "#cabinet" }, "south": { "texture": "#cabinet" },
+        "east": { "texture": "#cabinet" }, "west": { "texture": "#cabinet" }
+      }
+    }
+  ]
+}
