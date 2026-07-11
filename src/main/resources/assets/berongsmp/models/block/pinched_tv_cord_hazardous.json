@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_bare_copper",
+    "cord": "berongsmp:block/cord_normal",
+    "copper": "berongsmp:block/hazard_bare_copper"
+  },
+  "elements": [
+    {
+      "from": [3, 8, 15], "to": [13, 11, 16],
+      "faces": {
+        "up":    { "texture": "#cord" },
+        "down":  { "texture": "#cord" },
+        "north": { "texture": "#copper" },
+        "south": { "texture": "#cord" },
+        "east":  { "texture": "#cord" },
+        "west":  { "texture": "#cord" }
+      }
+    }
+  ]
+}

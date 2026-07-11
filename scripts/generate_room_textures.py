@@ -304,7 +304,227 @@ ALL += [
 ]
 
 # ---------------------------------------------------------------------------
-# Phase 2: Conference Room hazard textures appended here.
+# Phase 2: Conference Room hazards (props 56-65)
+# ---------------------------------------------------------------------------
+
+def tex_heater_body():
+    base = (58, 58, 62)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (86, 86, 92), (28, 28, 32))
+    border(im, (22, 22, 25))
+    save(im, "heater_body")
+
+
+def tex_heater_grille_off():
+    base = (32, 32, 35)
+    im = new_canvas(base)
+    for y in range(2, 14, 2):
+        rect(im, 2, y, 13, y, scale(base, 1.3))
+    border(im, (16, 16, 18))
+    save(im, "heater_grille_off")
+
+
+def tex_heater_grille_glow():
+    base = (200, 90, 30)
+    im = new_canvas((30, 22, 16))
+    for y in range(2, 14, 2):
+        rect(im, 2, y, 13, y, base)
+        rect(im, 2, y + 1, 13, y + 1, scale(base, 0.5))
+    border(im, (16, 12, 8))
+    save(im, "heater_grille_glow")
+
+
+def tex_lamp_pole():
+    base = (42, 42, 46)
+    im = new_canvas(base)
+    vertical_brush(im, 6, 0, 9, 15, base, stripe=1.2)
+    rect(im, 0, 0, 5, 15, scale(base, 0.7))
+    rect(im, 10, 0, 15, 15, scale(base, 0.7))
+    save(im, "lamp_pole")
+
+
+def tex_lamp_bowl_off():
+    base = (60, 60, 64)
+    im = new_canvas(base)
+    disc_fill(im, 7.5, 7.5, 7, base)
+    disc_ring(im, 7.5, 7.5, 6.5, scale(base, 1.3), thickness=1.0)
+    save(im, "lamp_bowl_off")
+
+
+def tex_lamp_bowl_glow():
+    im = new_canvas((60, 44, 20))
+    disc_fill(im, 7.5, 7.5, 7, (255, 235, 190))
+    disc_ring(im, 7.5, 7.5, 4, (255, 250, 230), thickness=1.5)
+    save(im, "lamp_bowl_glow")
+
+
+def tex_screen_housing():
+    base = (222, 222, 218)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.08, dark=0.92)
+    border(im, (168, 168, 162))
+    save(im, "screen_housing")
+
+
+def tex_screen_fabric_normal():
+    base = (238, 238, 234)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.04, dark=0.96)
+    border(im, (200, 200, 196))
+    save(im, "screen_fabric_normal")
+
+
+def tex_screen_fabric_smoking():
+    base = (150, 148, 142)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.0, dark=0.8)
+    speckle(im, [(90, 88, 82), (70, 68, 64)], density=0.18)
+    border(im, (60, 58, 54))
+    save(im, "screen_fabric_smoking")
+
+
+def tex_videowall_frame():
+    base = (18, 18, 20)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.3, dark=0.8)
+    inset_edges(im, 0, 0, W - 1, H - 1, (40, 40, 44), (6, 6, 7))
+    save(im, "videowall_frame")
+
+
+def tex_dispenser_body():
+    base = (228, 228, 224)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (250, 250, 246), (170, 170, 164))
+    save(im, "dispenser_body")
+
+
+def tex_dispenser_nozzle_normal():
+    base = (70, 70, 74)
+    im = new_canvas((228, 228, 224))
+    rect(im, 5, 6, 10, 9, base)
+    save(im, "dispenser_nozzle_normal")
+
+
+def tex_dispenser_nozzle_misting():
+    im = new_canvas((228, 228, 224))
+    rect(im, 5, 6, 10, 9, (70, 70, 74))
+    for _ in range(14):
+        x = random.randint(2, 13)
+        y = random.randint(0, 13)
+        set_px(im, x, y, (225, 235, 240))
+    save(im, "dispenser_nozzle_misting")
+
+
+def tex_laptop_lid():
+    base = (150, 152, 156)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.2, band=1, offset=3)
+    inset_edges(im, 0, 0, W - 1, H - 1, (182, 184, 188), (94, 96, 100))
+    save(im, "laptop_lid")
+
+
+def tex_laptop_vents_normal():
+    base = (110, 112, 116)
+    im = new_canvas(base)
+    for x in range(2, 14, 2):
+        rect(im, x, 2, x, 13, scale(base, 0.6))
+    save(im, "laptop_vents_normal")
+
+
+def tex_laptop_vents_hot():
+    im = new_canvas((70, 40, 20))
+    for x in range(2, 14, 2):
+        rect(im, x, 2, x, 13, (220, 120, 40))
+    save(im, "laptop_vents_hot")
+
+
+def tex_planter_soil_normal():
+    base = (58, 42, 30)
+    im = new_canvas(base)
+    speckle(im, [(70, 52, 38), (46, 32, 22)], density=0.2)
+    border(im, (34, 24, 16))
+    save(im, "planter_soil_normal")
+
+
+def tex_planter_soil_smoldering():
+    base = (54, 38, 26)
+    im = new_canvas(base)
+    speckle(im, [(70, 52, 38), (46, 32, 22)], density=0.15)
+    for _ in range(6):
+        x = random.randint(2, 13)
+        y = random.randint(2, 13)
+        set_px(im, x, y, (230, 110, 40))
+    border(im, (34, 24, 16))
+    save(im, "planter_soil_smoldering")
+
+
+def tex_cord_normal():
+    base = (24, 24, 26)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.3, dark=0.85)
+    border(im, (10, 10, 11))
+    save(im, "cord_normal")
+
+
+def tex_ups_case():
+    base = (36, 36, 40)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.12)
+    inset_edges(im, 0, 0, W - 1, H - 1, (60, 60, 66), (14, 14, 16))
+    save(im, "ups_case")
+
+
+def tex_ups_vent_normal():
+    base = (20, 20, 22)
+    im = new_canvas((36, 36, 40))
+    for y in range(2, 14, 2):
+        rect(im, 3, y, 12, y, base)
+    save(im, "ups_vent_normal")
+
+
+def tex_ups_vent_venting():
+    im = new_canvas((36, 36, 40))
+    for y in range(2, 14, 2):
+        rect(im, 3, y, 12, y, (20, 20, 22))
+    for _ in range(10):
+        x = random.randint(2, 13)
+        y = random.randint(0, 13)
+        set_px(im, x, y, (150, 220, 210))
+    save(im, "ups_vent_venting")
+
+
+def tex_dimmer_plate():
+    base = (232, 230, 224)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.06, dark=0.94)
+    inset_edges(im, 0, 0, W - 1, H - 1, (250, 248, 242), (176, 174, 168))
+    save(im, "dimmer_plate")
+
+
+def tex_dimmer_knob_normal():
+    im = new_canvas((232, 230, 224))
+    disc_fill(im, 7.5, 7.5, 4, (60, 60, 62))
+    disc_ring(im, 7.5, 7.5, 3.5, (90, 90, 94), thickness=1.0)
+    save(im, "dimmer_knob_normal")
+
+
+ALL += [
+    tex_heater_body, tex_heater_grille_off, tex_heater_grille_glow,
+    tex_lamp_pole, tex_lamp_bowl_off, tex_lamp_bowl_glow,
+    tex_screen_housing, tex_screen_fabric_normal, tex_screen_fabric_smoking,
+    tex_videowall_frame,
+    tex_dispenser_body, tex_dispenser_nozzle_normal, tex_dispenser_nozzle_misting,
+    tex_laptop_lid, tex_laptop_vents_normal, tex_laptop_vents_hot,
+    tex_planter_soil_normal, tex_planter_soil_smoldering,
+    tex_cord_normal,
+    tex_ups_case, tex_ups_vent_normal, tex_ups_vent_venting,
+    tex_dimmer_plate, tex_dimmer_knob_normal,
+]
+
+# ---------------------------------------------------------------------------
 # Phase 3: Office furniture textures appended here.
 # Phase 4: Office hazard textures appended here.
 # Phase 5: Laboratory furniture textures appended here.

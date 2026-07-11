@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/office_planter_pot",
+    "pot": "berongsmp:block/office_planter_pot",
+    "soil": "berongsmp:block/planter_soil_normal"
+  },
+  "elements": [
+    {
+      "from": [4, 0, 4], "to": [12, 10, 12],
+      "faces": {
+        "up":    { "texture": "#soil" },
+        "down":  { "texture": "#pot" },
+        "north": { "texture": "#pot" },
+        "south": { "texture": "#pot" },
+        "east":  { "texture": "#pot" },
+        "west":  { "texture": "#pot" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/heater_body",
+    "body": "berongsmp:block/heater_body",
+    "grille": "berongsmp:block/heater_grille_glow"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3], "to": [13, 10, 13],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#grille" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}
