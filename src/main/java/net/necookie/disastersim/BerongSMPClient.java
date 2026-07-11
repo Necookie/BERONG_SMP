@@ -19,6 +19,7 @@ import net.necookie.disastersim.client.AcademyHud;
 import net.necookie.disastersim.client.ClientEvents;
 import net.necookie.disastersim.client.CustomNpcRenderer;
 import net.necookie.disastersim.client.DropAndRollRenderModifier;
+import net.necookie.disastersim.client.ItemDescriptionTooltip;
 import net.necookie.disastersim.client.KeyMappings;
 import net.necookie.disastersim.client.TutorialHud;
 
@@ -70,6 +71,8 @@ public class BerongSMPClient {
         // separately via RegisterRenderStateModifiersEvent, below)
         NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPre);
         NeoForge.EVENT_BUS.addListener(DropAndRollRenderModifier::onRenderPost);
+        // Appends a tooltip line for any item/block whose lang file defines a ".desc" key
+        NeoForge.EVENT_BUS.addListener(ItemDescriptionTooltip::onItemTooltip);
     }
 
     /**
