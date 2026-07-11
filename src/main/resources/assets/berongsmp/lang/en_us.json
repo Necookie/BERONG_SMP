@@ -325,5 +325,26 @@
   "block.berongsmp.convection_oven": "Electric Convection Oven",
   "block.berongsmp.convection_oven.desc": "Place in a culinary classroom baking area. A shorted heating element and fan motor behind a failed door gasket can catch fire — a Class C fire. Any extinguisher defuses it.",
   "block.berongsmp.lechon_rotisserie_spit": "Lechon Rotisserie",
-  "block.berongsmp.lechon_rotisserie_spit.desc": "Place in an outdoor/covered cooking area for a charcoal spit roast. Fat dripping onto unattended coals can flare up. Requires the wet chemical extinguisher."
+  "block.berongsmp.lechon_rotisserie_spit.desc": "Place in an outdoor/covered cooking area for a charcoal spit roast. Fat dripping onto unattended coals can flare up. Requires the wet chemical extinguisher.",
+
+  "block.berongsmp.portable_space_heater": "Portable Space Heater (Electrical Hazard)",
+  "block.berongsmp.portable_space_heater.desc": "Place in a conference room near papers. A tipped heater can ignite anything against its grille. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.halogen_floor_lamp": "Halogen Floor Lamp (Electrical Hazard)",
+  "block.berongsmp.halogen_floor_lamp.desc": "Place beside curtains for a torchiere floor lamp. A tipped lamp's white-hot bowl can scorch fabric alight. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.jammed_projection_screen": "Jammed Projection Screen (Electrical Hazard)",
+  "block.berongsmp.jammed_projection_screen.desc": "Place on a conference room ceiling. A stalled retract motor can overheat its housing. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.overheating_video_wall": "Overheating Video Wall (Electrical Hazard)",
+  "block.berongsmp.overheating_video_wall.desc": "Place on a boardroom wall for a multi-panel LED display. A failed driver stack can overheat behind the panels. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.aerosol_freshener_dispenser": "Aerosol Freshener Dispenser (Fire Hazard)",
+  "block.berongsmp.aerosol_freshener_dispenser.desc": "Place on a wall away from heat sources. Mounted above a heat register, its propellant mist can flash over. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.smothered_laptop": "Smothered Laptop (Electrical Hazard)",
+  "block.berongsmp.smothered_laptop.desc": "Place on soft furniture. A laptop left running with its vents buried can overheat and ignite the upholstery. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.smoldering_planter": "Smoldering Planter (Fire Hazard)",
+  "block.berongsmp.smoldering_planter.desc": "Place as office floor decor. A discarded cigarette can smolder in dry peat potting mix. Plain Class A fire — any extinguisher defuses it.",
+  "block.berongsmp.pinched_tv_cord": "Pinched TV Cord (Electrical Hazard)",
+  "block.berongsmp.pinched_tv_cord.desc": "Place behind a wall-mounted display. A cord crushed flat by its mount bracket can arc through split insulation. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.venting_ups_battery": "Venting UPS Battery (Electrical Hazard)",
+  "block.berongsmp.venting_ups_battery.desc": "Place under a credenza. A failing lead-acid cell off-gasses hydrogen that can flash over. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.faulty_dimmer_switch": "Faulty Dimmer Switch (Electrical Hazard)",
+  "block.berongsmp.faulty_dimmer_switch.desc": "Place on a conference room wall. An over-lamped dimmer's triac can scorch through its faceplate. Wet chemical won't defuse it — use ABC or CO2."
 }

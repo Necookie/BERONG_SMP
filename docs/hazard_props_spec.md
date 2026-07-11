@@ -578,3 +578,110 @@
 - **Hazardous State:** Live coals left unattended — rendered fat dripping onto the coals threatens a flare-up. The only solid-fuel (charcoal) hazard in the mod.
 
 - **Failure Consequence (300 ticks):** Dripping fat flares the coals into a fire. **Only the wet chemical extinguisher may defuse it.** Prevention rakes the coals down and shields the drip pan.
+
+## 🏢 Conference Room Zone (props 56–65, added 2026-07-12)
+
+Real-world basis: wet chemical (aqueous, potassium-acetate) agent is conductive and unsafe on live
+electrical fires, and the wrong agent for flammable-vapor fires. All ten of these props are
+energized-equipment or vapor hazards **except `smoldering_planter`** (a plain Class A soil fire) —
+**only ABC or CO2 may defuse the other nine; wet chemical is refused with a warning.**
+
+### 56. Portable Space Heater (`berongsmp:portable_space_heater`)
+
+- **Target Room:** Conference Room
+
+- **Normal State:** An electric space heater, unplugged, cold coils.
+
+- **Hazardous State:** Tipped against a stack of loose papers, coils glowing orange through the grille.
+
+- **Failure Consequence (300 ticks):** The heater ignites the papers against its grille. **ABC/CO2 only.** Prevention unplugs it and clears the papers.
+
+### 57. Halogen Floor Lamp (`berongsmp:halogen_floor_lamp`)
+
+- **Target Room:** Conference Room / Lounge
+
+- **Normal State:** A torchiere floor lamp, standing upright, bowl cool.
+
+- **Hazardous State:** Tipped against a curtain, the halogen bowl running white-hot.
+
+- **Failure Consequence (350 ticks):** The white-hot bowl scorches the curtain alight. **ABC/CO2 only.** Prevention stands the lamp upright, clear of fabric.
+
+### 58. Jammed Projection Screen (`berongsmp:jammed_projection_screen`)
+
+- **Target Room:** Conference Room ceiling
+
+- **Normal State:** A retractable ceiling projection screen, fully retracted, motor idle.
+
+- **Hazardous State:** The tube motor stalls mid-retract, housing smoking. Distinct from `ceiling_projector` (the projector unit itself, not the screen).
+
+- **Failure Consequence (450 ticks):** The stalled motor overheats and ignites its housing. **ABC/CO2 only.** Prevention cuts power to the motor.
+
+### 59. Overheating Video Wall (`berongsmp:overheating_video_wall`)
+
+- **Target Room:** Conference Room / Boardroom wall
+
+- **Normal State:** A multi-panel LED video wall, dark, standby.
+
+- **Hazardous State:** The driver stack overheats behind the panels; one panel glitches out. Distinct from `smartboard_inverter` (water-ingress failure, not overheating electronics).
+
+- **Failure Consequence (400 ticks):** The overheated driver stack ignites behind the panels. **ABC/CO2 only.** Prevention powers down the wall to let it cool.
+
+### 60. Aerosol Freshener Dispenser (`berongsmp:aerosol_freshener_dispenser`)
+
+- **Target Room:** Conference Room / Corridor wall
+
+- **Normal State:** A wall-mounted automatic air-freshener dispenser, idle.
+
+- **Hazardous State:** Mounted above a heat register, misting flammable propellant.
+
+- **Failure Consequence (500 ticks):** The propellant mist finds the heat register and flashes alight. **ABC/CO2 only.** Prevention relocates the dispenser away from the register.
+
+### 61. Smothered Laptop (`berongsmp:smothered_laptop`)
+
+- **Target Room:** Conference Room / Lounge sofa
+
+- **Normal State:** A laptop sitting on a hard surface, vents clear.
+
+- **Hazardous State:** Left running with its vents buried in sofa cushions, case browning.
+
+- **Failure Consequence (450 ticks):** The smothered battery overheats and ignites the sofa. **ABC/CO2 only.** Prevention pulls the laptop clear of the cushions.
+
+### 62. Smoldering Planter (`berongsmp:smoldering_planter`)
+
+- **Target Room:** Conference Room / Office floor decor
+
+- **Normal State:** A clean decorative planter, healthy plant.
+
+- **Hazardous State:** A discarded cigarette smolders in dry peat potting mix. Distinct from `plastic_trash_bin` (a vape in a bin, not a planter).
+
+- **Failure Consequence (500 ticks):** The smoldering peat finally catches. **Any extinguisher defuses it** — the one Conference Room prop that is a plain Class A fire, not electrical. Prevention digs out the butt and waters the peat.
+
+### 63. Pinched TV Cord (`berongsmp:pinched_tv_cord`)
+
+- **Target Room:** Conference Room wall, behind a mounted display
+
+- **Normal State:** A tidy power cord run behind the display bracket.
+
+- **Hazardous State:** The cord is crushed flat by the mount, insulation split, bare copper arcing. Distinct from `frayed_console_wire` (worn fraying on open floor, not a crush injury behind a mount).
+
+- **Failure Consequence (400 ticks):** The crushed cord arcs and ignites the wall. **ABC/CO2 only.** Prevention reroutes the cord clear of the pinch point.
+
+### 64. Venting UPS Battery (`berongsmp:venting_ups_battery`)
+
+- **Target Room:** Conference Room, under a credenza
+
+- **Normal State:** An under-furniture UPS backup battery, green status.
+
+- **Hazardous State:** A failing lead-acid cell off-gasses hydrogen, case bulging. Distinct from `pa_system_backup` (a failing PA power panel, not a UPS battery bank).
+
+- **Failure Consequence (450 ticks, 2-block radius):** The venting hydrogen flashes over. **ABC/CO2 only.** Prevention pulls the failing battery and vents the cabinet.
+
+### 65. Faulty Dimmer Switch (`berongsmp:faulty_dimmer_switch`)
+
+- **Target Room:** Conference Room wall
+
+- **Normal State:** A clean wall dimmer switch, normal load.
+
+- **Hazardous State:** Over-lamped, the triac buzzes and scorches the faceplate. Distinct from `overloaded_wall_outlet` (a receptacle drawing too much current, not a lighting control).
+
+- **Failure Consequence (350 ticks):** The scorched dimmer ignites the wall. **ABC/CO2 only.** Prevention removes the extra lamp load.
