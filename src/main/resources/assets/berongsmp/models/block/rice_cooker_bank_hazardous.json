@@ -3,25 +3,59 @@
   "textures": {
     "particle": "berongsmp:block/hazard_scorch_char",
     "body": "berongsmp:block/rice_cooker_body",
-    "scorch": "berongsmp:block/hazard_scorch_char"
+    "scorch": "berongsmp:block/hazard_scorch_char",
+    "lid": "berongsmp:block/fixture_chrome",
+    "led": "berongsmp:block/hazard_warning_led"
   },
   "elements": [
     {
-      "name": "cooker_a",
-      "from": [1, 0, 1], "to": [7, 7, 7],
+      "name": "cooker_a_body",
+      "from": [1, 0, 1], "to": [7, 6, 7],
       "faces": {
-        "down": { "texture": "#scorch" }, "up": { "texture": "#body" },
+        "down": { "texture": "#scorch" }, "up": { "texture": "#scorch" },
         "north": { "texture": "#scorch" }, "south": { "texture": "#scorch" },
         "east": { "texture": "#scorch" }, "west": { "texture": "#scorch" }
       }
     },
     {
-      "name": "cooker_b",
-      "from": [9, 0, 9], "to": [15, 7, 15],
+      "name": "cooker_a_lid",
+      "from": [1, 6, 1], "to": [7, 7, 7],
       "faces": {
-        "down": { "texture": "#scorch" }, "up": { "texture": "#body" },
+        "down": { "texture": "#lid" }, "up": { "texture": "#lid" },
+        "north": { "texture": "#lid" }, "south": { "texture": "#lid" },
+        "east": { "texture": "#lid" }, "west": { "texture": "#lid" }
+      }
+    },
+    {
+      "name": "cooker_a_led",
+      "from": [3, 2, 0], "to": [4, 3, 1],
+      "faces": {
+        "north": { "texture": "#led" }, "south": { "texture": "#led" }
+      }
+    },
+    {
+      "name": "cooker_b_body",
+      "from": [9, 0, 9], "to": [15, 6, 15],
+      "faces": {
+        "down": { "texture": "#scorch" }, "up": { "texture": "#scorch" },
         "north": { "texture": "#scorch" }, "south": { "texture": "#scorch" },
         "east": { "texture": "#scorch" }, "west": { "texture": "#scorch" }
+      }
+    },
+    {
+      "name": "cooker_b_lid",
+      "from": [9, 6, 9], "to": [15, 7, 15],
+      "faces": {
+        "down": { "texture": "#lid" }, "up": { "texture": "#lid" },
+        "north": { "texture": "#lid" }, "south": { "texture": "#lid" },
+        "east": { "texture": "#lid" }, "west": { "texture": "#lid" }
+      }
+    },
+    {
+      "name": "cooker_b_led",
+      "from": [11, 2, 8], "to": [12, 3, 9],
+      "faces": {
+        "north": { "texture": "#led" }, "south": { "texture": "#led" }
       }
     }
   ]
