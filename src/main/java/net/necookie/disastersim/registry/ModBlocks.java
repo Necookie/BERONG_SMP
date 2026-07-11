@@ -471,6 +471,38 @@ public final class ModBlocks {
                     .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
 
+    /** Chef's Prep Table — see {@link ChefsPrepDrawersBlock}. */
+    public static final DeferredBlock<ChefsPrepDrawersBlock> CHEFS_PREP_DRAWERS = BLOCKS.registerBlock(
+            "chefs_prep_drawers", ChefsPrepDrawersBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Culinary Lab Refrigerator — see {@link CulinaryFridgeBlock}. */
+    public static final DeferredBlock<CulinaryFridgeBlock> CULINARY_FRIDGE = BLOCKS.registerBlock(
+            "culinary_fridge", CulinaryFridgeBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
+    /** Student Lab Microwave — see {@link StudentLabMicrowaveBlock}. */
+    public static final DeferredBlock<StudentLabMicrowaveBlock> STUDENT_LAB_MICROWAVE = BLOCKS.registerBlock(
+            "student_lab_microwave", StudentLabMicrowaveBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Corroded Gas Line Joint — see {@link CorrodedGasLineJointBlock}. */
+    public static final DeferredBlock<CorrodedGasLineJointBlock> CORRODED_GAS_LINE_JOINT = BLOCKS.registerBlock(
+            "corroded_gas_line_joint", CorrodedGasLineJointBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Gas Range, Stuck Burner — see {@link GasRangeStuckBurnerBlock}. */
+    public static final DeferredBlock<GasRangeStuckBurnerBlock> GAS_RANGE_STUCK_BURNER = BLOCKS.registerBlock(
+            "gas_range_stuck_burner", GasRangeStuckBurnerBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 11 : 0));
+
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
             "teachers_desk", TeachersDeskBlock::new,

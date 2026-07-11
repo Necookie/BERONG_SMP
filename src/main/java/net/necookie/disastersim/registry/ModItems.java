@@ -429,6 +429,26 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("leaking_butane_canister_stove", ModBlocks.LEAKING_BUTANE_CANISTER_STOVE);
     static { HAZARD_ITEM_MAP.put("leaking_butane_canister_stove", LEAKING_BUTANE_CANISTER_STOVE_ITEM); }
 
+    public static final DeferredItem<BlockItem> CHEFS_PREP_DRAWERS_ITEM =
+            ITEMS.registerSimpleBlockItem("chefs_prep_drawers", ModBlocks.CHEFS_PREP_DRAWERS);
+    static { HAZARD_ITEM_MAP.put("chefs_prep_drawers", CHEFS_PREP_DRAWERS_ITEM); }
+
+    public static final DeferredItem<BlockItem> CULINARY_FRIDGE_ITEM =
+            ITEMS.registerSimpleBlockItem("culinary_fridge", ModBlocks.CULINARY_FRIDGE);
+    static { HAZARD_ITEM_MAP.put("culinary_fridge", CULINARY_FRIDGE_ITEM); }
+
+    public static final DeferredItem<BlockItem> STUDENT_LAB_MICROWAVE_ITEM =
+            ITEMS.registerSimpleBlockItem("student_lab_microwave", ModBlocks.STUDENT_LAB_MICROWAVE);
+    static { HAZARD_ITEM_MAP.put("student_lab_microwave", STUDENT_LAB_MICROWAVE_ITEM); }
+
+    public static final DeferredItem<BlockItem> CORRODED_GAS_LINE_JOINT_ITEM =
+            ITEMS.registerSimpleBlockItem("corroded_gas_line_joint", ModBlocks.CORRODED_GAS_LINE_JOINT);
+    static { HAZARD_ITEM_MAP.put("corroded_gas_line_joint", CORRODED_GAS_LINE_JOINT_ITEM); }
+
+    public static final DeferredItem<BlockItem> GAS_RANGE_STUCK_BURNER_ITEM =
+            ITEMS.registerSimpleBlockItem("gas_range_stuck_burner", ModBlocks.GAS_RANGE_STUCK_BURNER);
+    static { HAZARD_ITEM_MAP.put("gas_range_stuck_burner", GAS_RANGE_STUCK_BURNER_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 
