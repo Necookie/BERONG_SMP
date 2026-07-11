@@ -7,7 +7,7 @@
   "elements": [
     {
       "name": "guard_column",
-      "from": [2, 0, 12], "to": [14, 16, 13],
+      "from": [5, 0, 10], "to": [11, 16, 10.5],
       "faces": {
         "up": { "texture": "#glass" }, "down": { "texture": "#glass" },
         "north": { "texture": "#glass" }, "south": { "texture": "#glass" },

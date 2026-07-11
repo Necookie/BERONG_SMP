@@ -9,7 +9,7 @@
   "elements": [
     {
       "name": "body",
-      "from": [0, 0, 0], "to": [16, 9, 16],
+      "from": [4, 0, 4], "to": [12, 9, 12],
       "faces": {
         "up": { "texture": "#steel" }, "down": { "texture": "#steel" },
         "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
@@ -18,7 +18,7 @@
     },
     {
       "name": "ice_well",
-      "from": [1, 9, 1], "to": [15, 11, 15],
+      "from": [4.5, 9, 4.5], "to": [11.5, 11, 11.5],
       "faces": {
         "up": { "texture": "#well" }, "down": { "texture": "#steel" },
         "north": { "texture": "#steel" }, "south": { "texture": "#steel" },
@@ -27,7 +27,7 @@
     },
     {
       "name": "guard_riser",
-      "from": [2, 11, 13], "to": [14, 16, 14],
+      "from": [5, 11, 10.5], "to": [11, 16, 11],
       "faces": {
         "up": { "texture": "#glass" }, "down": { "texture": "#glass" },
         "north": { "texture": "#glass" }, "south": { "texture": "#glass" },

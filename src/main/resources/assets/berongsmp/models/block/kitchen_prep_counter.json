@@ -8,7 +8,7 @@
   "elements": [
     {
       "name": "body",
-      "from": [0, 0, 0], "to": [16, 14, 16],
+      "from": [4, 0, 4], "to": [12, 14, 12],
       "faces": {
         "down": { "texture": "#body" }, "up": { "texture": "#body" },
         "north": { "texture": "#body" }, "south": { "texture": "#body" },
@@ -17,7 +17,7 @@
     },
     {
       "name": "top_trim",
-      "from": [0, 14, 0], "to": [16, 16, 16],
+      "from": [4, 14, 4], "to": [12, 16, 12],
       "faces": {
         "down": { "texture": "#trim" }, "up": { "texture": "#trim" },
         "north": { "texture": "#trim" }, "south": { "texture": "#trim" },
