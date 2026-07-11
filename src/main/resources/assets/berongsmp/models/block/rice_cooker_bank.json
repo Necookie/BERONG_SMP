@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/rice_cooker_body",
+    "body": "berongsmp:block/rice_cooker_body"
+  },
+  "elements": [
+    {
+      "name": "cooker_a",
+      "from": [1, 0, 1], "to": [7, 7, 7],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "cooker_b",
+      "from": [9, 0, 9], "to": [15, 7, 15],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

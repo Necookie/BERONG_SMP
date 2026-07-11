@@ -1286,6 +1286,73 @@ def tex_range_knob_melted():
     save(im, "range_knob_melted")
 
 
+def tex_mixer_body_metal():
+    im = new_canvas((190, 190, 195))
+    gradient_shade(im, 0, 0, 15, 15, (190, 190, 195), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (215, 215, 220), (120, 120, 126))
+    rect(im, 4, 0, 11, 5, (170, 170, 176))  # raised motor head
+    border(im, (110, 110, 116))
+    save(im, "mixer_body_metal")
+
+
+def tex_mixer_bowl_steel():
+    im = new_canvas((160, 162, 165))
+    gradient_shade(im, 1, 1, 14, 14, (160, 162, 165), light=1.2, dark=0.8)
+    inset_edges(im, 1, 1, 14, 14, (200, 202, 205), (90, 92, 95))
+    rect(im, 3, 12, 12, 15, (110, 112, 115))  # bowl base shadow
+    save(im, "mixer_bowl_steel")
+
+
+def tex_oven_door_window_glow():
+    im = new_canvas((40, 40, 42))
+    rect(im, 2, 2, 13, 13, (30, 15, 8))
+    rect(im, 4, 4, 11, 11, (200, 90, 20))
+    rect(im, 6, 6, 9, 9, (255, 190, 60))
+    speckle(im, [(255, 220, 120), (255, 110, 20)], density=0.15, x0=4, y0=4, x1=11, y1=11)
+    border(im, (25, 25, 27))
+    save(im, "oven_door_window_glow")
+
+
+def tex_induction_glass_top():
+    im = new_canvas((25, 25, 28))
+    gradient_shade(im, 0, 0, 15, 15, (25, 25, 28), light=1.3, dark=0.75)
+    disc_rings = [(7.5, 4.5, 2.5), (7.5, 10.5, 2.5)]
+    for cx, cy, r in disc_rings:
+        for y in range(16):
+            for x in range(16):
+                d = ((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5
+                if abs(d - r) < 0.7:
+                    set_px(im, x, y, (255, 60, 30))
+    border(im, (15, 15, 17))
+    save(im, "induction_glass_top")
+
+
+def tex_rice_cooker_body():
+    im = new_canvas((230, 230, 225))
+    gradient_shade(im, 1, 2, 14, 15, (230, 230, 225), light=1.12, dark=0.85)
+    inset_edges(im, 1, 2, 14, 15, (245, 245, 240), (160, 160, 155))
+    rect(im, 5, 0, 10, 2, (60, 60, 62))  # lid handle
+    rect(im, 4, 8, 11, 9, (90, 90, 92))  # control strip
+    save(im, "rice_cooker_body")
+
+
+def tex_espresso_body_steel():
+    im = new_canvas((175, 178, 182))
+    gradient_shade(im, 0, 0, 15, 15, (175, 178, 182), light=1.15, dark=0.82)
+    inset_edges(im, 0, 0, 15, 15, (205, 208, 212), (110, 113, 117))
+    rect(im, 3, 3, 12, 6, (60, 60, 62))  # control panel
+    save(im, "espresso_body_steel")
+
+
+def tex_espresso_group_head():
+    im = new_canvas((70, 70, 74))
+    gradient_shade(im, 1, 1, 14, 14, (70, 70, 74), light=1.2, dark=0.8)
+    rect(im, 5, 10, 10, 15, (40, 40, 42))  # portafilter
+    rect(im, 4, 8, 11, 10, (150, 150, 155))  # steam wisp band
+    border(im, (30, 30, 32))
+    save(im, "espresso_group_head")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -1331,6 +1398,11 @@ ALL = [
     tex_fridge_door_white, tex_condenser_coil_dusty,
     tex_gas_pipe_corroded,
     tex_range_knob_melted,
+    tex_mixer_body_metal, tex_mixer_bowl_steel,
+    tex_oven_door_window_glow,
+    tex_induction_glass_top,
+    tex_rice_cooker_body,
+    tex_espresso_body_steel, tex_espresso_group_head,
 ]
 
 if __name__ == "__main__":

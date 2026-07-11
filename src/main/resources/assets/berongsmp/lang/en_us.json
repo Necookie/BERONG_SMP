@@ -271,5 +271,16 @@
   "block.berongsmp.corroded_gas_line_joint": "Corroded Gas Line Joint",
   "block.berongsmp.corroded_gas_line_joint.desc": "Place on a kitchen wall as fixed gas piping. A rusted-through elbow joint can weep gas and flash over. Requires the wet chemical extinguisher.",
   "block.berongsmp.gas_range_stuck_burner": "Gas Range",
-  "block.berongsmp.gas_range_stuck_burner.desc": "Place in a culinary classroom kitchen line. A melted control knob can jam a burner open, flaring across the range. Requires the wet chemical extinguisher."
+  "block.berongsmp.gas_range_stuck_burner.desc": "Place in a culinary classroom kitchen line. A melted control knob can jam a burner open, flaring across the range. Requires the wet chemical extinguisher.",
+
+  "block.berongsmp.commercial_stand_mixer": "Commercial Stand Mixer",
+  "block.berongsmp.commercial_stand_mixer.desc": "Place on a prep counter for bread-dough work. A motor jammed by stiff dough can overheat — a Class C electrical fire. Any extinguisher defuses it.",
+  "block.berongsmp.gas_deck_oven": "Gas Deck Oven",
+  "block.berongsmp.gas_deck_oven.desc": "Place in a culinary classroom baking area. A stuck thermostat and cracked door can radiate heat onto nearby items. Requires the wet chemical extinguisher.",
+  "block.berongsmp.induction_cooktop_station": "Induction Cooktop",
+  "block.berongsmp.induction_cooktop_station.desc": "Place on a counter for electric cooking demos. A failed cooling fan can overheat the electronics under the glass — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.rice_cooker_bank": "Rice Cooker Bank",
+  "block.berongsmp.rice_cooker_bank.desc": "Place on a counter as a row of student rice cookers. Boiling one dry can scorch its base — a Class C fire. Any extinguisher defuses it.",
+  "block.berongsmp.espresso_machine": "Espresso Machine",
+  "block.berongsmp.espresso_machine.desc": "Place on a café/canteen counter. A scale-blocked pressure valve can over-pressurize the boiler and short the controls — a Class C fire. Any extinguisher defuses it."
 }

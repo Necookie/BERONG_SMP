@@ -1,0 +1,29 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_warning_led",
+    "body": "berongsmp:block/espresso_body_steel",
+    "head": "berongsmp:block/espresso_group_head",
+    "led": "berongsmp:block/hazard_warning_led"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [1, 0, 1], "to": [14, 12, 14],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#led" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "group_head",
+      "from": [5, 4, -1], "to": [10, 8, 1],
+      "faces": {
+        "down": { "texture": "#head" }, "up": { "texture": "#head" },
+        "north": { "texture": "#head" }, "south": { "texture": "#head" },
+        "east": { "texture": "#head" }, "west": { "texture": "#head" }
+      }
+    }
+  ]
+}

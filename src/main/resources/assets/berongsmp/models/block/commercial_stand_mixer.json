@@ -1,0 +1,28 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/mixer_body_metal",
+    "body": "berongsmp:block/mixer_body_metal",
+    "bowl": "berongsmp:block/mixer_bowl_steel"
+  },
+  "elements": [
+    {
+      "name": "head",
+      "from": [2, 8, 2], "to": [14, 14, 8],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "bowl",
+      "from": [3, 0, 5], "to": [13, 8, 13],
+      "faces": {
+        "down": { "texture": "#bowl" }, "up": { "texture": "#bowl" },
+        "north": { "texture": "#bowl" }, "south": { "texture": "#bowl" },
+        "east": { "texture": "#bowl" }, "west": { "texture": "#bowl" }
+      }
+    }
+  ]
+}

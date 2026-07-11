@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/fryer_body_steel",
+    "body": "berongsmp:block/fryer_body_steel",
+    "door": "berongsmp:block/hazard_glass_screen_off",
+    "knob": "berongsmp:block/gas_valve_wheel"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [0, 0, 0], "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#door" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    },
+    {
+      "name": "knob_panel",
+      "from": [1, 13, -1], "to": [15, 15, 0],
+      "faces": {
+        "north": { "texture": "#knob" }, "south": { "texture": "#knob" }
+      }
+    }
+  ]
+}

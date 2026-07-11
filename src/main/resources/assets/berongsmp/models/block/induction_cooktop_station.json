@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/steel_counter_body",
+    "side": "berongsmp:block/steel_counter_body",
+    "top": "berongsmp:block/induction_glass_top"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 4, 15],
+      "faces": {
+        "down": { "texture": "#side" }, "up": { "texture": "#top" },
+        "north": { "texture": "#side" }, "south": { "texture": "#side" },
+        "east": { "texture": "#side" }, "west": { "texture": "#side" }
+      }
+    }
+  ]
+}

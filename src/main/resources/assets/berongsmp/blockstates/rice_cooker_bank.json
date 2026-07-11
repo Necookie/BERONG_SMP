@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "hazardous=false,on_fire=false": { "model": "berongsmp:block/rice_cooker_bank" },
+    "hazardous=false,on_fire=true": { "model": "berongsmp:block/rice_cooker_bank_hazardous" },
+    "hazardous=true,on_fire=false": { "model": "berongsmp:block/rice_cooker_bank_hazardous" },
+    "hazardous=true,on_fire=true": { "model": "berongsmp:block/rice_cooker_bank_hazardous" }
+  }
+}
