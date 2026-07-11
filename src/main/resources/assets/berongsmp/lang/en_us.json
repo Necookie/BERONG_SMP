@@ -7,7 +7,7 @@
   "item.berongsmp.npc_security_tuazon": "Security Guard Tuazon",
   "item.berongsmp.npc_dm_orlanda": "DM Orlanda",
   "item.berongsmp.npc_necookie": "Necookie",
-  "item.berongsmp.npc_sir_bookmark": "Sir BookMark",
+  "item.berongsmp.npc_sir_bookmark": "Sir Bookmark",
   "item.berongsmp.npc_student": "Student",
   "item.berongsmp.npc_prof_instructor_david": "Instructor David",
   "item.berongsmp.npc_prof_principal_brown": "Principal Brown",
@@ -21,7 +21,7 @@
   "item.berongsmp.npc_student_kath": "Kath",
   "item.berongsmp.npc_student_kelly": "Kelly",
   "item.berongsmp.npc_student_nath": "Nath",
-  "item.berongsmp.npc_student_necookie": "Necookie",
+  "item.berongsmp.npc_student_necookie": "Necookie (Student)",
   "item.berongsmp.npc_student_nell": "Nell",
   "item.berongsmp.npc_student_princess": "Princess",
   "block.berongsmp.evacuation_map": "Evacuation Map",
@@ -110,6 +110,7 @@
   "block.berongsmp.basketball_pole": "Basketball Pole",
   "block.berongsmp.basketball_hoop": "Basketball Hoop",
   "item.berongsmp.basketball": "Basketball",
+  "block.berongsmp.table": "Table",
 
   "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
 
