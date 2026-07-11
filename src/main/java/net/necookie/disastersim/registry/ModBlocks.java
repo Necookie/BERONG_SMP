@@ -962,6 +962,72 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
 
+    // ── Conference Room hazards (props 56-65) ───────────────────────────────
+
+    /** Space heater tipped against papers — see {@link PortableSpaceHeaterBlock}. */
+    public static final DeferredBlock<PortableSpaceHeaterBlock> PORTABLE_SPACE_HEATER = BLOCKS.registerBlock(
+            "portable_space_heater", PortableSpaceHeaterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
+
+    /** Tipped torchiere scorching a curtain — see {@link HalogenFloorLampBlock}. */
+    public static final DeferredBlock<HalogenFloorLampBlock> HALOGEN_FLOOR_LAMP = BLOCKS.registerBlock(
+            "halogen_floor_lamp", HalogenFloorLampBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 3));
+
+    /** Stalled ceiling projection-screen motor — see {@link JammedProjectionScreenBlock}. */
+    public static final DeferredBlock<JammedProjectionScreenBlock> JAMMED_PROJECTION_SCREEN = BLOCKS.registerBlock(
+            "jammed_projection_screen", JammedProjectionScreenBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Overheating driver stack behind an LED video wall — see {@link OverheatingVideoWallBlock}. */
+    public static final DeferredBlock<OverheatingVideoWallBlock> OVERHEATING_VIDEO_WALL = BLOCKS.registerBlock(
+            "overheating_video_wall", OverheatingVideoWallBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
+
+    /** Aerosol dispenser misting propellant near a heat register — see {@link AerosolFreshenerDispenserBlock}. */
+    public static final DeferredBlock<AerosolFreshenerDispenserBlock> AEROSOL_FRESHENER_DISPENSER = BLOCKS.registerBlock(
+            "aerosol_freshener_dispenser", AerosolFreshenerDispenserBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Laptop smothered under sofa cushions — see {@link SmotheredLaptopBlock}. */
+    public static final DeferredBlock<SmotheredLaptopBlock> SMOTHERED_LAPTOP = BLOCKS.registerBlock(
+            "smothered_laptop", SmotheredLaptopBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
+    /** Cigarette smoldering in a planter's peat — see {@link SmolderingPlanterBlock}. */
+    public static final DeferredBlock<SmolderingPlanterBlock> SMOLDERING_PLANTER = BLOCKS.registerBlock(
+            "smoldering_planter", SmolderingPlanterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.PLANT)
+                    .strength(0.5f, 1.0f).sound(SoundType.GRAVEL).noOcclusion());
+
+    /** TV power cord crushed by its wall mount — see {@link PinchedTvCordBlock}. */
+    public static final DeferredBlock<PinchedTvCordBlock> PINCHED_TV_CORD = BLOCKS.registerBlock(
+            "pinched_tv_cord", PinchedTvCordBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Failing UPS battery off-gassing under a credenza — see {@link VentingUpsBatteryBlock}. */
+    public static final DeferredBlock<VentingUpsBatteryBlock> VENTING_UPS_BATTERY = BLOCKS.registerBlock(
+            "venting_ups_battery", VentingUpsBatteryBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Over-lamped dimmer switch scorching its faceplate — see {@link FaultyDimmerSwitchBlock}. */
+    public static final DeferredBlock<FaultyDimmerSwitchBlock> FAULTY_DIMMER_SWITCH = BLOCKS.registerBlock(
+            "faulty_dimmer_switch", FaultyDimmerSwitchBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {
