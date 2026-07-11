@@ -449,6 +449,26 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("gas_range_stuck_burner", ModBlocks.GAS_RANGE_STUCK_BURNER);
     static { HAZARD_ITEM_MAP.put("gas_range_stuck_burner", GAS_RANGE_STUCK_BURNER_ITEM); }
 
+    public static final DeferredItem<BlockItem> COMMERCIAL_STAND_MIXER_ITEM =
+            ITEMS.registerSimpleBlockItem("commercial_stand_mixer", ModBlocks.COMMERCIAL_STAND_MIXER);
+    static { HAZARD_ITEM_MAP.put("commercial_stand_mixer", COMMERCIAL_STAND_MIXER_ITEM); }
+
+    public static final DeferredItem<BlockItem> GAS_DECK_OVEN_ITEM =
+            ITEMS.registerSimpleBlockItem("gas_deck_oven", ModBlocks.GAS_DECK_OVEN);
+    static { HAZARD_ITEM_MAP.put("gas_deck_oven", GAS_DECK_OVEN_ITEM); }
+
+    public static final DeferredItem<BlockItem> INDUCTION_COOKTOP_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("induction_cooktop_station", ModBlocks.INDUCTION_COOKTOP_STATION);
+    static { HAZARD_ITEM_MAP.put("induction_cooktop_station", INDUCTION_COOKTOP_STATION_ITEM); }
+
+    public static final DeferredItem<BlockItem> RICE_COOKER_BANK_ITEM =
+            ITEMS.registerSimpleBlockItem("rice_cooker_bank", ModBlocks.RICE_COOKER_BANK);
+    static { HAZARD_ITEM_MAP.put("rice_cooker_bank", RICE_COOKER_BANK_ITEM); }
+
+    public static final DeferredItem<BlockItem> ESPRESSO_MACHINE_ITEM =
+            ITEMS.registerSimpleBlockItem("espresso_machine", ModBlocks.ESPRESSO_MACHINE);
+    static { HAZARD_ITEM_MAP.put("espresso_machine", ESPRESSO_MACHINE_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 

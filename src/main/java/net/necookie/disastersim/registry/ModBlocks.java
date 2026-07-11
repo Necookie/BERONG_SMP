@@ -503,6 +503,39 @@ public final class ModBlocks {
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 11 : 0));
 
+    /** Commercial Stand Mixer — see {@link CommercialStandMixerBlock}. */
+    public static final DeferredBlock<CommercialStandMixerBlock> COMMERCIAL_STAND_MIXER = BLOCKS.registerBlock(
+            "commercial_stand_mixer", CommercialStandMixerBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Gas Deck Oven — see {@link GasDeckOvenBlock}. */
+    public static final DeferredBlock<GasDeckOvenBlock> GAS_DECK_OVEN = BLOCKS.registerBlock(
+            "gas_deck_oven", GasDeckOvenBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
+
+    /** Induction Cooktop — see {@link InductionCooktopStationBlock}. */
+    public static final DeferredBlock<InductionCooktopStationBlock> INDUCTION_COOKTOP_STATION = BLOCKS.registerBlock(
+            "induction_cooktop_station", InductionCooktopStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.STONE).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
+
+    /** Rice Cooker Bank — see {@link RiceCookerBankBlock}. */
+    public static final DeferredBlock<RiceCookerBankBlock> RICE_COOKER_BANK = BLOCKS.registerBlock(
+            "rice_cooker_bank", RiceCookerBankBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
+
+    /** Espresso Machine — see {@link EspressoMachineBlock}. */
+    public static final DeferredBlock<EspressoMachineBlock> ESPRESSO_MACHINE = BLOCKS.registerBlock(
+            "espresso_machine", EspressoMachineBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
             "teachers_desk", TeachersDeskBlock::new,
