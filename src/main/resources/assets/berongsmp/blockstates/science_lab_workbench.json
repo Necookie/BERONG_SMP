@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/science_lab_workbench" },
+    "facing=south": { "model": "berongsmp:block/science_lab_workbench", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/science_lab_workbench", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/science_lab_workbench", "y": 270 }
+  }
+}

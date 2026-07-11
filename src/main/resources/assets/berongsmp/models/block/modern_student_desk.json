@@ -1,0 +1,64 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/desk_laminate_white",
+    "top": "berongsmp:block/desk_laminate_white",
+    "leg": "berongsmp:block/desk_leg_metal_black"
+  },
+  "elements": [
+    {
+      "name": "tabletop",
+      "from": [1, 12, 1], "to": [15, 16, 15],
+      "faces": {
+        "down": { "texture": "#top" }, "up": { "texture": "#top" },
+        "north": { "texture": "#top" }, "south": { "texture": "#top" },
+        "east": { "texture": "#top" }, "west": { "texture": "#top" }
+      }
+    },
+    {
+      "name": "under_shelf",
+      "from": [2, 4, 2], "to": [14, 5, 14],
+      "faces": {
+        "down": { "texture": "#top" }, "up": { "texture": "#top" },
+        "north": { "texture": "#top" }, "south": { "texture": "#top" },
+        "east": { "texture": "#top" }, "west": { "texture": "#top" }
+      }
+    },
+    {
+      "name": "leg_fl",
+      "from": [1, 0, 1], "to": [2, 12, 2],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    },
+    {
+      "name": "leg_fr",
+      "from": [14, 0, 1], "to": [15, 12, 2],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    },
+    {
+      "name": "leg_bl",
+      "from": [1, 0, 14], "to": [2, 12, 15],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    },
+    {
+      "name": "leg_br",
+      "from": [14, 0, 14], "to": [15, 12, 15],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/desk_laminate_white",
+    "top": "berongsmp:block/desk_laminate_white",
+    "leg": "berongsmp:block/desk_leg_metal_black",
+    "divider": "berongsmp:block/hazard_glass_screen_off"
+  },
+  "elements": [
+    {
+      "name": "tabletop",
+      "from": [0, 12, 0], "to": [16, 15, 16],
+      "faces": {
+        "down": { "texture": "#top" }, "up": { "texture": "#top" },
+        "north": { "texture": "#top" }, "south": { "texture": "#top" },
+        "east": { "texture": "#top" }, "west": { "texture": "#top" }
+      }
+    },
+    {
+      "name": "monitor_divider",
+      "from": [1, 15, 12], "to": [15, 16, 13],
+      "faces": {
+        "down": { "texture": "#divider" }, "up": { "texture": "#divider" },
+        "north": { "texture": "#divider" }, "south": { "texture": "#divider" },
+        "east": { "texture": "#divider" }, "west": { "texture": "#divider" }
+      }
+    },
+    {
+      "name": "leg_west",
+      "from": [1, 0, 1], "to": [3, 12, 3],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    },
+    {
+      "name": "leg_east",
+      "from": [13, 0, 1], "to": [15, 12, 3],
+      "faces": {
+        "down": { "texture": "#leg" }, "up": { "texture": "#leg" },
+        "north": { "texture": "#leg" }, "south": { "texture": "#leg" },
+        "east": { "texture": "#leg" }, "west": { "texture": "#leg" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cabinet_body_painted",
+    "panel": "berongsmp:block/cabinet_body_painted",
+    "desk": "berongsmp:block/desk_laminate_white"
+  },
+  "elements": [
+    {
+      "name": "back_panel",
+      "from": [0, 0, 14], "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#panel" }, "up": { "texture": "#panel" },
+        "north": { "texture": "#panel" }, "south": { "texture": "#panel" },
+        "east": { "texture": "#panel" }, "west": { "texture": "#panel" }
+      }
+    },
+    {
+      "name": "side_panel",
+      "from": [14, 0, 0], "to": [16, 16, 16],
+      "faces": {
+        "down": { "texture": "#panel" }, "up": { "texture": "#panel" },
+        "north": { "texture": "#panel" }, "south": { "texture": "#panel" },
+        "east": { "texture": "#panel" }, "west": { "texture": "#panel" }
+      }
+    },
+    {
+      "name": "desk_surface",
+      "from": [0, 8, 0], "to": [14, 10, 14],
+      "faces": {
+        "down": { "texture": "#desk" }, "up": { "texture": "#desk" },
+        "north": { "texture": "#desk" }, "south": { "texture": "#desk" },
+        "east": { "texture": "#desk" }, "west": { "texture": "#desk" }
+      }
+    }
+  ]
+}

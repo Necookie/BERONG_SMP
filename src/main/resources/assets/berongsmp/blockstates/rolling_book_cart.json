@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/rolling_book_cart" },
+    "facing=south": { "model": "berongsmp:block/rolling_book_cart", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/rolling_book_cart", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/rolling_book_cart", "y": 270 }
+  }
+}

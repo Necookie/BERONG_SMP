@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/bookshelf_spines_a",
+    "frame": "berongsmp:block/cart_cabinet_metal",
+    "books_a": "berongsmp:block/bookshelf_spines_a",
+    "books_b": "berongsmp:block/bookshelf_spines_b"
+  },
+  "elements": [
+    {
+      "name": "frame",
+      "from": [1, 0, 1], "to": [15, 12, 15],
+      "faces": {
+        "down": { "texture": "#frame" }, "up": { "texture": "#frame" },
+        "north": { "texture": "#frame" }, "south": { "texture": "#frame" },
+        "east": { "texture": "#frame" }, "west": { "texture": "#frame" }
+      }
+    },
+    {
+      "name": "lower_shelf_books",
+      "from": [2, 1, 2], "to": [14, 6, 14],
+      "faces": {
+        "north": { "texture": "#books_a" }, "south": { "texture": "#books_a" },
+        "east": { "texture": "#books_b" }, "west": { "texture": "#books_b" },
+        "up": { "texture": "#books_a" }
+      }
+    },
+    {
+      "name": "upper_shelf_books",
+      "from": [2, 7, 2], "to": [14, 11, 14],
+      "faces": {
+        "north": { "texture": "#books_b" }, "south": { "texture": "#books_b" },
+        "east": { "texture": "#books_a" }, "west": { "texture": "#books_a" },
+        "up": { "texture": "#books_b" }
+      }
+    }
+  ]
+}

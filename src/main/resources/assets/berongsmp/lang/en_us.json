@@ -227,5 +227,16 @@
   "block.berongsmp.unattended_welding_station": "Unattended Welding Station",
   "block.berongsmp.unattended_welding_station.desc": "Place in a vocational shop-class workshop. Left running, hot spatter from the arc welder can ignite nearby combustibles.",
   "block.berongsmp.leaking_butane_canister_stove": "Leaking Butane Canister Stove",
-  "block.berongsmp.leaking_butane_canister_stove.desc": "Place in a kitchen or canteen prep area. The portable burner leaks gas at the canister seam — only the wet chemical extinguisher can safely defuse it."
+  "block.berongsmp.leaking_butane_canister_stove.desc": "Place in a kitchen or canteen prep area. The portable burner leaks gas at the canister seam — only the wet chemical extinguisher can safely defuse it.",
+
+  "block.berongsmp.modern_student_desk": "Modern Student Desk",
+  "block.berongsmp.modern_student_desk.desc": "Place in a classroom for a single student — pairs with a separate Chair block. Decor only, no interaction.",
+  "block.berongsmp.science_lab_workbench": "Science Lab Workbench",
+  "block.berongsmp.science_lab_workbench.desc": "Place in a science lab as a surface for lab hazard props (Bunsen Burner Station, Reagent Storage Shelf). Decor only, no interaction.",
+  "block.berongsmp.computer_lab_desk_row": "Computer Lab Desk Row",
+  "block.berongsmp.computer_lab_desk_row.desc": "Place in an ICT/computer lab as a long shared desk with a monitor-divider back edge. Decor only, no interaction.",
+  "block.berongsmp.library_study_carrel": "Library Study Carrel",
+  "block.berongsmp.library_study_carrel.desc": "Place in the library for an individual partitioned study spot. Decor only, no interaction.",
+  "block.berongsmp.rolling_book_cart": "Rolling Book Cart",
+  "block.berongsmp.rolling_book_cart.desc": "Place in the library as a mobile stack of returned books — extra fuel load for a library fire drill. Decor only, no interaction."
 }

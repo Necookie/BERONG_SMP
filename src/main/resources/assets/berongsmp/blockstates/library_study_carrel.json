@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/library_study_carrel" },
+    "facing=south": { "model": "berongsmp:block/library_study_carrel", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/library_study_carrel", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/library_study_carrel", "y": 270 }
+  }
+}
