@@ -568,6 +568,40 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.METAL)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
+    /** Garbage Disposal Unit — see {@link GarbageDisposalUnitBlock}. */
+    public static final DeferredBlock<GarbageDisposalUnitBlock> GARBAGE_DISPOSAL_UNIT = BLOCKS.registerBlock(
+            "garbage_disposal_unit", GarbageDisposalUnitBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** UV Knife Sterilizer — see {@link KnifeSterilizerCabinetBlock}. */
+    public static final DeferredBlock<KnifeSterilizerCabinetBlock> KNIFE_STERILIZER_CABINET = BLOCKS.registerBlock(
+            "knife_sterilizer_cabinet", KnifeSterilizerCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
+
+    /** Chafing Steam Table — see {@link SternoSteamTableBlock}. */
+    public static final DeferredBlock<SternoSteamTableBlock> STERNO_STEAM_TABLE = BLOCKS.registerBlock(
+            "sterno_steam_table", SternoSteamTableBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
+
+    /** Electric Convection Oven — see {@link ConvectionOvenBlock}. */
+    public static final DeferredBlock<ConvectionOvenBlock> CONVECTION_OVEN = BLOCKS.registerBlock(
+            "convection_oven", ConvectionOvenBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
+
+    /** Lechon Rotisserie — see {@link LechonRotisserieSpitBlock}. */
+    public static final DeferredBlock<LechonRotisserieSpitBlock> LECHON_ROTISSERIE_SPIT = BLOCKS.registerBlock(
+            "lechon_rotisserie_spit", LechonRotisserieSpitBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
+
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
             "teachers_desk", TeachersDeskBlock::new,

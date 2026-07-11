@@ -489,6 +489,26 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("commercial_dish_sanitizer", ModBlocks.COMMERCIAL_DISH_SANITIZER);
     static { HAZARD_ITEM_MAP.put("commercial_dish_sanitizer", COMMERCIAL_DISH_SANITIZER_ITEM); }
 
+    public static final DeferredItem<BlockItem> GARBAGE_DISPOSAL_UNIT_ITEM =
+            ITEMS.registerSimpleBlockItem("garbage_disposal_unit", ModBlocks.GARBAGE_DISPOSAL_UNIT);
+    static { HAZARD_ITEM_MAP.put("garbage_disposal_unit", GARBAGE_DISPOSAL_UNIT_ITEM); }
+
+    public static final DeferredItem<BlockItem> KNIFE_STERILIZER_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("knife_sterilizer_cabinet", ModBlocks.KNIFE_STERILIZER_CABINET);
+    static { HAZARD_ITEM_MAP.put("knife_sterilizer_cabinet", KNIFE_STERILIZER_CABINET_ITEM); }
+
+    public static final DeferredItem<BlockItem> STERNO_STEAM_TABLE_ITEM =
+            ITEMS.registerSimpleBlockItem("sterno_steam_table", ModBlocks.STERNO_STEAM_TABLE);
+    static { HAZARD_ITEM_MAP.put("sterno_steam_table", STERNO_STEAM_TABLE_ITEM); }
+
+    public static final DeferredItem<BlockItem> CONVECTION_OVEN_ITEM =
+            ITEMS.registerSimpleBlockItem("convection_oven", ModBlocks.CONVECTION_OVEN);
+    static { HAZARD_ITEM_MAP.put("convection_oven", CONVECTION_OVEN_ITEM); }
+
+    public static final DeferredItem<BlockItem> LECHON_ROTISSERIE_SPIT_ITEM =
+            ITEMS.registerSimpleBlockItem("lechon_rotisserie_spit", ModBlocks.LECHON_ROTISSERIE_SPIT);
+    static { HAZARD_ITEM_MAP.put("lechon_rotisserie_spit", LECHON_ROTISSERIE_SPIT_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 
