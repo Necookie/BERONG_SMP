@@ -536,6 +536,38 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
 
+    /** Hot Water Urn — see {@link HotWaterUrnBlock}. */
+    public static final DeferredBlock<HotWaterUrnBlock> HOT_WATER_URN = BLOCKS.registerBlock(
+            "hot_water_urn", HotWaterUrnBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Countertop Toaster Oven — see {@link ToasterOvenCrumbBlock}. */
+    public static final DeferredBlock<ToasterOvenCrumbBlock> TOASTER_OVEN_CRUMB = BLOCKS.registerBlock(
+            "toaster_oven_crumb", ToasterOvenCrumbBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 9 : 0));
+
+    /** Dry Goods Pantry Shelf — see {@link DryGoodsPantryShelfBlock}. */
+    public static final DeferredBlock<DryGoodsPantryShelfBlock> DRY_GOODS_PANTRY_SHELF = BLOCKS.registerBlock(
+            "dry_goods_pantry_shelf", DryGoodsPantryShelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
+
+    /** Kitchen Exhaust Duct — see {@link GreaseDuctRunBlock}. */
+    public static final DeferredBlock<GreaseDuctRunBlock> GREASE_DUCT_RUN = BLOCKS.registerBlock(
+            "grease_duct_run", GreaseDuctRunBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Dish Sanitizer — see {@link CommercialDishSanitizerBlock}. */
+    public static final DeferredBlock<CommercialDishSanitizerBlock> COMMERCIAL_DISH_SANITIZER = BLOCKS.registerBlock(
+            "commercial_dish_sanitizer", CommercialDishSanitizerBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
             "teachers_desk", TeachersDeskBlock::new,

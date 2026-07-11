@@ -469,6 +469,26 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("espresso_machine", ModBlocks.ESPRESSO_MACHINE);
     static { HAZARD_ITEM_MAP.put("espresso_machine", ESPRESSO_MACHINE_ITEM); }
 
+    public static final DeferredItem<BlockItem> HOT_WATER_URN_ITEM =
+            ITEMS.registerSimpleBlockItem("hot_water_urn", ModBlocks.HOT_WATER_URN);
+    static { HAZARD_ITEM_MAP.put("hot_water_urn", HOT_WATER_URN_ITEM); }
+
+    public static final DeferredItem<BlockItem> TOASTER_OVEN_CRUMB_ITEM =
+            ITEMS.registerSimpleBlockItem("toaster_oven_crumb", ModBlocks.TOASTER_OVEN_CRUMB);
+    static { HAZARD_ITEM_MAP.put("toaster_oven_crumb", TOASTER_OVEN_CRUMB_ITEM); }
+
+    public static final DeferredItem<BlockItem> DRY_GOODS_PANTRY_SHELF_ITEM =
+            ITEMS.registerSimpleBlockItem("dry_goods_pantry_shelf", ModBlocks.DRY_GOODS_PANTRY_SHELF);
+    static { HAZARD_ITEM_MAP.put("dry_goods_pantry_shelf", DRY_GOODS_PANTRY_SHELF_ITEM); }
+
+    public static final DeferredItem<BlockItem> GREASE_DUCT_RUN_ITEM =
+            ITEMS.registerSimpleBlockItem("grease_duct_run", ModBlocks.GREASE_DUCT_RUN);
+    static { HAZARD_ITEM_MAP.put("grease_duct_run", GREASE_DUCT_RUN_ITEM); }
+
+    public static final DeferredItem<BlockItem> COMMERCIAL_DISH_SANITIZER_ITEM =
+            ITEMS.registerSimpleBlockItem("commercial_dish_sanitizer", ModBlocks.COMMERCIAL_DISH_SANITIZER);
+    static { HAZARD_ITEM_MAP.put("commercial_dish_sanitizer", COMMERCIAL_DISH_SANITIZER_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 
