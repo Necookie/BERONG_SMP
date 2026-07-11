@@ -1,0 +1,18 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hood_steel_clean",
+    "body": "berongsmp:block/hood_steel_clean"
+  },
+  "elements": [
+    {
+      "name": "bench",
+      "from": [1, 0, 1], "to": [15, 10, 15],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#body" },
+        "north": { "texture": "#body" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

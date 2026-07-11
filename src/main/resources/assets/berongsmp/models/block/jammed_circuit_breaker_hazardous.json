@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/breaker_panel_open_hot",
+    "body": "berongsmp:block/breaker_panel_open_hot",
+    "front": "berongsmp:block/breaker_panel_open_hot"
+  },
+  "elements": [
+    {
+      "from": [3, 4, 13],
+      "to": [13, 14, 16],
+      "faces": {
+        "down": { "texture": "#body" },
+        "up": { "texture": "#body" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#body" },
+        "east": { "texture": "#body" },
+        "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

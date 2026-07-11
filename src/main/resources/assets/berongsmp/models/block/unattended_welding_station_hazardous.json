@@ -1,0 +1,19 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/welder_spark_hot",
+    "body": "berongsmp:block/hood_steel_clean",
+    "hot": "berongsmp:block/welder_spark_hot"
+  },
+  "elements": [
+    {
+      "name": "bench",
+      "from": [1, 0, 1], "to": [15, 10, 15],
+      "faces": {
+        "down": { "texture": "#body" }, "up": { "texture": "#hot" },
+        "north": { "texture": "#hot" }, "south": { "texture": "#body" },
+        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

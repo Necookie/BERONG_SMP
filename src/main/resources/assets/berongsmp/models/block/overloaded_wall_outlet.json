@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/outlet_faceplate_white",
+    "body": "berongsmp:block/outlet_faceplate_white",
+    "front": "berongsmp:block/outlet_faceplate_white"
+  },
+  "elements": [
+    {
+      "from": [6, 3, 14],
+      "to": [10, 7, 16],
+      "faces": {
+        "down": { "texture": "#body" },
+        "up": { "texture": "#body" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#body" },
+        "east": { "texture": "#body" },
+        "west": { "texture": "#body" }
+      }
+    }
+  ]
+}

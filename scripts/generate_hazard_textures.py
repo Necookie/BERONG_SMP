@@ -1159,6 +1159,76 @@ def tex_exhaust_fan_dusty():
     save(im, "exhaust_fan_dusty")
 
 
+def tex_outlet_faceplate_white():
+    im = new_canvas((235, 233, 225))
+    gradient_shade(im, 1, 1, 14, 14, (235, 233, 225), light=1.08, dark=0.92)
+    inset_edges(im, 1, 1, 14, 14, (250, 249, 244), (170, 168, 160))
+    border(im, (150, 148, 140))
+    rect(im, 5, 4, 6, 7, (40, 40, 40))   # left prong slot
+    rect(im, 9, 4, 10, 7, (40, 40, 40))  # right prong slot
+    rect(im, 7, 8, 8, 10, (40, 40, 40))  # ground pin hole
+    screws(im, [(3, 12), (12, 12)], (150, 148, 140))
+    save(im, "outlet_faceplate_white")
+
+
+def tex_outlet_faceplate_scorched():
+    im = new_canvas((60, 52, 44))
+    gradient_shade(im, 1, 1, 14, 14, (60, 52, 44), light=1.1, dark=0.8)
+    inset_edges(im, 1, 1, 14, 14, (90, 78, 62), (25, 20, 16))
+    border(im, (30, 26, 20))
+    rect(im, 5, 4, 6, 7, (15, 12, 10))
+    rect(im, 9, 4, 10, 7, (15, 12, 10))
+    rect(im, 7, 8, 8, 10, (15, 12, 10))
+    speckle(im, [(20, 16, 12), (90, 40, 10)], density=0.25, x0=2, y0=2, x1=13, y1=13)
+    save(im, "outlet_faceplate_scorched")
+
+
+def tex_solvent_can_open():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 6, 15, 15, (150, 148, 140), light=1.05, dark=0.85)
+    rect(im, 0, 6, 15, 15, (60, 62, 65))  # shelf board shadow line
+    rect(im, 0, 6, 15, 6, (170, 168, 160))
+    for cx in (2, 6, 10, 13):
+        rect(im, cx, 8, cx + 2, 14, (190, 60, 40))  # red solvent can body
+        rect(im, cx, 8, cx + 2, 8, (60, 60, 62))    # open lid, dark
+    speckle(im, [(230, 150, 40), (140, 40, 20)], density=0.2, x0=0, y0=9, x1=15, y1=14)
+    border(im, (100, 98, 90))
+    save(im, "solvent_can_open")
+
+
+def tex_welder_spark_hot():
+    im = new_canvas((70, 70, 74))
+    gradient_shade(im, 0, 0, 15, 15, (70, 70, 74), light=1.2, dark=0.75)
+    rect(im, 2, 2, 13, 4, (40, 40, 44))  # scorched panel
+    speckle(im, [(255, 200, 80), (255, 120, 20), (255, 250, 200)], density=0.22, x0=2, y0=2, x1=13, y1=8)
+    rect(im, 6, 10, 9, 13, (30, 28, 26))  # dark scorch mark
+    border(im, (35, 35, 38))
+    save(im, "welder_spark_hot")
+
+
+def tex_butane_canister_blue():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 4, 15, 15, (150, 148, 140), light=1.05, dark=0.88)
+    rect(im, 4, 4, 11, 14, (40, 90, 170))   # blue canister body
+    rect(im, 4, 4, 5, 14, (70, 130, 210))   # highlight edge
+    rect(im, 10, 4, 11, 14, (25, 60, 120))  # shadow edge
+    rect(im, 6, 2, 9, 4, (90, 92, 95))      # burner valve nub
+    border(im, (100, 98, 90))
+    save(im, "butane_canister_blue")
+
+
+def tex_butane_canister_leaking():
+    im = new_canvas((150, 148, 140))
+    gradient_shade(im, 0, 4, 15, 15, (150, 148, 140), light=1.05, dark=0.88)
+    rect(im, 4, 4, 11, 14, (40, 90, 170))
+    rect(im, 4, 4, 5, 14, (70, 130, 210))
+    rect(im, 10, 4, 11, 14, (25, 60, 120))
+    rect(im, 6, 2, 9, 4, (90, 92, 95))
+    speckle(im, [(220, 220, 230), (180, 200, 220)], density=0.18, x0=5, y0=0, x1=10, y1=3)  # gas haze
+    border(im, (100, 98, 90))
+    save(im, "butane_canister_leaking")
+
+
 ALL = [
     tex_hazard_ember_glow, tex_hazard_warning_led, tex_hazard_ok_led,
     tex_hazard_spark_arc, tex_hazard_spark_arc_green, tex_hazard_smoke_stain,
@@ -1196,6 +1266,10 @@ ALL = [
     tex_gas_pipe_metal, tex_gas_valve_wheel, tex_gas_leak_stain,
     tex_dispenser_stand_metal, tex_dispenser_bottle, tex_dispenser_bottle_leak,
     tex_exhaust_fan_clean, tex_exhaust_fan_dusty,
+    tex_outlet_faceplate_white, tex_outlet_faceplate_scorched,
+    tex_solvent_can_open,
+    tex_welder_spark_hot,
+    tex_butane_canister_blue, tex_butane_canister_leaking,
 ]
 
 if __name__ == "__main__":

@@ -216,5 +216,16 @@
   "block.berongsmp.overloaded_breaker_panel.desc": "A panel drawing far more load than it's rated for can arc inside the box.",
   "block.berongsmp.reagent_storage_shelf.desc": "A tipped, leaking reagent bottle gives off fumes across a wide area.",
   "block.berongsmp.bunsen_burner_station.desc": "A burner left running unattended is an open flame next to lab chemicals.",
-  "block.berongsmp.overloaded_microwave.desc": "An overloaded microwave can arc internally and catch fire if left running."
+  "block.berongsmp.overloaded_microwave.desc": "An overloaded microwave can arc internally and catch fire if left running.",
+
+  "block.berongsmp.overloaded_wall_outlet": "Overloaded Wall Outlet",
+  "block.berongsmp.overloaded_wall_outlet.desc": "Place on a classroom or office wall near a desk. Sparks and overheats when hazardous — left unattended, it can scorch the wall alight.",
+  "block.berongsmp.jammed_circuit_breaker": "Jammed Circuit Breaker Box",
+  "block.berongsmp.jammed_circuit_breaker.desc": "Place on a utility corridor or electrical room wall. Its trip switch is jammed, so an overload has nothing left to stop it — defuse before it flashes over.",
+  "block.berongsmp.unsealed_solvent_shelf": "Unsealed Solvent Shelf",
+  "block.berongsmp.unsealed_solvent_shelf.desc": "Place in an art room or shop-class storage area. Open paint-thinner/lacquer cans give off flammable vapor that can flash-ignite a 2-block radius.",
+  "block.berongsmp.unattended_welding_station": "Unattended Welding Station",
+  "block.berongsmp.unattended_welding_station.desc": "Place in a vocational shop-class workshop. Left running, hot spatter from the arc welder can ignite nearby combustibles.",
+  "block.berongsmp.leaking_butane_canister_stove": "Leaking Butane Canister Stove",
+  "block.berongsmp.leaking_butane_canister_stove.desc": "Place in a kitchen or canteen prep area. The portable burner leaks gas at the canister seam — only the wet chemical extinguisher can safely defuse it."
 }

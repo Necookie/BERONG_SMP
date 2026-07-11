@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "hazardous=false,on_fire=false": { "model": "berongsmp:block/unsealed_solvent_shelf" },
+    "hazardous=false,on_fire=true": { "model": "berongsmp:block/unsealed_solvent_shelf_hazardous" },
+    "hazardous=true,on_fire=false": { "model": "berongsmp:block/unsealed_solvent_shelf_hazardous" },
+    "hazardous=true,on_fire=true": { "model": "berongsmp:block/unsealed_solvent_shelf_hazardous" }
+  }
+}
