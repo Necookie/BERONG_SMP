@@ -46,6 +46,10 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SPRINKLER_HEAD_ITEM.get());
                 output.accept(ModItems.SMOKE_DETECTOR_ITEM.get());
                 output.accept(ModItems.EXIT_SIGN_ITEM.get());
+                output.accept(ModItems.FIRE_EXTINGUISHER_CABINET_ITEM.get());
+                output.accept(ModItems.ASSEMBLY_POINT_SIGN_ITEM.get());
+                output.accept(ModItems.FIRST_AID_WALL_CABINET_ITEM.get());
+                output.accept(ModItems.FIRE_SAFETY_POSTER_ITEM.get());
             }).build());
 
     /** Creative tab: furniture and props for building scenarios. */
@@ -106,6 +110,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.BEVERAGE_JUICE_DISPENSER_ITEM.get());
                 output.accept(ModItems.CUTLERY_NAPKIN_CADDY_ITEM.get());
                 output.accept(ModItems.SERVING_HATCH_WINDOW_ITEM.get());
+                output.accept(ModItems.BLOCKED_EXIT_CLUTTER_ITEM.get());
             }).build());
 
     /** Creative tab: all 30 hazard prop blocks for the simulation building. */

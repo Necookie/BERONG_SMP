@@ -58,6 +58,11 @@ import net.necookie.disastersim.block.DishwashingSinkStationBlock;
 import net.necookie.disastersim.block.BeverageJuiceDispenserBlock;
 import net.necookie.disastersim.block.CutleryNapkinCaddyBlock;
 import net.necookie.disastersim.block.ServingHatchWindowBlock;
+import net.necookie.disastersim.block.FireExtinguisherCabinetBlock;
+import net.necookie.disastersim.block.AssemblyPointSignBlock;
+import net.necookie.disastersim.block.FirstAidWallCabinetBlock;
+import net.necookie.disastersim.block.FireSafetyPosterBlock;
+import net.necookie.disastersim.block.BlockedExitClutterBlock;
 import net.necookie.disastersim.block.SinkBlock;
 import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.block.ToiletBlock;
@@ -588,6 +593,37 @@ public final class ModBlocks {
             "evacuation_map", EvacuationMapBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Fire Extinguisher Cabinet — see {@link FireExtinguisherCabinetBlock}. */
+    public static final DeferredBlock<FireExtinguisherCabinetBlock> FIRE_EXTINGUISHER_CABINET = BLOCKS.registerBlock(
+            "fire_extinguisher_cabinet", FireExtinguisherCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
+                    .strength(1.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Evacuation Assembly Point Sign — see {@link AssemblyPointSignBlock}. */
+    public static final DeferredBlock<AssemblyPointSignBlock> ASSEMBLY_POINT_SIGN = BLOCKS.registerBlock(
+            "assembly_point_sign", AssemblyPointSignBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.EMERALD)
+                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion()
+                    .lightLevel(s -> 7));
+
+    /** First-Aid Wall Cabinet — see {@link FirstAidWallCabinetBlock}. */
+    public static final DeferredBlock<FirstAidWallCabinetBlock> FIRST_AID_WALL_CABINET = BLOCKS.registerBlock(
+            "first_aid_wall_cabinet", FirstAidWallCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Fire Safety Poster — see {@link FireSafetyPosterBlock}. */
+    public static final DeferredBlock<FireSafetyPosterBlock> FIRE_SAFETY_POSTER = BLOCKS.registerBlock(
+            "fire_safety_poster", FireSafetyPosterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+                    .strength(0.2f, 1.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Blocked Exit Clutter Pile — see {@link BlockedExitClutterBlock}. */
+    public static final DeferredBlock<BlockedExitClutterBlock> BLOCKED_EXIT_CLUTTER = BLOCKS.registerBlock(
+            "blocked_exit_clutter", BlockedExitClutterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
 
     /** Long cafeteria lunch table with attached bench seats — see {@link CafeteriaTableBlock}. */
     public static final DeferredBlock<CafeteriaTableBlock> CAFETERIA_TABLE = BLOCKS.registerBlock(

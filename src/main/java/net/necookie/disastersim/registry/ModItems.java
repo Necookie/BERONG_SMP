@@ -504,6 +504,21 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> EVACUATION_MAP_ITEM =
             ITEMS.registerSimpleBlockItem("evacuation_map", ModBlocks.EVACUATION_MAP);
 
+    public static final DeferredItem<BlockItem> FIRE_EXTINGUISHER_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("fire_extinguisher_cabinet", ModBlocks.FIRE_EXTINGUISHER_CABINET);
+
+    public static final DeferredItem<BlockItem> ASSEMBLY_POINT_SIGN_ITEM =
+            ITEMS.registerSimpleBlockItem("assembly_point_sign", ModBlocks.ASSEMBLY_POINT_SIGN);
+
+    public static final DeferredItem<BlockItem> FIRST_AID_WALL_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("first_aid_wall_cabinet", ModBlocks.FIRST_AID_WALL_CABINET);
+
+    public static final DeferredItem<BlockItem> FIRE_SAFETY_POSTER_ITEM =
+            ITEMS.registerSimpleBlockItem("fire_safety_poster", ModBlocks.FIRE_SAFETY_POSTER);
+
+    public static final DeferredItem<BlockItem> BLOCKED_EXIT_CLUTTER_ITEM =
+            ITEMS.registerSimpleBlockItem("blocked_exit_clutter", ModBlocks.BLOCKED_EXIT_CLUTTER);
+
     public static final DeferredItem<BlockItem> CAFETERIA_TABLE_ITEM =
             ITEMS.registerSimpleBlockItem("cafeteria_table", ModBlocks.CAFETERIA_TABLE);
 
@@ -629,6 +644,11 @@ public final class ModItems {
         ALL_ITEM_MAP.put("beverage_juice_dispenser", BEVERAGE_JUICE_DISPENSER_ITEM);
         ALL_ITEM_MAP.put("cutlery_napkin_caddy", CUTLERY_NAPKIN_CADDY_ITEM);
         ALL_ITEM_MAP.put("serving_hatch_window", SERVING_HATCH_WINDOW_ITEM);
+        ALL_ITEM_MAP.put("fire_extinguisher_cabinet", FIRE_EXTINGUISHER_CABINET_ITEM);
+        ALL_ITEM_MAP.put("assembly_point_sign", ASSEMBLY_POINT_SIGN_ITEM);
+        ALL_ITEM_MAP.put("first_aid_wall_cabinet", FIRST_AID_WALL_CABINET_ITEM);
+        ALL_ITEM_MAP.put("fire_safety_poster", FIRE_SAFETY_POSTER_ITEM);
+        ALL_ITEM_MAP.put("blocked_exit_clutter", BLOCKED_EXIT_CLUTTER_ITEM);
         ALL_ITEM_MAP.put("fire_blanket", FIRE_BLANKET);
         ALL_ITEM_MAP.put("first_aid_kit", FIRST_AID_KIT);
         ALL_ITEM_MAP.put("megaphone", MEGAPHONE);
