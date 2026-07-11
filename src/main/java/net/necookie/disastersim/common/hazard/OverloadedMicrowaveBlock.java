@@ -11,8 +11,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /** Faculty-pantry microwave running an overloaded heating cycle; sparks and smokes when hazardous. */
 public class OverloadedMicrowaveBlock extends HazardFacingBlock {
 
-    private static final VoxelShape SHAPE_NS = box(2, 3, 2, 14, 12, 14);
-    private static final VoxelShape SHAPE_EW = box(2, 3, 2, 14, 12, 14);
+    private static final VoxelShape SHAPE_NS = box(2, 0, 2, 14, 9, 14);
+    private static final VoxelShape SHAPE_EW = box(2, 0, 2, 14, 9, 14);
 
     public OverloadedMicrowaveBlock(Properties props) { super(props); }
 
