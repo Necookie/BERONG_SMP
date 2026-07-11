@@ -111,6 +111,17 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CUTLERY_NAPKIN_CADDY_ITEM.get());
                 output.accept(ModItems.SERVING_HATCH_WINDOW_ITEM.get());
                 output.accept(ModItems.BLOCKED_EXIT_CLUTTER_ITEM.get());
+                // Conference Room
+                output.accept(ModItems.CONFERENCE_TABLE_ITEM.get());
+                output.accept(ModItems.EXECUTIVE_OFFICE_CHAIR_ITEM.get());
+                output.accept(ModItems.CONFERENCE_CREDENZA_ITEM.get());
+                output.accept(ModItems.CONFERENCE_WALL_DISPLAY_ITEM.get());
+                output.accept(ModItems.FLIP_CHART_EASEL_ITEM.get());
+                output.accept(ModItems.CONFERENCE_SPEAKERPHONE_ITEM.get());
+                output.accept(ModItems.GLASS_OFFICE_PARTITION_ITEM.get());
+                output.accept(ModItems.LOUNGE_SOFA_ITEM.get());
+                output.accept(ModItems.POTTED_OFFICE_PLANT_ITEM.get());
+                output.accept(ModItems.WINDOW_BLINDS_ITEM.get());
             }).build());
 
     /** Creative tab: all 30 hazard prop blocks for the simulation building. */

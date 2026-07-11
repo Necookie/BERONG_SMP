@@ -11,6 +11,16 @@ import net.necookie.disastersim.block.BasketballHoopBlock;
 import net.necookie.disastersim.block.BasketballHoopPostBlock;
 import net.necookie.disastersim.block.BasketballPoleSegmentBlock;
 import net.necookie.disastersim.block.BulletinBoardBlock;
+import net.necookie.disastersim.block.ConferenceTableBlock;
+import net.necookie.disastersim.block.ExecutiveOfficeChairBlock;
+import net.necookie.disastersim.block.ConferenceCredenzaBlock;
+import net.necookie.disastersim.block.ConferenceWallDisplayBlock;
+import net.necookie.disastersim.block.FlipChartEaselBlock;
+import net.necookie.disastersim.block.ConferenceSpeakerphoneBlock;
+import net.necookie.disastersim.block.GlassOfficePartitionBlock;
+import net.necookie.disastersim.block.LoungeSofaBlock;
+import net.necookie.disastersim.block.PottedOfficePlantBlock;
+import net.necookie.disastersim.block.WindowBlindsBlock;
 import net.necookie.disastersim.block.CafeteriaMenuBoardBlock;
 import net.necookie.disastersim.block.CourtLineBlock;
 import net.necookie.disastersim.block.CafeteriaStoolBlock;
@@ -889,6 +899,68 @@ public final class ModBlocks {
             "basketball_hoop", BasketballHoopBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.COLOR_ORANGE)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    // ── Conference Room furniture ───────────────────────────────────────────
+
+    /** Self-connecting dark-laminate boardroom table — see {@link ConferenceTableBlock}. */
+    public static final DeferredBlock<ConferenceTableBlock> CONFERENCE_TABLE = BLOCKS.registerBlock(
+            "conference_table", ConferenceTableBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** High-back leather swivel chair — see {@link ExecutiveOfficeChairBlock}. */
+    public static final DeferredBlock<ExecutiveOfficeChairBlock> EXECUTIVE_OFFICE_CHAIR = BLOCKS.registerBlock(
+            "executive_office_chair", ExecutiveOfficeChairBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
+
+    /** Low walnut sideboard with sliding doors — see {@link ConferenceCredenzaBlock}. */
+    public static final DeferredBlock<ConferenceCredenzaBlock> CONFERENCE_CREDENZA = BLOCKS.registerBlock(
+            "conference_credenza", ConferenceCredenzaBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BROWN)
+                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Wall-mounted meeting display, dark standby screen — see {@link ConferenceWallDisplayBlock}. */
+    public static final DeferredBlock<ConferenceWallDisplayBlock> CONFERENCE_WALL_DISPLAY = BLOCKS.registerBlock(
+            "conference_wall_display", ConferenceWallDisplayBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** A-frame flip-chart easel with paper pad — see {@link FlipChartEaselBlock}. */
+    public static final DeferredBlock<FlipChartEaselBlock> FLIP_CHART_EASEL = BLOCKS.registerBlock(
+            "flip_chart_easel", FlipChartEaselBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Three-legged "spider" speakerphone centerpiece — see {@link ConferenceSpeakerphoneBlock}. */
+    public static final DeferredBlock<ConferenceSpeakerphoneBlock> CONFERENCE_SPEAKERPHONE = BLOCKS.registerBlock(
+            "conference_speakerphone", ConferenceSpeakerphoneBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Frosted-glass partition panel in an aluminum frame — see {@link GlassOfficePartitionBlock}. */
+    public static final DeferredBlock<GlassOfficePartitionBlock> GLASS_OFFICE_PARTITION = BLOCKS.registerBlock(
+            "glass_office_partition", GlassOfficePartitionBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
+
+    /** Two-seat fabric reception sofa — see {@link LoungeSofaBlock}. */
+    public static final DeferredBlock<LoungeSofaBlock> LOUNGE_SOFA = BLOCKS.registerBlock(
+            "lounge_sofa", LoungeSofaBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
+
+    /** Decorative floor planter with a broadleaf plant — see {@link PottedOfficePlantBlock}. */
+    public static final DeferredBlock<PottedOfficePlantBlock> POTTED_OFFICE_PLANT = BLOCKS.registerBlock(
+            "potted_office_plant", PottedOfficePlantBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.PLANT)
+                    .strength(0.5f, 1.0f).sound(SoundType.GRASS).noOcclusion());
+
+    /** Wall-mounted venetian blinds, slats half-open — see {@link WindowBlindsBlock}. */
+    public static final DeferredBlock<WindowBlindsBlock> WINDOW_BLINDS = BLOCKS.registerBlock(
+            "window_blinds", WindowBlindsBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
 
     private ModBlocks() {}
 

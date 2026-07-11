@@ -644,6 +644,38 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> SERVING_HATCH_WINDOW_ITEM =
             ITEMS.registerSimpleBlockItem("serving_hatch_window", ModBlocks.SERVING_HATCH_WINDOW);
 
+    // ── Conference Room furniture ───────────────────────────────────────────
+
+    public static final DeferredItem<BlockItem> CONFERENCE_TABLE_ITEM =
+            ITEMS.registerSimpleBlockItem("conference_table", ModBlocks.CONFERENCE_TABLE);
+
+    public static final DeferredItem<BlockItem> EXECUTIVE_OFFICE_CHAIR_ITEM =
+            ITEMS.registerSimpleBlockItem("executive_office_chair", ModBlocks.EXECUTIVE_OFFICE_CHAIR);
+
+    public static final DeferredItem<BlockItem> CONFERENCE_CREDENZA_ITEM =
+            ITEMS.registerSimpleBlockItem("conference_credenza", ModBlocks.CONFERENCE_CREDENZA);
+
+    public static final DeferredItem<BlockItem> CONFERENCE_WALL_DISPLAY_ITEM =
+            ITEMS.registerSimpleBlockItem("conference_wall_display", ModBlocks.CONFERENCE_WALL_DISPLAY);
+
+    public static final DeferredItem<BlockItem> FLIP_CHART_EASEL_ITEM =
+            ITEMS.registerSimpleBlockItem("flip_chart_easel", ModBlocks.FLIP_CHART_EASEL);
+
+    public static final DeferredItem<BlockItem> CONFERENCE_SPEAKERPHONE_ITEM =
+            ITEMS.registerSimpleBlockItem("conference_speakerphone", ModBlocks.CONFERENCE_SPEAKERPHONE);
+
+    public static final DeferredItem<BlockItem> GLASS_OFFICE_PARTITION_ITEM =
+            ITEMS.registerSimpleBlockItem("glass_office_partition", ModBlocks.GLASS_OFFICE_PARTITION);
+
+    public static final DeferredItem<BlockItem> LOUNGE_SOFA_ITEM =
+            ITEMS.registerSimpleBlockItem("lounge_sofa", ModBlocks.LOUNGE_SOFA);
+
+    public static final DeferredItem<BlockItem> POTTED_OFFICE_PLANT_ITEM =
+            ITEMS.registerSimpleBlockItem("potted_office_plant", ModBlocks.POTTED_OFFICE_PLANT);
+
+    public static final DeferredItem<BlockItem> WINDOW_BLINDS_ITEM =
+            ITEMS.registerSimpleBlockItem("window_blinds", ModBlocks.WINDOW_BLINDS);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -724,6 +756,16 @@ public final class ModItems {
         ALL_ITEM_MAP.put("beverage_juice_dispenser", BEVERAGE_JUICE_DISPENSER_ITEM);
         ALL_ITEM_MAP.put("cutlery_napkin_caddy", CUTLERY_NAPKIN_CADDY_ITEM);
         ALL_ITEM_MAP.put("serving_hatch_window", SERVING_HATCH_WINDOW_ITEM);
+        ALL_ITEM_MAP.put("conference_table", CONFERENCE_TABLE_ITEM);
+        ALL_ITEM_MAP.put("executive_office_chair", EXECUTIVE_OFFICE_CHAIR_ITEM);
+        ALL_ITEM_MAP.put("conference_credenza", CONFERENCE_CREDENZA_ITEM);
+        ALL_ITEM_MAP.put("conference_wall_display", CONFERENCE_WALL_DISPLAY_ITEM);
+        ALL_ITEM_MAP.put("flip_chart_easel", FLIP_CHART_EASEL_ITEM);
+        ALL_ITEM_MAP.put("conference_speakerphone", CONFERENCE_SPEAKERPHONE_ITEM);
+        ALL_ITEM_MAP.put("glass_office_partition", GLASS_OFFICE_PARTITION_ITEM);
+        ALL_ITEM_MAP.put("lounge_sofa", LOUNGE_SOFA_ITEM);
+        ALL_ITEM_MAP.put("potted_office_plant", POTTED_OFFICE_PLANT_ITEM);
+        ALL_ITEM_MAP.put("window_blinds", WINDOW_BLINDS_ITEM);
         ALL_ITEM_MAP.put("fire_extinguisher_cabinet", FIRE_EXTINGUISHER_CABINET_ITEM);
         ALL_ITEM_MAP.put("assembly_point_sign", ASSEMBLY_POINT_SIGN_ITEM);
         ALL_ITEM_MAP.put("first_aid_wall_cabinet", FIRST_AID_WALL_CABINET_ITEM);
