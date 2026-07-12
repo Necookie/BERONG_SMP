@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/safe_body",
+    "body": "berongsmp:block/safe_body",
+    "door": "berongsmp:block/safe_door"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 12, 14],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#door" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

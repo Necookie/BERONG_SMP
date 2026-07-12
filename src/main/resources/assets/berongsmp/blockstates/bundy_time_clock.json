@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/bundy_time_clock" },
+    "facing=south": { "model": "berongsmp:block/bundy_time_clock", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/bundy_time_clock", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/bundy_time_clock", "y": 270 }
+  }
+}

@@ -525,7 +525,168 @@ ALL += [
 ]
 
 # ---------------------------------------------------------------------------
-# Phase 3: Office furniture textures appended here.
+# Phase 3: Office furniture
+# ---------------------------------------------------------------------------
+
+def tex_cubicle_fabric():
+    base = (110, 118, 128)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    for y in range(2, 14, 4):
+        for x in range(2, 14, 4):
+            set_px(im, x, y, scale(base, 0.7))
+    inset_edges(im, 0, 0, W - 1, H - 1, (140, 148, 158), (66, 72, 80))
+    border(im, (58, 64, 72))
+    save(im, "cubicle_fabric")
+
+
+def tex_reception_front():
+    base = (60, 66, 74)
+    im = new_canvas(base)
+    gradient_shade(im, 0, 0, W - 1, H - 1, base, light=1.12, dark=0.88)
+    rect(im, 0, 3, 15, 4, scale(base, 1.5))  # raised transaction ledge highlight
+    border(im, (26, 30, 34))
+    save(im, "reception_front")
+
+
+def tex_mail_slots():
+    base = (150, 106, 62)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.88)
+    envelope_colors = [(230, 225, 210), (200, 210, 225), (225, 200, 195)]
+    for y0 in (1, 6, 11):
+        for x0 in (1, 6, 11):
+            rect(im, x0, y0, x0 + 3, y0 + 3, scale(base, 0.6))
+            if random.random() < 0.5:
+                rect(im, x0 + 1, y0 + 1, x0 + 2, y0 + 1, random.choice(envelope_colors))
+    border(im, (78, 54, 30))
+    save(im, "mail_slots")
+
+
+def tex_copier_body():
+    base = (206, 206, 202)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.88)
+    inset_edges(im, 0, 0, W - 1, H - 1, (230, 230, 226), (150, 150, 146))
+    save(im, "copier_body")
+
+
+def tex_copier_panel():
+    base = (70, 72, 76)
+    im = new_canvas((206, 206, 202))
+    rect(im, 3, 3, 12, 8, base)
+    indicator_dots(im, [(5, 5), (7, 5), (9, 5)], (70, 200, 90))
+    save(im, "copier_panel")
+
+
+def tex_doc_tray_stack():
+    im = new_canvas((235, 232, 224))
+    colors = [(70, 130, 90), (60, 100, 170), (200, 130, 50)]
+    for i, y0 in enumerate((1, 6, 11)):
+        rect(im, 1, y0, 14, y0 + 3, colors[i % len(colors)])
+        rect(im, 1, y0, 14, y0, scale(colors[i % len(colors)], 1.3))
+    save(im, "doc_tray_stack")
+
+
+def tex_binder_spines():
+    shelf_bg = (58, 42, 28)
+    im = new_canvas(shelf_bg)
+    palette = [(180, 60, 50), (60, 100, 170), (70, 140, 90), (200, 150, 40)]
+    x = 1
+    while x <= 14:
+        wband = random.choice([2, 3, 2])
+        x1 = min(x + wband, 14)
+        col = random.choice(palette)
+        rect(im, x, 1, x1, 14, col)
+        rect(im, x, 1, x, 14, scale(col, 1.35))
+        x = x1 + 1
+    border(im, (24, 17, 11))
+    save(im, "binder_spines")
+
+
+def tex_safe_body():
+    base = (58, 58, 62)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (86, 86, 92), (24, 24, 27))
+    save(im, "safe_body")
+
+
+def tex_safe_door():
+    base = (50, 50, 54)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    disc_fill(im, 10, 7.5, 3, (30, 30, 33))
+    disc_ring(im, 10, 7.5, 2.5, (150, 150, 40), thickness=1.0)
+    rect(im, 2, 12, 12, 13, (30, 30, 33))  # handle bar
+    border(im, (20, 20, 22))
+    save(im, "safe_door")
+
+
+def tex_coatrack_body():
+    base = (96, 62, 40)
+    im = new_canvas(base)
+    vertical_brush(im, 6, 0, 9, 15, base, stripe=1.15)
+    rect(im, 0, 0, 5, 15, scale(base, 0.75))
+    rect(im, 10, 0, 15, 15, scale(base, 0.75))
+    rect(im, 3, 1, 12, 4, (110, 40, 40))  # hung jacket
+    save(im, "coatrack_body")
+
+
+def tex_bundy_clock_face():
+    base = (236, 234, 226)
+    im = new_canvas(base)
+    disc_fill(im, 7.5, 6, 5, (250, 248, 242))
+    disc_ring(im, 7.5, 6, 5, (30, 30, 32), thickness=1.0)
+    line_px(im, 7.5, 6, 7.5, 3, (20, 20, 22))
+    line_px(im, 7.5, 6, 9.5, 6, (20, 20, 22))
+    for y0 in (12, 14):
+        rect(im, 2, y0, 13, y0, (200, 196, 186))
+    save(im, "bundy_clock_face")
+
+
+def line_px(im, x0, y0, x1, y1, color):
+    dx = abs(x1 - x0)
+    dy = -abs(y1 - y0)
+    sx = 1 if x0 < x1 else -1
+    sy = 1 if y0 < y1 else -1
+    err = dx + dy
+    x, y = round(x0), round(y0)
+    x1r, y1r = round(x1), round(y1)
+    while True:
+        set_px(im, x, y, color)
+        if x == x1r and y == y1r:
+            break
+        e2 = 2 * err
+        if e2 >= dy:
+            err += dy
+            x += sx
+        if e2 <= dx:
+            err += dx
+            y += sy
+
+
+def tex_bundy_frame():
+    base = (70, 70, 74)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (100, 100, 106), (30, 30, 33))
+    save(im, "bundy_frame")
+
+
+ALL += [
+    tex_cubicle_fabric,
+    tex_reception_front,
+    tex_mail_slots,
+    tex_copier_body, tex_copier_panel,
+    tex_doc_tray_stack,
+    tex_binder_spines,
+    tex_safe_body, tex_safe_door,
+    tex_coatrack_body,
+    tex_bundy_clock_face, tex_bundy_frame,
+]
+
+# ---------------------------------------------------------------------------
 # Phase 4: Office hazard textures appended here.
 # Phase 5: Laboratory furniture textures appended here.
 # Phase 6: Laboratory hazard textures appended here.

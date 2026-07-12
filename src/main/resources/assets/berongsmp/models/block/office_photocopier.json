@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/copier_body",
+    "body": "berongsmp:block/copier_body",
+    "panel": "berongsmp:block/copier_panel"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 12, 15],
+      "faces": {
+        "up":    { "texture": "#panel" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

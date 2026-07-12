@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/office_cubicle_partition" },
+    "facing=south": { "model": "berongsmp:block/office_cubicle_partition", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/office_cubicle_partition", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/office_cubicle_partition", "y": 270 }
+  }
+}

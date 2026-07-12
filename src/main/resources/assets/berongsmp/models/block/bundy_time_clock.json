@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/bundy_frame",
+    "frame": "berongsmp:block/bundy_frame",
+    "face": "berongsmp:block/bundy_clock_face"
+  },
+  "elements": [
+    {
+      "from": [2, 4, 13], "to": [14, 14, 16],
+      "faces": {
+        "up":    { "texture": "#frame" },
+        "down":  { "texture": "#frame" },
+        "north": { "texture": "#face" },
+        "south": { "texture": "#frame" },
+        "east":  { "texture": "#frame" },
+        "west":  { "texture": "#frame" }
+      }
+    }
+  ]
+}

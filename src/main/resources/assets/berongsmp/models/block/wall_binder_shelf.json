@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/binder_spines",
+    "wood": "berongsmp:block/table_leg_wood_dark",
+    "spines": "berongsmp:block/binder_spines"
+  },
+  "elements": [
+    {
+      "from": [1, 2, 12], "to": [15, 14, 16],
+      "faces": {
+        "up":    { "texture": "#wood" },
+        "down":  { "texture": "#wood" },
+        "north": { "texture": "#spines" },
+        "south": { "texture": "#wood" },
+        "east":  { "texture": "#wood" },
+        "west":  { "texture": "#wood" }
+      }
+    }
+  ]
+}

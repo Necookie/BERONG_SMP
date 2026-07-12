@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/mail_slots",
+    "wood": "berongsmp:block/table_leg_wood_dark",
+    "front": "berongsmp:block/mail_slots"
+  },
+  "elements": [
+    {
+      "from": [1, 3, 13], "to": [15, 15, 16],
+      "faces": {
+        "up":    { "texture": "#wood" },
+        "down":  { "texture": "#wood" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#wood" },
+        "east":  { "texture": "#wood" },
+        "west":  { "texture": "#wood" }
+      }
+    }
+  ]
+}

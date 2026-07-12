@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/wall_binder_shelf" },
+    "facing=south": { "model": "berongsmp:block/wall_binder_shelf", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/wall_binder_shelf", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/wall_binder_shelf", "y": 270 }
+  }
+}

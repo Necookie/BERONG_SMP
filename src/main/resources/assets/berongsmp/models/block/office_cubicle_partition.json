@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cubicle_fabric",
+    "fabric": "berongsmp:block/cubicle_fabric"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 6], "to": [16, 16, 10],
+      "faces": {
+        "up":    { "texture": "#fabric" },
+        "down":  { "texture": "#fabric" },
+        "north": { "texture": "#fabric" },
+        "south": { "texture": "#fabric" },
+        "east":  { "texture": "#fabric" },
+        "west":  { "texture": "#fabric" }
+      }
+    }
+  ]
+}

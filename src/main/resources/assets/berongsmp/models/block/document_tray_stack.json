@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/doc_tray_stack",
+    "tray": "berongsmp:block/doc_tray_stack"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3], "to": [13, 6, 13],
+      "faces": {
+        "up":    { "texture": "#tray" },
+        "down":  { "texture": "#tray" },
+        "north": { "texture": "#tray" },
+        "south": { "texture": "#tray" },
+        "east":  { "texture": "#tray" },
+        "west":  { "texture": "#tray" }
+      }
+    }
+  ]
+}

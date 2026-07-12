@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/desk_laminate_white",
+    "top": "berongsmp:block/desk_laminate_white",
+    "front": "berongsmp:block/reception_front"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 1], "to": [16, 14, 15],
+      "faces": {
+        "up":    { "texture": "#top" },
+        "down":  { "texture": "#top" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#top" },
+        "east":  { "texture": "#top" },
+        "west":  { "texture": "#top" }
+      }
+    }
+  ]
+}
