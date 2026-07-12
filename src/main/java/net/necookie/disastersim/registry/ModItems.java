@@ -593,6 +593,48 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("faulty_parol_lantern", ModBlocks.FAULTY_PAROL_LANTERN);
     static { HAZARD_ITEM_MAP.put("faulty_parol_lantern", FAULTY_PAROL_LANTERN_ITEM); }
 
+    // ── Laboratory hazards (props 76-85) ────────────────────────────────────
+
+    public static final DeferredItem<BlockItem> UNBALANCED_CENTRIFUGE_ITEM =
+            ITEMS.registerSimpleBlockItem("unbalanced_centrifuge", ModBlocks.UNBALANCED_CENTRIFUGE);
+    static { HAZARD_ITEM_MAP.put("unbalanced_centrifuge", UNBALANCED_CENTRIFUGE_ITEM); }
+
+    public static final DeferredItem<BlockItem> RUNAWAY_3D_PRINTER_ITEM =
+            ITEMS.registerSimpleBlockItem("runaway_3d_printer", ModBlocks.RUNAWAY_3D_PRINTER);
+    static { HAZARD_ITEM_MAP.put("runaway_3d_printer", RUNAWAY_3D_PRINTER_ITEM); }
+
+    public static final DeferredItem<BlockItem> UNATTENDED_SOLDERING_IRON_ITEM =
+            ITEMS.registerSimpleBlockItem("unattended_soldering_iron", ModBlocks.UNATTENDED_SOLDERING_IRON);
+    static { HAZARD_ITEM_MAP.put("unattended_soldering_iron", UNATTENDED_SOLDERING_IRON_ITEM); }
+
+    public static final DeferredItem<BlockItem> UNSHIELDED_TEST_LASER_ITEM =
+            ITEMS.registerSimpleBlockItem("unshielded_test_laser", ModBlocks.UNSHIELDED_TEST_LASER);
+    static { HAZARD_ITEM_MAP.put("unshielded_test_laser", UNSHIELDED_TEST_LASER_ITEM); }
+
+    public static final DeferredItem<BlockItem> LEAKING_OXYGEN_CYLINDER_ITEM =
+            ITEMS.registerSimpleBlockItem("leaking_oxygen_cylinder", ModBlocks.LEAKING_OXYGEN_CYLINDER);
+    static { HAZARD_ITEM_MAP.put("leaking_oxygen_cylinder", LEAKING_OXYGEN_CYLINDER_ITEM); }
+
+    public static final DeferredItem<BlockItem> SHORTED_BENCH_SUPPLY_ITEM =
+            ITEMS.registerSimpleBlockItem("shorted_bench_supply", ModBlocks.SHORTED_BENCH_SUPPLY);
+    static { HAZARD_ITEM_MAP.put("shorted_bench_supply", SHORTED_BENCH_SUPPLY_ITEM); }
+
+    public static final DeferredItem<BlockItem> OVERHEATED_VACUUM_PUMP_ITEM =
+            ITEMS.registerSimpleBlockItem("overheated_vacuum_pump", ModBlocks.OVERHEATED_VACUUM_PUMP);
+    static { HAZARD_ITEM_MAP.put("overheated_vacuum_pump", OVERHEATED_VACUUM_PUMP_ITEM); }
+
+    public static final DeferredItem<BlockItem> STUCK_ENVIRONMENT_CHAMBER_ITEM =
+            ITEMS.registerSimpleBlockItem("stuck_environment_chamber", ModBlocks.STUCK_ENVIRONMENT_CHAMBER);
+    static { HAZARD_ITEM_MAP.put("stuck_environment_chamber", STUCK_ENVIRONMENT_CHAMBER_ITEM); }
+
+    public static final DeferredItem<BlockItem> SOLVENT_DRYING_OVEN_ITEM =
+            ITEMS.registerSimpleBlockItem("solvent_drying_oven", ModBlocks.SOLVENT_DRYING_OVEN);
+    static { HAZARD_ITEM_MAP.put("solvent_drying_oven", SOLVENT_DRYING_OVEN_ITEM); }
+
+    public static final DeferredItem<BlockItem> FAULTY_DEHUMIDIFIER_ITEM =
+            ITEMS.registerSimpleBlockItem("faulty_dehumidifier", ModBlocks.FAULTY_DEHUMIDIFIER);
+    static { HAZARD_ITEM_MAP.put("faulty_dehumidifier", FAULTY_DEHUMIDIFIER_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 

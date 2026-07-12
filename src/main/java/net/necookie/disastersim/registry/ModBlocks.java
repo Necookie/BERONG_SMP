@@ -1239,6 +1239,70 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(2.0f, 4.0f).sound(SoundType.STONE).noOcclusion());
 
+    // ── Laboratory hazards (props 76-85) ────────────────────────────────────
+
+    /** Unbalanced centrifuge rotor walking the bench — see {@link UnbalancedCentrifugeBlock}. */
+    public static final DeferredBlock<UnbalancedCentrifugeBlock> UNBALANCED_CENTRIFUGE = BLOCKS.registerBlock(
+            "unbalanced_centrifuge", UnbalancedCentrifugeBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** 3D printer thermal-runaway on a dislodged heater cartridge — see {@link Runaway3dPrinterBlock}. */
+    public static final DeferredBlock<Runaway3dPrinterBlock> RUNAWAY_3D_PRINTER = BLOCKS.registerBlock(
+            "runaway_3d_printer", Runaway3dPrinterBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
+
+    /** Soldering iron left powered at full temperature — see {@link UnattendedSolderingIronBlock}. */
+    public static final DeferredBlock<UnattendedSolderingIronBlock> UNATTENDED_SOLDERING_IRON = BLOCKS.registerBlock(
+            "unattended_soldering_iron", UnattendedSolderingIronBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Class-4 test laser running with its beam dump missing — see {@link UnshieldedTestLaserBlock}. */
+    public static final DeferredBlock<UnshieldedTestLaserBlock> UNSHIELDED_TEST_LASER = BLOCKS.registerBlock(
+            "unshielded_test_laser", UnshieldedTestLaserBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
+                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
+
+    /** Leaking oxygen cylinder — oxidizer enrichment, CO2-only — see {@link LeakingOxygenCylinderBlock}. */
+    public static final DeferredBlock<LeakingOxygenCylinderBlock> LEAKING_OXYGEN_CYLINDER = BLOCKS.registerBlock(
+            "leaking_oxygen_cylinder", LeakingOxygenCylinderBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Shorted bench DC power supply — see {@link ShortedBenchSupplyBlock}. */
+    public static final DeferredBlock<ShortedBenchSupplyBlock> SHORTED_BENCH_SUPPLY = BLOCKS.registerBlock(
+            "shorted_bench_supply", ShortedBenchSupplyBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Vacuum pump running on degraded oil, belt slipping — see {@link OverheatedVacuumPumpBlock}. */
+    public static final DeferredBlock<OverheatedVacuumPumpBlock> OVERHEATED_VACUUM_PUMP = BLOCKS.registerBlock(
+            "overheated_vacuum_pump", OverheatedVacuumPumpBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Environmental chamber with a welded heater relay — see {@link StuckEnvironmentChamberBlock}. */
+    public static final DeferredBlock<StuckEnvironmentChamberBlock> STUCK_ENVIRONMENT_CHAMBER = BLOCKS.registerBlock(
+            "stuck_environment_chamber", StuckEnvironmentChamberBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Drying oven with flammable solvent vapor accumulating — see {@link SolventDryingOvenBlock}. */
+    public static final DeferredBlock<SolventDryingOvenBlock> SOLVENT_DRYING_OVEN = BLOCKS.registerBlock(
+            "solvent_drying_oven", SolventDryingOvenBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Dehumidifier with an iced coil, compressor short-cycling — see {@link FaultyDehumidifierBlock}. */
+    public static final DeferredBlock<FaultyDehumidifierBlock> FAULTY_DEHUMIDIFIER = BLOCKS.registerBlock(
+            "faulty_dehumidifier", FaultyDehumidifierBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.SNOW)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
     private ModBlocks() {}
 
     public static void register(IEventBus modEventBus) {
