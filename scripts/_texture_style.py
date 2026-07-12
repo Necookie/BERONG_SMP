@@ -119,3 +119,85 @@ def apply_material_signature(im):
 
 # Backwards-compatible alias; new scripts should call the explicit variant.
 apply_signature = apply_icon_signature
+
+
+# ---------------------------------------------------------------------------
+# Hazard-state tiers (docs/texture_design_system.md §5): a universal escalation
+# language layered on top of any material texture, independent of the
+# object's own bespoke art. Tier 2 (HAZARDOUS) and Tier 3 (ON_FIRE) each have
+# one fixed palette + treatment applied identically to every hazard prop, so
+# a player can read a block's state from across a room regardless of which
+# specific object it is.
+
+# Tier 2 — "Caution Amber": developing danger, not yet burning.
+HAZARD_CAUTION = (255, 196, 0)
+HAZARD_CAUTION_HI = (255, 224, 96)
+HAZARD_CAUTION_DEEP = (122, 84, 0)
+HAZARD_CHEVRON_DARK = (24, 20, 14)
+
+# Tier 3 — "Char & Ember": actually on fire, terminal state.
+FIRE_CHAR = (25, 20, 18)
+FIRE_EMBER = (255, 90, 30)
+FIRE_EMBER_CORE = (255, 214, 102)
+
+
+def _lerp_color(a, b, t):
+    return tuple(max(0, min(255, int(a[i] + (b[i] - a[i]) * t))) for i in range(3))
+
+
+def hazardize(im, seed=0):
+    """Tier-2 treatment: warm-shifts a material texture and bakes a 2px amber/
+    dark caution chevron band across the top edge (rows 0-1) plus a few
+    deterministic stress-glint pixels. Returns a new RGB image; does not
+    mutate the input. Safe on any 16x16 RGB body/accent swatch."""
+    out = im.convert("RGB").copy()
+    w, h = out.size
+    for y in range(h):
+        for x in range(w):
+            r, g, b = out.getpixel((x, y))
+            out.putpixel((x, y), (
+                max(0, min(255, int(r * 1.15))),
+                max(0, min(255, int(g * 1.00))),
+                max(0, min(255, int(b * 0.72))),
+            ))
+    # 2px caution chevron band along the top edge — a 45-degree diagonal
+    # stripe pattern alternating HAZARD_CAUTION / HAZARD_CHEVRON_DARK.
+    for x in range(w):
+        for row in (0, 1):
+            stripe = ((x + row + seed) // 2) % 2
+            out.putpixel((x, row), HAZARD_CAUTION if stripe == 0 else HAZARD_CHEVRON_DARK)
+    # Deterministic stress-glint pixels along the right/bottom edges.
+    glints = [(w - 1, 3), (w - 1, h - 4), (2, h - 1), (w - 5, h - 1)]
+    for i, (gx, gy) in enumerate(glints):
+        x = (gx + seed * (i + 1)) % w
+        y = (gy + seed * (i + 2)) % h
+        out.putpixel((x, y), HAZARD_CAUTION_HI)
+    return out
+
+
+def charify(im, seed=0):
+    """Tier-3 treatment: darkens/desaturates a material texture 65% toward
+    FIRE_CHAR and bakes 2-3 jagged 1px ember cracks (bright core, orange
+    body) plus a 1px ember rim along the bottom edge. Returns a new RGB
+    image; does not mutate the input."""
+    out = im.convert("RGB").copy()
+    w, h = out.size
+    for y in range(h):
+        for x in range(w):
+            out.putpixel((x, y), _lerp_color(out.getpixel((x, y)), FIRE_CHAR, 0.65))
+    # 1px ember rim along the bottom edge.
+    for x in range(w):
+        out.putpixel((x, h - 1), FIRE_EMBER)
+    # 2-3 jagged ember cracks running roughly top-to-bottom.
+    crack_starts = [(3 + seed) % w, (8 + seed * 2) % w, (12 + seed * 3) % w]
+    for ci, sx in enumerate(crack_starts[: 2 + (seed % 2)]):
+        x = sx
+        for y in range(h - 1):
+            color = FIRE_EMBER_CORE if (y + ci) % 3 == 0 else FIRE_EMBER
+            out.putpixel((x, y), color)
+            drift = ((x + y + ci + seed) % 5)
+            if drift == 0 and x + 1 < w:
+                x += 1
+            elif drift == 1 and x - 1 >= 0:
+                x -= 1
+    return out

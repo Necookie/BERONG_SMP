@@ -95,6 +95,33 @@ maker's-mark**.
   object is proven to need different framing after this fix — it's one more thing to keep in sync
   per block and the shared default already reads correctly for every existing shape.
 
+## 5. Hazard-State Tiers (2026-07-12 visual-overhaul addition)
+
+Every hazard prop has three real blockstate tiers (`HazardBlock`/`HazardFacingBlock`'s `HAZARDOUS`/
+`ON_FIRE`), but before this pass the HAZARDOUS and ON_FIRE models mostly reused the same body art
+with only a small prop-specific accent swapped in — easy to miss at a glance, and inconsistent from
+prop to prop. `_texture_style.py` now defines one fixed, universal escalation language applied
+identically to all 85 props via `scripts/generate_hazard_state_variants.py` / `generate_onfire_models.py`,
+independent of each prop's own bespoke art:
+
+- **Tier 1 (normal)** — the object's own material texture, untouched.
+- **Tier 2 (HAZARDOUS) — "Caution Amber".** `hazardize(im)`: warm-shifts the whole texture
+  (R×1.15, G×1.00, B×0.72) and bakes a 2px amber/near-black (`HAZARD_CAUTION` `#FFC400` /
+  `HAZARD_CHEVRON_DARK`) diagonal caution-chevron band across the top edge, plus a few
+  `HAZARD_CAUTION_HI` stress-glint pixels. Reads as "something here is warm/wrong" from across a room.
+- **Tier 3 (ON_FIRE) — "Char & Ember".** `charify(im)`: blends the texture 65% toward
+  `FIRE_CHAR` (near-black) and bakes 2-3 jagged `FIRE_EMBER`/`FIRE_EMBER_CORE` (`#FF5A1E` /
+  `#FFD666`) cracks plus a 1px ember rim along the bottom edge. Always strictly more severe-looking
+  than Tier 2, on top of the real FLAME particles/adjacent fire the gameplay layer already adds.
+
+**Never mutate a source texture in place.** Every `*_hazardous.json` / `*_on_fire.json` model gets
+its own `<texture>_hz.png` / `<texture>_of.png` copies (deduplicated by source filename across all
+85 props), generated fresh from the *original* per-tier source and repointed via the model's own
+`"textures"` map — this is what keeps a shared accent file like `hazard_glass_screen_off` (also
+reused by normal-state furniture, e.g. `conference_wall_display`) or a body texture shared between
+a hazard prop's normal and hazardous models safe to touch without leaking the amber/char treatment
+into a block state that should stay untouched.
+
 ## Applying it
 
 ```bash
