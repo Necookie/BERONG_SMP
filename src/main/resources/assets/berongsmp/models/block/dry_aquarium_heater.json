@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/tank_glass",
+    "glass": "berongsmp:block/tank_glass",
+    "water": "berongsmp:block/water_normal"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 10, 15],
+      "faces": {
+        "up":    { "texture": "#glass" },
+        "down":  { "texture": "#glass" },
+        "north": { "texture": "#water" },
+        "south": { "texture": "#glass" },
+        "east":  { "texture": "#glass" },
+        "west":  { "texture": "#glass" }
+      }
+    }
+  ]
+}

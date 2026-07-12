@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/crt_case",
+    "case": "berongsmp:block/crt_case",
+    "screen": "berongsmp:block/hazard_glass_screen_off"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 11, 14],
+      "faces": {
+        "up":    { "texture": "#case" },
+        "down":  { "texture": "#case" },
+        "north": { "texture": "#screen" },
+        "south": { "texture": "#case" },
+        "east":  { "texture": "#case" },
+        "west":  { "texture": "#case" }
+      }
+    }
+  ]
+}

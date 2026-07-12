@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/ebike_body",
+    "body": "berongsmp:block/ebike_body",
+    "port": "berongsmp:block/charge_port_normal"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 4], "to": [15, 12, 12],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#port" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

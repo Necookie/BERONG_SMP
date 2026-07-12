@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "hazardous=false,on_fire=false": { "model": "berongsmp:block/unattended_mug_warmer" },
+    "hazardous=false,on_fire=true": { "model": "berongsmp:block/unattended_mug_warmer_hazardous" },
+    "hazardous=true,on_fire=false": { "model": "berongsmp:block/unattended_mug_warmer_hazardous" },
+    "hazardous=true,on_fire=true": { "model": "berongsmp:block/unattended_mug_warmer_hazardous" }
+  }
+}

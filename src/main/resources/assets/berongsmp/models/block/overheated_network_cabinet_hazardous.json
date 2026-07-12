@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cabinet_frame",
+    "frame": "berongsmp:block/cabinet_frame",
+    "leds": "berongsmp:block/hazard_warning_led"
+  },
+  "elements": [
+    {
+      "from": [2, 3, 12], "to": [14, 15, 16],
+      "faces": {
+        "up":    { "texture": "#frame" },
+        "down":  { "texture": "#frame" },
+        "north": { "texture": "#leds" },
+        "south": { "texture": "#frame" },
+        "east":  { "texture": "#frame" },
+        "west":  { "texture": "#frame" }
+      }
+    }
+  ]
+}

@@ -687,7 +687,171 @@ ALL += [
 ]
 
 # ---------------------------------------------------------------------------
-# Phase 4: Office hazard textures appended here.
+# Phase 4: Office hazards (props 66-75)
+# ---------------------------------------------------------------------------
+
+def tex_shredder_body():
+    base = (64, 66, 70)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (92, 94, 98), (30, 32, 35))
+    save(im, "shredder_body")
+
+
+def tex_shredder_slot_normal():
+    im = new_canvas((64, 66, 70))
+    rect(im, 2, 6, 13, 9, (20, 20, 22))
+    save(im, "shredder_slot_normal")
+
+
+def tex_shredder_slot_jammed():
+    im = new_canvas((64, 66, 70))
+    rect(im, 2, 6, 13, 9, (20, 20, 22))
+    for _ in range(8):
+        x = random.randint(3, 12)
+        y = random.randint(6, 9)
+        set_px(im, x, y, (225, 220, 205))
+    save(im, "shredder_slot_jammed")
+
+
+def tex_cabinet_frame():
+    base = (26, 27, 30)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (48, 49, 53), (8, 8, 10))
+    save(im, "cabinet_frame")
+
+
+def tex_ebike_body():
+    base = (40, 44, 48)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    rect(im, 2, 3, 13, 5, (200, 40, 40))  # frame accent stripe
+    inset_edges(im, 0, 0, W - 1, H - 1, (64, 68, 72), (16, 18, 20))
+    save(im, "ebike_body")
+
+
+def tex_charge_port_normal():
+    im = new_canvas((40, 44, 48))
+    rect(im, 5, 5, 10, 10, (20, 20, 22))
+    indicator_dots(im, [(6, 6), (9, 9)], (70, 200, 90))
+    save(im, "charge_port_normal")
+
+
+def tex_fixture_housing():
+    base = (230, 230, 226)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.08, dark=0.92)
+    border(im, (176, 176, 170))
+    save(im, "fixture_housing")
+
+
+def tex_tube_normal():
+    im = new_canvas((248, 248, 240))
+    disc_ring(im, 7.5, 7.5, 6, (220, 220, 200), thickness=1.0)
+    save(im, "tube_normal")
+
+
+def tex_tube_dripping():
+    im = new_canvas((210, 200, 170))
+    for _ in range(10):
+        x = random.randint(2, 13)
+        y = random.randint(6, 14)
+        set_px(im, x, y, (120, 90, 40))
+    save(im, "tube_dripping")
+
+
+def tex_tank_glass():
+    base = (150, 195, 210)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.85)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.3, band=1, offset=2)
+    border(im, (70, 110, 122))
+    save(im, "tank_glass")
+
+
+def tex_water_normal():
+    base = (60, 130, 165)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    save(im, "water_normal")
+
+
+def tex_water_exposed():
+    im = new_canvas((40, 90, 115))
+    rect(im, 0, 10, 15, 15, (60, 130, 165))  # remaining water at the bottom
+    rect(im, 6, 3, 9, 9, (220, 110, 40))  # exposed heater element
+    save(im, "water_exposed")
+
+
+def tex_warmer_body():
+    base = (200, 200, 196)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    border(im, (150, 150, 144))
+    save(im, "warmer_body")
+
+
+def tex_warmer_top_normal():
+    im = new_canvas((200, 200, 196))
+    disc_fill(im, 7.5, 7.5, 6, (60, 60, 62))
+    save(im, "warmer_top_normal")
+
+
+def tex_wire_insulated():
+    base = (22, 22, 24)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.3, dark=0.85)
+    border(im, (10, 10, 11))
+    save(im, "wire_insulated")
+
+
+def tex_crt_case():
+    base = (196, 190, 176)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.88)
+    inset_edges(im, 0, 0, W - 1, H - 1, (220, 214, 198), (128, 122, 108))
+    save(im, "crt_case")
+
+
+def tex_dvr_case():
+    base = (32, 32, 35)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (54, 54, 58), (10, 10, 12))
+    save(im, "dvr_case")
+
+
+def tex_parol_star_off():
+    base = (222, 214, 190)
+    im = new_canvas((30, 26, 20))
+    for cx, cy in [(7, 7)]:
+        for r in range(6, 0, -2):
+            disc_fill(im, cx, cy, r, scale(base, 1.0 + r * 0.02))
+    save(im, "parol_star_off")
+
+
+def tex_parol_star_lit():
+    im = new_canvas((30, 26, 20))
+    disc_fill(im, 7, 7, 6, (255, 210, 90))
+    disc_fill(im, 7, 7, 3, (255, 245, 200))
+    save(im, "parol_star_lit")
+
+
+ALL += [
+    tex_shredder_body, tex_shredder_slot_normal, tex_shredder_slot_jammed,
+    tex_cabinet_frame,
+    tex_ebike_body, tex_charge_port_normal,
+    tex_fixture_housing, tex_tube_normal, tex_tube_dripping,
+    tex_tank_glass, tex_water_normal, tex_water_exposed,
+    tex_warmer_body, tex_warmer_top_normal,
+    tex_wire_insulated,
+    tex_crt_case,
+    tex_dvr_case,
+    tex_parol_star_off, tex_parol_star_lit,
+]
+
+# ---------------------------------------------------------------------------
 # Phase 5: Laboratory furniture textures appended here.
 # Phase 6: Laboratory hazard textures appended here.
 # ---------------------------------------------------------------------------

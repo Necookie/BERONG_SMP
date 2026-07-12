@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/warmer_body",
+    "body": "berongsmp:block/warmer_body",
+    "top": "berongsmp:block/hazard_ember_glow"
+  },
+  "elements": [
+    {
+      "from": [4, 0, 4], "to": [12, 3, 12],
+      "faces": {
+        "up":    { "texture": "#top" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

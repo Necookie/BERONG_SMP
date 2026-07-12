@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/dvr_case",
+    "case": "berongsmp:block/dvr_case",
+    "leds": "berongsmp:block/hazard_ok_led"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 5, 15],
+      "faces": {
+        "up":    { "texture": "#leds" },
+        "down":  { "texture": "#case" },
+        "north": { "texture": "#case" },
+        "south": { "texture": "#case" },
+        "east":  { "texture": "#case" },
+        "west":  { "texture": "#case" }
+      }
+    }
+  ]
+}
