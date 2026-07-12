@@ -26,6 +26,7 @@ This file is a lean index; deep-dive content lives under `docs/`:
 - **`docs/academy_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
 - **`docs/hazard_props_spec.md`** — design spec for all 85 hazard prop blocks (zones, rationale, failure consequences)
 - **`docs/skills_manual.md`** — the project skills in `.claude/skills/` and when/how to invoke each
+- **`docs/new_sim_building2_rooms.md`** — F3/WorldEdit-surveyed room coordinates for New Sim Building 2.0 (34 rooms, 2 floors), captured via `//copyroom`
 
 When a change touches a system with its own doc, update that doc — not a growing section here.
 
@@ -293,7 +294,7 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 - **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
 - **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 0 CCW rotations (`ccs_admin_building.schem`)
 - **New Tutorial Building**: `AcademyBuildingManager.POS = BlockPos(-177, -34, 8)`, placed with 0 CCW rotations (`academy_building.schem`) — far west of every other structure, its own standalone footprint
-- **New Sim Building 2.0**: `SimulationManager.NEW_SIM_BUILDING2_POS = BlockPos(-182, -34, 358)`, placed with 0 CCW rotations (`new_sim_building2.0.schem`) — far north of every other structure, its own standalone footprint
+- **New Sim Building 2.0**: `SimulationManager.NEW_SIM_BUILDING2_POS = BlockPos(-182, -34, 358)`, placed with 0 CCW rotations (`new_sim_building2.0.schem`) — far north of every other structure, its own standalone footprint. Room-level coordinates: [docs/new_sim_building2_rooms.md](docs/new_sim_building2_rooms.md)
 
 #### CCS 1st Floor Named Rooms (`SimRoom.CCS_GROUND_ROOMS`)
 
