@@ -20,7 +20,8 @@ This file is a lean index; deep-dive content lives under `docs/`:
   [furniture-visual-log.md](docs/history/furniture-visual-log.md),
   [cruz-pathfinding-recommendations.md](docs/history/cruz-pathfinding-recommendations.md),
   [hazard-3state-log.md](docs/history/hazard-3state-log.md),
-  [hazard-state-management-log.md](docs/history/hazard-state-management-log.md)
+  [hazard-state-management-log.md](docs/history/hazard-state-management-log.md),
+  [hazard-tier-and-tab-reorg-log.md](docs/history/hazard-tier-and-tab-reorg-log.md)
 - **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
 - **`docs/academy_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
 - **`docs/hazard_props_spec.md`** — design spec for all 85 hazard prop blocks (zones, rationale, failure consequences)
@@ -107,8 +108,8 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 |---|---|
 | `BerongSMP` | Mod entry point — a thin bootstrap since the registry extraction. Wires the `registry/Mod*` classes to the mod event bus, registers network payloads and lifecycle listeners, calls `DuckCoverHoldManager.bootstrap()` in `commonSetup` (forces the class load that registers its tick handler), and performs one-time world setup (`onServerStarting`/`onServerStarted`). Still owns `MODID` + `LOGGER`. |
 | `registry/ModBlocks` | All 178 `DeferredBlock` registrations: computer, fire alarm, furniture, the 85 hazard props (including the 30-prop Conference Room/Office/Laboratory batch, props 56–85), 10 school decor/furniture blocks, the safety-equipment blocks (exit sign, smoke detector, sprinkler head, emergency light, evacuation map), the 10 cafeteria furniture blocks, the 30 Conference Room/Office/Laboratory furniture blocks, the disguised `glowing_oak_planks` light source, the badminton court-building set (`court_line`, `badminton_net_post`, `badminton_net_mesh`), and the basketball court-building set (`basketball_hoop_post`, `basketball_pole`, `basketball_hoop`). |
-| `registry/ModItems` | All `DeferredItem` registrations (NPC spawners, block items, extinguishers, hazard wand, firefighter uniform + `ArmorMaterial`). Owns `HAZARD_ITEM_MAP` (LinkedHashMap; hazard-tab + `/item hazard` insertion order) and `ALL_ITEM_MAP` (superset for `/item get` / `/item kit`). |
-| `registry/ModCreativeTabs` | Four creative tabs: `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm, safety-equipment items), `FURN_TAB` (furn_tab — furniture + 10 school decor blocks + 10 cafeteria furniture blocks + 30 Conference Room/Office/Laboratory furniture blocks, each room grouped together for discoverability), `HAZARD_TAB` (hazards_tab — all 85 hazard props via `HAZARD_ITEM_MAP`, icon = daisy_chain_extension), `NPC_TAB` (npc_tab — all 24 NPC spawners, pulled out of the once-crowded `SIM_TAB` for discoverability; grouped in `NpcType` declaration order: New Tutorial active instructors → Academy background NPCs → sim-building faculty → sim-building students). |
+| `registry/ModItems` | All `DeferredItem` registrations (NPC spawners, block items, extinguishers, hazard wand, firefighter uniform + `ArmorMaterial`). Owns `HAZARD_ITEM_MAP` (LinkedHashMap; `/item hazard` insertion order, unchanged) plus `ALL_ITEM_MAP` (superset for `/item get` / `/item kit`) and, since the 2026-07-12 tab-reorganization pass, the 4 `HAZARD_ZONE_*` key lists (`HAZARD_ZONE_CLASSROOM`/`_KITCHEN`/`_ELECTRICAL_LAB`/`_CONFERENCE_OFFICE`) that `ModCreativeTabs` reads to split `HAZARD_ITEM_MAP`'s 85 entries across 4 sub-tabs — `assertHazardZonesCoverMap()` (called from `ModCreativeTabs`'s static init) fails fast if these ever drift out of sync with the map. |
+| `registry/ModCreativeTabs` | 9 creative tabs (reorganized 2026-07-12 — the original single `furn_tab`/`hazards_tab` had grown to 86/85 items each and were hard to browse): `SIM_TAB` (sim_tab — extinguishers, computer, fire alarm, safety-equipment items, and the fire hose cabinet, moved here from furniture), 4 hazard zone tabs — `HAZARD_CLASSROOM_TAB`, `HAZARD_KITCHEN_TAB`, `HAZARD_ELECTRICAL_LAB_TAB`, `HAZARD_CONFERENCE_OFFICE_TAB` (16/27/22/20 props, driven by `ModItems.HAZARD_ZONE_*`) — and 3 furniture room tabs — `FURN_SCHOOL_TAB`, `FURN_CAFETERIA_TAB`, `FURN_OFFICE_LAB_TAB` (35/16/31 items) — plus `NPC_TAB` (npc_tab — all 24 NPC spawners; grouped in `NpcType` declaration order: New Tutorial active instructors → Academy background NPCs → sim-building faculty → sim-building students). Every split was verified by script against the original two tabs' item lists (0 missing, 0 duplicated) before being committed. |
 | `registry/ModEntities` | `CUSTOM_NPC` entity type + its attribute-creation listener. |
 | `registry/ModSounds` | `FIRE_ALARM_RING` sound event. |
 | `registry/ModAttachments` | `DROPPED_TICKS` synced attachment driving the client drop-and-roll animation. |
@@ -468,6 +469,35 @@ The 10 newest school-zone hazard props (`scripts/generate_hazard_textures.py`, l
 **Known model-format gotcha**: a block model face's `"texture"` value **must** be a `"#variable"` reference resolved via that model's own `"textures"` map — a raw `"minecraft:block/xxx"` string directly in a face renders as the missing-texture (magenta/black) placeholder in-game, since Minecraft doesn't resolve namespaced IDs at the face level. (Found and fixed in `plastic_trash_bin_hazardous.json`'s `vape_glow` element.)
 
 **Second known model-format gotcha (found 2026-07-08, item-rendering audit)**: every custom block model **must** declare `"parent": "minecraft:block/block"` (directly, or via a chain that resolves to it) even though the model also lists its own `"elements"`. Without a parent, the model has no inherited `"display"` transforms block, so any item that uses `"parent": "berongsmp:block/xxx"` as its inventory icon renders unscaled and unrotated in the GUI — the block appears full-size/front-on in the slot instead of the standard isometric, scaled-down icon every other block in the mod uses. This silently affected 35 files: all 5 of the newest safety-equipment blocks (`exit_sign`, `smoke_detector`(+`_on`), `sprinkler_head`, `emergency_light`(+`_on`), `evacuation_map`), all 10 school-decor blocks (`teachers_desk`, `armchair_desk`, `tall_bookshelf`, `philippine_flag_stand`, `trophy_cabinet`, `water_dispenser`, `wall_clock`, `blackboard`, `podium_lectern`, `classroom_globe`), and 10 of the 30 hazard props (`overloaded_microwave`, `bunsen_burner_station`, `reagent_storage_shelf`, `overloaded_breaker_panel`, `overheating_wall_aircon`, `jammed_laser_printer`, `unattended_shrine_candle`, `leaking_gas_valve`, `alcohol_dispenser_station`, `clogged_exhaust_fan`, plus each one's `_hazardous` variant). Fixed by adding the parent key to all 37 files. When authoring a new block model by hand (not through a `generate_*_textures.py` script), always include `"parent": "minecraft:block/block"` as the first key — every correctly-rendering block in the mod (furniture, the original 20 hazard props, `computer`/`fire_alarm`) already does this.
+
+### Hazard-State Tiers & Flat-Modern Restyle (2026-07-12)
+
+Every hazard prop's `HAZARDOUS`/`ON_FIRE` blockstate now maps to genuinely distinct art instead of
+`on_fire=true` silently reusing the `_hazardous` model (the pre-existing behavior — see
+`scripts/add_onfire_blockstates.py`'s original docstring, which explicitly deferred bespoke burning
+art). `scripts/_texture_style.py` gained `hazardize()`/`charify()`: a universal "Caution Amber"
+(warm shift + amber/black chevron band) treatment for HAZARDOUS and a "Char & Ember" (darkened +
+glowing crack) treatment for ON_FIRE, applied identically to every prop regardless of its own
+bespoke art. `scripts/generate_hazard_state_tiers.py` mechanically derives a `<texture>_hz`/`_of`
+copy of every texture referenced by each `*_hazardous.json` model (deduplicated by source filename
+so a shared texture like `fixture_chrome` is only transformed once across all 85 props), generates
+the matching `*_on_fire.json` model, and repoints every blockstate's `on_fire=true` variants —
+**never mutating a source texture in place**, since some accent files (e.g. `hazard_glass_screen_off`)
+are also referenced by unrelated normal-state furniture models. Re-run after editing any hazard
+prop's normal-state texture or model:
+```bash
+python3 scripts/generate_hazard_state_tiers.py
+```
+Separately, every `generate_*_textures.py` script's local `gradient_shade` helper (previously a
+smooth per-pixel diagonal gradient, duplicated near-identically across 8 scripts) now quantizes into
+4 discrete tone bands at higher contrast (`light=1.45, dark=0.62`, matching `_texture_style.py`'s
+`LIGHT_FACTOR`/`SHADOW_FACTOR`) — a flat-shaded, cel-shaded look instead of a soft airbrush gradient,
+applied mod-wide by editing one shared helper per script rather than each object's individual
+drawing function. Whenever a script that also feeds hazard prop bodies is re-run, re-run
+`generate_hazard_state_tiers.py` immediately after so the `_hz`/`_of` variants stay derived from the
+current normal-state art. `light_bulb`'s texture is deliberately excluded (a seamless glow tile,
+banding would break the edge-to-edge tiling). Full log:
+**[docs/history/hazard-tier-and-tab-reorg-log.md](docs/history/hazard-tier-and-tab-reorg-log.md)**.
 
 ### Block Registration Pattern (NeoForge 26.x)
 
