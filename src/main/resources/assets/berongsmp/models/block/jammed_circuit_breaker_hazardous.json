@@ -1,21 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/breaker_panel_open_hot",
-    "body": "berongsmp:block/breaker_panel_open_hot",
-    "front": "berongsmp:block/breaker_panel_open_hot"
+    "particle": "berongsmp:block/breaker_panel_open_hot_hz",
+    "body": "berongsmp:block/breaker_panel_open_hot_hz",
+    "front": "berongsmp:block/breaker_panel_open_hot_hz"
   },
   "elements": [
     {
-      "from": [3, 4, 13],
-      "to": [13, 14, 16],
+      "from": [
+        3,
+        4,
+        13
+      ],
+      "to": [
+        13,
+        14,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#body" },
-        "up": { "texture": "#body" },
-        "north": { "texture": "#front" },
-        "south": { "texture": "#body" },
-        "east": { "texture": "#body" },
-        "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

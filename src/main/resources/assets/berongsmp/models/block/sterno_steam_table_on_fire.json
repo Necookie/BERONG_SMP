@@ -1,0 +1,212 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_ember_glow_of",
+    "body": "berongsmp:block/steel_counter_body_of",
+    "well": "berongsmp:block/food_well_metal_of",
+    "pan": "berongsmp:block/hazard_ember_glow_of",
+    "rail": "berongsmp:block/fixture_chrome_of",
+    "can": "berongsmp:block/sterno_can_blue_of",
+    "flame": "berongsmp:block/hazard_ember_glow_of"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        9,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#well"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "name": "pan_left",
+      "from": [
+        1,
+        9,
+        3
+      ],
+      "to": [
+        7,
+        11,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#pan"
+        },
+        "up": {
+          "texture": "#pan"
+        },
+        "north": {
+          "texture": "#pan"
+        },
+        "south": {
+          "texture": "#pan"
+        },
+        "east": {
+          "texture": "#pan"
+        },
+        "west": {
+          "texture": "#pan"
+        }
+      }
+    },
+    {
+      "name": "pan_right",
+      "from": [
+        9,
+        9,
+        3
+      ],
+      "to": [
+        15,
+        11,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#pan"
+        },
+        "up": {
+          "texture": "#pan"
+        },
+        "north": {
+          "texture": "#pan"
+        },
+        "south": {
+          "texture": "#pan"
+        },
+        "east": {
+          "texture": "#pan"
+        },
+        "west": {
+          "texture": "#pan"
+        }
+      }
+    },
+    {
+      "name": "serving_rail",
+      "from": [
+        0,
+        4,
+        -1
+      ],
+      "to": [
+        16,
+        6,
+        0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#rail"
+        },
+        "up": {
+          "texture": "#rail"
+        },
+        "north": {
+          "texture": "#rail"
+        },
+        "south": {
+          "texture": "#rail"
+        },
+        "east": {
+          "texture": "#rail"
+        },
+        "west": {
+          "texture": "#rail"
+        }
+      }
+    },
+    {
+      "name": "sterno_can",
+      "from": [
+        6,
+        6,
+        1
+      ],
+      "to": [
+        10,
+        9,
+        4
+      ],
+      "faces": {
+        "down": {
+          "texture": "#can"
+        },
+        "up": {
+          "texture": "#can"
+        },
+        "north": {
+          "texture": "#can"
+        },
+        "south": {
+          "texture": "#can"
+        },
+        "east": {
+          "texture": "#can"
+        },
+        "west": {
+          "texture": "#can"
+        }
+      }
+    },
+    {
+      "name": "flare",
+      "from": [
+        6,
+        9,
+        1
+      ],
+      "to": [
+        10,
+        11,
+        4
+      ],
+      "faces": {
+        "down": {
+          "texture": "#flame"
+        },
+        "up": {
+          "texture": "#flame"
+        },
+        "north": {
+          "texture": "#flame"
+        },
+        "south": {
+          "texture": "#flame"
+        },
+        "east": {
+          "texture": "#flame"
+        },
+        "west": {
+          "texture": "#flame"
+        }
+      }
+    }
+  ]
+}

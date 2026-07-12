@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/dispenser_body",
-    "body": "berongsmp:block/dispenser_body",
-    "nozzle": "berongsmp:block/dispenser_nozzle_misting"
+    "particle": "berongsmp:block/dispenser_body_hz",
+    "body": "berongsmp:block/dispenser_body_hz",
+    "nozzle": "berongsmp:block/dispenser_nozzle_misting_hz"
   },
   "elements": [
     {
-      "from": [5, 9, 14], "to": [11, 15, 16],
+      "from": [
+        5,
+        9,
+        14
+      ],
+      "to": [
+        11,
+        15,
+        16
+      ],
       "faces": {
-        "up":    { "texture": "#body" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#nozzle" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#nozzle"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

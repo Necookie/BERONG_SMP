@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/reagent_shelf_body",
-    "body": "berongsmp:block/reagent_shelf_body",
-    "front": "berongsmp:block/reagent_bottles_leaking"
+    "particle": "berongsmp:block/reagent_shelf_body_hz",
+    "body": "berongsmp:block/reagent_shelf_body_hz",
+    "front": "berongsmp:block/reagent_bottles_leaking_hz"
   },
   "elements": [
     {

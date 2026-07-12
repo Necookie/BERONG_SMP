@@ -1,18 +1,42 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_ember_glow",
-    "body": "berongsmp:block/press_body_metal",
-    "door": "berongsmp:block/hazard_ember_glow",
-    "scorch": "berongsmp:block/hazard_scorch_char"
+    "particle": "berongsmp:block/hazard_ember_glow_hz",
+    "body": "berongsmp:block/press_body_metal_hz",
+    "door": "berongsmp:block/hazard_ember_glow_hz",
+    "scorch": "berongsmp:block/hazard_scorch_char_hz"
   },
   "elements": [
     {
-      "from": [2, 0, 3], "to": [14, 8, 13],
+      "from": [
+        2,
+        0,
+        3
+      ],
+      "to": [
+        14,
+        8,
+        13
+      ],
       "faces": {
-        "down": { "texture": "#scorch" }, "up": { "texture": "#body" },
-        "north": { "texture": "#door" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#scorch"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

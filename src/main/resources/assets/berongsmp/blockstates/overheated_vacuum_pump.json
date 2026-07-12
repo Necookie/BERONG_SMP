@@ -1,8 +1,16 @@
 {
   "variants": {
-    "hazardous=false,on_fire=false": { "model": "berongsmp:block/overheated_vacuum_pump" },
-    "hazardous=false,on_fire=true": { "model": "berongsmp:block/overheated_vacuum_pump_hazardous" },
-    "hazardous=true,on_fire=false": { "model": "berongsmp:block/overheated_vacuum_pump_hazardous" },
-    "hazardous=true,on_fire=true": { "model": "berongsmp:block/overheated_vacuum_pump_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/overheated_vacuum_pump"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/overheated_vacuum_pump_on_fire"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/overheated_vacuum_pump_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/overheated_vacuum_pump_on_fire"
+    }
   }
 }

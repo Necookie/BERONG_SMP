@@ -1,0 +1,65 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/oven_door_window_glow_of",
+    "body": "berongsmp:block/fryer_body_steel_of",
+    "door": "berongsmp:block/oven_door_window_glow_of",
+    "knob": "berongsmp:block/range_knob_melted_of"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "name": "knob_panel",
+      "from": [
+        1,
+        13,
+        -1
+      ],
+      "to": [
+        15,
+        15,
+        0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#knob"
+        },
+        "south": {
+          "texture": "#knob"
+        }
+      }
+    }
+  ]
+}

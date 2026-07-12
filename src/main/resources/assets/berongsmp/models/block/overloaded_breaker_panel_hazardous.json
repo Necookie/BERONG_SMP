@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/breaker_panel_body",
-    "body": "berongsmp:block/breaker_panel_body",
-    "front": "berongsmp:block/breaker_panel_open_hot"
+    "particle": "berongsmp:block/breaker_panel_body_hz",
+    "body": "berongsmp:block/breaker_panel_body_hz",
+    "front": "berongsmp:block/breaker_panel_open_hot_hz"
   },
   "elements": [
     {

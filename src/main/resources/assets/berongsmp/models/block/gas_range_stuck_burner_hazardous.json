@@ -1,28 +1,76 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/fryer_body_steel",
-    "body": "berongsmp:block/fryer_body_steel",
-    "burner": "berongsmp:block/hazard_ember_glow",
-    "knob": "berongsmp:block/range_knob_melted"
+    "particle": "berongsmp:block/fryer_body_steel_hz",
+    "body": "berongsmp:block/fryer_body_steel_hz",
+    "burner": "berongsmp:block/hazard_ember_glow_hz",
+    "knob": "berongsmp:block/range_knob_melted_hz"
   },
   "elements": [
     {
       "name": "body",
-      "from": [0, 0, 0], "to": [16, 12, 16],
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#burner" },
-        "north": { "texture": "#body" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#burner"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "backguard",
-      "from": [0, 12, 13], "to": [16, 16, 16],
+      "from": [
+        0,
+        12,
+        13
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#knob" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#knob"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

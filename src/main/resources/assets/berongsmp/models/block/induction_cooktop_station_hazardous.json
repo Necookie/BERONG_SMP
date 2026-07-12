@@ -1,28 +1,76 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_glass_screen_glitch",
-    "side": "berongsmp:block/steel_counter_body",
-    "top": "berongsmp:block/hazard_glass_screen_glitch",
-    "panel": "berongsmp:block/hazard_warning_led"
+    "particle": "berongsmp:block/hazard_glass_screen_glitch_hz",
+    "side": "berongsmp:block/steel_counter_body_hz",
+    "top": "berongsmp:block/hazard_glass_screen_glitch_hz",
+    "panel": "berongsmp:block/hazard_warning_led_hz"
   },
   "elements": [
     {
       "name": "slab",
-      "from": [1, 0, 1], "to": [15, 4, 15],
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        4,
+        15
+      ],
       "faces": {
-        "down": { "texture": "#side" }, "up": { "texture": "#top" },
-        "north": { "texture": "#side" }, "south": { "texture": "#side" },
-        "east": { "texture": "#side" }, "west": { "texture": "#side" }
+        "down": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "west": {
+          "texture": "#side"
+        }
       }
     },
     {
       "name": "control_panel",
-      "from": [3, 0, 0], "to": [13, 3, 1],
+      "from": [
+        3,
+        0,
+        0
+      ],
+      "to": [
+        13,
+        3,
+        1
+      ],
       "faces": {
-        "down": { "texture": "#panel" }, "up": { "texture": "#panel" },
-        "north": { "texture": "#panel" }, "south": { "texture": "#panel" },
-        "east": { "texture": "#panel" }, "west": { "texture": "#panel" }
+        "down": {
+          "texture": "#panel"
+        },
+        "up": {
+          "texture": "#panel"
+        },
+        "north": {
+          "texture": "#panel"
+        },
+        "south": {
+          "texture": "#panel"
+        },
+        "east": {
+          "texture": "#panel"
+        },
+        "west": {
+          "texture": "#panel"
+        }
       }
     }
   ]

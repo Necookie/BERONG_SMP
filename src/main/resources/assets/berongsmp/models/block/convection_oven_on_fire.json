@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/oven_door_window_glow_of",
+    "body": "berongsmp:block/fryer_body_steel_of",
+    "door": "berongsmp:block/convection_oven_door_of",
+    "led": "berongsmp:block/hazard_warning_led_of"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "name": "warning_led",
+      "from": [
+        12,
+        13,
+        -1
+      ],
+      "to": [
+        14,
+        14,
+        0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#led"
+        },
+        "up": {
+          "texture": "#led"
+        },
+        "north": {
+          "texture": "#led"
+        },
+        "south": {
+          "texture": "#led"
+        },
+        "east": {
+          "texture": "#led"
+        },
+        "west": {
+          "texture": "#led"
+        }
+      }
+    }
+  ]
+}

@@ -1,46 +1,142 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/butane_canister_leaking",
-    "body": "berongsmp:block/stove_burner_metal",
-    "canister": "berongsmp:block/butane_canister_leaking",
-    "leak": "berongsmp:block/hazard_spark_arc_green"
+    "particle": "berongsmp:block/butane_canister_leaking_hz",
+    "body": "berongsmp:block/stove_burner_metal_hz",
+    "canister": "berongsmp:block/butane_canister_leaking_hz",
+    "leak": "berongsmp:block/hazard_spark_arc_green_hz"
   },
   "elements": [
     {
       "name": "base",
-      "from": [3, 0, 3], "to": [13, 4, 13],
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        4,
+        13
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#body" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "burner_top",
-      "from": [4, 4, 4], "to": [12, 6, 12],
+      "from": [
+        4,
+        4,
+        4
+      ],
+      "to": [
+        12,
+        6,
+        12
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#body" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "canister",
-      "from": [13, 1, 5], "to": [16, 4, 11],
+      "from": [
+        13,
+        1,
+        5
+      ],
+      "to": [
+        16,
+        4,
+        11
+      ],
       "faces": {
-        "down": { "texture": "#canister" }, "up": { "texture": "#canister" },
-        "north": { "texture": "#canister" }, "south": { "texture": "#canister" },
-        "east": { "texture": "#canister" }, "west": { "texture": "#canister" }
+        "down": {
+          "texture": "#canister"
+        },
+        "up": {
+          "texture": "#canister"
+        },
+        "north": {
+          "texture": "#canister"
+        },
+        "south": {
+          "texture": "#canister"
+        },
+        "east": {
+          "texture": "#canister"
+        },
+        "west": {
+          "texture": "#canister"
+        }
       }
     },
     {
       "name": "leak_plume",
-      "from": [12, 2, 7], "to": [13, 4, 9],
+      "from": [
+        12,
+        2,
+        7
+      ],
+      "to": [
+        13,
+        4,
+        9
+      ],
       "faces": {
-        "down": { "texture": "#leak" }, "up": { "texture": "#leak" },
-        "north": { "texture": "#leak" }, "south": { "texture": "#leak" },
-        "east": { "texture": "#leak" }, "west": { "texture": "#leak" }
+        "down": {
+          "texture": "#leak"
+        },
+        "up": {
+          "texture": "#leak"
+        },
+        "north": {
+          "texture": "#leak"
+        },
+        "south": {
+          "texture": "#leak"
+        },
+        "east": {
+          "texture": "#leak"
+        },
+        "west": {
+          "texture": "#leak"
+        }
       }
     }
   ]

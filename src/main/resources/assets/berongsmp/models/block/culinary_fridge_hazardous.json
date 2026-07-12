@@ -1,48 +1,139 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/condenser_coil_dusty",
-    "body": "berongsmp:block/locker_door_steel",
-    "door": "berongsmp:block/fridge_door_white",
-    "handle": "berongsmp:block/fixture_chrome",
-    "coils": "berongsmp:block/condenser_coil_dusty",
-    "led": "berongsmp:block/hazard_warning_led",
-    "smoke": "berongsmp:block/hazard_smoke_stain"
+    "particle": "berongsmp:block/condenser_coil_dusty_hz",
+    "body": "berongsmp:block/locker_door_steel_hz",
+    "door": "berongsmp:block/fridge_door_white_hz",
+    "handle": "berongsmp:block/fixture_chrome_hz",
+    "coils": "berongsmp:block/condenser_coil_dusty_hz",
+    "led": "berongsmp:block/hazard_warning_led_hz",
+    "smoke": "berongsmp:block/hazard_smoke_stain_hz"
   },
   "elements": [
     {
       "name": "body",
-      "from": [1, 0, 1], "to": [15, 16, 15],
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        16,
+        15
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#smoke" },
-        "north": { "texture": "#door" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#smoke"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "handle",
-      "from": [12, 6, 0], "to": [13, 11, 1],
+      "from": [
+        12,
+        6,
+        0
+      ],
+      "to": [
+        13,
+        11,
+        1
+      ],
       "faces": {
-        "north": { "texture": "#handle" }, "south": { "texture": "#handle" },
-        "east": { "texture": "#handle" }, "west": { "texture": "#handle" }
+        "north": {
+          "texture": "#handle"
+        },
+        "south": {
+          "texture": "#handle"
+        },
+        "east": {
+          "texture": "#handle"
+        },
+        "west": {
+          "texture": "#handle"
+        }
       }
     },
     {
       "name": "warning_led",
-      "from": [3, 13, 0], "to": [13, 14, 1],
+      "from": [
+        3,
+        13,
+        0
+      ],
+      "to": [
+        13,
+        14,
+        1
+      ],
       "faces": {
-        "down": { "texture": "#led" }, "up": { "texture": "#led" },
-        "north": { "texture": "#led" }, "south": { "texture": "#led" },
-        "east": { "texture": "#led" }, "west": { "texture": "#led" }
+        "down": {
+          "texture": "#led"
+        },
+        "up": {
+          "texture": "#led"
+        },
+        "north": {
+          "texture": "#led"
+        },
+        "south": {
+          "texture": "#led"
+        },
+        "east": {
+          "texture": "#led"
+        },
+        "west": {
+          "texture": "#led"
+        }
       }
     },
     {
       "name": "coils",
-      "from": [2, 0, 15], "to": [14, 4, 16],
+      "from": [
+        2,
+        0,
+        15
+      ],
+      "to": [
+        14,
+        4,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#coils" }, "up": { "texture": "#coils" },
-        "north": { "texture": "#coils" }, "south": { "texture": "#coils" },
-        "east": { "texture": "#coils" }, "west": { "texture": "#coils" }
+        "down": {
+          "texture": "#coils"
+        },
+        "up": {
+          "texture": "#coils"
+        },
+        "north": {
+          "texture": "#coils"
+        },
+        "south": {
+          "texture": "#coils"
+        },
+        "east": {
+          "texture": "#coils"
+        },
+        "west": {
+          "texture": "#coils"
+        }
       }
     }
   ]

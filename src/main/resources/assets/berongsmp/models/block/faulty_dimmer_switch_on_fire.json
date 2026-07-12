@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_scorch_char_of",
+    "plate": "berongsmp:block/hazard_scorch_char_of",
+    "knob": "berongsmp:block/dimmer_knob_normal_of"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        6,
+        15
+      ],
+      "to": [
+        10,
+        10,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#knob"
+        },
+        "down": {
+          "texture": "#knob"
+        },
+        "north": {
+          "texture": "#plate"
+        },
+        "south": {
+          "texture": "#plate"
+        },
+        "east": {
+          "texture": "#plate"
+        },
+        "west": {
+          "texture": "#plate"
+        }
+      }
+    }
+  ]
+}

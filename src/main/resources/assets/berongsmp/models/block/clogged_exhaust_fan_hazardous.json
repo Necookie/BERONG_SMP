@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/exhaust_fan_dusty",
-    "body": "berongsmp:block/exhaust_fan_dusty",
-    "front": "berongsmp:block/exhaust_fan_dusty"
+    "particle": "berongsmp:block/exhaust_fan_dusty_hz",
+    "body": "berongsmp:block/exhaust_fan_dusty_hz",
+    "front": "berongsmp:block/exhaust_fan_dusty_hz"
   },
   "elements": [
     {

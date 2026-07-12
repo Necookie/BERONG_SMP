@@ -1,53 +1,155 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_water_stain",
-    "body": "berongsmp:block/urn_body_steel",
-    "trim": "berongsmp:block/fixture_chrome",
-    "stain": "berongsmp:block/hazard_water_stain",
-    "spark": "berongsmp:block/hazard_spark_arc"
+    "particle": "berongsmp:block/hazard_water_stain_hz",
+    "body": "berongsmp:block/urn_body_steel_hz",
+    "trim": "berongsmp:block/fixture_chrome_hz",
+    "stain": "berongsmp:block/hazard_water_stain_hz",
+    "spark": "berongsmp:block/hazard_spark_arc_hz"
   },
   "elements": [
     {
       "name": "body",
-      "from": [4, 0, 4], "to": [12, 13, 12],
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        13,
+        12
+      ],
       "faces": {
-        "down": { "texture": "#stain" }, "up": { "texture": "#body" },
-        "north": { "texture": "#stain" }, "south": { "texture": "#stain" },
-        "east": { "texture": "#stain" }, "west": { "texture": "#stain" }
+        "down": {
+          "texture": "#stain"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#stain"
+        },
+        "south": {
+          "texture": "#stain"
+        },
+        "east": {
+          "texture": "#stain"
+        },
+        "west": {
+          "texture": "#stain"
+        }
       }
     },
     {
       "name": "lid",
-      "from": [5, 13, 5], "to": [11, 14, 11],
+      "from": [
+        5,
+        13,
+        5
+      ],
+      "to": [
+        11,
+        14,
+        11
+      ],
       "faces": {
-        "down": { "texture": "#trim" }, "up": { "texture": "#trim" },
-        "north": { "texture": "#trim" }, "south": { "texture": "#trim" },
-        "east": { "texture": "#trim" }, "west": { "texture": "#trim" }
+        "down": {
+          "texture": "#trim"
+        },
+        "up": {
+          "texture": "#trim"
+        },
+        "north": {
+          "texture": "#trim"
+        },
+        "south": {
+          "texture": "#trim"
+        },
+        "east": {
+          "texture": "#trim"
+        },
+        "west": {
+          "texture": "#trim"
+        }
       }
     },
     {
       "name": "spigot",
-      "from": [7, 3, 3], "to": [9, 6, 4],
+      "from": [
+        7,
+        3,
+        3
+      ],
+      "to": [
+        9,
+        6,
+        4
+      ],
       "faces": {
-        "down": { "texture": "#trim" }, "up": { "texture": "#trim" },
-        "north": { "texture": "#trim" }, "south": { "texture": "#trim" },
-        "east": { "texture": "#trim" }, "west": { "texture": "#trim" }
+        "down": {
+          "texture": "#trim"
+        },
+        "up": {
+          "texture": "#trim"
+        },
+        "north": {
+          "texture": "#trim"
+        },
+        "south": {
+          "texture": "#trim"
+        },
+        "east": {
+          "texture": "#trim"
+        },
+        "west": {
+          "texture": "#trim"
+        }
       }
     },
     {
       "name": "puddle",
-      "from": [2, 0, 2], "to": [14, 1, 14],
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        1,
+        14
+      ],
       "faces": {
-        "up": { "texture": "#stain" }
+        "up": {
+          "texture": "#stain"
+        }
       }
     },
     {
       "name": "spark",
-      "from": [5, 1, 5], "to": [11, 3, 11],
+      "from": [
+        5,
+        1,
+        5
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ],
       "faces": {
-        "north": { "texture": "#spark" }, "south": { "texture": "#spark" },
-        "east": { "texture": "#spark" }, "west": { "texture": "#spark" }
+        "north": {
+          "texture": "#spark"
+        },
+        "south": {
+          "texture": "#spark"
+        },
+        "east": {
+          "texture": "#spark"
+        },
+        "west": {
+          "texture": "#spark"
+        }
       }
     }
   ]

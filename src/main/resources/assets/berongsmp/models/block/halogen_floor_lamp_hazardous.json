@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/lamp_pole",
-    "pole": "berongsmp:block/lamp_pole",
-    "bowl": "berongsmp:block/lamp_bowl_glow"
+    "particle": "berongsmp:block/lamp_pole_hz",
+    "pole": "berongsmp:block/lamp_pole_hz",
+    "bowl": "berongsmp:block/lamp_bowl_glow_hz"
   },
   "elements": [
     {
-      "from": [6, 0, 6], "to": [10, 16, 10],
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        16,
+        10
+      ],
       "faces": {
-        "up":    { "texture": "#bowl" },
-        "down":  { "texture": "#pole" },
-        "north": { "texture": "#pole" },
-        "south": { "texture": "#pole" },
-        "east":  { "texture": "#pole" },
-        "west":  { "texture": "#pole" }
+        "up": {
+          "texture": "#bowl"
+        },
+        "down": {
+          "texture": "#pole"
+        },
+        "north": {
+          "texture": "#pole"
+        },
+        "south": {
+          "texture": "#pole"
+        },
+        "east": {
+          "texture": "#pole"
+        },
+        "west": {
+          "texture": "#pole"
+        }
       }
     }
   ]

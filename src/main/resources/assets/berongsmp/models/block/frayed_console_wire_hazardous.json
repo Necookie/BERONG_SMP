@@ -1,21 +1,152 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "cord":   "berongsmp:block/wire_cord_black",
-    "copper": "berongsmp:block/hazard_bare_copper",
-    "spark":  "berongsmp:block/hazard_spark_arc",
-    "particle": "berongsmp:block/wire_cord_black"
+    "cord": "berongsmp:block/wire_cord_black_hz",
+    "copper": "berongsmp:block/hazard_bare_copper_hz",
+    "spark": "berongsmp:block/hazard_spark_arc_hz",
+    "particle": "berongsmp:block/wire_cord_black_hz"
   },
   "elements": [
-    { "name": "cord_ns", "from": [3, 0, 0], "to": [13, 2, 10],
-      "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } },
-    { "name": "cord_ew", "from": [5, 0, 10], "to": [13, 2, 16],
-      "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } },
-    { "name": "connector_plug", "from": [3, 0, 0], "to": [13, 3, 2],
-      "faces": { "north": {"texture":"#cord"}, "south": {"texture":"#cord"}, "east": {"texture":"#cord"}, "west": {"texture":"#cord"}, "up": {"texture":"#cord"}, "down": {"texture":"#cord"} } },
-    { "name": "bare_copper", "from": [5, 1, 5], "to": [11, 2, 10],
-      "faces": { "up": {"texture":"#copper"}, "north": {"texture":"#copper"} } },
-    { "name": "spark_flare", "from": [6, 2, 6], "to": [10, 4, 9],
-      "faces": { "up": {"texture":"#spark"}, "north": {"texture":"#spark"} } }
+    {
+      "name": "cord_ns",
+      "from": [
+        3,
+        0,
+        0
+      ],
+      "to": [
+        13,
+        2,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#cord"
+        },
+        "south": {
+          "texture": "#cord"
+        },
+        "east": {
+          "texture": "#cord"
+        },
+        "west": {
+          "texture": "#cord"
+        },
+        "up": {
+          "texture": "#cord"
+        },
+        "down": {
+          "texture": "#cord"
+        }
+      }
+    },
+    {
+      "name": "cord_ew",
+      "from": [
+        5,
+        0,
+        10
+      ],
+      "to": [
+        13,
+        2,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#cord"
+        },
+        "south": {
+          "texture": "#cord"
+        },
+        "east": {
+          "texture": "#cord"
+        },
+        "west": {
+          "texture": "#cord"
+        },
+        "up": {
+          "texture": "#cord"
+        },
+        "down": {
+          "texture": "#cord"
+        }
+      }
+    },
+    {
+      "name": "connector_plug",
+      "from": [
+        3,
+        0,
+        0
+      ],
+      "to": [
+        13,
+        3,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#cord"
+        },
+        "south": {
+          "texture": "#cord"
+        },
+        "east": {
+          "texture": "#cord"
+        },
+        "west": {
+          "texture": "#cord"
+        },
+        "up": {
+          "texture": "#cord"
+        },
+        "down": {
+          "texture": "#cord"
+        }
+      }
+    },
+    {
+      "name": "bare_copper",
+      "from": [
+        5,
+        1,
+        5
+      ],
+      "to": [
+        11,
+        2,
+        10
+      ],
+      "faces": {
+        "up": {
+          "texture": "#copper"
+        },
+        "north": {
+          "texture": "#copper"
+        }
+      }
+    },
+    {
+      "name": "spark_flare",
+      "from": [
+        6,
+        2,
+        6
+      ],
+      "to": [
+        10,
+        4,
+        9
+      ],
+      "faces": {
+        "up": {
+          "texture": "#spark"
+        },
+        "north": {
+          "texture": "#spark"
+        }
+      }
+    }
   ]
 }

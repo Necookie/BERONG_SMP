@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/oven_body",
-    "body": "berongsmp:block/oven_body",
-    "door": "berongsmp:block/hazard_smoke_stain"
+    "particle": "berongsmp:block/oven_body_hz",
+    "body": "berongsmp:block/oven_body_hz",
+    "door": "berongsmp:block/hazard_smoke_stain_hz"
   },
   "elements": [
     {
-      "from": [1, 0, 1], "to": [15, 13, 15],
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        13,
+        15
+      ],
       "faces": {
-        "up":    { "texture": "#body" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#door" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

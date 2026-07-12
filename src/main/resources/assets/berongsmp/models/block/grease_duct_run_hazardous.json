@@ -1,46 +1,142 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hood_grease_dirty",
-    "duct": "berongsmp:block/hood_grease_dirty",
-    "hatch": "berongsmp:block/cabinet_body_graphite",
-    "ember": "berongsmp:block/hazard_ember_glow"
+    "particle": "berongsmp:block/hood_grease_dirty_hz",
+    "duct": "berongsmp:block/hood_grease_dirty_hz",
+    "hatch": "berongsmp:block/cabinet_body_graphite_hz",
+    "ember": "berongsmp:block/hazard_ember_glow_hz"
   },
   "elements": [
     {
       "name": "duct_body",
-      "from": [3, 12, 0], "to": [13, 16, 16],
+      "from": [
+        3,
+        12,
+        0
+      ],
+      "to": [
+        13,
+        16,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
-        "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
-        "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+        "down": {
+          "texture": "#duct"
+        },
+        "up": {
+          "texture": "#duct"
+        },
+        "north": {
+          "texture": "#duct"
+        },
+        "south": {
+          "texture": "#duct"
+        },
+        "east": {
+          "texture": "#duct"
+        },
+        "west": {
+          "texture": "#duct"
+        }
       }
     },
     {
       "name": "flange_front",
-      "from": [2, 12, 3], "to": [14, 16, 4],
+      "from": [
+        2,
+        12,
+        3
+      ],
+      "to": [
+        14,
+        16,
+        4
+      ],
       "faces": {
-        "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
-        "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
-        "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+        "down": {
+          "texture": "#duct"
+        },
+        "up": {
+          "texture": "#duct"
+        },
+        "north": {
+          "texture": "#duct"
+        },
+        "south": {
+          "texture": "#duct"
+        },
+        "east": {
+          "texture": "#duct"
+        },
+        "west": {
+          "texture": "#duct"
+        }
       }
     },
     {
       "name": "flange_back",
-      "from": [2, 12, 12], "to": [14, 16, 13],
+      "from": [
+        2,
+        12,
+        12
+      ],
+      "to": [
+        14,
+        16,
+        13
+      ],
       "faces": {
-        "down": { "texture": "#duct" }, "up": { "texture": "#duct" },
-        "north": { "texture": "#duct" }, "south": { "texture": "#duct" },
-        "east": { "texture": "#duct" }, "west": { "texture": "#duct" }
+        "down": {
+          "texture": "#duct"
+        },
+        "up": {
+          "texture": "#duct"
+        },
+        "north": {
+          "texture": "#duct"
+        },
+        "south": {
+          "texture": "#duct"
+        },
+        "east": {
+          "texture": "#duct"
+        },
+        "west": {
+          "texture": "#duct"
+        }
       }
     },
     {
       "name": "access_hatch",
-      "from": [4, 11, 6], "to": [12, 12, 10],
+      "from": [
+        4,
+        11,
+        6
+      ],
+      "to": [
+        12,
+        12,
+        10
+      ],
       "faces": {
-        "down": { "texture": "#ember" }, "up": { "texture": "#hatch" },
-        "north": { "texture": "#hatch" }, "south": { "texture": "#hatch" },
-        "east": { "texture": "#hatch" }, "west": { "texture": "#hatch" }
+        "down": {
+          "texture": "#ember"
+        },
+        "up": {
+          "texture": "#hatch"
+        },
+        "north": {
+          "texture": "#hatch"
+        },
+        "south": {
+          "texture": "#hatch"
+        },
+        "east": {
+          "texture": "#hatch"
+        },
+        "west": {
+          "texture": "#hatch"
+        }
       }
     }
   ]

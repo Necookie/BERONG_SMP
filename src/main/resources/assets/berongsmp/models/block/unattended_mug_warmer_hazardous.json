@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/warmer_body",
-    "body": "berongsmp:block/warmer_body",
-    "top": "berongsmp:block/hazard_ember_glow"
+    "particle": "berongsmp:block/warmer_body_hz",
+    "body": "berongsmp:block/warmer_body_hz",
+    "top": "berongsmp:block/hazard_ember_glow_hz"
   },
   "elements": [
     {
-      "from": [4, 0, 4], "to": [12, 3, 12],
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        3,
+        12
+      ],
       "faces": {
-        "up":    { "texture": "#top" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#body" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#top"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/centrifuge_body",
-    "body": "berongsmp:block/centrifuge_body",
-    "lid": "berongsmp:block/hazard_smoke_stain"
+    "particle": "berongsmp:block/centrifuge_body_hz",
+    "body": "berongsmp:block/centrifuge_body_hz",
+    "lid": "berongsmp:block/hazard_smoke_stain_hz"
   },
   "elements": [
     {
-      "from": [3, 0, 3], "to": [13, 9, 13],
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        9,
+        13
+      ],
       "faces": {
-        "up":    { "texture": "#lid" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#body" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#lid"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

@@ -1,8 +1,16 @@
 {
   "variants": {
-    "hazardous=false,on_fire=false": { "model": "berongsmp:block/halogen_floor_lamp" },
-    "hazardous=false,on_fire=true": { "model": "berongsmp:block/halogen_floor_lamp_hazardous" },
-    "hazardous=true,on_fire=false": { "model": "berongsmp:block/halogen_floor_lamp_hazardous" },
-    "hazardous=true,on_fire=true": { "model": "berongsmp:block/halogen_floor_lamp_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/halogen_floor_lamp"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/halogen_floor_lamp_on_fire"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/halogen_floor_lamp_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/halogen_floor_lamp_on_fire"
+    }
   }
 }

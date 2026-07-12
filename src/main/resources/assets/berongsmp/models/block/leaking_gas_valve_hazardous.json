@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/gas_pipe_metal",
-    "body": "berongsmp:block/gas_pipe_metal",
-    "front": "berongsmp:block/gas_leak_stain"
+    "particle": "berongsmp:block/gas_pipe_metal_hz",
+    "body": "berongsmp:block/gas_pipe_metal_hz",
+    "front": "berongsmp:block/gas_leak_stain_hz"
   },
   "elements": [
     {

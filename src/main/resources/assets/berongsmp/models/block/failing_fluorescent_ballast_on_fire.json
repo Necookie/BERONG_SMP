@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/fixture_housing_of",
+    "housing": "berongsmp:block/fixture_housing_of",
+    "tube": "berongsmp:block/tube_dripping_of"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        13,
+        2
+      ],
+      "to": [
+        14,
+        16,
+        14
+      ],
+      "faces": {
+        "up": {
+          "texture": "#housing"
+        },
+        "down": {
+          "texture": "#tube"
+        },
+        "north": {
+          "texture": "#housing"
+        },
+        "south": {
+          "texture": "#housing"
+        },
+        "east": {
+          "texture": "#housing"
+        },
+        "west": {
+          "texture": "#housing"
+        }
+      }
+    }
+  ]
+}

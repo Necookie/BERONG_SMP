@@ -1,17 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_scorch_char",
-    "body": "berongsmp:block/disposal_unit_metal",
-    "scorch": "berongsmp:block/hazard_scorch_char"
+    "particle": "berongsmp:block/hazard_scorch_char_hz",
+    "body": "berongsmp:block/disposal_unit_metal_hz",
+    "scorch": "berongsmp:block/hazard_scorch_char_hz"
   },
   "elements": [
     {
-      "from": [3, 0, 3], "to": [13, 8, 13],
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        8,
+        13
+      ],
       "faces": {
-        "down": { "texture": "#scorch" }, "up": { "texture": "#body" },
-        "north": { "texture": "#scorch" }, "south": { "texture": "#scorch" },
-        "east": { "texture": "#scorch" }, "west": { "texture": "#scorch" }
+        "down": {
+          "texture": "#scorch"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#scorch"
+        },
+        "south": {
+          "texture": "#scorch"
+        },
+        "east": {
+          "texture": "#scorch"
+        },
+        "west": {
+          "texture": "#scorch"
+        }
       }
     }
   ]

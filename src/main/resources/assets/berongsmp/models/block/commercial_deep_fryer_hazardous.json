@@ -1,22 +1,135 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "body":    "berongsmp:block/fryer_body_steel",
-    "oil_vat": "berongsmp:block/fryer_oil_hazard",
-    "panel":   "berongsmp:block/pa_rack_metal",
-    "led":     "berongsmp:block/hazard_warning_led",
-    "particle": "berongsmp:block/fryer_oil_hazard"
+    "body": "berongsmp:block/fryer_body_steel_hz",
+    "oil_vat": "berongsmp:block/fryer_oil_hazard_hz",
+    "panel": "berongsmp:block/pa_rack_metal_hz",
+    "led": "berongsmp:block/hazard_warning_led_hz",
+    "particle": "berongsmp:block/fryer_oil_hazard_hz"
   },
   "elements": [
-    { "name": "fryer_body", "from": [1, 0, 1], "to": [15, 12, 15],
-      "faces": { "north": {"texture":"#panel"}, "south": {"texture":"#body"}, "east": {"texture":"#body"}, "west": {"texture":"#body"}, "up": {"texture":"#body"}, "down": {"texture":"#body"} } },
-    { "name": "oil_fire", "from": [2, 11, 2], "to": [14, 16, 14],
-      "faces": { "north": {"texture":"#oil_vat"}, "south": {"texture":"#oil_vat"}, "east": {"texture":"#oil_vat"}, "west": {"texture":"#oil_vat"}, "up": {"texture":"#oil_vat"}, "down": {"texture":"#oil_vat"} } },
-    { "name": "control_panel", "from": [2, 7, 0], "to": [14, 10, 1],
-      "faces": { "north": {"texture":"#panel"} } },
-    { "name": "alarm_light", "from": [6, 10, 0], "to": [10, 12, 1],
-      "faces": { "north": {"texture":"#led"} } },
-    { "name": "legs", "from": [2, -1, 2], "to": [4, 0, 4],
-      "faces": { "north": {"texture":"#body"}, "down": {"texture":"#body"} } }
+    {
+      "name": "fryer_body",
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        12,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#panel"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "name": "oil_fire",
+      "from": [
+        2,
+        11,
+        2
+      ],
+      "to": [
+        14,
+        16,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#oil_vat"
+        },
+        "south": {
+          "texture": "#oil_vat"
+        },
+        "east": {
+          "texture": "#oil_vat"
+        },
+        "west": {
+          "texture": "#oil_vat"
+        },
+        "up": {
+          "texture": "#oil_vat"
+        },
+        "down": {
+          "texture": "#oil_vat"
+        }
+      }
+    },
+    {
+      "name": "control_panel",
+      "from": [
+        2,
+        7,
+        0
+      ],
+      "to": [
+        14,
+        10,
+        1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#panel"
+        }
+      }
+    },
+    {
+      "name": "alarm_light",
+      "from": [
+        6,
+        10,
+        0
+      ],
+      "to": [
+        10,
+        12,
+        1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#led"
+        }
+      }
+    },
+    {
+      "name": "legs",
+      "from": [
+        2,
+        -1,
+        2
+      ],
+      "to": [
+        4,
+        0,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    }
   ]
 }

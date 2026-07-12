@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/shredder_body",
-    "body": "berongsmp:block/shredder_body",
-    "slot": "berongsmp:block/shredder_slot_jammed"
+    "particle": "berongsmp:block/shredder_body_hz",
+    "body": "berongsmp:block/shredder_body_hz",
+    "slot": "berongsmp:block/shredder_slot_jammed_hz"
   },
   "elements": [
     {
-      "from": [2, 0, 2], "to": [14, 10, 14],
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        10,
+        14
+      ],
       "faces": {
-        "up":    { "texture": "#body" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#slot" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#slot"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

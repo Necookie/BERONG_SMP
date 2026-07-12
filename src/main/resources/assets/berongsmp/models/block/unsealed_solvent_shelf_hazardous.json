@@ -1,44 +1,127 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/solvent_can_open",
-    "wood": "berongsmp:block/table_leg_wood_dark",
-    "cans": "berongsmp:block/solvent_can_open",
-    "stain": "berongsmp:block/hazard_grease_stain"
+    "particle": "berongsmp:block/solvent_can_open_hz",
+    "wood": "berongsmp:block/table_leg_wood_dark_hz",
+    "cans": "berongsmp:block/solvent_can_open_hz",
+    "stain": "berongsmp:block/hazard_grease_stain_hz"
   },
   "elements": [
     {
       "name": "back_panel",
-      "from": [1, 0, 14], "to": [15, 16, 16],
+      "from": [
+        1,
+        0,
+        14
+      ],
+      "to": [
+        15,
+        16,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#wood" }, "up": { "texture": "#wood" },
-        "north": { "texture": "#wood" }, "south": { "texture": "#wood" },
-        "east": { "texture": "#wood" }, "west": { "texture": "#wood" }
+        "down": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        }
       }
     },
     {
       "name": "shelf_board",
-      "from": [1, 7, 9], "to": [15, 8, 16],
+      "from": [
+        1,
+        7,
+        9
+      ],
+      "to": [
+        15,
+        8,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#stain" }, "up": { "texture": "#stain" },
-        "north": { "texture": "#wood" }, "south": { "texture": "#wood" },
-        "east": { "texture": "#wood" }, "west": { "texture": "#wood" }
+        "down": {
+          "texture": "#stain"
+        },
+        "up": {
+          "texture": "#stain"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        }
       }
     },
     {
       "name": "cans_open",
-      "from": [2, 8, 10], "to": [14, 14, 15],
+      "from": [
+        2,
+        8,
+        10
+      ],
+      "to": [
+        14,
+        14,
+        15
+      ],
       "faces": {
-        "down": { "texture": "#cans" }, "up": { "texture": "#cans" },
-        "north": { "texture": "#cans" }, "south": { "texture": "#cans" },
-        "east": { "texture": "#cans" }, "west": { "texture": "#cans" }
+        "down": {
+          "texture": "#cans"
+        },
+        "up": {
+          "texture": "#cans"
+        },
+        "north": {
+          "texture": "#cans"
+        },
+        "south": {
+          "texture": "#cans"
+        },
+        "east": {
+          "texture": "#cans"
+        },
+        "west": {
+          "texture": "#cans"
+        }
       }
     },
     {
       "name": "floor_spill",
-      "from": [1, 0, 12], "to": [15, 1, 16],
+      "from": [
+        1,
+        0,
+        12
+      ],
+      "to": [
+        15,
+        1,
+        16
+      ],
       "faces": {
-        "up": { "texture": "#stain" }
+        "up": {
+          "texture": "#stain"
+        }
       }
     }
   ]

@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/bunsen_base_metal",
-    "body": "berongsmp:block/bunsen_base_metal",
-    "top": "berongsmp:block/bunsen_flame_ring"
+    "particle": "berongsmp:block/bunsen_base_metal_hz",
+    "body": "berongsmp:block/bunsen_base_metal_hz",
+    "top": "berongsmp:block/bunsen_flame_ring_hz"
   },
   "elements": [
     {

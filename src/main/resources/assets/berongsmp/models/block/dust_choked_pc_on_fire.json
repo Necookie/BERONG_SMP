@@ -1,0 +1,126 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "tower": "berongsmp:block/pc_tower_case_of",
+    "dustvent": "berongsmp:block/pc_tower_vent_dusty_of",
+    "backpack": "berongsmp:block/backpack_fabric_of",
+    "led": "berongsmp:block/hazard_warning_led_of",
+    "particle": "berongsmp:block/pc_tower_case_of"
+  },
+  "elements": [
+    {
+      "name": "tower",
+      "from": [
+        3,
+        0,
+        2
+      ],
+      "to": [
+        13,
+        14,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tower"
+        },
+        "south": {
+          "texture": "#dustvent"
+        },
+        "east": {
+          "texture": "#tower"
+        },
+        "west": {
+          "texture": "#tower"
+        },
+        "up": {
+          "texture": "#tower"
+        },
+        "down": {
+          "texture": "#tower"
+        }
+      }
+    },
+    {
+      "name": "drive_bay",
+      "from": [
+        4,
+        9,
+        1
+      ],
+      "to": [
+        9,
+        11,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tower"
+        },
+        "south": {
+          "texture": "#tower"
+        },
+        "east": {
+          "texture": "#tower"
+        },
+        "west": {
+          "texture": "#tower"
+        },
+        "up": {
+          "texture": "#tower"
+        },
+        "down": {
+          "texture": "#tower"
+        }
+      }
+    },
+    {
+      "name": "backpack_wedged",
+      "from": [
+        1,
+        3,
+        13
+      ],
+      "to": [
+        12,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#backpack"
+        },
+        "south": {
+          "texture": "#backpack"
+        },
+        "east": {
+          "texture": "#backpack"
+        },
+        "west": {
+          "texture": "#backpack"
+        },
+        "up": {
+          "texture": "#backpack"
+        }
+      }
+    },
+    {
+      "name": "power_button",
+      "from": [
+        10,
+        10,
+        1
+      ],
+      "to": [
+        12,
+        12,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#led"
+        }
+      }
+    }
+  ]
+}

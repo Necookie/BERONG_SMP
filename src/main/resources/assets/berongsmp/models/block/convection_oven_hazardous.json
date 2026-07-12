@@ -1,27 +1,75 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/oven_door_window_glow",
-    "body": "berongsmp:block/fryer_body_steel",
-    "door": "berongsmp:block/convection_oven_door",
-    "led": "berongsmp:block/hazard_warning_led"
+    "particle": "berongsmp:block/oven_door_window_glow_hz",
+    "body": "berongsmp:block/fryer_body_steel_hz",
+    "door": "berongsmp:block/convection_oven_door_hz",
+    "led": "berongsmp:block/hazard_warning_led_hz"
   },
   "elements": [
     {
-      "from": [0, 0, 0], "to": [16, 16, 16],
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#door" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "warning_led",
-      "from": [12, 13, -1], "to": [14, 14, 0],
+      "from": [
+        12,
+        13,
+        -1
+      ],
+      "to": [
+        14,
+        14,
+        0
+      ],
       "faces": {
-        "down": { "texture": "#led" }, "up": { "texture": "#led" },
-        "north": { "texture": "#led" }, "south": { "texture": "#led" },
-        "east": { "texture": "#led" }, "west": { "texture": "#led" }
+        "down": {
+          "texture": "#led"
+        },
+        "up": {
+          "texture": "#led"
+        },
+        "north": {
+          "texture": "#led"
+        },
+        "south": {
+          "texture": "#led"
+        },
+        "east": {
+          "texture": "#led"
+        },
+        "west": {
+          "texture": "#led"
+        }
       }
     }
   ]

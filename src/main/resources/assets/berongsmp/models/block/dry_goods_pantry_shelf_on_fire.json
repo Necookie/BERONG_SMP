@@ -1,0 +1,145 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_scorch_char_of",
+    "shelf": "berongsmp:block/reagent_shelf_body_of",
+    "sacks": "berongsmp:block/flour_sacks_white_of",
+    "scorch": "berongsmp:block/hazard_scorch_char_of",
+    "ember": "berongsmp:block/hazard_ember_glow_of",
+    "dust": "berongsmp:block/hazard_smoke_stain_of"
+  },
+  "elements": [
+    {
+      "name": "shelf_frame",
+      "from": [
+        0,
+        0,
+        12
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#shelf"
+        },
+        "up": {
+          "texture": "#shelf"
+        },
+        "north": {
+          "texture": "#shelf"
+        },
+        "south": {
+          "texture": "#shelf"
+        },
+        "east": {
+          "texture": "#shelf"
+        },
+        "west": {
+          "texture": "#shelf"
+        }
+      }
+    },
+    {
+      "name": "sacks",
+      "from": [
+        1,
+        3,
+        8
+      ],
+      "to": [
+        15,
+        13,
+        12
+      ],
+      "faces": {
+        "down": {
+          "texture": "#sacks"
+        },
+        "up": {
+          "texture": "#scorch"
+        },
+        "north": {
+          "texture": "#scorch"
+        },
+        "south": {
+          "texture": "#sacks"
+        },
+        "east": {
+          "texture": "#sacks"
+        },
+        "west": {
+          "texture": "#sacks"
+        }
+      }
+    },
+    {
+      "name": "ballast",
+      "from": [
+        4,
+        13,
+        7
+      ],
+      "to": [
+        12,
+        15,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#ember"
+        },
+        "up": {
+          "texture": "#ember"
+        },
+        "north": {
+          "texture": "#ember"
+        },
+        "south": {
+          "texture": "#ember"
+        },
+        "east": {
+          "texture": "#ember"
+        },
+        "west": {
+          "texture": "#ember"
+        }
+      }
+    },
+    {
+      "name": "dust_haze",
+      "from": [
+        1,
+        12,
+        7
+      ],
+      "to": [
+        15,
+        15,
+        8
+      ],
+      "faces": {
+        "down": {
+          "texture": "#dust"
+        },
+        "up": {
+          "texture": "#dust"
+        },
+        "north": {
+          "texture": "#dust"
+        },
+        "south": {
+          "texture": "#dust"
+        },
+        "east": {
+          "texture": "#dust"
+        },
+        "west": {
+          "texture": "#dust"
+        }
+      }
+    }
+  ]
+}

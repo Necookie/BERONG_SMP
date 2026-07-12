@@ -4,13 +4,13 @@
       "model": "berongsmp:block/unattended_shrine_candle"
     },
     "hazardous=false,on_fire=true": {
-      "model": "berongsmp:block/unattended_shrine_candle_hazardous"
+      "model": "berongsmp:block/unattended_shrine_candle_on_fire"
     },
     "hazardous=true,on_fire=false": {
       "model": "berongsmp:block/unattended_shrine_candle_hazardous"
     },
     "hazardous=true,on_fire=true": {
-      "model": "berongsmp:block/unattended_shrine_candle_hazardous"
+      "model": "berongsmp:block/unattended_shrine_candle_on_fire"
     }
   }
 }

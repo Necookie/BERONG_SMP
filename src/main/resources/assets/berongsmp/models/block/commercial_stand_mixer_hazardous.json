@@ -1,56 +1,171 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/hazard_smoke_stain",
-    "body": "berongsmp:block/hazard_smoke_stain",
-    "bowl": "berongsmp:block/mixer_bowl_steel",
-    "dial": "berongsmp:block/hazard_warning_led",
-    "beater": "berongsmp:block/fixture_chrome",
-    "spark": "berongsmp:block/hazard_spark_arc"
+    "particle": "berongsmp:block/hazard_smoke_stain_hz",
+    "body": "berongsmp:block/hazard_smoke_stain_hz",
+    "bowl": "berongsmp:block/mixer_bowl_steel_hz",
+    "dial": "berongsmp:block/hazard_warning_led_hz",
+    "beater": "berongsmp:block/fixture_chrome_hz",
+    "spark": "berongsmp:block/hazard_spark_arc_hz"
   },
   "elements": [
     {
       "name": "head",
-      "from": [2, 8, 2], "to": [14, 14, 8],
+      "from": [
+        2,
+        8,
+        2
+      ],
+      "to": [
+        14,
+        14,
+        8
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#body" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "motor_dial",
-      "from": [4, 9, 1], "to": [10, 13, 2],
+      "from": [
+        4,
+        9,
+        1
+      ],
+      "to": [
+        10,
+        13,
+        2
+      ],
       "faces": {
-        "north": { "texture": "#dial" }, "south": { "texture": "#dial" },
-        "east": { "texture": "#dial" }, "west": { "texture": "#dial" }
+        "north": {
+          "texture": "#dial"
+        },
+        "south": {
+          "texture": "#dial"
+        },
+        "east": {
+          "texture": "#dial"
+        },
+        "west": {
+          "texture": "#dial"
+        }
       }
     },
     {
       "name": "spark_burst",
-      "from": [2, 13, 3], "to": [14, 15, 7],
+      "from": [
+        2,
+        13,
+        3
+      ],
+      "to": [
+        14,
+        15,
+        7
+      ],
       "faces": {
-        "down": { "texture": "#spark" }, "up": { "texture": "#spark" },
-        "north": { "texture": "#spark" }, "south": { "texture": "#spark" },
-        "east": { "texture": "#spark" }, "west": { "texture": "#spark" }
+        "down": {
+          "texture": "#spark"
+        },
+        "up": {
+          "texture": "#spark"
+        },
+        "north": {
+          "texture": "#spark"
+        },
+        "south": {
+          "texture": "#spark"
+        },
+        "east": {
+          "texture": "#spark"
+        },
+        "west": {
+          "texture": "#spark"
+        }
       }
     },
     {
       "name": "beater",
-      "from": [7, 7, 8], "to": [9, 9, 10],
+      "from": [
+        7,
+        7,
+        8
+      ],
+      "to": [
+        9,
+        9,
+        10
+      ],
       "faces": {
-        "down": { "texture": "#beater" }, "up": { "texture": "#beater" },
-        "north": { "texture": "#beater" }, "south": { "texture": "#beater" },
-        "east": { "texture": "#beater" }, "west": { "texture": "#beater" }
+        "down": {
+          "texture": "#beater"
+        },
+        "up": {
+          "texture": "#beater"
+        },
+        "north": {
+          "texture": "#beater"
+        },
+        "south": {
+          "texture": "#beater"
+        },
+        "east": {
+          "texture": "#beater"
+        },
+        "west": {
+          "texture": "#beater"
+        }
       }
     },
     {
       "name": "bowl",
-      "from": [3, 0, 5], "to": [13, 8, 13],
+      "from": [
+        3,
+        0,
+        5
+      ],
+      "to": [
+        13,
+        8,
+        13
+      ],
       "faces": {
-        "down": { "texture": "#bowl" }, "up": { "texture": "#bowl" },
-        "north": { "texture": "#bowl" }, "south": { "texture": "#bowl" },
-        "east": { "texture": "#bowl" }, "west": { "texture": "#bowl" }
+        "down": {
+          "texture": "#bowl"
+        },
+        "up": {
+          "texture": "#bowl"
+        },
+        "north": {
+          "texture": "#bowl"
+        },
+        "south": {
+          "texture": "#bowl"
+        },
+        "east": {
+          "texture": "#bowl"
+        },
+        "west": {
+          "texture": "#bowl"
+        }
       }
     }
   ]

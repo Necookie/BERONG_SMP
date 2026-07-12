@@ -1,0 +1,95 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "pack": "berongsmp:block/lipo_foil_damaged_of",
+    "cell": "berongsmp:block/pa_rack_metal_of",
+    "bloat": "berongsmp:block/lipo_foil_damaged_of",
+    "particle": "berongsmp:block/lipo_foil_damaged_of"
+  },
+  "elements": [
+    {
+      "name": "pack_damaged",
+      "from": [
+        2,
+        0,
+        4
+      ],
+      "to": [
+        14,
+        3,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pack"
+        },
+        "south": {
+          "texture": "#pack"
+        },
+        "east": {
+          "texture": "#pack"
+        },
+        "west": {
+          "texture": "#pack"
+        },
+        "up": {
+          "texture": "#bloat"
+        },
+        "down": {
+          "texture": "#pack"
+        }
+      }
+    },
+    {
+      "name": "bloat_center",
+      "from": [
+        4,
+        3,
+        5
+      ],
+      "to": [
+        12,
+        6,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#bloat"
+        },
+        "south": {
+          "texture": "#bloat"
+        },
+        "east": {
+          "texture": "#bloat"
+        },
+        "west": {
+          "texture": "#bloat"
+        },
+        "up": {
+          "texture": "#bloat"
+        }
+      }
+    },
+    {
+      "name": "lead_wire",
+      "from": [
+        13,
+        1,
+        7
+      ],
+      "to": [
+        16,
+        2,
+        9
+      ],
+      "faces": {
+        "east": {
+          "texture": "#cell"
+        },
+        "up": {
+          "texture": "#cell"
+        }
+      }
+    }
+  ]
+}

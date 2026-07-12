@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/dispenser_stand_metal",
-    "body": "berongsmp:block/dispenser_stand_metal",
-    "front": "berongsmp:block/dispenser_bottle_leak"
+    "particle": "berongsmp:block/dispenser_stand_metal_hz",
+    "body": "berongsmp:block/dispenser_stand_metal_hz",
+    "front": "berongsmp:block/dispenser_bottle_leak_hz"
   },
   "elements": [
     {

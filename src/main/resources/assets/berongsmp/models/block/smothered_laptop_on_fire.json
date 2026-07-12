@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/laptop_lid_of",
+    "lid": "berongsmp:block/laptop_lid_of",
+    "vents": "berongsmp:block/laptop_vents_hot_of"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        3,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#lid"
+        },
+        "down": {
+          "texture": "#vents"
+        },
+        "north": {
+          "texture": "#lid"
+        },
+        "south": {
+          "texture": "#lid"
+        },
+        "east": {
+          "texture": "#lid"
+        },
+        "west": {
+          "texture": "#lid"
+        }
+      }
+    }
+  ]
+}

@@ -1,26 +1,64 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/oven_door_window_glow",
-    "body": "berongsmp:block/fryer_body_steel",
-    "door": "berongsmp:block/oven_door_window_glow",
-    "knob": "berongsmp:block/range_knob_melted"
+    "particle": "berongsmp:block/oven_door_window_glow_hz",
+    "body": "berongsmp:block/fryer_body_steel_hz",
+    "door": "berongsmp:block/oven_door_window_glow_hz",
+    "knob": "berongsmp:block/range_knob_melted_hz"
   },
   "elements": [
     {
       "name": "body",
-      "from": [0, 0, 0], "to": [16, 16, 16],
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
       "faces": {
-        "down": { "texture": "#body" }, "up": { "texture": "#body" },
-        "north": { "texture": "#door" }, "south": { "texture": "#body" },
-        "east": { "texture": "#body" }, "west": { "texture": "#body" }
+        "down": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#door"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     },
     {
       "name": "knob_panel",
-      "from": [1, 13, -1], "to": [15, 15, 0],
+      "from": [
+        1,
+        13,
+        -1
+      ],
+      "to": [
+        15,
+        15,
+        0
+      ],
       "faces": {
-        "north": { "texture": "#knob" }, "south": { "texture": "#knob" }
+        "north": {
+          "texture": "#knob"
+        },
+        "south": {
+          "texture": "#knob"
+        }
       }
     }
   ]

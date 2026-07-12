@@ -1,8 +1,16 @@
 {
   "variants": {
-    "hazardous=false,on_fire=false": { "model": "berongsmp:block/leaking_oxygen_cylinder" },
-    "hazardous=false,on_fire=true": { "model": "berongsmp:block/leaking_oxygen_cylinder_hazardous" },
-    "hazardous=true,on_fire=false": { "model": "berongsmp:block/leaking_oxygen_cylinder_hazardous" },
-    "hazardous=true,on_fire=true": { "model": "berongsmp:block/leaking_oxygen_cylinder_hazardous" }
+    "hazardous=false,on_fire=false": {
+      "model": "berongsmp:block/leaking_oxygen_cylinder"
+    },
+    "hazardous=false,on_fire=true": {
+      "model": "berongsmp:block/leaking_oxygen_cylinder_on_fire"
+    },
+    "hazardous=true,on_fire=false": {
+      "model": "berongsmp:block/leaking_oxygen_cylinder_hazardous"
+    },
+    "hazardous=true,on_fire=true": {
+      "model": "berongsmp:block/leaking_oxygen_cylinder_on_fire"
+    }
   }
 }

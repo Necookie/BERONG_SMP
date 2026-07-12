@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/microwave_body",
-    "body": "berongsmp:block/microwave_body",
-    "front": "berongsmp:block/microwave_door_glow"
+    "particle": "berongsmp:block/microwave_body_hz",
+    "body": "berongsmp:block/microwave_body_hz",
+    "front": "berongsmp:block/microwave_door_glow_hz"
   },
   "elements": [
     {

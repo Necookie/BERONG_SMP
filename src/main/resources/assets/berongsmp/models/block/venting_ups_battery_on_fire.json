@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/ups_case_of",
+    "case": "berongsmp:block/ups_case_of",
+    "vent": "berongsmp:block/ups_vent_venting_of"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        7,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#case"
+        },
+        "down": {
+          "texture": "#case"
+        },
+        "north": {
+          "texture": "#vent"
+        },
+        "south": {
+          "texture": "#case"
+        },
+        "east": {
+          "texture": "#case"
+        },
+        "west": {
+          "texture": "#case"
+        }
+      }
+    }
+  ]
+}

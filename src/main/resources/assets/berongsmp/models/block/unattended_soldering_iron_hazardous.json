@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/iron_base",
-    "base": "berongsmp:block/iron_base",
-    "tip": "berongsmp:block/hazard_ember_glow"
+    "particle": "berongsmp:block/iron_base_hz",
+    "base": "berongsmp:block/iron_base_hz",
+    "tip": "berongsmp:block/hazard_ember_glow_hz"
   },
   "elements": [
     {
-      "from": [3, 0, 3], "to": [13, 4, 13],
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        4,
+        13
+      ],
       "faces": {
-        "up":    { "texture": "#tip" },
-        "down":  { "texture": "#base" },
-        "north": { "texture": "#base" },
-        "south": { "texture": "#base" },
-        "east":  { "texture": "#base" },
-        "west":  { "texture": "#base" }
+        "up": {
+          "texture": "#tip"
+        },
+        "down": {
+          "texture": "#base"
+        },
+        "north": {
+          "texture": "#base"
+        },
+        "south": {
+          "texture": "#base"
+        },
+        "east": {
+          "texture": "#base"
+        },
+        "west": {
+          "texture": "#base"
+        }
       }
     }
   ]

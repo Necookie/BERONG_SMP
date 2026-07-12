@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/screen_housing_of",
+    "housing": "berongsmp:block/screen_housing_of",
+    "fabric": "berongsmp:block/screen_fabric_smoking_of"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        11,
+        3
+      ],
+      "to": [
+        13,
+        16,
+        13
+      ],
+      "faces": {
+        "up": {
+          "texture": "#housing"
+        },
+        "down": {
+          "texture": "#fabric"
+        },
+        "north": {
+          "texture": "#housing"
+        },
+        "south": {
+          "texture": "#housing"
+        },
+        "east": {
+          "texture": "#housing"
+        },
+        "west": {
+          "texture": "#housing"
+        }
+      }
+    }
+  ]
+}

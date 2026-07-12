@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/dvr_case",
-    "case": "berongsmp:block/dvr_case",
-    "leds": "berongsmp:block/hazard_warning_led"
+    "particle": "berongsmp:block/dvr_case_hz",
+    "case": "berongsmp:block/dvr_case_hz",
+    "leds": "berongsmp:block/hazard_warning_led_hz"
   },
   "elements": [
     {
-      "from": [1, 0, 1], "to": [15, 5, 15],
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        5,
+        15
+      ],
       "faces": {
-        "up":    { "texture": "#leds" },
-        "down":  { "texture": "#case" },
-        "north": { "texture": "#case" },
-        "south": { "texture": "#case" },
-        "east":  { "texture": "#case" },
-        "west":  { "texture": "#case" }
+        "up": {
+          "texture": "#leds"
+        },
+        "down": {
+          "texture": "#case"
+        },
+        "north": {
+          "texture": "#case"
+        },
+        "south": {
+          "texture": "#case"
+        },
+        "east": {
+          "texture": "#case"
+        },
+        "west": {
+          "texture": "#case"
+        }
       }
     }
   ]

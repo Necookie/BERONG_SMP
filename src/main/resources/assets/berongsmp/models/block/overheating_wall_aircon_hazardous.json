@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/aircon_side_metal",
-    "body": "berongsmp:block/aircon_side_metal",
-    "front": "berongsmp:block/aircon_front_dripping"
+    "particle": "berongsmp:block/aircon_side_metal_hz",
+    "body": "berongsmp:block/aircon_side_metal_hz",
+    "front": "berongsmp:block/aircon_front_dripping_hz"
   },
   "elements": [
     {

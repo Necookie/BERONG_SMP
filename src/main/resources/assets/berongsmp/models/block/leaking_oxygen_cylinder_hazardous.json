@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/oxy_cylinder_body",
-    "body": "berongsmp:block/oxy_cylinder_body",
-    "valve": "berongsmp:block/hazard_smoke_stain"
+    "particle": "berongsmp:block/oxy_cylinder_body_hz",
+    "body": "berongsmp:block/oxy_cylinder_body_hz",
+    "valve": "berongsmp:block/hazard_smoke_stain_hz"
   },
   "elements": [
     {
-      "from": [5, 0, 5], "to": [11, 15, 11],
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        15,
+        11
+      ],
       "faces": {
-        "up":    { "texture": "#valve" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#body" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#valve"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

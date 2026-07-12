@@ -1,53 +1,233 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "plastic": "berongsmp:block/bin_plastic_gray",
-    "rim":     "berongsmp:block/bin_rim_dark",
-    "paper":   "berongsmp:block/hazard_crumpled_paper",
-    "glow":    "berongsmp:block/hazard_ember_glow",
-    "particle": "berongsmp:block/bin_plastic_gray"
+    "plastic": "berongsmp:block/bin_plastic_gray_hz",
+    "rim": "berongsmp:block/bin_rim_dark_hz",
+    "paper": "berongsmp:block/hazard_crumpled_paper_hz",
+    "glow": "berongsmp:block/hazard_ember_glow_hz",
+    "particle": "berongsmp:block/bin_plastic_gray_hz"
   },
   "elements": [
     {
       "name": "body",
-      "from": [4, 0, 4], "to": [12, 11, 12],
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        11,
+        12
+      ],
       "faces": {
-        "north": { "texture": "#plastic", "uv": [0, 0, 8, 11] },
-        "south": { "texture": "#plastic", "uv": [0, 0, 8, 11] },
-        "east":  { "texture": "#plastic", "uv": [0, 0, 8, 11] },
-        "west":  { "texture": "#plastic", "uv": [0, 0, 8, 11] },
-        "up":    { "texture": "#paper",   "uv": [0, 0, 8,  8] },
-        "down":  { "texture": "#plastic", "uv": [0, 0, 8,  8] }
+        "north": {
+          "texture": "#plastic",
+          "uv": [
+            0,
+            0,
+            8,
+            11
+          ]
+        },
+        "south": {
+          "texture": "#plastic",
+          "uv": [
+            0,
+            0,
+            8,
+            11
+          ]
+        },
+        "east": {
+          "texture": "#plastic",
+          "uv": [
+            0,
+            0,
+            8,
+            11
+          ]
+        },
+        "west": {
+          "texture": "#plastic",
+          "uv": [
+            0,
+            0,
+            8,
+            11
+          ]
+        },
+        "up": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        },
+        "down": {
+          "texture": "#plastic",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        }
       }
     },
     {
       "name": "rim",
-      "from": [3, 11, 3], "to": [13, 13, 13],
+      "from": [
+        3,
+        11,
+        3
+      ],
+      "to": [
+        13,
+        13,
+        13
+      ],
       "faces": {
-        "north": { "texture": "#rim", "uv": [0, 0, 10,  2] },
-        "south": { "texture": "#rim", "uv": [0, 0, 10,  2] },
-        "east":  { "texture": "#rim", "uv": [0, 0, 10,  2] },
-        "west":  { "texture": "#rim", "uv": [0, 0, 10,  2] },
-        "up":    { "texture": "#rim", "uv": [0, 0, 10, 10] },
-        "down":  { "texture": "#rim", "uv": [0, 0, 10, 10] }
+        "north": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            2
+          ]
+        },
+        "south": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            2
+          ]
+        },
+        "east": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            2
+          ]
+        },
+        "west": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            2
+          ]
+        },
+        "up": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#rim",
+          "uv": [
+            0,
+            0,
+            10,
+            10
+          ]
+        }
       }
     },
     {
       "name": "overflow_papers",
-      "from": [4, 12, 4], "to": [12, 16, 12],
+      "from": [
+        4,
+        12,
+        4
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
       "faces": {
-        "north": { "texture": "#paper", "uv": [0, 0, 8,  4] },
-        "south": { "texture": "#paper", "uv": [0, 0, 8,  4] },
-        "east":  { "texture": "#paper", "uv": [0, 0, 8,  4] },
-        "west":  { "texture": "#paper", "uv": [0, 0, 8,  4] },
-        "up":    { "texture": "#paper", "uv": [0, 0, 8,  8] }
+        "north": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            4
+          ]
+        },
+        "south": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            4
+          ]
+        },
+        "east": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            4
+          ]
+        },
+        "west": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            4
+          ]
+        },
+        "up": {
+          "texture": "#paper",
+          "uv": [
+            0,
+            0,
+            8,
+            8
+          ]
+        }
       }
     },
     {
       "name": "vape_glow",
-      "from": [6, 9, 6], "to": [10, 11, 10],
+      "from": [
+        6,
+        9,
+        6
+      ],
+      "to": [
+        10,
+        11,
+        10
+      ],
       "faces": {
-        "up": { "texture": "#glow", "uv": [0, 0, 4, 4] }
+        "up": {
+          "texture": "#glow",
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ]
+        }
       }
     }
   ]

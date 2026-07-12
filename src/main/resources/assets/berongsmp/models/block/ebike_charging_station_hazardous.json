@@ -1,20 +1,41 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "berongsmp:block/ebike_body",
-    "body": "berongsmp:block/ebike_body",
-    "port": "berongsmp:block/hazard_spark_arc"
+    "particle": "berongsmp:block/ebike_body_hz",
+    "body": "berongsmp:block/ebike_body_hz",
+    "port": "berongsmp:block/hazard_spark_arc_hz"
   },
   "elements": [
     {
-      "from": [1, 0, 4], "to": [15, 12, 12],
+      "from": [
+        1,
+        0,
+        4
+      ],
+      "to": [
+        15,
+        12,
+        12
+      ],
       "faces": {
-        "up":    { "texture": "#body" },
-        "down":  { "texture": "#body" },
-        "north": { "texture": "#port" },
-        "south": { "texture": "#body" },
-        "east":  { "texture": "#body" },
-        "west":  { "texture": "#body" }
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#port"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        }
       }
     }
   ]

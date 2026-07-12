@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/parol_star_lit_of",
+    "star": "berongsmp:block/parol_star_lit_of"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        8,
+        4
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
+      "faces": {
+        "up": {
+          "texture": "#star"
+        },
+        "down": {
+          "texture": "#star"
+        },
+        "north": {
+          "texture": "#star"
+        },
+        "south": {
+          "texture": "#star"
+        },
+        "east": {
+          "texture": "#star"
+        },
+        "west": {
+          "texture": "#star"
+        }
+      }
+    }
+  ]
+}

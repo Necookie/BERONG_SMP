@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/hazard_scorch_char_of",
+    "body": "berongsmp:block/disposal_unit_metal_of",
+    "scorch": "berongsmp:block/hazard_scorch_char_of"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        8,
+        13
+      ],
+      "faces": {
+        "down": {
+          "texture": "#scorch"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "north": {
+          "texture": "#scorch"
+        },
+        "south": {
+          "texture": "#scorch"
+        },
+        "east": {
+          "texture": "#scorch"
+        },
+        "west": {
+          "texture": "#scorch"
+        }
+      }
+    }
+  ]
+}

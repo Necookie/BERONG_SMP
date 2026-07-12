@@ -1,20 +1,126 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "tower":  "berongsmp:block/pc_tower_case",
-    "dustvent": "berongsmp:block/pc_tower_vent_dusty",
-    "backpack": "berongsmp:block/backpack_fabric",
-    "led":    "berongsmp:block/hazard_warning_led",
-    "particle": "berongsmp:block/pc_tower_case"
+    "tower": "berongsmp:block/pc_tower_case_hz",
+    "dustvent": "berongsmp:block/pc_tower_vent_dusty_hz",
+    "backpack": "berongsmp:block/backpack_fabric_hz",
+    "led": "berongsmp:block/hazard_warning_led_hz",
+    "particle": "berongsmp:block/pc_tower_case_hz"
   },
   "elements": [
-    { "name": "tower", "from": [3, 0, 2], "to": [13, 14, 14],
-      "faces": { "north": {"texture":"#tower"}, "south": {"texture":"#dustvent"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
-    { "name": "drive_bay", "from": [4, 9, 1], "to": [9, 11, 3],
-      "faces": { "north": {"texture":"#tower"}, "south": {"texture":"#tower"}, "east": {"texture":"#tower"}, "west": {"texture":"#tower"}, "up": {"texture":"#tower"}, "down": {"texture":"#tower"} } },
-    { "name": "backpack_wedged", "from": [1, 3, 13], "to": [12, 13, 16],
-      "faces": { "north": {"texture":"#backpack"}, "south": {"texture":"#backpack"}, "east": {"texture":"#backpack"}, "west": {"texture":"#backpack"}, "up": {"texture":"#backpack"} } },
-    { "name": "power_button", "from": [10, 10, 1], "to": [12, 12, 2],
-      "faces": { "north": {"texture":"#led"} } }
+    {
+      "name": "tower",
+      "from": [
+        3,
+        0,
+        2
+      ],
+      "to": [
+        13,
+        14,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tower"
+        },
+        "south": {
+          "texture": "#dustvent"
+        },
+        "east": {
+          "texture": "#tower"
+        },
+        "west": {
+          "texture": "#tower"
+        },
+        "up": {
+          "texture": "#tower"
+        },
+        "down": {
+          "texture": "#tower"
+        }
+      }
+    },
+    {
+      "name": "drive_bay",
+      "from": [
+        4,
+        9,
+        1
+      ],
+      "to": [
+        9,
+        11,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tower"
+        },
+        "south": {
+          "texture": "#tower"
+        },
+        "east": {
+          "texture": "#tower"
+        },
+        "west": {
+          "texture": "#tower"
+        },
+        "up": {
+          "texture": "#tower"
+        },
+        "down": {
+          "texture": "#tower"
+        }
+      }
+    },
+    {
+      "name": "backpack_wedged",
+      "from": [
+        1,
+        3,
+        13
+      ],
+      "to": [
+        12,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#backpack"
+        },
+        "south": {
+          "texture": "#backpack"
+        },
+        "east": {
+          "texture": "#backpack"
+        },
+        "west": {
+          "texture": "#backpack"
+        },
+        "up": {
+          "texture": "#backpack"
+        }
+      }
+    },
+    {
+      "name": "power_button",
+      "from": [
+        10,
+        10,
+        1
+      ],
+      "to": [
+        12,
+        12,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#led"
+        }
+      }
+    }
   ]
 }
