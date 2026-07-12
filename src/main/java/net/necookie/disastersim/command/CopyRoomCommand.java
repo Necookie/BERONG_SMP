@@ -14,9 +14,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 /**
@@ -95,8 +100,7 @@ public final class CopyRoomCommand {
                         width, length, height, floorArea, wallArea, ceilingArea, volume);
 
         try {
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(new StringSelection(csv), null);
+            copyToClipboard(csv);
         } catch (Exception e) {
             source.sendFailure(Component.literal(
                     "§cClipboard access failed (" + e.getClass().getSimpleName()
@@ -106,5 +110,46 @@ public final class CopyRoomCommand {
 
         source.sendSuccess(() -> Component.literal("§a✓ Room information copied to clipboard."), false);
         return 1;
+    }
+
+    /**
+     * NeoForge/FML sets {@code java.awt.headless=true} at bootstrap (both client and dedicated
+     * server JVMs — it keeps AWT from fighting LWJGL's native window), so {@link Toolkit}'s
+     * clipboard always throws {@link HeadlessException} inside a running Minecraft process. Fall
+     * back to shelling out to the OS's own clipboard utility, which doesn't care about AWT state.
+     */
+    private static void copyToClipboard(String text) throws Exception {
+        if (!GraphicsEnvironment.isHeadless()) {
+            try {
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(new StringSelection(text), null);
+                return;
+            } catch (HeadlessException ignored) {
+                // Fall through to the native-command path below.
+            }
+        }
+
+        String osName = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        String[] command;
+        if (osName.contains("win")) {
+            command = new String[] {"clip"};
+        } else if (osName.contains("mac")) {
+            command = new String[] {"pbcopy"};
+        } else {
+            command = new String[] {"xclip", "-selection", "clipboard"};
+        }
+
+        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        try (OutputStream out = process.getOutputStream()) {
+            out.write(text.getBytes(StandardCharsets.UTF_8));
+        }
+        boolean finished = process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            throw new IOException("Clipboard command '" + command[0] + "' timed out");
+        }
+        if (process.exitValue() != 0) {
+            throw new IOException("Clipboard command '" + command[0] + "' exited with code " + process.exitValue());
+        }
     }
 }
