@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/secured_cylinder_rack" },
+    "facing=south": { "model": "berongsmp:block/secured_cylinder_rack", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/secured_cylinder_rack", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/secured_cylinder_rack", "y": 270 }
+  }
+}

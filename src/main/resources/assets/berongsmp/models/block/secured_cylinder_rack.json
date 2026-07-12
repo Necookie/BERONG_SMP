@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cylinder_body",
+    "cylinder": "berongsmp:block/cylinder_body",
+    "strap": "berongsmp:block/handle_bar_black"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 3], "to": [14, 16, 13],
+      "faces": {
+        "up":    { "texture": "#cylinder" },
+        "down":  { "texture": "#cylinder" },
+        "north": { "texture": "#cylinder" },
+        "south": { "texture": "#strap" },
+        "east":  { "texture": "#cylinder" },
+        "west":  { "texture": "#cylinder" }
+      }
+    }
+  ]
+}

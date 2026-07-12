@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/microscope_station" },
+    "facing=south": { "model": "berongsmp:block/microscope_station", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/microscope_station", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/microscope_station", "y": 270 }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/microscope_base",
+    "base": "berongsmp:block/microscope_base",
+    "body": "berongsmp:block/microscope_body"
+  },
+  "elements": [
+    {
+      "from": [4, 0, 4], "to": [12, 9, 12],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#base" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#base" },
+        "east":  { "texture": "#base" },
+        "west":  { "texture": "#base" }
+      }
+    }
+  ]
+}

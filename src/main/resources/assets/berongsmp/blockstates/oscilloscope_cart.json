@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/oscilloscope_cart" },
+    "facing=south": { "model": "berongsmp:block/oscilloscope_cart", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/oscilloscope_cart", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/oscilloscope_cart", "y": 270 }
+  }
+}

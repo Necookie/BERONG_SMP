@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/granite_top",
+    "granite": "berongsmp:block/granite_top",
+    "shield": "berongsmp:block/glass_partition_pane"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 2], "to": [15, 11, 14],
+      "faces": {
+        "up":    { "texture": "#granite" },
+        "down":  { "texture": "#granite" },
+        "north": { "texture": "#shield" },
+        "south": { "texture": "#granite" },
+        "east":  { "texture": "#granite" },
+        "west":  { "texture": "#granite" }
+      }
+    }
+  ]
+}

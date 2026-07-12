@@ -852,7 +852,115 @@ ALL += [
 ]
 
 # ---------------------------------------------------------------------------
-# Phase 5: Laboratory furniture textures appended here.
+# Phase 5: Laboratory furniture
+# ---------------------------------------------------------------------------
+
+def tex_fume_hood_frame():
+    base = (214, 214, 210)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (236, 236, 232), (156, 156, 150))
+    save(im, "fume_hood_frame")
+
+
+def tex_fume_hood_glass():
+    base = (170, 200, 210)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.2, dark=0.88)
+    diagonal_sheen(im, 0, 0, W - 1, H - 1, factor=1.3, band=1, offset=3)
+    border(im, (90, 120, 128))
+    save(im, "fume_hood_glass")
+
+
+def tex_equipment_rack_front():
+    base = (30, 30, 33)
+    im = new_canvas(base)
+    for y0 in (2, 6, 10):
+        rect(im, 1, y0, 14, y0 + 2, scale(base, 1.3))
+        for x in range(2, 14, 2):
+            set_px(im, x, y0 + 1, (60, 60, 64))
+    save(im, "equipment_rack_front")
+
+
+def tex_lab_stool_seat():
+    base = (32, 32, 34)
+    im = new_canvas((40, 40, 44))
+    disc_fill(im, 7.5, 7.5, 6, base)
+    disc_ring(im, 7.5, 7.5, 5.5, scale(base, 1.4), thickness=1.0)
+    save(im, "lab_stool_seat")
+
+
+def tex_cart_body():
+    base = (188, 190, 194)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.88)
+    inset_edges(im, 0, 0, W - 1, H - 1, (212, 214, 218), (128, 130, 134))
+    save(im, "cart_body")
+
+
+def tex_microscope_base():
+    base = (48, 48, 52)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.15, dark=0.85)
+    save(im, "microscope_base")
+
+
+def tex_microscope_body():
+    base = (60, 62, 66)
+    im = new_canvas((48, 48, 52))
+    rect(im, 6, 1, 9, 12, base)
+    rect(im, 6, 1, 9, 1, scale(base, 1.5))
+    save(im, "microscope_body")
+
+
+def tex_eyewash_green():
+    base = (46, 122, 70)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.12, dark=0.88)
+    inset_edges(im, 0, 0, W - 1, H - 1, (70, 152, 92), (24, 72, 40))
+    save(im, "eyewash_green")
+
+
+def tex_component_drawer_front():
+    base = (30, 30, 33)
+    im = new_canvas(base)
+    for y0 in range(1, 15, 3):
+        for x0 in range(1, 15, 4):
+            rect(im, x0, y0, x0 + 2, y0 + 1, scale(base, 1.5))
+            rect(im, x0, y0 + 1, x0, y0 + 1, (230, 228, 220))  # label sliver
+    save(im, "component_drawer_front")
+
+
+def tex_cylinder_body():
+    base = (50, 130, 120)
+    im = new_canvas(base)
+    vertical_brush(im, 3, 0, 12, 15, base, stripe=1.15)
+    rect(im, 0, 0, 2, 15, (24, 24, 26))
+    rect(im, 13, 0, 15, 15, (24, 24, 26))
+    save(im, "cylinder_body")
+
+
+def tex_granite_top():
+    base = (54, 52, 56)
+    im = new_canvas(base)
+    speckle(im, [(70, 68, 72), (36, 34, 38), (90, 88, 92)], density=0.25)
+    inset_edges(im, 0, 0, W - 1, H - 1, (78, 76, 80), (24, 22, 26))
+    save(im, "granite_top")
+
+
+ALL += [
+    tex_fume_hood_frame, tex_fume_hood_glass,
+    tex_equipment_rack_front,
+    tex_lab_stool_seat,
+    tex_cart_body,
+    tex_microscope_base, tex_microscope_body,
+    tex_eyewash_green,
+    tex_component_drawer_front,
+    tex_cylinder_body,
+    tex_granite_top,
+]
+
+# ---------------------------------------------------------------------------
 # Phase 6: Laboratory hazard textures appended here.
 # ---------------------------------------------------------------------------
 

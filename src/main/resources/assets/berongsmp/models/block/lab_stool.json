@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/lab_stool_seat",
+    "seat": "berongsmp:block/lab_stool_seat",
+    "frame": "berongsmp:block/chair_frame_black"
+  },
+  "elements": [
+    {
+      "from": [5, 0, 5], "to": [11, 12, 11],
+      "faces": {
+        "up":    { "texture": "#seat" },
+        "down":  { "texture": "#frame" },
+        "north": { "texture": "#frame" },
+        "south": { "texture": "#frame" },
+        "east":  { "texture": "#frame" },
+        "west":  { "texture": "#frame" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/eyewash_green",
+    "body": "berongsmp:block/eyewash_green",
+    "nozzle": "berongsmp:block/fixture_chrome"
+  },
+  "elements": [
+    {
+      "from": [3, 4, 12], "to": [13, 12, 16],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#nozzle" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

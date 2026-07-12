@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "berongsmp:block/eye_wash_station" },
+    "facing=south": { "model": "berongsmp:block/eye_wash_station", "y": 180 },
+    "facing=east":  { "model": "berongsmp:block/eye_wash_station", "y": 90 },
+    "facing=west":  { "model": "berongsmp:block/eye_wash_station", "y": 270 }
+  }
+}

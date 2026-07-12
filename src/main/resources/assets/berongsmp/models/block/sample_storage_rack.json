@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cardboard_box",
+    "wood": "berongsmp:block/table_leg_wood_dark",
+    "boxes": "berongsmp:block/cardboard_box"
+  },
+  "elements": [
+    {
+      "from": [1, 1, 12], "to": [15, 15, 16],
+      "faces": {
+        "up":    { "texture": "#wood" },
+        "down":  { "texture": "#wood" },
+        "north": { "texture": "#boxes" },
+        "south": { "texture": "#wood" },
+        "east":  { "texture": "#wood" },
+        "west":  { "texture": "#wood" }
+      }
+    }
+  ]
+}

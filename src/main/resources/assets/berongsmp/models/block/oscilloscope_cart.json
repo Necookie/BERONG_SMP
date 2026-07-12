@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cart_body",
+    "body": "berongsmp:block/cart_body",
+    "screen": "berongsmp:block/hazard_glass_screen_off"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 13, 14],
+      "faces": {
+        "up":    { "texture": "#screen" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

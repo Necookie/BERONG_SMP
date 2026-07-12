@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/cabinet_body_graphite",
+    "body": "berongsmp:block/cabinet_body_graphite",
+    "front": "berongsmp:block/component_drawer_front"
+  },
+  "elements": [
+    {
+      "from": [1, 1, 11], "to": [15, 15, 16],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#front" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}
