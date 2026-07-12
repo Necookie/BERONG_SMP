@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/oven_body",
+    "body": "berongsmp:block/oven_body",
+    "door": "berongsmp:block/oven_door_normal"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 13, 15],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#door" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

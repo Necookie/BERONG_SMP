@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/oxy_cylinder_body",
+    "body": "berongsmp:block/oxy_cylinder_body",
+    "valve": "berongsmp:block/oxy_valve_normal"
+  },
+  "elements": [
+    {
+      "from": [5, 0, 5], "to": [11, 15, 11],
+      "faces": {
+        "up":    { "texture": "#valve" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

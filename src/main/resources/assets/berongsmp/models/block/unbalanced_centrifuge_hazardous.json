@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/centrifuge_body",
+    "body": "berongsmp:block/centrifuge_body",
+    "lid": "berongsmp:block/hazard_smoke_stain"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3], "to": [13, 9, 13],
+      "faces": {
+        "up":    { "texture": "#lid" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#body" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

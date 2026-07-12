@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/dehumid_body",
+    "body": "berongsmp:block/dehumid_body",
+    "vent": "berongsmp:block/hazard_water_stain"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 12, 14],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#vent" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/pump_body",
+    "body": "berongsmp:block/pump_body",
+    "belt": "berongsmp:block/hazard_smoke_stain"
+  },
+  "elements": [
+    {
+      "from": [3, 0, 3], "to": [13, 8, 13],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#belt" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/supply_body",
+    "body": "berongsmp:block/supply_body",
+    "display": "berongsmp:block/supply_display_normal"
+  },
+  "elements": [
+    {
+      "from": [2, 0, 2], "to": [14, 8, 14],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#display" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}

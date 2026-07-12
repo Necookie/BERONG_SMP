@@ -961,8 +961,176 @@ ALL += [
 ]
 
 # ---------------------------------------------------------------------------
-# Phase 6: Laboratory hazard textures appended here.
+# Phase 6: Laboratory hazards (props 76-85)
 # ---------------------------------------------------------------------------
+
+def tex_centrifuge_body():
+    base = (222, 222, 218)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (244, 244, 240), (168, 168, 162))
+    save(im, "centrifuge_body")
+
+
+def tex_centrifuge_lid_normal():
+    im = new_canvas((222, 222, 218))
+    disc_ring(im, 7.5, 7.5, 6, (150, 150, 146), thickness=1.2)
+    save(im, "centrifuge_lid_normal")
+
+
+def tex_printer_body():
+    base = (48, 48, 52)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (72, 72, 76), (16, 16, 18))
+    save(im, "printer_body")
+
+
+def tex_printer_bed_normal():
+    im = new_canvas((30, 30, 33))
+    for x in range(1, 15, 2):
+        rect(im, x, 1, x, 14, (44, 44, 48))
+    save(im, "printer_bed_normal")
+
+
+def tex_iron_base():
+    base = (60, 60, 64)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    save(im, "iron_base")
+
+
+def tex_iron_tip_normal():
+    im = new_canvas((60, 60, 64))
+    rect(im, 6, 5, 9, 10, (40, 36, 32))
+    save(im, "iron_tip_normal")
+
+
+def tex_laser_body():
+    base = (40, 42, 46)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.12)
+    inset_edges(im, 0, 0, W - 1, H - 1, (64, 66, 70), (14, 15, 17))
+    save(im, "laser_body")
+
+
+def tex_laser_aperture_normal():
+    im = new_canvas((40, 42, 46))
+    disc_fill(im, 7.5, 7.5, 3, (20, 18, 20))
+    save(im, "laser_aperture_normal")
+
+
+def tex_laser_aperture_beam():
+    im = new_canvas((40, 42, 46))
+    disc_fill(im, 7.5, 7.5, 4, (230, 30, 30))
+    disc_fill(im, 7.5, 7.5, 2, (255, 200, 200))
+    save(im, "laser_aperture_beam")
+
+
+def tex_oxy_cylinder_body():
+    base = (60, 140, 90)
+    im = new_canvas(base)
+    vertical_brush(im, 3, 0, 12, 15, base, stripe=1.15)
+    rect(im, 0, 0, 2, 15, (24, 24, 26))
+    rect(im, 13, 0, 15, 15, (24, 24, 26))
+    save(im, "oxy_cylinder_body")
+
+
+def tex_oxy_valve_normal():
+    im = new_canvas((60, 140, 90))
+    rect(im, 5, 5, 10, 10, (40, 40, 42))
+    disc_ring(im, 7.5, 7.5, 2.2, (200, 30, 30), thickness=1.0)
+    save(im, "oxy_valve_normal")
+
+
+def tex_supply_body():
+    base = (200, 200, 196)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (224, 224, 218), (144, 144, 138))
+    save(im, "supply_body")
+
+
+def tex_supply_display_normal():
+    im = new_canvas((200, 200, 196))
+    rect(im, 3, 4, 12, 9, (20, 30, 22))
+    for x in (5, 7, 9):
+        set_px(im, x, 6, (60, 200, 90))
+    save(im, "supply_display_normal")
+
+
+def tex_pump_body():
+    base = (52, 54, 58)
+    im = new_canvas(base)
+    vertical_brush(im, 0, 0, 15, 15, base, stripe=1.1)
+    inset_edges(im, 0, 0, W - 1, H - 1, (76, 78, 82), (18, 19, 21))
+    save(im, "pump_body")
+
+
+def tex_pump_belt_normal():
+    im = new_canvas((52, 54, 58))
+    rect(im, 2, 6, 13, 9, (24, 24, 26))
+    save(im, "pump_belt_normal")
+
+
+def tex_chamber_body():
+    base = (208, 208, 204)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (230, 230, 224), (150, 150, 144))
+    save(im, "chamber_body")
+
+
+def tex_chamber_display_normal():
+    im = new_canvas((208, 208, 204))
+    rect(im, 4, 4, 11, 9, (24, 26, 28))
+    for x in (6, 8, 10):
+        set_px(im, x, 6, (60, 180, 220))
+    save(im, "chamber_display_normal")
+
+
+def tex_oven_body():
+    base = (196, 196, 192)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (218, 218, 212), (140, 140, 134))
+    save(im, "oven_body")
+
+
+def tex_oven_door_normal():
+    im = new_canvas((196, 196, 192))
+    rect(im, 2, 2, 13, 13, (60, 62, 66))
+    inset_edges(im, 2, 2, 13, 13, (90, 92, 96), (30, 32, 34))
+    save(im, "oven_door_normal")
+
+
+def tex_dehumid_body():
+    base = (222, 224, 226)
+    im = new_canvas(base)
+    gradient_shade(im, 1, 1, 14, 14, base, light=1.1, dark=0.9)
+    inset_edges(im, 0, 0, W - 1, H - 1, (244, 246, 248), (166, 168, 170))
+    save(im, "dehumid_body")
+
+
+def tex_dehumid_vent_normal():
+    im = new_canvas((222, 224, 226))
+    for y in range(2, 14, 2):
+        rect(im, 2, y, 13, y, (150, 152, 155))
+    save(im, "dehumid_vent_normal")
+
+
+ALL += [
+    tex_centrifuge_body, tex_centrifuge_lid_normal,
+    tex_printer_body, tex_printer_bed_normal,
+    tex_iron_base, tex_iron_tip_normal,
+    tex_laser_body, tex_laser_aperture_normal, tex_laser_aperture_beam,
+    tex_oxy_cylinder_body, tex_oxy_valve_normal,
+    tex_supply_body, tex_supply_display_normal,
+    tex_pump_body, tex_pump_belt_normal,
+    tex_chamber_body, tex_chamber_display_normal,
+    tex_oven_body, tex_oven_door_normal,
+    tex_dehumid_body, tex_dehumid_vent_normal,
+]
 
 if __name__ == "__main__":
     for fn in ALL:

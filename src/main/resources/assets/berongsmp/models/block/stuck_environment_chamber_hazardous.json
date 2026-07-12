@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "berongsmp:block/chamber_body",
+    "body": "berongsmp:block/chamber_body",
+    "display": "berongsmp:block/hazard_warning_led"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 14, 15],
+      "faces": {
+        "up":    { "texture": "#body" },
+        "down":  { "texture": "#body" },
+        "north": { "texture": "#display" },
+        "south": { "texture": "#body" },
+        "east":  { "texture": "#body" },
+        "west":  { "texture": "#body" }
+      }
+    }
+  ]
+}
