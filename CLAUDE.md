@@ -292,6 +292,7 @@ does not reuse the old `tutorial/` package. Full architecture, dialogue flow, an
 - **SSC Building**: `SSC_POS = BlockPos(11, -33, 90)` (~19 blocks west of the library origin), placed with 1 CCW rotation
 - **CCS Admin Building**: `CCS_POS = BlockPos(76, -34, 4)`, placed with 0 CCW rotations (`ccs_admin_building.schem`)
 - **New Tutorial Building**: `AcademyBuildingManager.POS = BlockPos(-177, -34, 8)`, placed with 0 CCW rotations (`academy_building.schem`) — far west of every other structure, its own standalone footprint
+- **New Sim Building 2.0**: `SimulationManager.NEW_SIM_BUILDING2_POS = BlockPos(-182, -34, 358)`, placed with 0 CCW rotations (`new_sim_building2.0.schem`) — far north of every other structure, its own standalone footprint
 
 #### CCS 1st Floor Named Rooms (`SimRoom.CCS_GROUND_ROOMS`)
 
@@ -334,6 +335,7 @@ Stored under `src/main/resources/data/berongsmp/structure/`:
 - `ccs_admin_building.schem` — CCS Admin building (Sponge Schematic v3, placed/restored each session with 0 CCW rotations)
 
 - `academy_building.schem` — the Academy tutorial building (Sponge Schematic v3, placed once at server start by `AcademyBuildingManager`, 0 CCW rotations, NPCs/armor stands baked in)
+- `new_sim_building2.0.schem` — New Sim Building 2.0 (Sponge Schematic v3, placed/restored each session with 0 CCW rotations, alongside SSC/CCS in `SimulationManager.BUILDINGS`); not yet its own `/sim_fire`/`/sim_earthquake` scenario target
 
 `SimulationManager.BUILDINGS` holds the full list of `StructurePlacer`+`BlockPos` pairs iterated on session start and end.
 

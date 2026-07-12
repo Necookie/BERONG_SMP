@@ -63,6 +63,7 @@ public class SimulationManager {
 
     private static final BlockPos SSC_POS = new BlockPos(11,  -33, 90);
     public static final BlockPos CCS_POS = new BlockPos(76, -34, 4);
+    private static final BlockPos NEW_SIM_BUILDING2_POS = new BlockPos(-182, -34, 358);
 
     // Separate from QUAKE_INTERVAL so tuning earthquake rate doesn't silently change HUD update frequency.
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
@@ -98,7 +99,9 @@ public class SimulationManager {
             Map.entry(new SchemLoader(
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS),
             Map.entry(new SchemLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building.schem"), 0), CCS_POS)
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building.schem"), 0), CCS_POS),
+            Map.entry(new SchemLoader(
+                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/new_sim_building2.0.schem"), 0), NEW_SIM_BUILDING2_POS)
     );
 
     private static final SimulationEffects EFFECTS = new SimulationEffects();
