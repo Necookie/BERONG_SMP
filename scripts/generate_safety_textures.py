@@ -89,25 +89,30 @@ def inset_edges(im, x0, y0, x1, y1, hi, lo):
     rect(im, x1, y0, x1, y1, lo)
 
 
-def gradient_shade(im, x0, y0, x1, y1, base, light=1.25, dark=0.8):
-    """Diagonal top-left-lit shading across a rectangular region."""
+def gradient_shade(im, x0, y0, x1, y1, base, light=1.45, dark=0.62, bands=4):
+    """Flat-shaded diagonal top-left-lit banding — quantized into discrete
+    tone steps rather than a smooth per-pixel gradient, matching the
+    mod-wide signature contrast (_texture_style.LIGHT_FACTOR/SHADOW_FACTOR)."""
     span = max((x1 - x0) + (y1 - y0), 1)
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             t = ((x - x0) + (y - y0)) / span
-            factor = light + (dark - light) * t
+            step = round(t * (bands - 1)) / (bands - 1) if bands > 1 else 0
+            factor = light + (dark - light) * step
             set_px(im, x, y, scale(base, factor))
 
 
-def gradient_shade_rgba(im, x0, y0, x1, y1, light_base, dark_base):
+def gradient_shade_rgba(im, x0, y0, x1, y1, light_base, dark_base, bands=4):
     """Like gradient_shade but for a transparent RGBA item canvas — only
-    repaints pixels that are already opaque, leaving the silhouette intact."""
+    repaints pixels that are already opaque, leaving the silhouette intact.
+    Banded the same way as gradient_shade for a consistent flat-shaded look."""
     span = max((x1 - x0) + (y1 - y0), 1)
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             if 0 <= x < W and 0 <= y < H and im.getpixel((x, y))[3] > 0:
                 t = ((x - x0) + (y - y0)) / span
-                c = tuple(int(light_base[i] + (dark_base[i] - light_base[i]) * t) for i in range(3))
+                step = round(t * (bands - 1)) / (bands - 1) if bands > 1 else 0
+                c = tuple(int(light_base[i] + (dark_base[i] - light_base[i]) * step) for i in range(3))
                 im.putpixel((x, y), rgba(c))
 
 
