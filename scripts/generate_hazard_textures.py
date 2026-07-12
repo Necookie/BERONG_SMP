@@ -75,13 +75,17 @@ def add(color, delta):
     return tuple(max(0, min(255, c + d)) for c, d in zip(color, delta))
 
 
-def gradient_shade(im, x0, y0, x1, y1, base, light=1.35, dark=0.72):
-    """Diagonal top-left-lit shading across a rectangular region."""
+def gradient_shade(im, x0, y0, x1, y1, base, light=1.45, dark=0.62, bands=4):
+    """Flat-shaded diagonal top-left-lit banding across a rectangular region —
+    quantized into discrete tone steps rather than a smooth per-pixel airbrush
+    gradient, for a crisp modern-flat look. light/dark match the mod-wide
+    signature contrast (_texture_style.LIGHT_FACTOR/SHADOW_FACTOR)."""
     span = max((x1 - x0) + (y1 - y0), 1)
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
             t = ((x - x0) + (y - y0)) / span
-            factor = light + (dark - light) * t
+            step = round(t * (bands - 1)) / (bands - 1) if bands > 1 else 0
+            factor = light + (dark - light) * step
             set_px(im, x, y, scale(base, factor))
 
 
