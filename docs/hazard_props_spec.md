@@ -685,3 +685,108 @@ energized-equipment or vapor hazards **except `smoldering_planter`** (a plain Cl
 - **Hazardous State:** Over-lamped, the triac buzzes and scorches the faceplate. Distinct from `overloaded_wall_outlet` (a receptacle drawing too much current, not a lighting control).
 
 - **Failure Consequence (350 ticks):** The scorched dimmer ignites the wall. **ABC/CO2 only.** Prevention removes the extra lamp load.
+
+## 🗄 Office Zone (props 66–75, added 2026-07-12)
+
+All ten of these props are energized-electrical hazards. **Only ABC or CO2 may defuse them — wet
+chemical is refused with a warning** (see the Conference Room Zone rule above).
+
+### 66. Jammed Paper Shredder (`berongsmp:jammed_paper_shredder`)
+
+- **Target Room:** Office
+
+- **Normal State:** An idle paper shredder, motor free.
+
+- **Hazardous State:** Overfed with a thick sheaf, motor stalled against the cutters, paper-dust smoke rising.
+
+- **Failure Consequence (350 ticks):** The stalled motor overheats and ignites the paper dust. **ABC/CO2 only.** Prevention clears the jammed sheaf.
+
+### 67. Overheated Network Cabinet (`berongsmp:overheated_network_cabinet`)
+
+- **Target Room:** Office wall
+
+- **Normal State:** A wall comms cabinet, green status LEDs.
+
+- **Hazardous State:** A clogged fan filter lets the switch stack run over temperature. Distinct from `dust_choked_pc` (one desktop with a backpack on its vents, not networking infrastructure).
+
+- **Failure Consequence (450 ticks):** The overheated switch stack ignites inside the cabinet. **ABC/CO2 only.** Prevention clears the filter.
+
+### 68. E-Bike Charging Station (`berongsmp:ebike_charging_station`)
+
+- **Target Room:** Office storage area
+
+- **Normal State:** An e-bike parked, unplugged.
+
+- **Hazardous State:** Charging overnight on a cheap, uncertified charger — the pack warms and hisses. Distinct from `swollen_phone_battery`/`damaged_lipo_pack`/`charging_cart`: a vehicle-scale pack, the modern headline indoor-fire hazard.
+
+- **Failure Consequence (300 ticks, 2-block radius):** The pack goes into thermal runaway and bursts into flame. **ABC/CO2 only.** Prevention unplugs the cheap charger.
+
+### 69. Failing Fluorescent Ballast (`berongsmp:failing_fluorescent_ballast`)
+
+- **Target Room:** Office ceiling
+
+- **Normal State:** A clean twin-tube fluorescent fixture.
+
+- **Hazardous State:** The magnetic ballast drips tar and buzzes, tube flickering.
+
+- **Failure Consequence (400 ticks):** The failing ballast overheats and ignites the fixture housing. **ABC/CO2 only.** Prevention replaces the ballast.
+
+### 70. Dry Aquarium Heater (`berongsmp:dry_aquarium_heater`)
+
+- **Target Room:** Office lobby / break room
+
+- **Normal State:** An office fish tank, water level normal, heater submerged.
+
+- **Hazardous State:** The water level has dropped, exposing the submersible heater to open air.
+
+- **Failure Consequence (400 ticks):** The exposed heater scorches through the acrylic lid and ignites it. **ABC/CO2 only.** Prevention tops up the tank and unplugs the heater.
+
+### 71. Unattended Mug Warmer (`berongsmp:unattended_mug_warmer`)
+
+- **Target Room:** Office desk
+
+- **Normal State:** A desk mug warmer, switched off.
+
+- **Hazardous State:** Left on and buried under a memo pile.
+
+- **Failure Consequence (500 ticks):** The buried warmer scorches the memo pile alight. **ABC/CO2 only.** Prevention switches it off and clears the pile.
+
+### 72. Dusty CRT Monitor (`berongsmp:dusty_crt_monitor`)
+
+- **Target Room:** Office storage corner
+
+- **Normal State:** An old CRT monitor, unplugged, dark.
+
+- **Hazardous State:** Years of dust let the flyback transformer arc through the casing.
+
+- **Failure Consequence (450 ticks):** The flyback arc ignites the casing. **ABC/CO2 only.** Prevention unplugs it and clears the dust.
+
+### 73. Rodent-Chewed Wiring (`berongsmp:rodent_chewed_wiring`)
+
+- **Target Room:** Office baseboard, behind cabinets
+
+- **Normal State:** A tidy baseboard cable run.
+
+- **Hazardous State:** Insulation gnawed to bare copper, arcing hidden from view. Distinct from `frayed_console_wire` (worn fraying on an open floor cord, not a hidden rodent-chewed baseboard run).
+
+- **Failure Consequence (350 ticks):** The gnawed wiring arcs and ignites the baseboard. **ABC/CO2 only.** Prevention splices and re-insulates the section.
+
+### 74. Overheating CCTV DVR (`berongsmp:overheating_cctv_dvr`)
+
+- **Target Room:** Office security shelf
+
+- **Normal State:** A security DVR, drives idling normally.
+
+- **Hazardous State:** Runs 24/7 with blocked vents, the drive bay cooking.
+
+- **Failure Consequence (450 ticks):** The overheated drive bay ignites. **ABC/CO2 only.** Prevention clears the blocked vents.
+
+### 75. Faulty Parol Lantern (`berongsmp:faulty_parol_lantern`)
+
+- **Target Room:** Office lobby (hanging)
+
+- **Normal State:** An unlit Christmas parol.
+
+- **Hazardous State:** Substandard series lights left plugged in, wiring hot at the star points.
+
+- **Failure Consequence (300 ticks):** The hot wiring ignites the parol. **ABC/CO2 only.** Prevention unplugs the series lights.

@@ -367,5 +367,26 @@
   "block.berongsmp.venting_ups_battery": "Venting UPS Battery (Electrical Hazard)",
   "block.berongsmp.venting_ups_battery.desc": "Place under a credenza. A failing lead-acid cell off-gasses hydrogen that can flash over. Wet chemical won't defuse it — use ABC or CO2.",
   "block.berongsmp.faulty_dimmer_switch": "Faulty Dimmer Switch (Electrical Hazard)",
-  "block.berongsmp.faulty_dimmer_switch.desc": "Place on a conference room wall. An over-lamped dimmer's triac can scorch through its faceplate. Wet chemical won't defuse it — use ABC or CO2."
+  "block.berongsmp.faulty_dimmer_switch.desc": "Place on a conference room wall. An over-lamped dimmer's triac can scorch through its faceplate. Wet chemical won't defuse it — use ABC or CO2.",
+
+  "block.berongsmp.jammed_paper_shredder": "Jammed Paper Shredder (Electrical Hazard)",
+  "block.berongsmp.jammed_paper_shredder.desc": "Place in an office. An overfed sheaf can stall the motor and ignite the paper dust. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.overheated_network_cabinet": "Overheated Network Cabinet (Electrical Hazard)",
+  "block.berongsmp.overheated_network_cabinet.desc": "Place on an office wall. A clogged fan filter can let the switch stack overheat. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.ebike_charging_station": "E-Bike Charging Station (Electrical Hazard)",
+  "block.berongsmp.ebike_charging_station.desc": "Place in an office storage area. A cheap charger left on overnight can send the pack into thermal runaway. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.failing_fluorescent_ballast": "Failing Fluorescent Ballast (Electrical Hazard)",
+  "block.berongsmp.failing_fluorescent_ballast.desc": "Place on an office ceiling. A dripping, buzzing ballast can overheat its housing. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.dry_aquarium_heater": "Dry Aquarium Heater (Electrical Hazard)",
+  "block.berongsmp.dry_aquarium_heater.desc": "Place as office decor. A dropped water level can expose the heater to open air. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.unattended_mug_warmer": "Unattended Mug Warmer (Electrical Hazard)",
+  "block.berongsmp.unattended_mug_warmer.desc": "Place on a desk. Left on and buried under papers, it can scorch them alight. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.dusty_crt_monitor": "Dusty CRT Monitor (Electrical Hazard)",
+  "block.berongsmp.dusty_crt_monitor.desc": "Place in an office storage corner. Years of dust can let the flyback transformer arc. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.rodent_chewed_wiring": "Rodent-Chewed Wiring (Electrical Hazard)",
+  "block.berongsmp.rodent_chewed_wiring.desc": "Place along an office baseboard. Insulation gnawed to bare copper can arc hidden from view. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.overheating_cctv_dvr": "Overheating CCTV DVR (Electrical Hazard)",
+  "block.berongsmp.overheating_cctv_dvr.desc": "Place on a security shelf. Blocked vents on a 24/7 DVR can cook the drive bay. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.faulty_parol_lantern": "Faulty Parol Lantern (Electrical Hazard)",
+  "block.berongsmp.faulty_parol_lantern.desc": "Place hanging in an office lobby. Substandard series lights left plugged in can ignite at the star points. Wet chemical won't defuse it — use ABC or CO2."
 }
