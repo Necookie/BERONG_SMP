@@ -15,9 +15,19 @@ import net.neoforged.neoforge.registries.DeferredRegister;
  * {@code BerongSMP} so the entry point stays a thin bootstrap; {@link #register(IEventBus)} is
  * called from its constructor.
  *
- * <p>The original single {@code furn_tab} (~86 items) and {@code hazards_tab} (85 items) were
- * hard to browse — split 2026-07-12 into 3 furniture tabs (by room) and 4 hazard tabs (by zone,
- * see {@link ModItems#HAZARD_ZONE_CLASSROOM} and siblings) so each tab holds ~16-31 items.
+ * <p><b>Hard cap: at most 5 mod tabs.</b> NeoForge 26.1.2.36-beta's
+ * {@code CreativeModeInventoryScreen} (patched) paginates the sorted tab list into pages of
+ * exactly 10 ({@code if (tabIndex == 10)}), and {@code CreativeTabsScreenPage} splits each page
+ * 5-top-row/5-bottom-row ({@code maxLength = 10; topLength = maxLength / 2}). Vanilla registers
+ * exactly 10 non-pinned tabs, so they alone fill page 1 — every mod tab therefore always lands on
+ * page 2, starting at its top row. A first attempt (2026-07-12) split into 7 sub-tabs (4 hazard +
+ * 3 furniture, 9 mod tabs total with SIM_TAB/NPC_TAB): the first 5 landed in page 2's top row and
+ * worked, but the remaining 4 spilled into page 2's bottom row and were not visible/reachable in
+ * practice. Fixed same-day by consolidating back down to exactly 5 mod tabs — {@link #SIM_TAB},
+ * {@link #FURN_TAB}, {@link #HAZARD_SCHOOL_TAB}, {@link #HAZARD_OFFICE_LAB_TAB}, {@link #NPC_TAB}
+ * — so all 5 fill page 2's top row exactly and none fall into the broken bottom row. Verify any
+ * future tab-count change in-game (open creative, page to page 2 with the {@code >} button, and
+ * confirm every mod tab actually renders) before assuming more tabs are safe.
  */
 public final class ModCreativeTabs {
 
@@ -61,12 +71,13 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.FIRE_SAFETY_POSTER_ITEM.get());
             }).build());
 
-    /** Creative tab: classroom/school furniture and general props for building scenarios. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_SCHOOL_TAB = CREATIVE_MODE_TABS.register("furn_school_tab", () -> CreativeModeTab.builder()
+    /** Creative tab: all furniture — school/classroom, cafeteria, and Conference Room/Office/Laboratory. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_TAB = CREATIVE_MODE_TABS.register("furn_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.furniture"))
             .withTabsBefore(SIM_TAB.getKey())
             .icon(() -> ModItems.CHAIR_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
+                // Classroom & School
                 output.accept(ModItems.WHITEBOARD_ITEM.get());
                 output.accept(ModItems.BULLETIN_BOARD_ITEM.get());
                 output.accept(ModItems.COMPUTER_TABLE_ITEM.get());
@@ -102,14 +113,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TALL_BOOKSHELF_ITEM.get());
                 output.accept(ModItems.ARMCHAIR_DESK_ITEM.get());
                 output.accept(ModItems.TEACHERS_DESK_ITEM.get());
-            }).build());
-
-    /** Creative tab: cafeteria/kitchen furniture and serving fixtures. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_CAFETERIA_TAB = CREATIVE_MODE_TABS.register("furn_cafeteria_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.furniture_cafeteria"))
-            .withTabsBefore(FURN_SCHOOL_TAB.getKey())
-            .icon(() -> ModItems.CAFETERIA_TABLE_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
+                // Cafeteria
                 output.accept(ModItems.CAFETERIA_TABLE_ITEM.get());
                 output.accept(ModItems.CAFETERIA_STOOL_ITEM.get());
                 output.accept(ModItems.TRAY_STACK_ITEM.get());
@@ -126,14 +130,6 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CUTLERY_NAPKIN_CADDY_ITEM.get());
                 output.accept(ModItems.SERVING_HATCH_WINDOW_ITEM.get());
                 output.accept(ModItems.BLOCKED_EXIT_CLUTTER_ITEM.get());
-            }).build());
-
-    /** Creative tab: Conference Room, Office, and Laboratory furniture (30 room-batch blocks + the lab workbench). */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_OFFICE_LAB_TAB = CREATIVE_MODE_TABS.register("furn_office_lab_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.furniture_officelab"))
-            .withTabsBefore(FURN_CAFETERIA_TAB.getKey())
-            .icon(() -> ModItems.CONFERENCE_TABLE_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
                 // Conference Room
                 output.accept(ModItems.CONFERENCE_TABLE_ITEM.get());
                 output.accept(ModItems.EXECUTIVE_OFFICE_CHAIR_ITEM.get());
@@ -170,40 +166,34 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SCIENCE_LAB_WORKBENCH_ITEM.get());
             }).build());
 
-    /** Creative tab: classroom/school-zone hazard props (see {@link ModItems#HAZARD_ZONE_CLASSROOM}). */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_CLASSROOM_TAB = CREATIVE_MODE_TABS.register("hazards_classroom_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.hazards_classroom"))
-            .withTabsBefore(FURN_OFFICE_LAB_TAB.getKey())
-            .icon(() -> ModItems.DAISY_CHAIN_EXTENSION_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_CLASSROOM.forEach(
-                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
-            .build());
-
-    /** Creative tab: kitchen/Class-F-K-zone hazard props (see {@link ModItems#HAZARD_ZONE_KITCHEN}). */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_KITCHEN_TAB = CREATIVE_MODE_TABS.register("hazards_kitchen_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.hazards_kitchen"))
-            .withTabsBefore(HAZARD_CLASSROOM_TAB.getKey())
+    /**
+     * Creative tab: Classroom &amp; Kitchen hazard props — merges {@link ModItems#HAZARD_ZONE_CLASSROOM}
+     * and {@link ModItems#HAZARD_ZONE_KITCHEN} (16 + 27 = 43 items). {@code ModItems.HAZARD_ITEM_MAP}
+     * and the 4 zone lists are unchanged; the merge happens only here, at display time.
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_SCHOOL_TAB = CREATIVE_MODE_TABS.register("hazards_school_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_school"))
+            .withTabsBefore(FURN_TAB.getKey())
             .icon(() -> ModItems.COMMERCIAL_DEEP_FRYER_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_KITCHEN.forEach(
-                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
+            .displayItems((parameters, output) -> {
+                ModItems.HAZARD_ZONE_CLASSROOM.forEach(id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get()));
+                ModItems.HAZARD_ZONE_KITCHEN.forEach(id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get()));
+            })
             .build());
 
-    /** Creative tab: electrical/lab-zone hazard props (see {@link ModItems#HAZARD_ZONE_ELECTRICAL_LAB}). */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_ELECTRICAL_LAB_TAB = CREATIVE_MODE_TABS.register("hazards_electrical_lab_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.hazards_lab"))
-            .withTabsBefore(HAZARD_KITCHEN_TAB.getKey())
-            .icon(() -> ModItems.DAMAGED_LIPO_PACK_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_ELECTRICAL_LAB.forEach(
-                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
-            .build());
-
-    /** Creative tab: conference-room/office-zone hazard props (see {@link ModItems#HAZARD_ZONE_CONFERENCE_OFFICE}). */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_CONFERENCE_OFFICE_TAB = CREATIVE_MODE_TABS.register("hazards_conference_office_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.hazards_office"))
-            .withTabsBefore(HAZARD_ELECTRICAL_LAB_TAB.getKey())
+    /**
+     * Creative tab: Electrical/Lab &amp; Conference/Office hazard props — merges
+     * {@link ModItems#HAZARD_ZONE_ELECTRICAL_LAB} and {@link ModItems#HAZARD_ZONE_CONFERENCE_OFFICE}
+     * (22 + 20 = 42 items).
+     */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_OFFICE_LAB_TAB = CREATIVE_MODE_TABS.register("hazards_office_lab_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_officelab"))
+            .withTabsBefore(HAZARD_SCHOOL_TAB.getKey())
             .icon(() -> ModItems.VENTING_UPS_BATTERY_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_CONFERENCE_OFFICE.forEach(
-                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
+            .displayItems((parameters, output) -> {
+                ModItems.HAZARD_ZONE_ELECTRICAL_LAB.forEach(id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get()));
+                ModItems.HAZARD_ZONE_CONFERENCE_OFFICE.forEach(id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get()));
+            })
             .build());
 
     /**
@@ -214,7 +204,7 @@ public final class ModCreativeTabs {
      */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> NPC_TAB = CREATIVE_MODE_TABS.register("npc_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.npcs"))
-            .withTabsBefore(HAZARD_CONFERENCE_OFFICE_TAB.getKey())
+            .withTabsBefore(HAZARD_OFFICE_LAB_TAB.getKey())
             .icon(() -> ModItems.NPC_OFFICER_CRUZ.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 // New Tutorial (Academy) — active room instructors

@@ -70,13 +70,15 @@ edge-to-edge.
 prop bodies, so the `_hz`/`_of` tier textures stay derived from the current (now flat-shaded)
 normal-state art rather than the pre-restyle originals.
 
-## 3. Creative-tab reorganization
+## 3. Creative-tab reorganization (first attempt — superseded same-day by §4)
 
 **Problem:** `HAZARD_TAB` held all 85 hazard props in one scrollable tab; `FURN_TAB` held 86
 furniture items (83 after the fire hose cabinet moved out) in another. Both were hard to browse.
 
-**Fix:** `ModCreativeTabs` now registers 4 hazard tabs by zone and 3 furniture tabs by room, plus
-the unchanged `SIM_TAB`/`NPC_TAB` (9 mod tabs total):
+**Fix (superseded — see §4):** `ModCreativeTabs` initially registered 4 hazard tabs by zone and 3
+furniture tabs by room, plus the unchanged `SIM_TAB`/`NPC_TAB` (9 mod tabs total). This shipped,
+was pushed, and then broke the inventory in practice — kept below for context on the item groupings
+it introduced (which §4 reuses, just merged pairwise into fewer tabs), not as the current state:
 
 | Tab | Items | Source |
 |---|---|---|
@@ -98,4 +100,60 @@ dropping a future hazard prop from every tab. `FIRE_HOSE_CABINET_ITEM` moved fro
 Both splits were verified by script before committing: every hazard-zone list diffed against
 `HAZARD_ITEM_MAP`'s actual 85 keys (0 missing, 0 extra, 0 cross-list duplicates), and the 3
 furniture tabs' combined item set diffed against the original `FURN_TAB`'s 83 non-fire-hose items
-(0 missing, 0 extra, 0 cross-tab duplicates).
+(0 missing, 0 extra, 0 cross-tab duplicates). **What this verification could not catch:** it only
+checked *which items are registered to which tab* — it never checked whether the tab itself would
+actually render in the game's UI. That gap is exactly what broke.
+
+## 4. Tab-count correction (same day — the real fix)
+
+**Problem, as reported by the user playing the actual game:** "there are hazard tabs only for 1
+specific category, other tabs aren't shown, most of furniture and hazard items are not shown in
+inventory." §3's 9-tab layout (`SIM_TAB` + 4 hazard + 3 furniture + `NPC_TAB`) had shipped and been
+pushed to `main` before this was caught — the script-based verification in §3 only proved item
+*assignment* was correct, not that every tab would *render*.
+
+**Root cause, verified against the real decompiled/patched source** (not guessed — see below for
+exactly where): NeoForge 26.1.2.36-beta patches `net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen`
+to paginate the sorted creative-tab list into pages of exactly 10 (`if (tabIndex == 10) { ... }`),
+and `net.neoforged.neoforge.client.gui.CreativeTabsScreenPage` splits each page 5-top-row/5-bottom-row
+(`int maxLength = 10; int topLength = maxLength / 2;`, first `topLength` tabs go to `topTabs`, the
+rest to `bottomTabs`). Vanilla Minecraft 26.1 registers exactly 10 non-pinned tabs (4 more —
+hotbar/search/op_blocks/inventory — are pinned and always shown regardless of page), which means
+vanilla alone completely fills page 1. **Every mod tab therefore always lands on page 2**, filling
+its top row first. With 9 mod tabs, the first 5 (in `withTabsBefore` chain order: `sim_tab`,
+`furn_school_tab`, `furn_cafeteria_tab`, `furn_office_lab_tab`, `hazards_classroom_tab`) landed in
+page 2's top row and worked; the remaining 4 (`hazards_kitchen_tab`, `hazards_electrical_lab_tab`,
+`hazards_conference_office_tab`, `npc_tab`) spilled into page 2's bottom row and were not
+visible/reachable — matching the report exactly (`hazards_classroom_tab`, the "1 specific
+category," was the 5th/top-row tab; everything after it was gone).
+
+Verified by extracting real source from two local Gradle caches rather than trusting an LLM's
+unverified claim: `~/.gradle/caches/neoformruntime/intermediate_results/mergeWithSources_*_output.jar`
+(contains the NeoForge-patched `CreativeModeInventoryScreen.java`, confirming the `tabIndex == 10`
+pagination) and the `neoforge-26.1.2.36-beta-sources.jar` module artifact (contains
+`net/neoforged/neoforge/client/gui/CreativeTabsScreenPage.java`, confirming the `maxLength = 10` /
+`topLength = maxLength / 2` row split). Both files were independently confirmed to exist and to
+contain the claimed code before the fix was designed around them.
+
+**Fix:** consolidated from 9 mod tabs down to exactly 5, so all of them fit in page 2's top row and
+none fall into the broken bottom row:
+
+| Tab (registry name) | Items | Merges |
+|---|---|---|
+| `SIM_TAB` (sim_tab) | 25 | unchanged |
+| `FURN_TAB` (furn_tab) | 82 | the §3 School (35) + Cafeteria (16) + Office & Lab (31) lists, concatenated in one tab |
+| `HAZARD_SCHOOL_TAB` (hazards_school_tab) | 43 | `ModItems.HAZARD_ZONE_CLASSROOM` (16) + `HAZARD_ZONE_KITCHEN` (27) |
+| `HAZARD_OFFICE_LAB_TAB` (hazards_office_lab_tab) | 42 | `ModItems.HAZARD_ZONE_ELECTRICAL_LAB` (22) + `HAZARD_ZONE_CONFERENCE_OFFICE` (20) |
+| `NPC_TAB` (npc_tab) | 24 | unchanged |
+
+`ModItems.HAZARD_ITEM_MAP` and the 4 `HAZARD_ZONE_*` lists (and `assertHazardZonesCoverMap()`) were
+left exactly as §3 built them — the merge happens only inside each hazard tab's `displayItems`
+callback (two `.forEach()` calls instead of one), which is far less invasive than reshaping the
+zone-list data model itself. `ModCreativeTabs`'s class javadoc now states the 5-tab hard cap and the
+exact NeoForge pagination mechanics inline, so this isn't silently regressed by a future "let's add
+one more tab" change.
+
+Re-verified with the same script-based cross-check as §3 (0 missing / 0 extra across all 85 hazard
+props and all 82 furniture items) plus a full `./gradlew build`. **This class of bug cannot be fully
+verified without the actual game UI** — the fix is only confirmed correct once a human opens the
+creative inventory in-game, pages to page 2, and confirms all 5 mod tabs render and open.
