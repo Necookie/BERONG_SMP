@@ -143,8 +143,20 @@ dependencies {
     // compileOnly for API access at build time; localRuntime (not runtimeOnly, see the
     // configurations block above) so the full mod is present for dev-testing without being
     // pulled in as a hard dependency by anything that depends on this mod.
-    compileOnly "com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}"
-    localRuntime "com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}:dist"
+    //
+    // Excludes the transitive worldeditcui-protocol companion mod: //copyroom only calls
+    // WorldEdit's LocalSession/Region API and never touches the CUI selection-outline overlay,
+    // and the published worldeditcui-protocol-neoforge-mc26.1:4.0.3 artifact is a "-dev" build
+    // that throws a classloader LinkageError (duplicate CustomPacketPayload$Type definitions)
+    // when NeoForge tries to register its network payload against this NeoForge 26.1.2.36-beta
+    // build — crashes client startup entirely if left in. Confirmed via an actual runClient
+    // crash log; not needed for anything this mod does.
+    compileOnly("com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}") {
+        exclude group: 'org.enginehub.worldeditcui-protocol'
+    }
+    localRuntime("com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}:dist") {
+        exclude group: 'org.enginehub.worldeditcui-protocol'
+    }
 
     // Unit testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
