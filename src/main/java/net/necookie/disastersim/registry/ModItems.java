@@ -1,6 +1,7 @@
 package net.necookie.disastersim.registry;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -634,6 +635,65 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> FAULTY_DEHUMIDIFIER_ITEM =
             ITEMS.registerSimpleBlockItem("faulty_dehumidifier", ModBlocks.FAULTY_DEHUMIDIFIER);
     static { HAZARD_ITEM_MAP.put("faulty_dehumidifier", FAULTY_DEHUMIDIFIER_ITEM); }
+
+    /**
+     * {@link #HAZARD_ITEM_MAP}'s 85 keys split into 4 zone groupings for {@code ModCreativeTabs}'
+     * hazard sub-tabs — one long 85-item tab was hard to browse. Every key must appear in exactly
+     * one list; {@link #assertHazardZonesCoverMap()} is called from {@code ModCreativeTabs} static
+     * init to fail loudly (rather than silently drop an item from every tab) if a future hazard
+     * prop is added to {@link #HAZARD_ITEM_MAP} without also being added here.
+     */
+    public static final List<String> HAZARD_ZONE_CLASSROOM = List.of(
+            "plastic_trash_bin", "daisy_chain_extension", "woodshop_sawdust_layer", "stage_spotlight",
+            "archive_box_stack", "overloaded_microwave", "overloaded_breaker_panel",
+            "overheating_wall_aircon", "jammed_laser_printer", "unattended_shrine_candle",
+            "alcohol_dispenser_station", "clogged_exhaust_fan", "overloaded_wall_outlet",
+            "jammed_circuit_breaker", "unsealed_solvent_shelf", "unattended_welding_station");
+
+    public static final List<String> HAZARD_ZONE_KITCHEN = List.of(
+            "unattended_grease_pan", "grease_clogged_hood", "contaminated_kitchen_bin",
+            "jammed_panini_press", "commercial_deep_fryer", "leaking_gas_valve",
+            "leaking_butane_canister_stove", "chefs_prep_drawers", "culinary_fridge",
+            "student_lab_microwave", "corroded_gas_line_joint", "gas_range_stuck_burner",
+            "commercial_stand_mixer", "gas_deck_oven", "induction_cooktop_station",
+            "rice_cooker_bank", "espresso_machine", "hot_water_urn", "toaster_oven_crumb",
+            "dry_goods_pantry_shelf", "grease_duct_run", "commercial_dish_sanitizer",
+            "garbage_disposal_unit", "knife_sterilizer_cabinet", "sterno_steam_table",
+            "convection_oven", "lechon_rotisserie_spit");
+
+    public static final List<String> HAZARD_ZONE_ELECTRICAL_LAB = List.of(
+            "dust_choked_pc", "charging_cart", "frayed_console_wire", "malfunctioning_vending",
+            "ceiling_projector", "swollen_phone_battery", "damaged_lipo_pack", "vape_in_iron_locker",
+            "pa_system_backup", "smartboard_inverter", "bunsen_burner_station", "reagent_storage_shelf",
+            "unbalanced_centrifuge", "runaway_3d_printer", "unattended_soldering_iron",
+            "unshielded_test_laser", "leaking_oxygen_cylinder", "shorted_bench_supply",
+            "overheated_vacuum_pump", "stuck_environment_chamber", "solvent_drying_oven",
+            "faulty_dehumidifier");
+
+    public static final List<String> HAZARD_ZONE_CONFERENCE_OFFICE = List.of(
+            "portable_space_heater", "halogen_floor_lamp", "jammed_projection_screen",
+            "overheating_video_wall", "aerosol_freshener_dispenser", "smothered_laptop",
+            "smoldering_planter", "pinched_tv_cord", "venting_ups_battery", "faulty_dimmer_switch",
+            "jammed_paper_shredder", "overheated_network_cabinet", "ebike_charging_station",
+            "failing_fluorescent_ballast", "dry_aquarium_heater", "unattended_mug_warmer",
+            "dusty_crt_monitor", "rodent_chewed_wiring", "overheating_cctv_dvr", "faulty_parol_lantern");
+
+    /** Fails fast at class-load if the 4 hazard zone lists above ever drift from {@link #HAZARD_ITEM_MAP}. */
+    public static void assertHazardZonesCoverMap() {
+        java.util.Set<String> covered = new java.util.HashSet<>();
+        covered.addAll(HAZARD_ZONE_CLASSROOM);
+        covered.addAll(HAZARD_ZONE_KITCHEN);
+        covered.addAll(HAZARD_ZONE_ELECTRICAL_LAB);
+        covered.addAll(HAZARD_ZONE_CONFERENCE_OFFICE);
+        if (!covered.equals(HAZARD_ITEM_MAP.keySet())) {
+            java.util.Set<String> missing = new java.util.HashSet<>(HAZARD_ITEM_MAP.keySet());
+            missing.removeAll(covered);
+            java.util.Set<String> extra = new java.util.HashSet<>(covered);
+            extra.removeAll(HAZARD_ITEM_MAP.keySet());
+            throw new IllegalStateException(
+                    "Hazard zone lists out of sync with HAZARD_ITEM_MAP. Missing: " + missing + " Extra: " + extra);
+        }
+    }
 
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);

@@ -90,7 +90,13 @@
   "block.berongsmp.bunsen_burner_station": "Bunsen Burner Station",
   "block.berongsmp.overloaded_microwave": "Overloaded Microwave",
   "itemGroup.berongsmp.simulation": "BerongSMP — Simulation",
-  "itemGroup.berongsmp.furniture": "BerongSMP — Furniture",
+  "itemGroup.berongsmp.furniture": "BerongSMP — Furniture: School",
+  "itemGroup.berongsmp.furniture_cafeteria": "BerongSMP — Furniture: Cafeteria",
+  "itemGroup.berongsmp.furniture_officelab": "BerongSMP — Furniture: Office & Lab",
+  "itemGroup.berongsmp.hazards_classroom": "BerongSMP — Hazards: Classroom",
+  "itemGroup.berongsmp.hazards_kitchen": "BerongSMP — Hazards: Kitchen",
+  "itemGroup.berongsmp.hazards_lab": "BerongSMP — Hazards: Electrical & Lab",
+  "itemGroup.berongsmp.hazards_office": "BerongSMP — Hazards: Conference & Office",
   "block.berongsmp.example_block": "Example Block",
   "block.berongsmp.computer": "Computer",
   "block.berongsmp.computer.desc": "Right-click to turn on/off. Set alight with flint and steel — only a CO2 extinguisher puts it out.",
@@ -163,8 +169,6 @@
   "block.berongsmp.basketball_pole.desc": "An auto-filled pole segment — not normally placed by hand.",
   "block.berongsmp.basketball_hoop.desc": "A backboard, rim, and net. Auto-fills the pole down to the nearest post below it.",
   "item.berongsmp.basketball.desc": "A basketball for pickup games on the court.",
-
-  "itemGroup.berongsmp.hazards": "BerongSMP — Hazard Props",
 
   "block.berongsmp.plastic_trash_bin":    "Plastic Trash Bin",
   "block.berongsmp.daisy_chain_extension": "Daisy-Chain Extension Cord",

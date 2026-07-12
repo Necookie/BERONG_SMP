@@ -11,11 +11,19 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * The mod's three creative tabs (simulation tools, furniture, hazard props), pulling their
- * contents from {@link ModItems}. Extracted from {@code BerongSMP} so the entry point stays a
- * thin bootstrap; {@link #register(IEventBus)} is called from its constructor.
+ * The mod's creative tabs, pulling their contents from {@link ModItems}. Extracted from
+ * {@code BerongSMP} so the entry point stays a thin bootstrap; {@link #register(IEventBus)} is
+ * called from its constructor.
+ *
+ * <p>The original single {@code furn_tab} (~86 items) and {@code hazards_tab} (85 items) were
+ * hard to browse — split 2026-07-12 into 3 furniture tabs (by room) and 4 hazard tabs (by zone,
+ * see {@link ModItems#HAZARD_ZONE_CLASSROOM} and siblings) so each tab holds ~16-31 items.
  */
 public final class ModCreativeTabs {
+
+    static {
+        ModItems.assertHazardZonesCoverMap();
+    }
 
     /** Deferred Register for Creative Mode Tabs. */
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, BerongSMP.MODID);
@@ -39,6 +47,7 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.MEGAPHONE.get());
                 output.accept(ModItems.FIRST_AID_KIT.get());
                 output.accept(ModItems.FIRE_BLANKET.get());
+                output.accept(ModItems.FIRE_HOSE_CABINET_ITEM.get());
                 output.accept(ModItems.COMPUTER_ITEM.get());
                 output.accept(ModItems.FIRE_ALARM_ITEM.get());
                 output.accept(ModItems.EVACUATION_MAP_ITEM.get());
@@ -52,14 +61,13 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.FIRE_SAFETY_POSTER_ITEM.get());
             }).build());
 
-    /** Creative tab: furniture and props for building scenarios. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_TAB = CREATIVE_MODE_TABS.register("furn_tab", () -> CreativeModeTab.builder()
+    /** Creative tab: classroom/school furniture and general props for building scenarios. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_SCHOOL_TAB = CREATIVE_MODE_TABS.register("furn_school_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.furniture"))
             .withTabsBefore(SIM_TAB.getKey())
             .icon(() -> ModItems.CHAIR_ITEM.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(ModItems.WHITEBOARD_ITEM.get());
-                output.accept(ModItems.FIRE_HOSE_CABINET_ITEM.get());
                 output.accept(ModItems.BULLETIN_BOARD_ITEM.get());
                 output.accept(ModItems.COMPUTER_TABLE_ITEM.get());
                 output.accept(ModItems.TABLE_ITEM.get());
@@ -82,7 +90,6 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.BASKETBALL.get());
                 output.accept(ModItems.CLASSROOM_GLOBE_ITEM.get());
                 output.accept(ModItems.MODERN_STUDENT_DESK_ITEM.get());
-                output.accept(ModItems.SCIENCE_LAB_WORKBENCH_ITEM.get());
                 output.accept(ModItems.COMPUTER_LAB_DESK_ROW_ITEM.get());
                 output.accept(ModItems.LIBRARY_STUDY_CARREL_ITEM.get());
                 output.accept(ModItems.ROLLING_BOOK_CART_ITEM.get());
@@ -95,6 +102,14 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.TALL_BOOKSHELF_ITEM.get());
                 output.accept(ModItems.ARMCHAIR_DESK_ITEM.get());
                 output.accept(ModItems.TEACHERS_DESK_ITEM.get());
+            }).build());
+
+    /** Creative tab: cafeteria/kitchen furniture and serving fixtures. */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_CAFETERIA_TAB = CREATIVE_MODE_TABS.register("furn_cafeteria_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.furniture_cafeteria"))
+            .withTabsBefore(FURN_SCHOOL_TAB.getKey())
+            .icon(() -> ModItems.CAFETERIA_TABLE_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
                 output.accept(ModItems.CAFETERIA_TABLE_ITEM.get());
                 output.accept(ModItems.CAFETERIA_STOOL_ITEM.get());
                 output.accept(ModItems.TRAY_STACK_ITEM.get());
@@ -111,6 +126,14 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.CUTLERY_NAPKIN_CADDY_ITEM.get());
                 output.accept(ModItems.SERVING_HATCH_WINDOW_ITEM.get());
                 output.accept(ModItems.BLOCKED_EXIT_CLUTTER_ITEM.get());
+            }).build());
+
+    /** Creative tab: Conference Room, Office, and Laboratory furniture (30 room-batch blocks + the lab workbench). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> FURN_OFFICE_LAB_TAB = CREATIVE_MODE_TABS.register("furn_office_lab_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.furniture_officelab"))
+            .withTabsBefore(FURN_CAFETERIA_TAB.getKey())
+            .icon(() -> ModItems.CONFERENCE_TABLE_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
                 // Conference Room
                 output.accept(ModItems.CONFERENCE_TABLE_ITEM.get());
                 output.accept(ModItems.EXECUTIVE_OFFICE_CHAIR_ITEM.get());
@@ -144,14 +167,43 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.SECURED_CYLINDER_RACK_ITEM.get());
                 output.accept(ModItems.SAMPLE_STORAGE_RACK_ITEM.get());
                 output.accept(ModItems.BALANCE_SCALE_TABLE_ITEM.get());
+                output.accept(ModItems.SCIENCE_LAB_WORKBENCH_ITEM.get());
             }).build());
 
-    /** Creative tab: all 30 hazard prop blocks for the simulation building. */
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_TAB = CREATIVE_MODE_TABS.register("hazards_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.berongsmp.hazards"))
-            .withTabsBefore(FURN_TAB.getKey())
+    /** Creative tab: classroom/school-zone hazard props (see {@link ModItems#HAZARD_ZONE_CLASSROOM}). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_CLASSROOM_TAB = CREATIVE_MODE_TABS.register("hazards_classroom_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_classroom"))
+            .withTabsBefore(FURN_OFFICE_LAB_TAB.getKey())
             .icon(() -> ModItems.DAISY_CHAIN_EXTENSION_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ModItems.HAZARD_ITEM_MAP.values().forEach(i -> output.accept(i.get())))
+            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_CLASSROOM.forEach(
+                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
+            .build());
+
+    /** Creative tab: kitchen/Class-F-K-zone hazard props (see {@link ModItems#HAZARD_ZONE_KITCHEN}). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_KITCHEN_TAB = CREATIVE_MODE_TABS.register("hazards_kitchen_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_kitchen"))
+            .withTabsBefore(HAZARD_CLASSROOM_TAB.getKey())
+            .icon(() -> ModItems.COMMERCIAL_DEEP_FRYER_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_KITCHEN.forEach(
+                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
+            .build());
+
+    /** Creative tab: electrical/lab-zone hazard props (see {@link ModItems#HAZARD_ZONE_ELECTRICAL_LAB}). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_ELECTRICAL_LAB_TAB = CREATIVE_MODE_TABS.register("hazards_electrical_lab_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_lab"))
+            .withTabsBefore(HAZARD_KITCHEN_TAB.getKey())
+            .icon(() -> ModItems.DAMAGED_LIPO_PACK_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_ELECTRICAL_LAB.forEach(
+                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
+            .build());
+
+    /** Creative tab: conference-room/office-zone hazard props (see {@link ModItems#HAZARD_ZONE_CONFERENCE_OFFICE}). */
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> HAZARD_CONFERENCE_OFFICE_TAB = CREATIVE_MODE_TABS.register("hazards_conference_office_tab", () -> CreativeModeTab.builder()
+            .title(Component.translatable("itemGroup.berongsmp.hazards_office"))
+            .withTabsBefore(HAZARD_ELECTRICAL_LAB_TAB.getKey())
+            .icon(() -> ModItems.VENTING_UPS_BATTERY_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> ModItems.HAZARD_ZONE_CONFERENCE_OFFICE.forEach(
+                    id -> output.accept(ModItems.HAZARD_ITEM_MAP.get(id).get())))
             .build());
 
     /**
@@ -162,7 +214,7 @@ public final class ModCreativeTabs {
      */
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> NPC_TAB = CREATIVE_MODE_TABS.register("npc_tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.berongsmp.npcs"))
-            .withTabsBefore(HAZARD_TAB.getKey())
+            .withTabsBefore(HAZARD_CONFERENCE_OFFICE_TAB.getKey())
             .icon(() -> ModItems.NPC_OFFICER_CRUZ.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 // New Tutorial (Academy) — active room instructors
