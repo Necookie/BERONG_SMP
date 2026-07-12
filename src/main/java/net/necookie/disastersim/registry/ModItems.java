@@ -792,6 +792,38 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> OFFICE_SUPPLY_CABINET_ITEM =
             ITEMS.registerSimpleBlockItem("office_supply_cabinet", ModBlocks.OFFICE_SUPPLY_CABINET);
 
+    // ── Laboratory furniture ─────────────────────────────────────────────
+
+    public static final DeferredItem<BlockItem> LABORATORY_FUME_HOOD_ITEM =
+            ITEMS.registerSimpleBlockItem("laboratory_fume_hood", ModBlocks.LABORATORY_FUME_HOOD);
+
+    public static final DeferredItem<BlockItem> EQUIPMENT_RACK_ITEM =
+            ITEMS.registerSimpleBlockItem("equipment_rack", ModBlocks.EQUIPMENT_RACK);
+
+    public static final DeferredItem<BlockItem> LAB_STOOL_ITEM =
+            ITEMS.registerSimpleBlockItem("lab_stool", ModBlocks.LAB_STOOL);
+
+    public static final DeferredItem<BlockItem> OSCILLOSCOPE_CART_ITEM =
+            ITEMS.registerSimpleBlockItem("oscilloscope_cart", ModBlocks.OSCILLOSCOPE_CART);
+
+    public static final DeferredItem<BlockItem> MICROSCOPE_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("microscope_station", ModBlocks.MICROSCOPE_STATION);
+
+    public static final DeferredItem<BlockItem> EYE_WASH_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("eye_wash_station", ModBlocks.EYE_WASH_STATION);
+
+    public static final DeferredItem<BlockItem> COMPONENT_DRAWER_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("component_drawer_cabinet", ModBlocks.COMPONENT_DRAWER_CABINET);
+
+    public static final DeferredItem<BlockItem> SECURED_CYLINDER_RACK_ITEM =
+            ITEMS.registerSimpleBlockItem("secured_cylinder_rack", ModBlocks.SECURED_CYLINDER_RACK);
+
+    public static final DeferredItem<BlockItem> SAMPLE_STORAGE_RACK_ITEM =
+            ITEMS.registerSimpleBlockItem("sample_storage_rack", ModBlocks.SAMPLE_STORAGE_RACK);
+
+    public static final DeferredItem<BlockItem> BALANCE_SCALE_TABLE_ITEM =
+            ITEMS.registerSimpleBlockItem("balance_scale_table", ModBlocks.BALANCE_SCALE_TABLE);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -892,6 +924,16 @@ public final class ModItems {
         ALL_ITEM_MAP.put("coat_rack_stand", COAT_RACK_STAND_ITEM);
         ALL_ITEM_MAP.put("bundy_time_clock", BUNDY_TIME_CLOCK_ITEM);
         ALL_ITEM_MAP.put("office_supply_cabinet", OFFICE_SUPPLY_CABINET_ITEM);
+        ALL_ITEM_MAP.put("laboratory_fume_hood", LABORATORY_FUME_HOOD_ITEM);
+        ALL_ITEM_MAP.put("equipment_rack", EQUIPMENT_RACK_ITEM);
+        ALL_ITEM_MAP.put("lab_stool", LAB_STOOL_ITEM);
+        ALL_ITEM_MAP.put("oscilloscope_cart", OSCILLOSCOPE_CART_ITEM);
+        ALL_ITEM_MAP.put("microscope_station", MICROSCOPE_STATION_ITEM);
+        ALL_ITEM_MAP.put("eye_wash_station", EYE_WASH_STATION_ITEM);
+        ALL_ITEM_MAP.put("component_drawer_cabinet", COMPONENT_DRAWER_CABINET_ITEM);
+        ALL_ITEM_MAP.put("secured_cylinder_rack", SECURED_CYLINDER_RACK_ITEM);
+        ALL_ITEM_MAP.put("sample_storage_rack", SAMPLE_STORAGE_RACK_ITEM);
+        ALL_ITEM_MAP.put("balance_scale_table", BALANCE_SCALE_TABLE_ITEM);
         ALL_ITEM_MAP.put("fire_extinguisher_cabinet", FIRE_EXTINGUISHER_CABINET_ITEM);
         ALL_ITEM_MAP.put("assembly_point_sign", ASSEMBLY_POINT_SIGN_ITEM);
         ALL_ITEM_MAP.put("first_aid_wall_cabinet", FIRST_AID_WALL_CABINET_ITEM);

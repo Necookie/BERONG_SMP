@@ -31,6 +31,16 @@ import net.necookie.disastersim.block.OfficeSafeBlock;
 import net.necookie.disastersim.block.CoatRackStandBlock;
 import net.necookie.disastersim.block.BundyTimeClockBlock;
 import net.necookie.disastersim.block.OfficeSupplyCabinetBlock;
+import net.necookie.disastersim.block.LaboratoryFumeHoodBlock;
+import net.necookie.disastersim.block.EquipmentRackBlock;
+import net.necookie.disastersim.block.LabStoolBlock;
+import net.necookie.disastersim.block.OscilloscopeCartBlock;
+import net.necookie.disastersim.block.MicroscopeStationBlock;
+import net.necookie.disastersim.block.EyeWashStationBlock;
+import net.necookie.disastersim.block.ComponentDrawerCabinetBlock;
+import net.necookie.disastersim.block.SecuredCylinderRackBlock;
+import net.necookie.disastersim.block.SampleStorageRackBlock;
+import net.necookie.disastersim.block.BalanceScaleTableBlock;
 import net.necookie.disastersim.block.CafeteriaMenuBoardBlock;
 import net.necookie.disastersim.block.CourtLineBlock;
 import net.necookie.disastersim.block.CafeteriaStoolBlock;
@@ -1166,6 +1176,68 @@ public final class ModBlocks {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_YELLOW)
                     .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion()
                     .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 2));
+
+    // ── Laboratory furniture ─────────────────────────────────────────────
+
+    /** Full-height fume hood with glass sash — see {@link LaboratoryFumeHoodBlock}. */
+    public static final DeferredBlock<LaboratoryFumeHoodBlock> LABORATORY_FUME_HOOD = BLOCKS.registerBlock(
+            "laboratory_fume_hood", LaboratoryFumeHoodBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Floor-standing 19-inch instrument rack — see {@link EquipmentRackBlock}. */
+    public static final DeferredBlock<EquipmentRackBlock> EQUIPMENT_RACK = BLOCKS.registerBlock(
+            "equipment_rack", EquipmentRackBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Adjustable lab stool on a steel column — see {@link LabStoolBlock}. */
+    public static final DeferredBlock<LabStoolBlock> LAB_STOOL = BLOCKS.registerBlock(
+            "lab_stool", LabStoolBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Rolling oscilloscope instrument cart — see {@link OscilloscopeCartBlock}. */
+    public static final DeferredBlock<OscilloscopeCartBlock> OSCILLOSCOPE_CART = BLOCKS.registerBlock(
+            "oscilloscope_cart", OscilloscopeCartBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Bench microscope on a small stand — see {@link MicroscopeStationBlock}. */
+    public static final DeferredBlock<MicroscopeStationBlock> MICROSCOPE_STATION = BLOCKS.registerBlock(
+            "microscope_station", MicroscopeStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Green wall eyewash fountain — see {@link EyeWashStationBlock}. */
+    public static final DeferredBlock<EyeWashStationBlock> EYE_WASH_STATION = BLOCKS.registerBlock(
+            "eye_wash_station", EyeWashStationBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Wall cabinet of labeled electronics-parts drawers — see {@link ComponentDrawerCabinetBlock}. */
+    public static final DeferredBlock<ComponentDrawerCabinetBlock> COMPONENT_DRAWER_CABINET = BLOCKS.registerBlock(
+            "component_drawer_cabinet", ComponentDrawerCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Wall rack of properly chained gas cylinders — see {@link SecuredCylinderRackBlock}. */
+    public static final DeferredBlock<SecuredCylinderRackBlock> SECURED_CYLINDER_RACK = BLOCKS.registerBlock(
+            "secured_cylinder_rack", SecuredCylinderRackBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Shelf of labeled sample boxes and vial trays — see {@link SampleStorageRackBlock}. */
+    public static final DeferredBlock<SampleStorageRackBlock> SAMPLE_STORAGE_RACK = BLOCKS.registerBlock(
+            "sample_storage_rack", SampleStorageRackBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Anti-vibration granite balance table — see {@link BalanceScaleTableBlock}. */
+    public static final DeferredBlock<BalanceScaleTableBlock> BALANCE_SCALE_TABLE = BLOCKS.registerBlock(
+            "balance_scale_table", BalanceScaleTableBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
+                    .strength(2.0f, 4.0f).sound(SoundType.STONE).noOcclusion());
 
     private ModBlocks() {}
 

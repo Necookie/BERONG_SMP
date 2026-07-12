@@ -133,6 +133,17 @@ public final class ModCreativeTabs {
                 output.accept(ModItems.COAT_RACK_STAND_ITEM.get());
                 output.accept(ModItems.BUNDY_TIME_CLOCK_ITEM.get());
                 output.accept(ModItems.OFFICE_SUPPLY_CABINET_ITEM.get());
+                // Laboratory
+                output.accept(ModItems.LABORATORY_FUME_HOOD_ITEM.get());
+                output.accept(ModItems.EQUIPMENT_RACK_ITEM.get());
+                output.accept(ModItems.LAB_STOOL_ITEM.get());
+                output.accept(ModItems.OSCILLOSCOPE_CART_ITEM.get());
+                output.accept(ModItems.MICROSCOPE_STATION_ITEM.get());
+                output.accept(ModItems.EYE_WASH_STATION_ITEM.get());
+                output.accept(ModItems.COMPONENT_DRAWER_CABINET_ITEM.get());
+                output.accept(ModItems.SECURED_CYLINDER_RACK_ITEM.get());
+                output.accept(ModItems.SAMPLE_STORAGE_RACK_ITEM.get());
+                output.accept(ModItems.BALANCE_SCALE_TABLE_ITEM.get());
             }).build());
 
     /** Creative tab: all 30 hazard prop blocks for the simulation building. */
