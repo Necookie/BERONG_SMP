@@ -21,6 +21,16 @@ import net.necookie.disastersim.block.GlassOfficePartitionBlock;
 import net.necookie.disastersim.block.LoungeSofaBlock;
 import net.necookie.disastersim.block.PottedOfficePlantBlock;
 import net.necookie.disastersim.block.WindowBlindsBlock;
+import net.necookie.disastersim.block.OfficeCubiclePartitionBlock;
+import net.necookie.disastersim.block.ReceptionDeskBlock;
+import net.necookie.disastersim.block.MailSortingShelfBlock;
+import net.necookie.disastersim.block.OfficePhotocopierBlock;
+import net.necookie.disastersim.block.DocumentTrayStackBlock;
+import net.necookie.disastersim.block.WallBinderShelfBlock;
+import net.necookie.disastersim.block.OfficeSafeBlock;
+import net.necookie.disastersim.block.CoatRackStandBlock;
+import net.necookie.disastersim.block.BundyTimeClockBlock;
+import net.necookie.disastersim.block.OfficeSupplyCabinetBlock;
 import net.necookie.disastersim.block.CafeteriaMenuBoardBlock;
 import net.necookie.disastersim.block.CourtLineBlock;
 import net.necookie.disastersim.block.CafeteriaStoolBlock;
@@ -1027,6 +1037,68 @@ public final class ModBlocks {
             "faulty_dimmer_switch", FaultyDimmerSwitchBlock::new,
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
+
+    // ── Office furniture ─────────────────────────────────────────────────
+
+    /** Fabric-covered cubicle divider panel — see {@link OfficeCubiclePartitionBlock}. */
+    public static final DeferredBlock<OfficeCubiclePartitionBlock> OFFICE_CUBICLE_PARTITION = BLOCKS.registerBlock(
+            "office_cubicle_partition", OfficeCubiclePartitionBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
+
+    /** Tall front-counter reception desk — see {@link ReceptionDeskBlock}. */
+    public static final DeferredBlock<ReceptionDeskBlock> RECEPTION_DESK = BLOCKS.registerBlock(
+            "reception_desk", ReceptionDeskBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Wall pigeonhole mail-slot unit — see {@link MailSortingShelfBlock}. */
+    public static final DeferredBlock<MailSortingShelfBlock> MAIL_SORTING_SHELF = BLOCKS.registerBlock(
+            "mail_sorting_shelf", MailSortingShelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Large floor office copier — see {@link OfficePhotocopierBlock}. */
+    public static final DeferredBlock<OfficePhotocopierBlock> OFFICE_PHOTOCOPIER = BLOCKS.registerBlock(
+            "office_photocopier", OfficePhotocopierBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Desktop stack of letter trays — see {@link DocumentTrayStackBlock}. */
+    public static final DeferredBlock<DocumentTrayStackBlock> DOCUMENT_TRAY_STACK = BLOCKS.registerBlock(
+            "document_tray_stack", DocumentTrayStackBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Wall shelf of colored ring binders — see {@link WallBinderShelfBlock}. */
+    public static final DeferredBlock<WallBinderShelfBlock> WALL_BINDER_SHELF = BLOCKS.registerBlock(
+            "wall_binder_shelf", WallBinderShelfBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Squat steel safe with a dial — see {@link OfficeSafeBlock}. */
+    public static final DeferredBlock<OfficeSafeBlock> OFFICE_SAFE = BLOCKS.registerBlock(
+            "office_safe", OfficeSafeBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.METAL)
+                    .strength(3.0f, 8.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Standing wooden coat rack — see {@link CoatRackStandBlock}. */
+    public static final DeferredBlock<CoatRackStandBlock> COAT_RACK_STAND = BLOCKS.registerBlock(
+            "coat_rack_stand", CoatRackStandBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.WOOD)
+                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+
+    /** Wall punch clock with a timecard rack — see {@link BundyTimeClockBlock}. */
+    public static final DeferredBlock<BundyTimeClockBlock> BUNDY_TIME_CLOCK = BLOCKS.registerBlock(
+            "bundy_time_clock", BundyTimeClockBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+
+    /** Tall stationery cabinet, doors ajar — see {@link OfficeSupplyCabinetBlock}. */
+    public static final DeferredBlock<OfficeSupplyCabinetBlock> OFFICE_SUPPLY_CABINET = BLOCKS.registerBlock(
+            "office_supply_cabinet", OfficeSupplyCabinetBlock::new,
+            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
     private ModBlocks() {}
 

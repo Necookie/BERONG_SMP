@@ -718,6 +718,38 @@ public final class ModItems {
     public static final DeferredItem<BlockItem> WINDOW_BLINDS_ITEM =
             ITEMS.registerSimpleBlockItem("window_blinds", ModBlocks.WINDOW_BLINDS);
 
+    // ── Office furniture ─────────────────────────────────────────────────
+
+    public static final DeferredItem<BlockItem> OFFICE_CUBICLE_PARTITION_ITEM =
+            ITEMS.registerSimpleBlockItem("office_cubicle_partition", ModBlocks.OFFICE_CUBICLE_PARTITION);
+
+    public static final DeferredItem<BlockItem> RECEPTION_DESK_ITEM =
+            ITEMS.registerSimpleBlockItem("reception_desk", ModBlocks.RECEPTION_DESK);
+
+    public static final DeferredItem<BlockItem> MAIL_SORTING_SHELF_ITEM =
+            ITEMS.registerSimpleBlockItem("mail_sorting_shelf", ModBlocks.MAIL_SORTING_SHELF);
+
+    public static final DeferredItem<BlockItem> OFFICE_PHOTOCOPIER_ITEM =
+            ITEMS.registerSimpleBlockItem("office_photocopier", ModBlocks.OFFICE_PHOTOCOPIER);
+
+    public static final DeferredItem<BlockItem> DOCUMENT_TRAY_STACK_ITEM =
+            ITEMS.registerSimpleBlockItem("document_tray_stack", ModBlocks.DOCUMENT_TRAY_STACK);
+
+    public static final DeferredItem<BlockItem> WALL_BINDER_SHELF_ITEM =
+            ITEMS.registerSimpleBlockItem("wall_binder_shelf", ModBlocks.WALL_BINDER_SHELF);
+
+    public static final DeferredItem<BlockItem> OFFICE_SAFE_ITEM =
+            ITEMS.registerSimpleBlockItem("office_safe", ModBlocks.OFFICE_SAFE);
+
+    public static final DeferredItem<BlockItem> COAT_RACK_STAND_ITEM =
+            ITEMS.registerSimpleBlockItem("coat_rack_stand", ModBlocks.COAT_RACK_STAND);
+
+    public static final DeferredItem<BlockItem> BUNDY_TIME_CLOCK_ITEM =
+            ITEMS.registerSimpleBlockItem("bundy_time_clock", ModBlocks.BUNDY_TIME_CLOCK);
+
+    public static final DeferredItem<BlockItem> OFFICE_SUPPLY_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("office_supply_cabinet", ModBlocks.OFFICE_SUPPLY_CABINET);
+
     /** Maps every custom BerongSMP item's registry name → its DeferredItem, for {@code /item get} and {@code /item kit}. */
     public static final LinkedHashMap<String, DeferredItem<? extends Item>> ALL_ITEM_MAP = new LinkedHashMap<>();
 
@@ -808,6 +840,16 @@ public final class ModItems {
         ALL_ITEM_MAP.put("lounge_sofa", LOUNGE_SOFA_ITEM);
         ALL_ITEM_MAP.put("potted_office_plant", POTTED_OFFICE_PLANT_ITEM);
         ALL_ITEM_MAP.put("window_blinds", WINDOW_BLINDS_ITEM);
+        ALL_ITEM_MAP.put("office_cubicle_partition", OFFICE_CUBICLE_PARTITION_ITEM);
+        ALL_ITEM_MAP.put("reception_desk", RECEPTION_DESK_ITEM);
+        ALL_ITEM_MAP.put("mail_sorting_shelf", MAIL_SORTING_SHELF_ITEM);
+        ALL_ITEM_MAP.put("office_photocopier", OFFICE_PHOTOCOPIER_ITEM);
+        ALL_ITEM_MAP.put("document_tray_stack", DOCUMENT_TRAY_STACK_ITEM);
+        ALL_ITEM_MAP.put("wall_binder_shelf", WALL_BINDER_SHELF_ITEM);
+        ALL_ITEM_MAP.put("office_safe", OFFICE_SAFE_ITEM);
+        ALL_ITEM_MAP.put("coat_rack_stand", COAT_RACK_STAND_ITEM);
+        ALL_ITEM_MAP.put("bundy_time_clock", BUNDY_TIME_CLOCK_ITEM);
+        ALL_ITEM_MAP.put("office_supply_cabinet", OFFICE_SUPPLY_CABINET_ITEM);
         ALL_ITEM_MAP.put("fire_extinguisher_cabinet", FIRE_EXTINGUISHER_CABINET_ITEM);
         ALL_ITEM_MAP.put("assembly_point_sign", ASSEMBLY_POINT_SIGN_ITEM);
         ALL_ITEM_MAP.put("first_aid_wall_cabinet", FIRST_AID_WALL_CABINET_ITEM);
