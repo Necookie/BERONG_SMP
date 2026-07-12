@@ -409,5 +409,26 @@
   "block.berongsmp.overheating_cctv_dvr": "Overheating CCTV DVR (Electrical Hazard)",
   "block.berongsmp.overheating_cctv_dvr.desc": "Place on a security shelf. Blocked vents on a 24/7 DVR can cook the drive bay. Wet chemical won't defuse it — use ABC or CO2.",
   "block.berongsmp.faulty_parol_lantern": "Faulty Parol Lantern (Electrical Hazard)",
-  "block.berongsmp.faulty_parol_lantern.desc": "Place hanging in an office lobby. Substandard series lights left plugged in can ignite at the star points. Wet chemical won't defuse it — use ABC or CO2."
+  "block.berongsmp.faulty_parol_lantern.desc": "Place hanging in an office lobby. Substandard series lights left plugged in can ignite at the star points. Wet chemical won't defuse it — use ABC or CO2.",
+
+  "block.berongsmp.unbalanced_centrifuge": "Unbalanced Centrifuge (Electrical Hazard)",
+  "block.berongsmp.unbalanced_centrifuge.desc": "Place on a lab bench. An unbalanced rotor walking the bench can ignite from motor friction. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.runaway_3d_printer": "Runaway 3D Printer (Electrical Hazard)",
+  "block.berongsmp.runaway_3d_printer.desc": "Place in a laboratory. A dislodged heater cartridge can set the filament alight mid-print. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.unattended_soldering_iron": "Unattended Soldering Iron (Electrical Hazard)",
+  "block.berongsmp.unattended_soldering_iron.desc": "Place on a lab bench. An iron left powered at full temperature can burn through the mat. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.unshielded_test_laser": "Unshielded Test Laser (Electrical Hazard)",
+  "block.berongsmp.unshielded_test_laser.desc": "Place on a lab bench. A Class-4 beam with a missing beam dump can burn through the cable tray. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.leaking_oxygen_cylinder": "Leaking Oxygen Cylinder (Oxidizer Hazard)",
+  "block.berongsmp.leaking_oxygen_cylinder.desc": "Place in a laboratory. A leaking regulator enriches the nearby air with oxygen — everything burns hotter and faster near a spark. Dry chemical is unreliable and wet chemical is doubly wrong on an oxidizer fire — only the CO2 extinguisher may defuse it.",
+  "block.berongsmp.shorted_bench_supply": "Shorted Bench Supply (Electrical Hazard)",
+  "block.berongsmp.shorted_bench_supply.desc": "Place on a lab bench. Shorted crocodile leads under a schematic can arc and ignite the paper. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.overheated_vacuum_pump": "Overheated Vacuum Pump (Electrical Hazard)",
+  "block.berongsmp.overheated_vacuum_pump.desc": "Place under a lab bench. Degraded oil and a slipping belt can ignite. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.stuck_environment_chamber": "Stuck Environment Chamber (Electrical Hazard)",
+  "block.berongsmp.stuck_environment_chamber.desc": "Place in a laboratory. A welded heater relay can overshoot far past setpoint and ignite. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.solvent_drying_oven": "Solvent Drying Oven (Vapor Hazard)",
+  "block.berongsmp.solvent_drying_oven.desc": "Place in a laboratory. Solvent-wet glassware can vent flammable vapor that flashes over in the heated chamber. Wet chemical won't defuse it — use ABC or CO2.",
+  "block.berongsmp.faulty_dehumidifier": "Faulty Dehumidifier (Electrical Hazard)",
+  "block.berongsmp.faulty_dehumidifier.desc": "Place in a laboratory. An iced coil and short-cycling compressor can overheat and ignite. Wet chemical won't defuse it — use ABC or CO2."
 }

@@ -790,3 +790,111 @@ chemical is refused with a warning** (see the Conference Room Zone rule above).
 - **Hazardous State:** Substandard series lights left plugged in, wiring hot at the star points.
 
 - **Failure Consequence (300 ticks):** The hot wiring ignites the parol. **ABC/CO2 only.** Prevention unplugs the series lights.
+
+## 🔬 Research & Instrumentation Laboratory Zone (props 76–85, added 2026-07-12)
+
+Angle: research/testing/instrumentation equipment — deliberately not cooking and not science-class
+chemistry (which the earlier `bunsen_burner_station`/`reagent_storage_shelf` already cover). Nine
+of these ten are energized-electrical or flammable-vapor hazards (**ABC/CO2 only**); the tenth,
+`leaking_oxygen_cylinder`, is a special oxidizer case (**CO2 only** — the strictest rule in the
+mod).
+
+### 76. Unbalanced Centrifuge (`berongsmp:unbalanced_centrifuge`)
+
+- **Target Room:** Laboratory bench
+
+- **Normal State:** A benchtop centrifuge, lid closed, idle.
+
+- **Hazardous State:** An unbalanced rotor screams at speed, walking across the bench, motor friction smoking.
+
+- **Failure Consequence (350 ticks):** The motor friction ignites. **ABC/CO2 only.** Prevention stops the centrifuge and rebalances the load.
+
+### 77. Runaway 3D Printer (`berongsmp:runaway_3d_printer`)
+
+- **Target Room:** Laboratory / makerspace bench
+
+- **Normal State:** An FDM 3D printer, bed cold, idle.
+
+- **Hazardous State:** A dislodged heater cartridge causes thermal runaway mid-print, filament smoking.
+
+- **Failure Consequence (300 ticks):** The filament and bed ignite. **ABC/CO2 only.** Prevention reseats the heater cartridge and stops the print.
+
+### 78. Unattended Soldering Iron (`berongsmp:unattended_soldering_iron`)
+
+- **Target Room:** Laboratory / electronics bench
+
+- **Normal State:** A soldering iron, cold, in its holder.
+
+- **Hazardous State:** Left powered at full temperature, the tip burns through the mat beside flux and wire spools. Distinct from `unattended_welding_station` (shop-scale arc welder, not a benchtop electronics tool).
+
+- **Failure Consequence (300 ticks):** The iron ignites the flux and spools. **ABC/CO2 only.** Prevention returns the iron to its holder.
+
+### 79. Unshielded Test Laser (`berongsmp:unshielded_test_laser`)
+
+- **Target Room:** Laboratory optics bench
+
+- **Normal State:** A bench Class-4 laser, shutter closed, off.
+
+- **Hazardous State:** Running with the beam dump missing, burning a spot on the cable tray.
+
+- **Failure Consequence (250 ticks — the fastest in this zone):** The beam burns through the cable tray and ignites it. **ABC/CO2 only.** Prevention closes the shutter and refits the beam dump.
+
+### 80. Leaking Oxygen Cylinder (`berongsmp:leaking_oxygen_cylinder`) — **Oxidizer, CO2-only**
+
+- **Target Room:** Laboratory
+
+- **Normal State:** A compressed-oxygen cylinder, capped and upright. The safe counterpart is `secured_cylinder_rack` — two properly chained cylinders.
+
+- **Hazardous State:** A leaking regulator seat enriches the nearby air with oxygen — an oxidizer hazard, not a fuel-gas leak like every other gas prop in the mod. Everything nearby burns hotter and faster near any spark.
+
+- **Failure Consequence (300 ticks, 2-block radius):** Oxygen-enriched air finds a spark and burns violently. **Only the CO2 extinguisher may defuse it** — dry chemical is unreliable against an oxidizer-fed fire, and wet chemical is doubly wrong. Prevention closes the cylinder valve.
+
+### 81. Shorted Bench Supply (`berongsmp:shorted_bench_supply`)
+
+- **Target Room:** Laboratory / electronics bench
+
+- **Normal State:** A benchtop DC power supply, outputs off.
+
+- **Hazardous State:** Crocodile leads shorted under a paper schematic, current limit defeated.
+
+- **Failure Consequence (400 ticks):** The shorted leads arc and ignite the schematic. **ABC/CO2 only.** Prevention clears the leads and resets the current limit.
+
+### 82. Overheated Vacuum Pump (`berongsmp:overheated_vacuum_pump`)
+
+- **Target Room:** Under a laboratory bench
+
+- **Normal State:** A rotary-vane vacuum pump, idle.
+
+- **Hazardous State:** Running on degraded black oil, belt slipping and smoking.
+
+- **Failure Consequence (450 ticks):** The degraded oil and belt ignite. **ABC/CO2 only.** Prevention shuts off the pump for an oil change.
+
+### 83. Stuck Environment Chamber (`berongsmp:stuck_environment_chamber`)
+
+- **Target Room:** Laboratory
+
+- **Normal State:** An environmental test chamber, door sealed, display nominal.
+
+- **Hazardous State:** A welded heater relay overshoots far past setpoint with a sample inside.
+
+- **Failure Consequence (450 ticks):** The overshoot ignites the sample. **ABC/CO2 only.** Prevention cuts power and frees the relay.
+
+### 84. Solvent Drying Oven (`berongsmp:solvent_drying_oven`)
+
+- **Target Room:** Laboratory
+
+- **Normal State:** A lab drying oven, door shut, empty.
+
+- **Hazardous State:** Solvent-wet glassware loaded — flammable vapor accumulating in the heated chamber. Distinct from the kitchen `gas_deck_oven`/`convection_oven` (appliance failure, not vapor accumulation).
+
+- **Failure Consequence (350 ticks, 2-block radius):** The accumulated vapor flashes over. **ABC/CO2 only.** Prevention opens the door and vents the vapor.
+
+### 85. Faulty Dehumidifier (`berongsmp:faulty_dehumidifier`)
+
+- **Target Room:** Laboratory
+
+- **Normal State:** A dehumidifier, cycling normally.
+
+- **Hazardous State:** The coil ices over, compressor short-cycling and overheating — a real recall-class appliance fire. Distinct from `overheating_wall_aircon` (window unit, condensation-into-wiring failure).
+
+- **Failure Consequence (400 ticks):** The short-cycling compressor ignites. **ABC/CO2 only.** Prevention unplugs the unit and lets the coil thaw.
