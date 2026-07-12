@@ -27,7 +27,11 @@ sourceSets.main.resources {
 }
 
 repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    // EngineHub (WorldEdit) — required by the optional worldedit-neoforge dependency below.
+    maven {
+        name = "EngineHub"
+        url = "https://maven.enginehub.org/repo/"
+    }
 }
 
 base {
@@ -134,6 +138,13 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    // WorldEdit (optional): //copyroom reads the player's active WorldEdit selection.
+    // compileOnly for API access at build time; localRuntime (not runtimeOnly, see the
+    // configurations block above) so the full mod is present for dev-testing without being
+    // pulled in as a hard dependency by anything that depends on this mod.
+    compileOnly "com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}"
+    localRuntime "com.sk89q.worldedit:worldedit-neoforge-mc${minecraft_version}:${worldedit_version}:dist"
 
     // Unit testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'

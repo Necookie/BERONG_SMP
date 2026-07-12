@@ -9,6 +9,7 @@ import net.minecraft.commands.CommandSourceStack;
  * - ItemCommands          — /spawn_lspu, /get_extinguisher, /get_co2_extinguisher, /get_wet_chemical_extinguisher
  * - SimulationCommands    — /sim_fire, /sim_earthquake, /sim_stop, /sim_status, /sim_list, etc.
  * - BfpAdminCommands      — /bfp (login, checkin, checkout, sessions, student, ...)
+ * - CopyRoomCommand       — //copyroom (WorldEdit selection → clipboard room metrics, optional dep)
  */
 public class ModCommands {
 
@@ -22,5 +23,6 @@ public class ModCommands {
         ItemCommands.register(dispatcher);
         SimulationCommands.register(dispatcher);
         BfpAdminCommands.register(dispatcher);
+        CopyRoomCommand.register(dispatcher);
     }
 }
