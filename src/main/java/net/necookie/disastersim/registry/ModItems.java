@@ -551,6 +551,48 @@ public final class ModItems {
             ITEMS.registerSimpleBlockItem("faulty_dimmer_switch", ModBlocks.FAULTY_DIMMER_SWITCH);
     static { HAZARD_ITEM_MAP.put("faulty_dimmer_switch", FAULTY_DIMMER_SWITCH_ITEM); }
 
+    // ── Office hazards (props 66-75) ────────────────────────────────────────
+
+    public static final DeferredItem<BlockItem> JAMMED_PAPER_SHREDDER_ITEM =
+            ITEMS.registerSimpleBlockItem("jammed_paper_shredder", ModBlocks.JAMMED_PAPER_SHREDDER);
+    static { HAZARD_ITEM_MAP.put("jammed_paper_shredder", JAMMED_PAPER_SHREDDER_ITEM); }
+
+    public static final DeferredItem<BlockItem> OVERHEATED_NETWORK_CABINET_ITEM =
+            ITEMS.registerSimpleBlockItem("overheated_network_cabinet", ModBlocks.OVERHEATED_NETWORK_CABINET);
+    static { HAZARD_ITEM_MAP.put("overheated_network_cabinet", OVERHEATED_NETWORK_CABINET_ITEM); }
+
+    public static final DeferredItem<BlockItem> EBIKE_CHARGING_STATION_ITEM =
+            ITEMS.registerSimpleBlockItem("ebike_charging_station", ModBlocks.EBIKE_CHARGING_STATION);
+    static { HAZARD_ITEM_MAP.put("ebike_charging_station", EBIKE_CHARGING_STATION_ITEM); }
+
+    public static final DeferredItem<BlockItem> FAILING_FLUORESCENT_BALLAST_ITEM =
+            ITEMS.registerSimpleBlockItem("failing_fluorescent_ballast", ModBlocks.FAILING_FLUORESCENT_BALLAST);
+    static { HAZARD_ITEM_MAP.put("failing_fluorescent_ballast", FAILING_FLUORESCENT_BALLAST_ITEM); }
+
+    public static final DeferredItem<BlockItem> DRY_AQUARIUM_HEATER_ITEM =
+            ITEMS.registerSimpleBlockItem("dry_aquarium_heater", ModBlocks.DRY_AQUARIUM_HEATER);
+    static { HAZARD_ITEM_MAP.put("dry_aquarium_heater", DRY_AQUARIUM_HEATER_ITEM); }
+
+    public static final DeferredItem<BlockItem> UNATTENDED_MUG_WARMER_ITEM =
+            ITEMS.registerSimpleBlockItem("unattended_mug_warmer", ModBlocks.UNATTENDED_MUG_WARMER);
+    static { HAZARD_ITEM_MAP.put("unattended_mug_warmer", UNATTENDED_MUG_WARMER_ITEM); }
+
+    public static final DeferredItem<BlockItem> DUSTY_CRT_MONITOR_ITEM =
+            ITEMS.registerSimpleBlockItem("dusty_crt_monitor", ModBlocks.DUSTY_CRT_MONITOR);
+    static { HAZARD_ITEM_MAP.put("dusty_crt_monitor", DUSTY_CRT_MONITOR_ITEM); }
+
+    public static final DeferredItem<BlockItem> RODENT_CHEWED_WIRING_ITEM =
+            ITEMS.registerSimpleBlockItem("rodent_chewed_wiring", ModBlocks.RODENT_CHEWED_WIRING);
+    static { HAZARD_ITEM_MAP.put("rodent_chewed_wiring", RODENT_CHEWED_WIRING_ITEM); }
+
+    public static final DeferredItem<BlockItem> OVERHEATING_CCTV_DVR_ITEM =
+            ITEMS.registerSimpleBlockItem("overheating_cctv_dvr", ModBlocks.OVERHEATING_CCTV_DVR);
+    static { HAZARD_ITEM_MAP.put("overheating_cctv_dvr", OVERHEATING_CCTV_DVR_ITEM); }
+
+    public static final DeferredItem<BlockItem> FAULTY_PAROL_LANTERN_ITEM =
+            ITEMS.registerSimpleBlockItem("faulty_parol_lantern", ModBlocks.FAULTY_PAROL_LANTERN);
+    static { HAZARD_ITEM_MAP.put("faulty_parol_lantern", FAULTY_PAROL_LANTERN_ITEM); }
+
     public static final DeferredItem<BlockItem> TEACHERS_DESK_ITEM =
             ITEMS.registerSimpleBlockItem("teachers_desk", ModBlocks.TEACHERS_DESK);
 
