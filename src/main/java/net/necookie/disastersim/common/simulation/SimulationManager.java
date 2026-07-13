@@ -643,6 +643,10 @@ public class SimulationManager {
                     if (!session.getPreventedHazards().contains(pos)) {
                         HazardManager.forceFailure(level, session, pos, player);
                         session.recordEscalated(pos);
+                        // Catch the 2 nearest wood-plank blocks (not just an adjacent air cell) so
+                        // the fire has real fuel and actually spreads through the room, instead of
+                        // risking a lone fire block fizzling out on a stone/tile floor.
+                        HazardBlock.igniteNearestFlammable(level, pos, 2, 6);
                     }
                 }
                 player.sendSystemMessage(Component.literal(String.format(

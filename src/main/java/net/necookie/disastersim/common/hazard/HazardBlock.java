@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
@@ -17,6 +18,10 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Base for symmetric (no-facing) hazard prop blocks. Adds the {@code hazardous} (developing
@@ -119,6 +124,49 @@ public abstract class HazardBlock extends Block {
                 lit++;
             }
         }
+    }
+
+    /**
+     * Finds the {@code maxTargets} nearest {@code BlockTags.PLANKS} blocks within
+     * {@code searchRadius} of {@code origin} and lights an adjacent air cell next to each — real
+     * fuel for vanilla fire to consume and spread through, instead of a lone fire block floating
+     * with nothing flammable nearby to catch (which can fizzle out immediately on a stone/tile
+     * floor). Falls back to {@link #igniteAdjacent} if no planks are found in range, so a failure
+     * always visibly starts a fire even in an all-non-flammable room.
+     */
+    public static void igniteNearestFlammable(Level level, BlockPos origin, int maxTargets, int searchRadius) {
+        List<BlockPos> planks = new ArrayList<>();
+        for (BlockPos check : BlockPos.betweenClosed(
+                origin.offset(-searchRadius, -searchRadius, -searchRadius),
+                origin.offset(searchRadius, searchRadius, searchRadius))) {
+            if (level.getBlockState(check).is(BlockTags.PLANKS)) {
+                planks.add(check.immutable());
+            }
+        }
+        if (planks.isEmpty()) {
+            igniteAdjacent(level, origin, maxTargets);
+            return;
+        }
+        planks.sort(Comparator.comparingDouble(p -> p.distSqr(origin)));
+        int lit = 0;
+        for (BlockPos plank : planks) {
+            if (lit >= maxTargets) break;
+            if (igniteAdjacentTo(level, plank)) lit++;
+        }
+        // Every nearest plank's neighbors happened to be occupied/non-air — still guarantee a fire.
+        if (lit == 0) igniteAdjacent(level, origin, maxTargets);
+    }
+
+    /** Lights the first available adjacent air cell touching {@code target}. Returns true if one was lit. */
+    private static boolean igniteAdjacentTo(Level level, BlockPos target) {
+        for (Direction dir : Direction.values()) {
+            BlockPos adj = target.relative(dir);
+            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
+                level.setBlockAndUpdate(adj, Blocks.FIRE.defaultBlockState());
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

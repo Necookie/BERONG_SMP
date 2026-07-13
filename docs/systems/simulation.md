@@ -139,7 +139,13 @@ PREVENTION (Config.NEW_SIM2_PREVENTION_TICKS, default 2:00):
     hazardous organically — only the deliberately-armed 5 are ever live
   → all 5 found before the timer → phase jumps straight to END (endReason=all_hazards_prevented)
   → timer expires with some unfound → HazardManager.forceFailure ignites every unfound hazard
-    (small fire, ON_FIRE=true) → INTERVENTION; phase_transition(intervention) emitted
+    (small fire, ON_FIRE=true), then HazardBlock.igniteNearestFlammable(level, pos, 2, 6) lights
+    the 2 nearest BlockTags.PLANKS blocks within 6 blocks (falls back to a single adjacent-air
+    igniteAdjacent if no planks are in range) — real fuel so the fire actually spreads through the
+    room instead of a lone fire block risking fizzling out on a stone/tile floor — → INTERVENTION;
+    phase_transition(intervention) emitted. Scoped to this transition only (2026-07-14) — every
+    other hazard failure mod-wide (organic Library/CCS escalation, the Academy's Reyes demo, the
+    hazard wand) keeps the original single-adjacent-air-block behavior.
 
 INTERVENTION (Config.NEW_SIM2_INTERVENTION_TICKS, default 1:30):
   → each escalated hazard needs its class-correct extinguisher — this is free: the existing
