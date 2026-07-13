@@ -4,6 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
@@ -109,6 +111,9 @@ public abstract class HazardFacingBlock extends Block {
                 level.setBlock(pos, state.setValue(HAZARDOUS, false), 3);
                 level.levelEvent(null, 1009, pos, 0);
                 player.sendSystemMessage(Component.literal(preventMessage()));
+                if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer) {
+                    HazardManager.onManualPrevention(serverLevel, serverPlayer, pos, state);
+                }
             }
             return InteractionResult.SUCCESS;
         }
