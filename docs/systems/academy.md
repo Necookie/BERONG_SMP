@@ -1,6 +1,8 @@
 # New Tutorial Building (Academy)
 
-A second, **fully independent** tutorial — "the Academy" — lives in `academy_building.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. The old tutorial keeps functioning exactly as before and is still the only thing gating the fire/quake simulation buttons (`LobbyManager.gatesPassed`) — wiring the Academy into that gate is an explicit future step, not done yet. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/academy_script.md`.
+A second, **fully independent** tutorial — "the Academy" — lives in `academy_building.schem`, placed at `AcademyBuildingManager.POS = BlockPos(-177,-34,8)`. It deliberately does not reuse or extend the old `tutorial/` package (`TutorialStage`/`TutorialManager`/`NpcDialogue`/`NpcRole`) — a single flat stage enum can't represent 4 independently-progressing NPC rooms, so it's a parallel system in its own `net.necookie.disastersim.academy` package instead. **The Academy is now the default tutorial** (2026-07-13): the main lobby's first button launches it directly (`AcademyManager.startAcademyRun`), and its own certification (Capt. Morfe's `MorfePhase.EVALUATED_PASS`, or a restored `/login` account's `users.tutorial_completed`) gates the lobby's second button (New Sim Building 2.0), not the old tutorial anymore — see `docs/systems/simulation.md`'s "Lobby Buttons & the Academy→Simulation Bridge". The old tutorial still functions exactly as before but no longer gates anything; it's reachable via `/bfp old_tutorial` for dev/admin use. `/bfp new_tutorial*` was renamed to `/bfp tutorial*` (the old `/bfp tutorial` moved to `/bfp old_tutorial`) to match — a breaking change for staff muscle memory, called out here deliberately. Full dialogue script, per-room coordinate tables, and a Mermaid flow diagram: `docs/academy_script.md`.
+
+**Auth system (2026-07-13):** `/register <username> <password> <student_id> <section> <full_name>` now creates a persistent Turso `users` account (salted `PBKDF2WithHmacSHA256` hash via `session.PasswordHasher`, never plaintext) alongside the existing world-saved registration, so a returning student can `/login <username> <password>` on a later visit and — if their account already shows `tutorial_completed=1` — skip straight to the lobby's simulation button without replaying the Academy. `session.AuthManager` holds the per-station "who's logged in" state (transient, like `DropAndRollManager`'s per-UUID maps) and is what `MorfeRoomManager.runEvaluation`'s PASS branch flips via `AuthManager.markTutorialCompleted`. `/history` (player) and `/bfp user <username>` (instructor) both query the same `sessions.username`-keyed run history. `SessionManager.checkin` also now resets `AcademySavedData` for the incoming station UUID — otherwise a new student at a shared station would inherit whatever Academy certification state the previous student left behind, since `AcademyProgress` is keyed by station UUID, not student identity; a returning student's *real* certification lives on their `users` row instead, restored on `/login`.
 
 ```
 Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — physical lime
@@ -104,7 +106,7 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   as a violation. **She can never strand**:
   with nobody in an escortable phase, `tickReturnHome` walks her back to the briefing anchor
   (-153.5,-33,32.5) (stuck → poof-teleport home) and drops escort mode on arrival;
-  `CruzRoomManager.resetCruz` (called by `/bfp new_tutorial [reset]` and Morfe's fail-reset)
+  `CruzRoomManager.resetCruz` (called by `/bfp tutorial [reset]` and Morfe's fail-reset)
   instantly snaps her there so a restarting trainee always finds her waiting; and a `ROOM1_BOUNDS`
   safety net poof-recovers her to the escorted player if she's ever outside Room 1's footprint.
   The duplicate second Cruz from the old two-NPC handoff design was **removed from the .schem file
@@ -303,10 +305,17 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. Morfe speaks through 
   0-100 rubric: 25 points each for movement mistakes, fire correct/wrong ratio, drop-and-roll
   performed, quake compliant — pattern-cloned from SimulationFeedback's threshold-driven scoring
   style), prints the score (+ weak areas on a fail), then plays `MORFE_PASS_LINES` or
-  `MORFE_FAIL_LINES`. Pass → certified, no further gating changes. Fail → the reset (full
-  AcademyProgress wipe + Reyes prop cleanup + teleport back to Room 1's briefing zone, where a
-  Cruz welcome-back prompt greets them) fires from the fail sequence's onComplete — only after the
-  player has read Morfe's send-off where they stand.
+  `MORFE_FAIL_LINES`. **Pass (2026-07-13):** certifies the trainee (`MorfePhase.EVALUATED_PASS`),
+  calls `AuthManager.markTutorialCompleted` (persists certification to a logged-in `/login`
+  account, if any), then `MORFE_PASS_LINES`'s `onComplete` runs `deploySimAfterCountdown` — a
+  5-second countdown message followed by `SimulationManager.startSimulation(NEW_SIM_BUILDING2_FIRE)`
+  (the exact `/sim_fire new_sim_building2` path), skipped if the player logged out, died, or
+  already started something else during the wait. The tutorial's completion is no longer a dead
+  end — it feeds directly into the graded simulation run, which itself later returns to Morfe for
+  a debrief (see `docs/systems/simulation.md`'s "Lobby Buttons & the Academy→Simulation Bridge").
+  Fail → the reset (full AcademyProgress wipe + Reyes prop cleanup + teleport back to Room 1's
+  briefing zone, where a Cruz welcome-back prompt greets them) fires from the fail sequence's
+  onComplete — only after the player has read Morfe's send-off where they stand.
 
 **Scoring scope is deliberate (confirmed 2026-07-06):** Reyes's `PREVENTION_DEMO` and
 `ALARM_CHECKPOINT`/`EVACUATION_BRIEF` phases earn zero points in `AcademyScoring` — only movement,
