@@ -259,8 +259,27 @@ public class TursoClient {
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN confidence REAL"))
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN bfp_notes TEXT"))
             .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN move_log_csv TEXT"))
+            .thenRun(() -> silentAlter("ALTER TABLE sessions ADD COLUMN username TEXT"))
             .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_student ON sessions(student_name)"))
-            .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_start ON sessions(start_time)"));
+            .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_start ON sessions(start_time)"))
+            .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_username ON sessions(username)"));
+
+        // Separate account table for the /register + /login username/password system — decoupled
+        // from `sessions` (one user row can have many session rows across return visits).
+        String usersDdl = """
+                CREATE TABLE IF NOT EXISTS users (
+                    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username            TEXT    NOT NULL UNIQUE,
+                    password_hash       TEXT    NOT NULL,
+                    student_id          TEXT,
+                    section             TEXT,
+                    full_name           TEXT,
+                    tutorial_completed  INTEGER DEFAULT 0,
+                    created_at          TEXT    NOT NULL,
+                    last_login          TEXT
+                )""";
+        executeAsync(usersDdl)
+            .thenRun(() -> executeAsync("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)"));
     }
 
     /** Runs an ALTER TABLE statement, silently swallowing the error if the column already exists. */
