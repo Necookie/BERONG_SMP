@@ -31,12 +31,14 @@ public class Config {
             .defineInRange("simDurationTicks", 2400, 200, 72000);
 
     public static final ModConfigSpec.IntValue FIRE_SPAWN_COUNT = BUILDER
-            .comment("Number of fire blocks placed per fire-spawn event.")
-            .defineInRange("fireSpawnCount", 3, 1, 50);
+            .comment("Number of fire blocks placed per fire-spawn event. Bumped 3 -> 5 on 2026-07-14 "
+                   + "to make fire spread faster/feel more dangerous.")
+            .defineInRange("fireSpawnCount", 5, 1, 50);
 
     public static final ModConfigSpec.IntValue FIRE_SPAWN_INTERVAL = BUILDER
-            .comment("Ticks between fire-spread events (20 ticks = 1 second). Default: 20 = once per second.")
-            .defineInRange("fireSpawnInterval", 20, 1, 100);
+            .comment("Ticks between fire-spread events (20 ticks = 1 second). Default: 10 = twice per "
+                   + "second (halved from 20 on 2026-07-14 to make fire spread faster).")
+            .defineInRange("fireSpawnInterval", 10, 1, 100);
 
     public static final ModConfigSpec.IntValue QUAKE_BREAK_COUNT = BUILDER
             .comment("Blocks destroyed per earthquake-break event.")

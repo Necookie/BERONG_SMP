@@ -353,8 +353,8 @@ All values are read at call time via `.get()` — changes take effect without re
 | Key | Default | Meaning |
 |---|---|---|
 | `simDurationTicks` | 2400 | Session length (20 ticks = 1 second) |
-| `fireSpawnCount` | 3 | Fire blocks placed per spawn event |
-| `fireSpawnInterval` | 20 | Ticks between fire spawns |
+| `fireSpawnCount` | 5 | Fire blocks placed per spawn event (bumped from 3 on 2026-07-14, faster spread) |
+| `fireSpawnInterval` | 10 | Ticks between fire spawns (halved from 20 on 2026-07-14, faster spread) |
 | `quakeBreakCount` | 2 | Blocks destroyed per quake event |
 | `quakeInterval` | 10 | Ticks between quake events |
 | `simAreaSize` | 25 | XZ arena radius for random effects |
