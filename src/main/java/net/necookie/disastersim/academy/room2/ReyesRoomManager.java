@@ -635,7 +635,7 @@ public final class ReyesRoomManager {
      * Restocks the Tool Selection Wall: refills each of the three glow item frames with its
      * extinguisher, respawning any frame entity that's gone entirely. The schematic only restores
      * the wall on a full server reboot ({@code SchemLoader} re-places entities at placement time) —
-     * a mid-session restart via {@code /bfp new_tutorial [reset]} or a Capt. Morfe fail previously
+     * a mid-session restart via {@code /bfp tutorial [reset]} or a Capt. Morfe fail previously
      * left the frames empty (the previous run took the items) or missing (popped/burned), so the
      * next trainee couldn't complete TOOL_SELECTION at all. Called from both reset paths and,
      * self-healingly, right after building placement.
@@ -710,7 +710,7 @@ public final class ReyesRoomManager {
     }
 
     /**
-     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp new_tutorial reset}) to
+     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp tutorial reset}) to
      * drop this room's per-player state. If the scripted ignite demo was active, also clears the
      * player's actual fire: vanilla persists remaining fire ticks in the player's own save data, so
      * without this a player who quits mid-demo would rejoin still visibly on fire and taking damage

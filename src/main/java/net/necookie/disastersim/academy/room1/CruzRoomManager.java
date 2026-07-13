@@ -470,7 +470,7 @@ public final class CruzRoomManager {
     }
 
     /**
-     * Instantly returns Cruz to her briefing anchor. Called by {@code /bfp new_tutorial [reset]}
+     * Instantly returns Cruz to her briefing anchor. Called by {@code /bfp tutorial [reset]}
      * and Capt. Morfe's fail-reset so a restarting trainee always finds her waiting beside them at
      * (-153.5,-33,32.5) — never stranded across the building where the last run left her.
      */

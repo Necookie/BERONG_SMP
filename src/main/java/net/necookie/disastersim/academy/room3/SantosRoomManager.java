@@ -273,7 +273,7 @@ public final class SantosRoomManager {
     }
 
     /**
-     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp new_tutorial reset}) to
+     * Called from {@code AcademyManager}'s logout handler (and {@code /bfp tutorial reset}) to
      * drop this room's per-player state. If the player quit mid-drill (PRE_DRILL or QUAKE_ACTIVE),
      * also rolls their phase back to NOT_STARTED: {@code preDrillStartTick} is gone the instant it's
      * removed below, but the persisted phase alone is enough for {@link #tick} to re-enter

@@ -74,12 +74,12 @@ public final class AcademyBuildingManager {
      */
     private static final AABB BUILDING_SCAN_BOUNDS = new AABB(-400, -80, -200, 400, 60, 400);
 
-    /** A named F3-captured reference viewpoint inside the building, for {@code /bfp new_tutorial}. */
+    /** A named F3-captured reference viewpoint inside the building, for {@code /bfp tutorial}. */
     public record Viewpoint(double x, double y, double z, float yaw, float pitch) {}
 
     /**
-     * Reference viewpoints for {@code /bfp new_tutorial <name>} (see
-     * {@code BfpAdminCommands.newTutorialCommand}) — one admin teleport target per named station,
+     * Reference viewpoints for {@code /bfp tutorial <name>} (see
+     * {@code BfpAdminCommands.academyTutorialCommand}) — one admin teleport target per named station,
      * captured via in-game F3 while standing at that spot. Add more entries here as additional
      * stations (fire practice, earthquake drill, ...) get captured; each key becomes its own
      * subcommand automatically.
@@ -100,8 +100,8 @@ public final class AcademyBuildingManager {
     );
 
     /**
-     * Key into {@link #VIEWPOINTS} used by the bare {@code /bfp new_tutorial} (no section
-     * argument), mirroring {@code /bfp tutorial}'s no-arg quick-test form. Repoint this once a
+     * Key into {@link #VIEWPOINTS} used by the bare {@code /bfp tutorial} (no section
+     * argument), mirroring {@code /bfp old_tutorial}'s no-arg quick-test form. Repoint this once a
      * dedicated entrance viewpoint is captured; for now the only known-good spot is Officer Cruz's.
      */
     public static final String DEFAULT_VIEWPOINT = "officer_cruz";

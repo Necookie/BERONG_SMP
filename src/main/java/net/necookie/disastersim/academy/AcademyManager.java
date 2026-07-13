@@ -110,7 +110,7 @@ public final class AcademyManager {
      * earthquake is still going after exiting and reloading the world." Both room managers roll
      * their own phase back to a safe re-enterable point internally; see their {@code clearPlayer}.
      * Shared by the {@link PlayerLifecycleRegistry} hooks registered above and
-     * {@code /bfp new_tutorial reset}, which needs the same cleanup while the player stays connected.
+     * {@code /bfp tutorial reset}, which needs the same cleanup while the player stays connected.
      */
     public static void clearTransientState(ServerPlayer player) {
         UUID id = player.getUUID();

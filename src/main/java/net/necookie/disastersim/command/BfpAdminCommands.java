@@ -162,7 +162,7 @@ public class BfpAdminCommands {
                                     return 1;
                                 })))
 
-                .then(Commands.literal("tutorial")
+                .then(Commands.literal("old_tutorial")
                         .executes(ctx -> {
                             if (!ctx.getSource().isPlayer()) return 0;
                             return tutorialReset(ctx, ctx.getSource().getPlayer());
@@ -170,7 +170,7 @@ public class BfpAdminCommands {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> tutorialReset(ctx, EntityArgument.getPlayer(ctx, "player")))))
 
-                .then(newTutorialCommand())
+                .then(academyTutorialCommand())
 
                 .then(Commands.literal("session")
                         .then(Commands.literal("info")
@@ -397,26 +397,27 @@ public class BfpAdminCommands {
     }
 
     /**
-     * {@code /bfp new_tutorial [player]} — mirrors {@code /bfp tutorial}'s "activate" behavior for
-     * the old tutorial exactly: wipes the player's {@link AcademyProgress} back to a fresh start,
-     * clears every room manager's transient state, and teleports to
+     * {@code /bfp tutorial [player]} — the Academy is now the default tutorial (the legacy one
+     * lives at {@code /bfp old_tutorial}). Mirrors what {@code /bfp old_tutorial}'s "activate"
+     * behavior does for the legacy tutorial: wipes the player's {@link AcademyProgress} back to a
+     * fresh start, clears every room manager's transient state, and teleports to
      * {@link AcademyBuildingManager#DEFAULT_VIEWPOINT} (Room 1). Previously this bare form only
      * teleported without resetting anything, which didn't actually "start" the Academy the way
-     * {@code /bfp tutorial} starts the old one — a player already mid-progress would just get
+     * {@code /bfp old_tutorial} starts the legacy one — a player already mid-progress would just get
      * dropped back into whatever phase they were last in instead of a clean run.
      *
-     * <p>{@code /bfp new_tutorial <section> [player]} teleports to any other named F3-captured
+     * <p>{@code /bfp tutorial <section> [player]} teleports to any other named F3-captured
      * reference viewpoint ({@link AcademyBuildingManager#VIEWPOINTS}) as a pure dev-navigation jump
      * — no reset — for eyeballing NPC placement. One literal subcommand per map entry, so adding a
-     * new named viewpoint there automatically adds its own {@code /bfp new_tutorial <name>}
-     * subcommand here. {@code /bfp new_tutorial reset [player]} is kept as an explicit, discoverable
-     * alias for the same reset-and-teleport the bare command now performs.
+     * new named viewpoint there automatically adds its own {@code /bfp tutorial <name>}
+     * subcommand here. {@code /bfp tutorial reset [player]} is kept as an explicit, discoverable
+     * alias for the same reset-and-teleport the bare command performs.
      */
-    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> newTutorialCommand() {
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> academyTutorialCommand() {
         AcademyBuildingManager.Viewpoint defaultViewpoint =
                 AcademyBuildingManager.VIEWPOINTS.get(AcademyBuildingManager.DEFAULT_VIEWPOINT);
 
-        var root = Commands.literal("new_tutorial")
+        var root = Commands.literal("tutorial")
                 .executes(ctx -> {
                     if (!ctx.getSource().isPlayer()) return 0;
                     return academyReset(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
@@ -460,7 +461,7 @@ public class BfpAdminCommands {
     }
 
     /**
-     * {@code /bfp new_tutorial skipto <instructor> [player]} — dev shortcut so a room past the
+     * {@code /bfp tutorial skipto <instructor> [player]} — dev shortcut so a room past the
      * first doesn't require replaying every prior room by hand. Marks every room strictly before
      * {@code instructor} as {@code DONE} (and the target room + everything after it back to
      * {@code NOT_STARTED}, via {@link AcademyProgress#resetAll()}), applies the same transient-state
@@ -532,10 +533,11 @@ public class BfpAdminCommands {
         target.teleportTo(level, viewpoint.x(), viewpoint.y(), viewpoint.z(),
                 java.util.Collections.emptySet(), viewpoint.yaw(), viewpoint.pitch(), true);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "§eTeleported §f" + target.getName().getString() + "§e to the new tutorial building."), true);
+                "§eTeleported §f" + target.getName().getString() + "§e to the Academy building."), true);
         return 1;
     }
 
+    /** Resets the legacy tutorial (now {@code /bfp old_tutorial}) — the Academy's reset lives in {@link #academyReset}. */
     private static int tutorialReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
         SessionManager.resetTutorialOnly(target.getUUID());
@@ -546,7 +548,7 @@ public class BfpAdminCommands {
                 TutorialLobbyManager.TSPAWN_Z,
                 java.util.Collections.emptySet(), 0f, 0f, true);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "§eTutorial reset and §f" + target.getName().getString() + "§e teleported to tutorial lobby."), true);
+                "§eOLD tutorial reset and §f" + target.getName().getString() + "§e teleported to tutorial lobby."), true);
         return 1;
     }
 
