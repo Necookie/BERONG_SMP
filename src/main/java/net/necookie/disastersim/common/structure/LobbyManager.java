@@ -15,12 +15,14 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.necookie.disastersim.BerongSMP;
+import net.necookie.disastersim.academy.AcademyManager;
+import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.registration.RegistrationManager;
+import net.necookie.disastersim.session.AuthManager;
 import net.necookie.disastersim.tutorial.NpcRole;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.tutorial.TutorialManager;
-import net.necookie.disastersim.tutorial.TutorialSavedData;
-import net.necookie.disastersim.tutorial.TutorialStage;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -47,9 +49,9 @@ public class LobbyManager {
     private static final Identifier LOBBY_STRUCTURE_ID =
             Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lobby_structure");
 
-    // Sorted by ascending Z: lower Z = fire trigger, higher Z = earthquake trigger.
-    private static BlockPos fireButtonPos  = null;
-    private static BlockPos quakeButtonPos = null;
+    // Sorted by ascending Z: lower Z = Academy tutorial trigger, higher Z = New Sim Building 2.0 trigger.
+    private static BlockPos tutorialButtonPos   = null;
+    private static BlockPos simulationButtonPos = null;
 
     private static boolean lobbyReady = false;
 
@@ -89,21 +91,21 @@ public class LobbyManager {
             }
         }
 
-        // Sorted ascending Z: lower Z = fire trigger, higher Z = earthquake trigger.
-        // Relies on the lobby NBT placing the fire button at a lower Z — update sort key if NBT changes.
+        // Sorted ascending Z: lower Z = Academy tutorial trigger, higher Z = simulation trigger.
+        // Relies on the lobby NBT placing the tutorial button at a lower Z — update sort key if NBT changes.
         buttons.sort(Comparator.comparingInt(BlockPos::getZ));
 
-        fireButtonPos  = buttons.size() >= 1 ? buttons.get(0) : null;
-        quakeButtonPos = buttons.size() >= 2 ? buttons.get(1) : null;
+        tutorialButtonPos   = buttons.size() >= 1 ? buttons.get(0) : null;
+        simulationButtonPos = buttons.size() >= 2 ? buttons.get(1) : null;
 
         if (buttons.size() < 2) {
             BerongSMP.LOGGER.warn(
                     "Lobby button scan found only {} button(s); expected 2. "
-                    + "Fire={}, Quake={}. Check the lobby_structure NBT.",
-                    buttons.size(), fireButtonPos, quakeButtonPos);
+                    + "Tutorial={}, Simulation={}. Check the lobby_structure NBT.",
+                    buttons.size(), tutorialButtonPos, simulationButtonPos);
         } else {
-            BerongSMP.LOGGER.info("Lobby buttons found: {} total. Fire={}, Quake={}",
-                    buttons.size(), fireButtonPos, quakeButtonPos);
+            BerongSMP.LOGGER.info("Lobby buttons found: {} total. Tutorial={}, Simulation={}",
+                    buttons.size(), tutorialButtonPos, simulationButtonPos);
         }
     }
 
@@ -116,14 +118,10 @@ public class LobbyManager {
         routePlayer(player, level);
     }
 
-    @SubscribeEvent
-    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        if (!TutorialLobbyManager.needsTutorialLobby(player.getUUID())) return;
-
-        ServerLevel level = (ServerLevel) player.level();
-        routePlayer(player, level);
-    }
+    // No custom onPlayerRespawn handler: the world respawn point is pinned to the lobby
+    // (BerongSMP.onServerStarting → level.setRespawnData at BlockPos(8,-31,8)), so vanilla's own
+    // respawn placement already lands players there with no bed/anchor set. A death mid-simulation
+    // is handled separately by SimulationManager.onPlayerRespawn (pendingLobbyRespawn).
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
@@ -149,20 +147,15 @@ public class LobbyManager {
         TutorialManager.onNpcInteract(player, role);
     }
 
+    /**
+     * Every login lands in the main lobby — the old routing that diverted an old-tutorial-incomplete
+     * player to the legacy tutorial lobby is gone now that the legacy tutorial no longer gates
+     * anything the main lobby offers (its buttons launch the Academy / New Sim Building 2.0
+     * directly). The legacy tutorial is still reachable via {@code /bfp old_tutorial} for dev use.
+     */
     private static void routePlayer(ServerPlayer player, ServerLevel level) {
-        if (TutorialLobbyManager.needsTutorialLobby(player.getUUID())) {
-            player.teleportTo(level,
-                TutorialLobbyManager.TSPAWN_X, TutorialLobbyManager.TSPAWN_Y, TutorialLobbyManager.TSPAWN_Z,
-                Collections.emptySet(), 0.0f, 0.0f, true);
-            // Re-give extinguisher and fires if player reconnected mid-PASS_SPRAY stage
-            if (TutorialSavedData.get(level).getStage(player.getUUID()) == TutorialStage.PASS_SPRAY) {
-                TutorialManager.spawnPracticeFires(level);
-                TutorialManager.giveExtinguisher(player);
-            }
-        } else {
-            player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
-                Collections.emptySet(), 0.0f, 0.0f, true);
-        }
+        player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
+            Collections.emptySet(), 0.0f, 0.0f, true);
     }
 
     @SubscribeEvent
@@ -177,40 +170,59 @@ public class LobbyManager {
 
         BlockPos pos = event.getPos();
 
-        if (fireButtonPos != null && pos.equals(fireButtonPos)) {
-            if (!gatesPassed(player, event)) return;
-            SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_FIRE);
+        if (tutorialButtonPos != null && pos.equals(tutorialButtonPos)) {
+            if (!baseGatesPassed(player, event)) return;
+            ServerLevel level = (ServerLevel) event.getLevel();
+            AcademyManager.startAcademyRun(player, level);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
-        } else if (quakeButtonPos != null && pos.equals(quakeButtonPos)) {
-            if (!gatesPassed(player, event)) return;
-            // Pick a random strong magnitude (6.0–9.5) so each button-triggered quake feels different.
-            double magnitude = 6.0 + event.getLevel().getRandom().nextDouble() * 3.5;
-            SimulationManager.startSimulation(player, SimulationManager.SimulationState.CCS_EARTHQUAKE, magnitude);
+        } else if (simulationButtonPos != null && pos.equals(simulationButtonPos)) {
+            if (!baseGatesPassed(player, event)) return;
+            if (!academyCertified(player, event)) return;
+            SimulationManager.startSimulation(player, SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
     }
 
     /**
-     * Runs the lobby entry gates (registration → active session → tutorial complete), unless the
-     * player has an admin test-bypass. Returns {@code true} if the player may start a simulation;
+     * Runs the lobby entry gates common to both buttons (registration → active session), unless
+     * the player has an admin test-bypass. Returns {@code true} if the player may proceed;
      * otherwise messages the reason, cancels the interaction with FAIL, and returns {@code false}.
+     * The legacy tutorial-completion gate is gone — the Academy is reached via button 1 itself now,
+     * and button 2's own Academy-certification gate is checked separately by
+     * {@link #academyCertified}.
      */
-    private static boolean gatesPassed(ServerPlayer player, PlayerInteractEvent.RightClickBlock event) {
+    private static boolean baseGatesPassed(ServerPlayer player, PlayerInteractEvent.RightClickBlock event) {
         if (BfpAdminCommands.isTestBypass(player.getUUID())) return true;
         if (!RegistrationManager.isRegistered(player)) {
             return denyGate(player, event,
-                "§cPlease /register first! Usage: /register <student_id> <section> <full_name>");
+                "§cPlease /register first! Usage: /register <username> <password> <student_id> <section> <full_name>"
+                    + "\n§7(Already have an account? §f/login <username> <password>§7 instead.)");
         }
         if (SessionManager.getActiveSession(player.getUUID()) == null) {
             return denyGate(player, event,
-                "§cYour session has expired. Type §f/register <id> <section> <name>§c again to start a new one.");
-        }
-        if (!TutorialManager.isComplete(player.getUUID())) {
-            return denyGate(player, event, "§cComplete the safety tutorial first!");
+                "§cYour session has expired. Use §f/login <username> <password>§c (or §f/register§c again) to start a new one.");
         }
         return true;
+    }
+
+    /**
+     * Button 2 (New Sim Building 2.0) additionally requires the player to have been certified by
+     * the Academy — either this session (Capt. Morfe's {@code EVALUATED_PASS}) or on a previous
+     * visit, restored via {@code /login} ({@link AuthManager#isTutorialCompleted}).
+     */
+    private static boolean academyCertified(ServerPlayer player, PlayerInteractEvent.RightClickBlock event) {
+        if (BfpAdminCommands.isTestBypass(player.getUUID())) return true;
+        ServerLevel level = (ServerLevel) event.getLevel();
+        boolean certifiedThisSession =
+                AcademySavedData.get(level).get(player.getUUID()).morfePhase() == MorfePhase.EVALUATED_PASS;
+        if (certifiedThisSession || AuthManager.isTutorialCompleted(player.getUUID())) {
+            return true;
+        }
+        return denyGate(player, event,
+            "§cComplete the Academy tutorial first — press the first button."
+                + "\n§7(Already certified from a previous visit? §f/login <username> <password>§7 to restore it.)");
     }
 
     private static boolean denyGate(ServerPlayer player, PlayerInteractEvent.RightClickBlock event, String message) {
