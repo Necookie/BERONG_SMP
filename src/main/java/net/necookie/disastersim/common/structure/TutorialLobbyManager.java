@@ -104,11 +104,6 @@ public class TutorialLobbyManager {
         initNpcs(level);
     }
 
-    /** Returns {@code true} if the player has not yet completed the tutorial. */
-    public static boolean needsTutorialLobby(UUID uuid) {
-        return !TutorialManager.isComplete(uuid);
-    }
-
     // -----------------------------------------------------------------------
     // Structure building
     // -----------------------------------------------------------------------
