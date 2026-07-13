@@ -12,8 +12,11 @@ import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModBlocks;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.academy.room4.MorfeRoomManager;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.common.hazard.HazardBlock;
 import net.necookie.disastersim.common.hazard.HazardManager;
+import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.common.zones.AssemblyZone;
@@ -288,7 +291,7 @@ public class SimulationManager {
         if (!isDoor) return;
 
         String targetName = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getPath();
-        double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        double elapsedS = session.elapsedSeconds();
         double hazDist;
         if (session.getState().isFire() && event.getLevel() instanceof ServerLevel sl) {
             hazDist = nearestFireDistance(sl, player.blockPosition());
@@ -321,15 +324,29 @@ public class SimulationManager {
         if (session == null) return;
 
         int finalScore = 0;
-        if (session.getState().isFire()) {
+        NewSimScoring.Result newSimResult = null;
+        if (session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            newSimResult = NewSimScoring.evaluate(
+                    session.getArmedHazards().size(),
+                    session.getPreventedHazards().size(),
+                    session.getEscalatedHazards().size(),
+                    session.getExtinguishedEscalated().size(),
+                    session.wasAlarmRung(),
+                    session.hasReachedAssembly(),
+                    endReason);
+            finalScore = newSimResult.score();
+        } else if (session.getState().isFire()) {
             finalScore = Math.min(100, session.getFiresExtinguished() * 2);
         }
-        double elapsedT = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        boolean passed = newSimResult != null
+                ? newSimResult.passed()
+                : session.getState().isFire() && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
+        double elapsedT = session.elapsedSeconds();
         session.logger.log("SIM_END", java.util.Map.of(
             "fires_extinguished", session.getFiresExtinguished(),
             "fire_spread_count", session.getFireSpreadCount(),
             "score", finalScore,
-            "passed", finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get(),
+            "passed", passed,
             "end_reason", endReason
         ));
 
@@ -349,7 +366,7 @@ public class SimulationManager {
         meta.put("scenario_type",                session.getState().name().toLowerCase());
         meta.put("started_at",                   session.getStartedAt().toString());
         meta.put("ended_at",                     java.time.Instant.now().toString());
-        meta.put("duration_ticks",               Config.SIM_DURATION_TICKS.get() - session.getTimerTicks());
+        meta.put("duration_ticks",               session.elapsedTicks());
         meta.put("end_reason",                   endReason);
         meta.put("fires_extinguished_count",     session.getFiresExtinguished());
         meta.put("magnitude",                    session.getState().isQuake()
@@ -360,25 +377,41 @@ public class SimulationManager {
                                                      ? session.getAftershockMagnitudeScale() : "");
         meta.put("final_earthquake_phase",       session.getQuakePhase() != null
                                                      ? session.getQuakePhase().name() : "");
+        meta.put("final_fire_phase",              session.getFirePhase() != null
+                                                     ? session.getFirePhase().name() : "");
         TelemetryCsvWriter.closeSession(session.getSessionId(), meta);
         TelemetryCsvWriter.flush();
 
         if (TursoClient.isReady()) {
-            String simType = session.getState().name(); // FIRE, EARTHQUAKE, CCS_FIRE, or CCS_EARTHQUAKE
-            boolean passed = session.getState().isFire()
-                    && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
+            String simType = session.getState().name(); // FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE, or NEW_SIM_BUILDING2_FIRE
             net.necookie.disastersim.BerongSMP.LOGGER.info(
                     "[SimulationManager] endSimulation uuid={} simType={} score={}", uuid, simType, finalScore);
-            TursoClient.executeAsync(
-                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
-                    " end_time=?, status='completed', event_log=?, move_log_csv=?" +
-                    " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
-                    " ORDER BY id DESC LIMIT 1)",
-                    simType, finalScore, passed,
-                    java.time.Instant.now().toString(),
-                    session.logger.toJson(),
-                    session.buildMoveCsv(),
-                    uuid.toString());
+            if (newSimResult != null) {
+                // Only New Sim Building 2.0 writes prep_level — every other scenario type must
+                // leave the column untouched, since a BFP instructor may already have set it
+                // manually via /bfp prep_level and this UPDATE would otherwise null it back out.
+                TursoClient.executeAsync(
+                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, prep_level=?," +
+                        " end_time=?, status='completed', event_log=?, move_log_csv=?" +
+                        " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                        " ORDER BY id DESC LIMIT 1)",
+                        simType, finalScore, passed, newSimResult.prepLevel(),
+                        java.time.Instant.now().toString(),
+                        session.logger.toJson(),
+                        session.buildMoveCsv(),
+                        uuid.toString());
+            } else {
+                TursoClient.executeAsync(
+                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
+                        " end_time=?, status='completed', event_log=?, move_log_csv=?" +
+                        " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                        " ORDER BY id DESC LIMIT 1)",
+                        simType, finalScore, passed,
+                        java.time.Instant.now().toString(),
+                        session.logger.toJson(),
+                        session.buildMoveCsv(),
+                        uuid.toString());
+            }
         } else {
             net.necookie.disastersim.BerongSMP.LOGGER.warn(
                     "[SimulationManager] TursoClient not ready — session data NOT saved for {}", uuid);
@@ -396,15 +429,24 @@ public class SimulationManager {
         if (player.isAlive()) {
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
-            if (session.getState().isFire()) {
-                player.sendSystemMessage(Component.literal(
-                    "§eFires extinguished: " + session.getFiresExtinguished()));
-                SimulationFeedback.sendFire(player, session.logger, finalScore);
-            } else if (session.getState().isQuake()) {
-                SimulationFeedback.sendQuake(player, finalScore);
+            if (newSimResult != null) {
+                // Route through Capt. Morfe for an in-character debrief instead of the lobby —
+                // startSimDebrief itself teleports to the lobby once the dialogue finishes.
+                AcademyBuildingManager.Viewpoint vp = AcademyBuildingManager.VIEWPOINTS.get("capt_morfe");
+                player.teleportTo(level, vp.x(), vp.y(), vp.z(),
+                        Collections.emptySet(), vp.yaw(), vp.pitch(), true);
+                MorfeRoomManager.startSimDebrief(player, newSimResult, endReason);
+            } else {
+                if (session.getState().isFire()) {
+                    player.sendSystemMessage(Component.literal(
+                        "§eFires extinguished: " + session.getFiresExtinguished()));
+                    SimulationFeedback.sendFire(player, session.logger, finalScore);
+                } else if (session.getState().isQuake()) {
+                    SimulationFeedback.sendQuake(player, finalScore);
+                }
+                player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
+                        Collections.emptySet(), 0.0f, 0.0f, true);
             }
-            player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
-                    Collections.emptySet(), 0.0f, 0.0f, true);
         } else {
             pendingLobbyRespawn.add(uuid);
         }
@@ -412,6 +454,17 @@ public class SimulationManager {
 
     public static void placeAllBuildings(ServerLevel level) {
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+    }
+
+    /**
+     * Runs {@link HazardManager#scanHazardProps} over New Sim Building 2.0's full arena bounds
+     * without starting a session — the verification tool for confirming the arena bounds actually
+     * cover every hazard prop/computer/outlet placed in the building (see {@code /sim_scan_hazards}
+     * in {@code SimulationCommands}, and the New Sim Building 2.0 plan's manual prerequisites).
+     */
+    public static List<BlockPos> scanNewSimBuilding2Hazards(ServerLevel level) {
+        return HazardManager.scanHazardProps(level,
+                NEW_SIM2_ARENA_BASE, NEW_SIM2_ARENA_SPAN_X, NEW_SIM2_ARENA_SPAN_Z, NEW_SIM2_ARENA_HEIGHT);
     }
 
     public static SimulationSession getSession(java.util.UUID uuid) {
@@ -468,7 +521,9 @@ public class SimulationManager {
 
             tickTelemetry(session, uuid, level, player, ticks);
 
-            if (session.getState().isFire()) {
+            if (session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+                if (tickNewSim2FireSession(session, uuid, level, player, ticks)) continue;
+            } else if (session.getState().isFire()) {
                 tickFireSession(session, level, player, ticks);
             } else if (session.getState().isQuake()) {
                 tickEarthquakeSession(session, level, player, ticks);
@@ -486,9 +541,11 @@ public class SimulationManager {
                                       ServerLevel level, ServerPlayer player, int ticks) {
         if (ticks % 20 == 0) {
             BlockPos pos = player.blockPosition();
-            SimRoom room = session.getState().isCCS()
-                    ? SimRoom.fromCCSPos(pos)
-                    : SimRoom.fromPos(pos, SIM_POS);
+            SimRoom room = session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE
+                    ? SimRoom.fromNewSim2Pos(pos)
+                    : session.getState().isCCS()
+                            ? SimRoom.fromCCSPos(pos)
+                            : SimRoom.fromPos(pos, SIM_POS);
             double nearestFire = nearestFireDistance(level, pos);
             session.logger.log("PLAYER_TICK", java.util.Map.of(
                 "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
@@ -497,7 +554,7 @@ public class SimulationManager {
             ));
         }
         if (ticks % 2 == 0) {
-            double elapsedS = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+            double elapsedS = session.elapsedSeconds();
             double hazDist = hazardDistance(session, level, player);
             session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                     session.getSessionId(), uuid.toString(),
@@ -548,6 +605,69 @@ public class SimulationManager {
         if (session.getState().isCCS()) {
             tickCcsFireNarrative(player, ticks);
         }
+    }
+
+    /**
+     * Drives New Sim Building 2.0's prevention→intervention→evacuation state machine (own branch
+     * in {@link #onServerTick}, not {@link #tickFireSession} — the organic random-escalation
+     * {@code HazardManager.tick} drives is deliberately not used here). Returns true once the run
+     * has ended (caller should {@code continue} the outer loop, matching {@link #tickAssemblyZone}'s
+     * convention) — {@code tickFirePhase()} is pure bookkeeping, so all the actual world mutation
+     * (igniting unfound hazards, letting contained fires "go big", ending the session) happens here
+     * on the phase-change edge, exactly like {@link #tickEarthquakeSession} does for quake phases.
+     */
+    private static boolean tickNewSim2FireSession(SimulationSession session, UUID uuid,
+                                                   ServerLevel level, ServerPlayer player, int ticks) {
+        SimulationSession.FirePhase before = session.getFirePhase();
+        session.tickFirePhase();
+        SimulationSession.FirePhase after = session.getFirePhase();
+
+        if (before != after) {
+            if (after == SimulationSession.FirePhase.INTERVENTION) {
+                for (BlockPos pos : session.getArmedHazards()) {
+                    if (!session.getPreventedHazards().contains(pos)) {
+                        HazardManager.forceFailure(level, session, pos, player);
+                        session.recordEscalated(pos);
+                    }
+                }
+                player.sendSystemMessage(Component.literal(String.format(
+                        "§c⚠ Time's up! %d hazard(s) you missed have caught fire — grab the correct extinguisher!",
+                        session.getEscalatedHazards().size())));
+                emitPhaseTransition(session, uuid, player, "intervention");
+            } else if (after == SimulationSession.FirePhase.EVACUATION) {
+                for (BlockPos pos : session.getEscalatedHazards()) {
+                    if (!session.getExtinguishedEscalated().contains(pos)) {
+                        HazardBlock.igniteRadius(level, pos, 3, 10);
+                    }
+                }
+                player.sendSystemMessage(Component.literal(
+                        "§4§l⚠ The fire is out of control — EVACUATE to the assembly area now!"));
+                emitPhaseTransition(session, uuid, player, "evacuation");
+            } else if (after == SimulationSession.FirePhase.END) {
+                String endReason = before == SimulationSession.FirePhase.PREVENTION
+                        ? "all_hazards_prevented" : "intervention_success";
+                player.sendSystemMessage(Component.literal(
+                        "all_hazards_prevented".equals(endReason)
+                                ? "§a✓ Every hazard prevented before it ever caught fire!"
+                                : "§a✓ Every fire contained — nice work!"));
+                endSimulation(uuid, endReason);
+                return true;
+            }
+        }
+
+        // Real arena-wide fire spread only kicks in once evacuation has actually begun.
+        if (session.getFirePhase() == SimulationSession.FirePhase.EVACUATION
+                && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
+            EFFECTS.simulateFire(level, session);
+        }
+        if (ticks % 20 == 0) {
+            EFFECTS.applyFireProximityEffects(level, player);
+            session.resetExtinguishEventPending();
+        }
+        if (ticks % 40 == 0) {
+            EFFECTS.cleanupFireOutsideBounds(level, session);
+        }
+        return false;
     }
 
     /** Sends a one-time alert when the total spread count crosses a dramatic threshold. */
@@ -610,10 +730,12 @@ public class SimulationManager {
     private static void tickExitZone(SimulationSession session, UUID uuid,
                                      ServerLevel level, ServerPlayer player, int ticks) {
         if (session.hasPassedExit()) return;
-        ExitZones.ExitZone exit = ExitZones.find(player.position(), session.getState().isCCS());
+        ExitZones.ExitZone exit = session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE
+                ? ExitZones.findNewSim2(player.position())
+                : ExitZones.find(player.position(), session.getState().isCCS());
         if (exit == null) return;
         session.markPassedExit();
-        double elapsedS   = (double)(Config.SIM_DURATION_TICKS.get() - ticks) / 20.0;
+        double elapsedS   = session.elapsedSeconds();
         double hazDist    = hazardDistance(session, level, player);
         double tRounded   = Math.round(elapsedS * 100.0) / 100.0;
         double hazRounded = Math.round(hazDist  * 100.0) / 100.0;
@@ -631,10 +753,22 @@ public class SimulationManager {
     /** Returns true if simulation ended (caller should continue outer loop). */
     private static boolean tickAssemblyZone(SimulationSession session, UUID uuid,
                                             ServerLevel level, ServerPlayer player, int ticks) {
+        boolean isNewSim2 = session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE;
+        // New Sim Building 2.0's assembly zone only matters once evacuation is actually
+        // triggered — a player standing there during prevention/intervention hasn't "won".
+        if (isNewSim2 && session.getFirePhase() != SimulationSession.FirePhase.EVACUATION) return false;
+
         if (ticks % 5 == 0) {
-            AssemblyZone.spawnBorderParticles(level, session.getState().isCCS());
+            if (isNewSim2) {
+                AssemblyZone.spawnBorderParticlesNewSim2(level);
+            } else {
+                AssemblyZone.spawnBorderParticles(level, session.getState().isCCS());
+            }
         }
-        if (!session.hasReachedAssembly() && AssemblyZone.isInside(player.position(), session.getState().isCCS())) {
+        boolean inside = isNewSim2
+                ? AssemblyZone.isInsideNewSim2(player.position())
+                : AssemblyZone.isInside(player.position(), session.getState().isCCS());
+        if (!session.hasReachedAssembly() && inside) {
             session.markAssemblyReached();
             double hazDist = hazardDistance(session, level, player);
             AssemblyZone.onPlayerArrived(player, session, level, hazDist);
@@ -656,6 +790,10 @@ public class SimulationManager {
     }
 
     private static double hazardDistance(SimulationSession session, ServerLevel level, ServerPlayer player) {
+        if (session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            double armedDist = nearestArmedHazardDistance(session, level, player.blockPosition());
+            return armedDist != NO_HAZARD_DISTANCE ? armedDist : nearestFireDistance(level, player.blockPosition());
+        }
         if (session.getState() == SimulationState.CCS_FIRE) {
             return nearestCCSHazardDistance(level, player.blockPosition());
         }
@@ -665,6 +803,23 @@ public class SimulationManager {
         return session.getEpicenter() != null
                 ? player.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(session.getEpicenter()))
                 : 99.0;
+    }
+
+    /**
+     * Distance to the nearest still-hazardous/on-fire armed hazard (at most {@link
+     * #NEW_SIM2_HAZARD_COUNT} positions, so this is cheap — no arena scan). Falls back to real
+     * fire ({@link #nearestFireDistance}) once evacuation's arena-wide spread begins.
+     */
+    private static double nearestArmedHazardDistance(SimulationSession session, ServerLevel level, BlockPos origin) {
+        double minSq = Double.MAX_VALUE;
+        for (BlockPos pos : session.getArmedHazards()) {
+            net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(pos);
+            if (HazardManager.isHazardous(bs)) {
+                double d = origin.distSqr(pos);
+                if (d < minSq) minSq = d;
+            }
+        }
+        return minSq == Double.MAX_VALUE ? NO_HAZARD_DISTANCE : Math.sqrt(minSq);
     }
 
     private static double nearestCCSHazardDistance(ServerLevel level, BlockPos origin) {
