@@ -3,16 +3,17 @@ package net.necookie.disastersim.common.player;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.necookie.disastersim.registry.ModAttachments;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.common.scheduling.TickScheduler;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,14 +29,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class DropAndRollManager {
 
-    static {
-        TickScheduler.register(DropAndRollManager::tick);
-    }
-
     private static final int FIRE_TICKS_REDUCED_PER_PRESS = 30; // 1.5s worth, vs. vanilla's 1/tick decay
     private static final int DROPPED_WINDOW_TICKS = 100;        // 5s
 
+    // "The fire must always stick to the player unless they drop and roll" — once a player catches
+    // fire during an active fire-type simulation, membership here persists (independent of
+    // Player.getRemainingFireTicks(), which vanilla can zero out on its own via water contact)
+    // until they either start a drop-and-roll or leave the simulation. Stronger-than-vanilla damage
+    // ticks alongside it. See #tick's sticky-fire loop.
+    private static final Set<UUID> stickyBurning = ConcurrentHashMap.newKeySet();
+    private static final int SIM_FIRE_TICK_FLOOR = 60;            // 3s — re-topped every tick, so this is really "never runs out"
+    private static final int SIM_FIRE_DAMAGE_INTERVAL_TICKS = 20; // 1s, matches vanilla's own on-fire damage cadence
+    private static final float SIM_FIRE_DAMAGE = 3.0f;            // vanilla's own on-fire tick is 1.0 — this is meant to hurt
+
     private static final Map<UUID, Integer> droppedTicksRemaining = new ConcurrentHashMap<>();
+
+    static {
+        TickScheduler.register(DropAndRollManager::tick);
+        PlayerLifecycleRegistry.registerLogoutHook(player -> stickyBurning.remove(player.getUUID()));
+    }
 
     private DropAndRollManager() {}
 
@@ -61,6 +73,8 @@ public final class DropAndRollManager {
 
     /** Called once per server tick from SimulationManager.onServerTick. */
     public static void tick(ServerLevel level) {
+        tickStickyFire(level);
+
         if (droppedTicksRemaining.isEmpty()) return;
         Iterator<Map.Entry<UUID, Integer>> it = droppedTicksRemaining.entrySet().iterator();
         while (it.hasNext()) {
@@ -82,6 +96,37 @@ public final class DropAndRollManager {
         }
     }
 
+    /**
+     * Drives the "fire sticks until you actually drop and roll" rule: while a player is inside an
+     * active fire-type {@code SimulationSession} and not currently in the dropped/rolling window,
+     * catching fire (from touching a real fire block, a hazard failure, etc.) keeps them burning —
+     * re-topped every tick regardless of what vanilla's own water-contact/decay logic just did to
+     * {@code remainingFireTicks} — with a heavier damage tick than vanilla's default. Starting a
+     * drop-and-roll ({@link #isDropped}) immediately exempts the player for as long as the window
+     * lasts; leaving the fire-type session (or logging out, via the class-load static hook) drops
+     * them from tracking entirely.
+     */
+    private static void tickStickyFire(ServerLevel level) {
+        for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
+            UUID id = player.getUUID();
+            SimulationSession session = SimulationManager.getSession(id);
+            boolean inFireSim = session != null && session.getState().isFire();
+            if (!inFireSim || isDropped(id)) {
+                stickyBurning.remove(id);
+                continue;
+            }
+            if (player.getRemainingFireTicks() > 0) {
+                stickyBurning.add(id);
+            }
+            if (!stickyBurning.contains(id)) continue;
+
+            player.setRemainingFireTicks(Math.max(player.getRemainingFireTicks(), SIM_FIRE_TICK_FLOOR));
+            if (level.getGameTime() % SIM_FIRE_DAMAGE_INTERVAL_TICKS == 0) {
+                player.hurt(player.damageSources().onFire(), SIM_FIRE_DAMAGE);
+            }
+        }
+    }
+
     public static boolean isDropped(UUID id) {
         return droppedTicksRemaining.containsKey(id);
     }
@@ -95,7 +140,8 @@ public final class DropAndRollManager {
         ServerLevel level = (ServerLevel) player.level();
         level.sendParticles(ParticleTypes.ASH, player.getX(), player.getY() + 0.1, player.getZ(),
                 12, 0.4, 0.05, 0.4, 0.02);
-        level.playSound(null, player.blockPosition(), SoundEvents.GENERIC_EXTINGUISH_FIRE,
-                SoundSource.PLAYERS, 1.0f, 1.2f);
+        // No sound here anymore — GENERIC_EXTINGUISH_FIRE at pitch 1.2 fired on every single press
+        // (mashing R = a rapid, jarring pop repeated many times); the particles alone are enough
+        // feedback for the roll.
     }
 }
