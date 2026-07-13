@@ -431,11 +431,22 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
             if (newSimResult != null) {
                 // Route through Capt. Morfe for an in-character debrief instead of the lobby —
-                // startSimDebrief itself teleports to the lobby once the dialogue finishes.
-                AcademyBuildingManager.Viewpoint vp = AcademyBuildingManager.VIEWPOINTS.get("capt_morfe");
-                player.teleportTo(level, vp.x(), vp.y(), vp.z(),
-                        Collections.emptySet(), vp.yaw(), vp.pitch(), true);
-                MorfeRoomManager.startSimDebrief(player, newSimResult, endReason);
+                // startSimDebrief itself teleports to the lobby once the dialogue finishes. Delayed
+                // 5 seconds ("Morfe is reviewing your run") rather than an instant cut, per the
+                // scenario's intended prevention/intervention/evacuation -> evaluation pacing.
+                player.sendSystemMessage(Component.literal(
+                        "§eSimulation ended. §7Capt. Morfe is reviewing your run — debrief in 5 seconds..."));
+                final NewSimScoring.Result resultForDebrief = newSimResult;
+                final String reasonForDebrief = endReason;
+                TickScheduler.scheduleOnce(100, lvl -> {
+                    ServerPlayer p = lvl.getServer().getPlayerList().getPlayer(uuid);
+                    if (p == null || !p.isAlive()) return; // logged out or died during the wait
+                    if (getSession(uuid) != null) return;   // started something else — skip the stale debrief
+                    AcademyBuildingManager.Viewpoint vp = AcademyBuildingManager.VIEWPOINTS.get("capt_morfe");
+                    p.teleportTo(lvl, vp.x(), vp.y(), vp.z(),
+                            Collections.emptySet(), vp.yaw(), vp.pitch(), true);
+                    MorfeRoomManager.startSimDebrief(p, resultForDebrief, reasonForDebrief);
+                });
             } else {
                 if (session.getState().isFire()) {
                     player.sendSystemMessage(Component.literal(
