@@ -44,12 +44,31 @@ public class ExitZones {
     );
 
     /**
+     * Emergency exits for New Sim Building 2.0.
+     * PLACEHOLDER — no F3 survey has been done for this building's doors yet; roughly the Lobby's
+     * west-facing threshold (docs/new_sim_building2_rooms.md: Lobby X -118..-81, Z 482..498) toward
+     * {@link AssemblyZone#getNewSim2Zone()}. MUST be F3-verified before this scenario is trusted
+     * for real data collection.
+     */
+    public static final List<ExitZone> NEW_SIM2_ZONES = List.of(
+        new ExitZone("new_sim2_main_exit", new AABB(-121, -33, 486, -117, -29, 494))
+    );
+
+    /**
      * Returns the first ExitZone that contains the given position, or null.
      * @param isCCS true to search CCS zones, false for LSPU Library zones.
      */
     public static ExitZone find(Vec3 pos, boolean isCCS) {
         List<ExitZone> list = isCCS ? CCS_ZONES : ZONES;
         for (ExitZone z : list) {
+            if (z.contains(pos)) return z;
+        }
+        return null;
+    }
+
+    /** New Sim Building 2.0's own lookup — a 3rd building doesn't fit the existing boolean isCCS shape. */
+    public static ExitZone findNewSim2(Vec3 pos) {
+        for (ExitZone z : NEW_SIM2_ZONES) {
             if (z.contains(pos)) return z;
         }
         return null;

@@ -189,7 +189,7 @@ public final class SafetyDeviceManager {
     public static void pointToNearestExit(ServerPlayer sp) {
         ExitZones.ExitZone nearest = null;
         double best = Double.MAX_VALUE;
-        for (List<ExitZones.ExitZone> zones : List.of(ExitZones.ZONES, ExitZones.CCS_ZONES)) {
+        for (List<ExitZones.ExitZone> zones : List.of(ExitZones.ZONES, ExitZones.CCS_ZONES, ExitZones.NEW_SIM2_ZONES)) {
             for (ExitZones.ExitZone zone : zones) {
                 double d = zone.bounds().getCenter().distanceTo(sp.position());
                 if (d < best) {

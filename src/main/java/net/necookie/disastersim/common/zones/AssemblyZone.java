@@ -6,7 +6,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.common.simulation.SimulationSession;
 
@@ -30,6 +29,14 @@ public class AssemblyZone {
     // PLACEHOLDER — walk with F3 to confirm exact coordinates (see docs/f3_tuning_todo.md).
     private static final AABB CCS_ZONE = new AABB(76, -35, 73, 136, -28, 90);
 
+    // New Sim Building 2.0 assembly zone.
+    // PLACEHOLDER — no F3 survey has been done for this building yet (unlike ZONE/CCS_ZONE,
+    // which are at least approximately walked). Sized/shaped like CCS_ZONE, roughly outside the
+    // Lobby's west-facing entrance (docs/new_sim_building2_rooms.md: Lobby X -118..-81, Z
+    // 482..498) — MUST be F3-verified in-game before this scenario is trusted for real data
+    // collection; see the New Sim Building 2.0 plan's manual prerequisites.
+    private static final AABB NEW_SIM2_ZONE = new AABB(-140, -34, 480, -119, -28, 500);
+
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;
 
@@ -39,7 +46,15 @@ public class AssemblyZone {
      * @param isCCS true for CCS Admin Building simulations, false for LSPU Library.
      */
     public static void spawnBorderParticles(ServerLevel level, boolean isCCS) {
-        AABB zone = isCCS ? CCS_ZONE : ZONE;
+        spawnBorderParticlesForZone(level, isCCS ? CCS_ZONE : ZONE);
+    }
+
+    /** New Sim Building 2.0's own dispatcher — a 3rd building doesn't fit the existing boolean isCCS shape. */
+    public static void spawnBorderParticlesNewSim2(ServerLevel level) {
+        spawnBorderParticlesForZone(level, NEW_SIM2_ZONE);
+    }
+
+    private static void spawnBorderParticlesForZone(ServerLevel level, AABB zone) {
         double minX = zone.minX, maxX = zone.maxX;
         double minZ = zone.minZ, maxZ = zone.maxZ;
         double baseY = zone.minY;
@@ -72,6 +87,11 @@ public class AssemblyZone {
         return (isCCS ? CCS_ZONE : ZONE).contains(pos);
     }
 
+    /** New Sim Building 2.0's own dispatcher — see {@link #spawnBorderParticlesNewSim2}. */
+    public static boolean isInsideNewSim2(Vec3 pos) {
+        return NEW_SIM2_ZONE.contains(pos);
+    }
+
     /**
      * Called once when a player first enters the zone during a simulation.
      * Logs the assembly_area_reached event, sends a message, and bursts celebration particles.
@@ -81,8 +101,7 @@ public class AssemblyZone {
         player.sendSystemMessage(Component.literal(
                 "§a✓ You reached the ASSEMBLY AREA — you are safe!"));
 
-        double t = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
-        double tRounded = Math.round(t * 100.0) / 100.0;
+        double tRounded = Math.round(session.elapsedSeconds() * 100.0) / 100.0;
         double hazRounded = Math.round(hazardDist * 100.0) / 100.0;
         session.logger.log("assembly_area_reached", java.util.Map.of(
                 "t",               tRounded,
@@ -105,6 +124,7 @@ public class AssemblyZone {
                 pos.x, pos.y + 1, pos.z, 15, 0.5, 0.5, 0.5, 0.2);
     }
 
-    public static AABB getZone()    { return ZONE; }
-    public static AABB getCcsZone() { return CCS_ZONE; }
+    public static AABB getZone()       { return ZONE; }
+    public static AABB getCcsZone()    { return CCS_ZONE; }
+    public static AABB getNewSim2Zone(){ return NEW_SIM2_ZONE; }
 }
