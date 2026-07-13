@@ -1,8 +1,12 @@
 # Simulation Flow
 
 ```
-Player logs in → LobbyManager.onPlayerLogin → teleport to lobby
-Player clicks button → LobbyManager.onRightClickBlock → SimulationManager.startSimulation
+Player logs in → LobbyManager.onPlayerLogin → always teleport to the main lobby (SPAWN_X/Y/Z)
+Player clicks the main lobby's button 1 → LobbyManager.onRightClickBlock → AcademyManager.startAcademyRun
+  (see "Lobby Buttons & the Academy→Simulation Bridge" below — this is NOT the SimulationManager flow)
+Player clicks the main lobby's button 2 → LobbyManager.onRightClickBlock → SimulationManager.startSimulation(NEW_SIM_BUILDING2_FIRE)
+  (gated on Academy certification — see below)
+Command (/sim_fire, /sim_earthquake) → SimulationManager.startSimulation
   → places all buildings (LSPU Library + SSC Building + CCS Admin Building) via BUILDINGS list
   → teleports player to a random valid position inside the target building (library for FIRE/EARTHQUAKE, CCS for CCS_FIRE/CCS_EARTHQUAKE); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to building centre if none found
   → (FIRE only) gives fire extinguisher in hotbar slot 0
@@ -52,8 +56,46 @@ SimulationManager.onServerTick (every tick):
 Session expires / player dies / /sim_stop → SimulationManager.endSimulation
   → restores all buildings via BUILDINGS list
   → teleports alive player to lobby OR marks UUID in pendingLobbyRespawn (dead player)
+  → NEW_SIM_BUILDING2_FIRE is the one exception: alive player instead gets a 5-second delayed
+    teleport+debrief to Capt. Morfe — see "Lobby Buttons & the Academy→Simulation Bridge" below
 Player respawns → SimulationManager.onPlayerRespawn → redirects to lobby if pending
 ```
+
+### Lobby Buttons & the Academy→Simulation Bridge (2026-07-13)
+
+The main lobby's two buttons no longer trigger the old Library/CCS Library-style simulations —
+that flow is still reachable via `/sim_fire library`, `/sim_fire ccs`, `/sim_earthquake ...` for
+dev/admin use, but the buttons themselves now drive the Academy → New Sim Building 2.0 pipeline:
+
+- **Button 1** (lower Z) — `AcademyManager.startAcademyRun(player, level)`: always begins a fresh
+  Academy run (wipes `AcademyProgress`, resets Cruz/Reyes room state, teleports to Room 1), the
+  same helper `/bfp tutorial`'s bare/reset forms call.
+- **Button 2** (higher Z) — `SimulationManager.startSimulation(player, NEW_SIM_BUILDING2_FIRE)`
+  directly (same path `/sim_fire new_sim_building2` uses), gated on **Academy certification**:
+  either this session's Capt. Morfe `MorfePhase.EVALUATED_PASS`, or a restored `/login` account
+  whose `users.tutorial_completed` flag is set (`AuthManager.isTutorialCompleted`).
+- Both buttons still require **registration** (`LobbyManager.baseGatesPassed`): `/register
+  <username> <password> <student_id> <section> <full_name>` (creates a persistent Turso `users`
+  account alongside the existing world-saved registration) or `/login <username> <password>` for
+  a returning student — see `docs/systems/academy.md` for the full auth flow and why a returning
+  student's Academy certification survives without replaying the tutorial.
+- Default spawn is always the main lobby now (`LobbyManager.routePlayer`) — the old routing to a
+  separate tutorial lobby for old-tutorial-incomplete players is gone, since the old tutorial no
+  longer gates anything the main lobby offers. World respawn was already pinned to the lobby
+  (`BerongSMP.onServerStarting`), so no custom `onPlayerRespawn` handler is needed either.
+
+**The tutorial's payoff is the graded run itself:** completing the Academy (Capt. Morfe PASS) no
+longer just certifies the trainee and stops. After `MORFE_PASS_LINES` finishes, a 5-second
+countdown message plays, then `MorfeRoomManager.deploySimAfterCountdown` calls
+`SimulationManager.startSimulation(NEW_SIM_BUILDING2_FIRE)` automatically (skipped if the player
+logged out, died, or already started something else during the wait — checked at fire time by
+UUID, never a captured stale reference). When that session later ends, the existing
+teleport-to-Morfe + `startSimDebrief` behavior is now itself delayed 5 seconds
+(`TickScheduler.scheduleOnce(100, ...)`) instead of firing instantly, so the pacing reads as
+"prevention → intervention → evacuation → (pause) → evaluation" rather than an abrupt cut. Both
+5-second handoffs use the same one-shot delayed-task queue (`TickScheduler.scheduleOnce`,
+alongside the class's existing per-tick handler registry) — server-thread only, no new
+synchronisation needed.
 
 ### Player Safety Mechanics
 
@@ -114,7 +156,10 @@ EVACUATION:
   → AssemblyZone/ExitZones' New Sim Building 2.0-specific methods (isInsideNewSim2/findNewSim2/
     spawnBorderParticlesNewSim2) only start mattering here — tickAssemblyZone gates on
     firePhase == EVACUATION so standing in the zone during prevention/intervention doesn't
-    end the run early. Both zones are PLACEHOLDER pending an in-game F3 survey.
+    end the run early. Both zones are now derived from the docs/new_sim_building2_rooms.md room
+    survey (the 1st-floor "Lobby" room as assembly area, the two Hallway↔Lobby thresholds as exit
+    doors) — a real improvement over the old exterior-placeholder box, but still a best-effort
+    derivation rather than a fresh F3 walk-through; see docs/f3_tuning_todo.md §7.
   → reaching assembly → endSimulation("assembly_reached"); overall session timer expiring first → "timeout"
 
 endSimulation (any endReason):
