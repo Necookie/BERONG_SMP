@@ -410,6 +410,7 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/bfp sessions export` | Write all sessions to `run/bfp_sessions_export.csv` |
 | `/bfp student <name>` | Look up last 10 sessions for a student name |
 | `/bfp user <username>` | Look up last 10 sessions for a `/register`/`/login` account username (2026-07-13). |
+| `/bfp user delete <username>` | Deletes a `student_accounts` row so that username can be `/register`ed again (2026-07-13) — DB hygiene for stale/test accounts; leaves that account's `sessions` run history untouched. |
 
 **Player-facing account commands** (2026-07-13, `RegistrationCommands`):
 

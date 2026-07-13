@@ -289,7 +289,10 @@ public class BfpAdminCommands {
                                     String msg = sb.toString();
                                     ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
                                     return 1;
-                                })))
+                                }))
+                        .then(Commands.literal("delete")
+                                .then(Commands.argument("username", StringArgumentType.word())
+                                        .executes(BfpAdminCommands::deleteUserAccount))))
 
                 .then(Commands.literal("note")
                         .then(Commands.argument("text", StringArgumentType.greedyString())
@@ -605,6 +608,33 @@ public class BfpAdminCommands {
           .append(" §ascore=").append(str(r, "simulation_score"))
           .append(" pass=").append(str(r, "passed"))
           .append(" [").append(str(r, "status")).append("]\n");
+    }
+
+    /**
+     * {@code /bfp user delete <username>} — frees up a {@code student_accounts} username so it
+     * can be {@code /register}ed again. Exists for exactly the DB-hygiene problem that surfaced
+     * the {@code users}/{@code student_accounts} table-collision bug (2026-07-13): test/old
+     * accounts pile up with no built-in way to reclaim a username short of raw SQL against Turso.
+     * Only removes the account row — any {@code sessions} rows tied to that username (run history)
+     * are left alone, matching how {@code /bfp reset} only ever touches the current session, not
+     * historical ones.
+     */
+    private static int deleteUserAccount(CommandContext<CommandSourceStack> ctx) {
+        String username = StringArgumentType.getString(ctx, "username");
+        if (!TursoClient.isReady()) {
+            ctx.getSource().sendFailure(Component.literal("Turso not configured — account system unavailable."));
+            return 0;
+        }
+        String json = TursoClient.query("SELECT id FROM student_accounts WHERE username=?", username);
+        JsonArray rows = TursoClient.parseRows(json);
+        if (rows.isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal("No account found for username: " + username));
+            return 0;
+        }
+        TursoClient.executeAsync("DELETE FROM student_accounts WHERE username=?", username);
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§eAccount §f@" + username + "§e deleted — that username can be registered again."), true);
+        return 1;
     }
 
     private static int setPrepLevel(CommandContext<CommandSourceStack> ctx, String level) {
