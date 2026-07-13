@@ -13,7 +13,9 @@ import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
+import net.necookie.disastersim.common.scheduling.TickScheduler;
 import net.necookie.disastersim.common.simulation.NewSimScoring;
+import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 import net.necookie.disastersim.session.AuthManager;
@@ -21,6 +23,7 @@ import net.necookie.disastersim.session.AuthManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Room 4 — Capt. Cesar Morfe Jr.'s Evaluation. Gated on Room 3 ({@link SantosPhase#DONE}).
@@ -77,7 +80,7 @@ public final class MorfeRoomManager {
             // Persists to the logged-in account (if any) so a returning student's /login restores
             // certification without replaying the tutorial — see AuthManager/LobbyManager.
             AuthManager.markTutorialCompleted(player.getUUID());
-            AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_PASS_LINES, () -> { });
+            AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_PASS_LINES, () -> deploySimAfterCountdown(player));
             return;
         }
 
@@ -103,6 +106,25 @@ public final class MorfeRoomManager {
 
     /** No-op — Room 4 has no ongoing per-tick state, only the interact-driven evaluation flow. */
     public static void tick(ServerLevel level) {
+    }
+
+    /**
+     * On an Academy PASS, redirects the trainee into New Sim Building 2.0's graded fire scenario
+     * (the exact path {@code /sim_fire new_sim_building2} uses) after a short countdown, instead of
+     * just certifying them and stopping — the tutorial's real payoff is the graded run itself.
+     * {@code SimulationManager.startSimulation} plays its own 3-2-1 warmup once this fires, so the
+     * two countdowns chain rather than overlap.
+     */
+    private static void deploySimAfterCountdown(ServerPlayer player) {
+        UUID uuid = player.getUUID();
+        player.sendSystemMessage(Component.literal(
+                "§e⏳ Excellent work — deploying you to New Sim Building 2.0 in 5 seconds. Good luck, trainee!"));
+        TickScheduler.scheduleOnce(100, level -> {
+            ServerPlayer p = level.getServer().getPlayerList().getPlayer(uuid);
+            if (p == null || !p.isAlive()) return;                 // logged out or died during the wait
+            if (SimulationManager.getSession(uuid) != null) return; // already in a session — skip
+            SimulationManager.startSimulation(p, SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE);
+        });
     }
 
     /**
