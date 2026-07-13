@@ -11,8 +11,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.necookie.disastersim.common.simulation.SimRoom;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
+
+import java.util.List;
+import java.util.TreeMap;
 
 public class SimulationCommands {
 
@@ -20,7 +26,7 @@ public class SimulationCommands {
         dispatcher.register(Commands.literal("sim_fire")
                 .executes(context -> {
                     context.getSource().sendFailure(Component.literal(
-                            "§cUsage: /sim_fire <library|ccs>"));
+                            "§cUsage: /sim_fire <library|ccs|new_sim_building2>"));
                     return 0;
                 })
                 .then(Commands.literal("library")
@@ -37,6 +43,14 @@ public class SimulationCommands {
                             SimulationManager.startSimulation(
                                     context.getSource().getPlayer(),
                                     SimulationManager.SimulationState.CCS_FIRE);
+                            return 1;
+                        }))
+                .then(Commands.literal("new_sim_building2")
+                        .executes(context -> {
+                            if (!context.getSource().isPlayer()) return 0;
+                            SimulationManager.startSimulation(
+                                    context.getSource().getPlayer(),
+                                    SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE);
                             return 1;
                         })));
 
@@ -202,6 +216,40 @@ public class SimulationCommands {
                                             "§eTimer adjusted by §f" + sign + delta + "s §e→ §f" + formatTime(newSecs)), true);
                                     return 1;
                                 }))));
+
+        dispatcher.register(Commands.literal("sim_scan_hazards")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
+                .executes(SimulationCommands::simScanHazards));
+    }
+
+    /**
+     * Dev verification tool for New Sim Building 2.0's arena bounds — runs the same
+     * {@code HazardManager.scanHazardProps} call {@code /sim_fire new_sim_building2} uses at
+     * session start, without actually starting a session, and prints a per-room breakdown.
+     * Compare the total against an in-game walkthrough: if a room you know has a hazard/computer/
+     * outlet in it comes up empty, the arena bounds in {@code SimulationManager} are too tight —
+     * widen them rather than assuming the block-type filter is at fault.
+     */
+    private static int simScanHazards(CommandContext<CommandSourceStack> ctx) {
+        ServerLevel level = ctx.getSource().getLevel();
+        List<BlockPos> found = SimulationManager.scanNewSimBuilding2Hazards(level);
+
+        var perRoom = new TreeMap<String, Integer>();
+        for (BlockPos pos : found) {
+            perRoom.merge(SimRoom.nameInNewSim2(pos), 1, Integer::sum);
+        }
+
+        ctx.getSource().sendSuccess(() -> Component.literal(
+                "§6Hazard scan (New Sim Building 2.0): §f" + found.size() + " prop(s) found."), false);
+        StringBuilder sb = new StringBuilder();
+        for (var entry : perRoom.entrySet()) {
+            sb.append("§7  ").append(entry.getKey()).append(": §f").append(entry.getValue()).append('\n');
+        }
+        if (!sb.isEmpty()) {
+            String breakdown = sb.toString();
+            ctx.getSource().sendSuccess(() -> Component.literal(breakdown), false);
+        }
+        return found.size();
     }
 
     private static int simStatus(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
