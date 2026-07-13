@@ -117,6 +117,27 @@ style of not punishing imperfect technique on non-critical steps).
 captured "facing" shot yet, unlike `officer_cruz`). Capture a proper facing angle for each and
 update those three entries the same way `officer_cruz` was captured.
 
+## 7. New Sim Building 2.0 — Assembly Zone + Exit Doors
+
+**Why:** `AssemblyZone.NEW_SIM2_ZONE` and `ExitZones.NEW_SIM2_ZONES` were upgraded from
+building-exterior placeholders to a **best-effort derivation** from the room survey table in
+`docs/new_sim_building2_rooms.md` (the 1st-floor "Lobby" room as the assembly zone; the two
+Hallway↔Lobby thresholds as exit doors) — not a fresh F3 walk-through. This is a real improvement
+(the old placeholder sat entirely outside the building) but should still be confirmed in person:
+walk from a 2nd-floor hazard room down to the Lobby and verify the exit-door AABBs are actually
+crossed before the assembly zone, and that the assembly AABB's Y-range (-34 to -27) doesn't clip
+through the floor/ceiling given the Lobby's actual 1-block-floor-layer capture in the survey.
+
+**What to capture:** Stand at the Hallway 1/Hallway 2 → Lobby thresholds with F3 and confirm/tune
+the door AABBs; stand inside the Lobby and confirm the assembly zone bounds feel right as a muster
+point (not blocked by furniture/schematic geometry the room survey didn't capture).
+
+**Files to update:**
+- `src/main/java/net/necookie/disastersim/common/zones/AssemblyZone.java` — `NEW_SIM2_ZONE`
+- `src/main/java/net/necookie/disastersim/common/zones/ExitZones.java` — `NEW_SIM2_ZONES`
+
+---
+
 ## After updating coordinates
 
 1. Rebuild: `./gradlew compileJava`
