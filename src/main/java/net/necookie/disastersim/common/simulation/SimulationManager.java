@@ -176,6 +176,10 @@ public class SimulationManager {
         // Place all buildings so every session starts with clean, undamaged structures.
         for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
+        if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            TelemetryCsvWriter.scanAndRegisterNewSim2FireAlarms(level,
+                    NEW_SIM2_ARENA_BASE, NEW_SIM2_ARENA_SPAN_X, NEW_SIM2_ARENA_SPAN_Z, NEW_SIM2_ARENA_HEIGHT);
+        }
 
         if (state.isFire()) {
             session.setHazardPositions(HazardManager.scanHazardProps(level,

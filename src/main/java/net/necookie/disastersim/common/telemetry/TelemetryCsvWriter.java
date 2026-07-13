@@ -39,6 +39,8 @@ public class TelemetryCsvWriter {
     private static BufferedWriter sessionWriter;
     private static final List<BlockPos> fireAlarmPositions = new ArrayList<>();
     private static boolean fireAlarmsScanDone = false;
+    private static final List<BlockPos> nsb2FireAlarmPositions = new ArrayList<>();
+    private static boolean nsb2FireAlarmsScanDone = false;
     private static String cachedModVersion = null;
 
     // Nominal extinguisher cabinet positions — extinguishers are issued as items at session start,
@@ -175,6 +177,31 @@ public class TelemetryCsvWriter {
         BerongSMP.LOGGER.info("[TelemetryCsvWriter] FireAlarmBlock scan: found {} alarm(s) in simulation area", fireAlarmPositions.size());
     }
 
+    /**
+     * Same idea as {@link #scanAndRegisterFireAlarms}, but for New Sim Building 2.0's much larger
+     * footprint (both floors) — a separate list/flag/box since the two buildings' alarm counts feed
+     * different {@code map_metadata.json} sections (§8 of telemetry_contract.md) and this scenario's
+     * {@code NewSimScoring} bonus depends on the building actually containing a reachable alarm.
+     */
+    public static void scanAndRegisterNewSim2FireAlarms(ServerLevel level, BlockPos base, int spanX, int spanZ, int height) {
+        if (nsb2FireAlarmsScanDone) return;
+        nsb2FireAlarmPositions.clear();
+        for (BlockPos check : BlockPos.betweenClosed(base, base.offset(spanX, height, spanZ))) {
+            if (level.getBlockState(check).getBlock() instanceof FireAlarmBlock) {
+                nsb2FireAlarmPositions.add(check.immutable());
+            }
+        }
+        nsb2FireAlarmsScanDone = true;
+        if (telemetryDir != null) {
+            try {
+                writeMapMetadata(telemetryDir.resolve("map_metadata.json"));
+            } catch (IOException e) {
+                BerongSMP.LOGGER.error("[TelemetryCsvWriter] Failed to rewrite map_metadata.json: {}", e.getMessage());
+            }
+        }
+        BerongSMP.LOGGER.info("[TelemetryCsvWriter] New Sim Building 2.0 FireAlarmBlock scan: found {} alarm(s)", nsb2FireAlarmPositions.size());
+    }
+
     public static void shutdown() {
         try {
             if (eventWriter != null)   { eventWriter.flush();   eventWriter.close(); }
@@ -242,11 +269,15 @@ public class TelemetryCsvWriter {
     }
 
     private static String buildAlarmJson() {
-        if (fireAlarmPositions.isEmpty()) return "";
+        return buildAlarmJson(fireAlarmPositions);
+    }
+
+    private static String buildAlarmJson(List<BlockPos> positions) {
+        if (positions.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < fireAlarmPositions.size(); i++) {
+        for (int i = 0; i < positions.size(); i++) {
             if (i > 0) sb.append(",");
-            BlockPos p = fireAlarmPositions.get(i);
+            BlockPos p = positions.get(i);
             sb.append(String.format("{\"x\":%d,\"y\":%d,\"z\":%d}", p.getX(), p.getY(), p.getZ()));
         }
         return sb.toString();
@@ -331,10 +362,11 @@ public class TelemetryCsvWriter {
             "    \"new_sim_building2_fire\": {\n" +
             "      \"exits\": [\n        " + nsb2Exits + "\n      ],\n" +
             "      \"assembly_area\": " + nsb2AssemblyJson + ",\n" +
+            "      \"fire_alarm_positions\": [" + buildAlarmJson(nsb2FireAlarmPositions) + "],\n" +
             "      \"extinguisher_positions\": [{\"note\": \"all 3 classes issued as items at session start\"}],\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"5 random hazards armed each run from the building's own hazard-prop scan — see new_sim_building2_pos and /sim_scan_hazards\"},\n" +
             "      \"phases\": [\"prevention\", \"intervention\", \"evacuation\"],\n" +
-            "      \"survey_status\": \"PLACEHOLDER — exits/assembly_area not yet F3-verified in-game\"\n" +
+            "      \"survey_status\": \"assembly/exits derived from docs/new_sim_building2_rooms.md room survey; not F3-walked\"\n" +
             "    }\n" +
             "  }\n" +
             "}\n";
