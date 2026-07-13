@@ -564,16 +564,16 @@ public class SimulationManager {
                 "nearest_fire_dist", Math.round(nearestFire * 10.0) / 10.0
             ));
         }
-        if (ticks % 2 == 0) {
-            double elapsedS = session.elapsedSeconds();
-            double hazDist = hazardDistance(session, level, player);
-            session.bufferCsvRow(TelemetryCsvWriter.writeRow(
-                    session.getSessionId(), uuid.toString(),
-                    session.getState().name().toLowerCase(),
-                    Math.round(elapsedS * 100.0) / 100.0, "move_tick",
-                    player.getX(), player.getY(), player.getZ(),
-                    Math.round(hazDist * 100.0) / 100.0, null, null));
-        }
+        // telemetry_contract.md v1.2 §2 locks movement sampling at 20 Hz (every native tick) — no
+        // modulo gate here. Previously this ran every 2 ticks (10 Hz), silently under-sampling.
+        double elapsedS = session.elapsedSeconds();
+        double hazDist = hazardDistance(session, level, player);
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                session.getSessionId(), uuid.toString(),
+                session.getState().name().toLowerCase(),
+                Math.round(elapsedS * 100.0) / 100.0, "move_tick",
+                player.getX(), player.getY(), player.getZ(),
+                Math.round(hazDist * 100.0) / 100.0, null, null));
     }
 
     private static void tickWarmupCountdown(SimulationSession session, ServerPlayer player) {
