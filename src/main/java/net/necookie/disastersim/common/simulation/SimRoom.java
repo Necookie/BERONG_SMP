@@ -60,54 +60,64 @@ public enum SimRoom {
 
     /**
      * Named rooms in New Sim Building 2.0's 2nd floor (absolute world coords, F3-surveyed —
-     * see docs/new_sim_building2_rooms.md). Floor Y = -23, ceiling Y = -14 (10 blocks tall).
+     * see docs/new_sim_building2_rooms.md). Floor Y = -24, ceiling Y = -14 (11 blocks tall).
      * This is the pool {@code SimulationManager.findRandomSpawnInNewSim2Upper} draws from.
+     *
+     * <p><b>2026-07-14 recalibration:</b> in-game F3 re-observation found the 1st floor reading
+     * too high and the 2nd floor reading too low against the real structure. Floor Y dropped 1
+     * block (-23 → -24); ceiling Y is unchanged (the room gained a block of height rather than
+     * shifting as a whole) — see {@link #NEW_SIM2_GROUND_ROOMS}'s matching note for the 1st floor.
      */
     public static final List<CcsRoom> NEW_SIM2_UPPER_ROOMS = List.of(
-        new CcsRoom("Room 201",         new AABB( -88, -23, 446,  -81, -14, 453)),
-        new CcsRoom("Male CR",          new AABB(-100, -23, 446,  -93, -14, 453)),
-        new CcsRoom("Female CR",        new AABB(-100, -23, 455,  -93, -14, 462)),
-        new CcsRoom("Conference Room",  new AABB( -88, -23, 455,  -81, -14, 471)),
-        new CcsRoom("Room 202",         new AABB(-100, -23, 464,  -93, -14, 471)),
-        new CcsRoom("Room 203",         new AABB( -88, -23, 473,  -81, -14, 480)),
-        new CcsRoom("Lecture Hall",     new AABB( -88, -23, 482,  -81, -14, 498)),
-        new CcsRoom("ComLab 201",       new AABB(-100, -23, 473,  -93, -14, 489)),
-        new CcsRoom("Room 204",         new AABB(-100, -23, 491,  -93, -14, 498)),
-        new CcsRoom("Room 205",         new AABB(-100, -23, 500,  -93, -14, 507)),
-        new CcsRoom("Room 206",         new AABB( -88, -23, 500,  -81, -14, 507)),
-        new CcsRoom("Room 207",         new AABB( -88, -23, 509,  -81, -14, 516)),
-        new CcsRoom("Clinic",           new AABB( -88, -23, 518,  -81, -14, 525)),
-        new CcsRoom("Study Lobby",      new AABB(-100, -23, 509,  -93, -14, 525)),
-        new CcsRoom("Faculty Room",     new AABB( -88, -23, 527,  -81, -14, 534)),
-        new CcsRoom("Research Lab",     new AABB(-100, -23, 527,  -93, -14, 534)),
-        new CcsRoom("Library",          new AABB(-101, -23, 536,  -81, -14, 542)),
-        new CcsRoom("Basketball Court", new AABB(-105, -23, 434,  -81, -14, 444)),
-        new CcsRoom("Hallway 1",        new AABB(-105, -23, 445, -102, -14, 542)),
-        new CcsRoom("Hallway 2",        new AABB( -91, -23, 445,  -90, -14, 535))
+        new CcsRoom("Room 201",         new AABB( -88, -24, 446,  -81, -14, 453)),
+        new CcsRoom("Male CR",          new AABB(-100, -24, 446,  -93, -14, 453)),
+        new CcsRoom("Female CR",        new AABB(-100, -24, 455,  -93, -14, 462)),
+        new CcsRoom("Conference Room",  new AABB( -88, -24, 455,  -81, -14, 471)),
+        new CcsRoom("Room 202",         new AABB(-100, -24, 464,  -93, -14, 471)),
+        new CcsRoom("Room 203",         new AABB( -88, -24, 473,  -81, -14, 480)),
+        new CcsRoom("Lecture Hall",     new AABB( -88, -24, 482,  -81, -14, 498)),
+        new CcsRoom("ComLab 201",       new AABB(-100, -24, 473,  -93, -14, 489)),
+        new CcsRoom("Room 204",         new AABB(-100, -24, 491,  -93, -14, 498)),
+        new CcsRoom("Room 205",         new AABB(-100, -24, 500,  -93, -14, 507)),
+        new CcsRoom("Room 206",         new AABB( -88, -24, 500,  -81, -14, 507)),
+        new CcsRoom("Room 207",         new AABB( -88, -24, 509,  -81, -14, 516)),
+        new CcsRoom("Clinic",           new AABB( -88, -24, 518,  -81, -14, 525)),
+        new CcsRoom("Study Lobby",      new AABB(-100, -24, 509,  -93, -14, 525)),
+        new CcsRoom("Faculty Room",     new AABB( -88, -24, 527,  -81, -14, 534)),
+        new CcsRoom("Research Lab",     new AABB(-100, -24, 527,  -93, -14, 534)),
+        new CcsRoom("Library",          new AABB(-101, -24, 536,  -81, -14, 542)),
+        new CcsRoom("Basketball Court", new AABB(-105, -24, 434,  -81, -14, 444)),
+        new CcsRoom("Hallway 1",        new AABB(-105, -24, 445, -102, -14, 542)),
+        new CcsRoom("Hallway 2",        new AABB( -91, -24, 445,  -90, -14, 535))
     );
 
     /**
      * Named rooms in New Sim Building 2.0's 1st floor (absolute world coords, F3-surveyed —
-     * see docs/new_sim_building2_rooms.md). Most rooms are Y -33..-24 (10 tall); "Main Hallway"
-     * and "Lobby" were captured as a single Y=-33 floor layer and "General CR" as Y -33..-25 (9
-     * tall) — all three bumped to a full -33..-24 standing volume here so {@code AABB.contains()}
-     * (strict on the max boundary) actually admits a standing player, per the survey doc's own note.
+     * see docs/new_sim_building2_rooms.md). Most rooms are Y -34..-25 (10 tall); "Main Hallway",
+     * "Lobby", and "General CR" were originally captured as thinner slices — all bumped to a full
+     * -34..-25 standing volume here so {@code AABB.contains()} (strict on the max boundary)
+     * actually admits a standing player, per the survey doc's own note.
+     *
+     * <p><b>2026-07-14 recalibration:</b> in-game F3 re-observation found this floor reading too
+     * high against the real structure — both floor Y (-33 → -34) and ceiling Y (-24 → -25) dropped
+     * 1 block, shifting the whole floor down while keeping its height. See
+     * {@link #NEW_SIM2_UPPER_ROOMS}'s matching note for the 2nd floor.
      */
     public static final List<CcsRoom> NEW_SIM2_GROUND_ROOMS = List.of(
-        new CcsRoom("Cafeteria",          new AABB(-105, -33, 434,  -81, -24, 444)),
-        new CcsRoom("Room 101",           new AABB( -89, -33, 446,  -81, -24, 456)),
-        new CcsRoom("Under Maintenance",  new AABB(-105, -33, 446,  -97, -24, 456)),
-        new CcsRoom("Room 102",           new AABB( -89, -33, 458,  -81, -24, 468)),
-        new CcsRoom("Room 103",           new AABB(-105, -33, 458,  -97, -24, 468)),
-        new CcsRoom("Main Hallway",       new AABB( -95, -33, 446,  -91, -24, 530)),
-        new CcsRoom("Lobby",              new AABB(-118, -33, 482,  -81, -24, 498)),
-        new CcsRoom("Room 104",           new AABB( -89, -33, 496,  -81, -24, 506)),
-        new CcsRoom("Kitchen Lobby",      new AABB(-105, -33, 508,  -97, -24, 524)),
-        new CcsRoom("Room 105",           new AABB( -89, -33, 508,  -81, -24, 518)),
-        new CcsRoom("Room 106",           new AABB( -89, -33, 520,  -81, -24, 530)),
-        new CcsRoom("Principal's Office", new AABB(-105, -33, 526,  -97, -24, 530)),
-        new CcsRoom("Badminton Court",    new AABB(-105, -33, 532,  -81, -24, 542)),
-        new CcsRoom("General CR",         new AABB(-118, -33, 472, -106, -24, 476))
+        new CcsRoom("Cafeteria",          new AABB(-105, -34, 434,  -81, -25, 444)),
+        new CcsRoom("Room 101",           new AABB( -89, -34, 446,  -81, -25, 456)),
+        new CcsRoom("Under Maintenance",  new AABB(-105, -34, 446,  -97, -25, 456)),
+        new CcsRoom("Room 102",           new AABB( -89, -34, 458,  -81, -25, 468)),
+        new CcsRoom("Room 103",           new AABB(-105, -34, 458,  -97, -25, 468)),
+        new CcsRoom("Main Hallway",       new AABB( -95, -34, 446,  -91, -25, 530)),
+        new CcsRoom("Lobby",              new AABB(-118, -34, 482,  -81, -25, 498)),
+        new CcsRoom("Room 104",           new AABB( -89, -34, 496,  -81, -25, 506)),
+        new CcsRoom("Kitchen Lobby",      new AABB(-105, -34, 508,  -97, -25, 524)),
+        new CcsRoom("Room 105",           new AABB( -89, -34, 508,  -81, -25, 518)),
+        new CcsRoom("Room 106",           new AABB( -89, -34, 520,  -81, -25, 530)),
+        new CcsRoom("Principal's Office", new AABB(-105, -34, 526,  -97, -25, 530)),
+        new CcsRoom("Badminton Court",    new AABB(-105, -34, 532,  -81, -25, 542)),
+        new CcsRoom("General CR",         new AABB(-118, -34, 472, -106, -25, 476))
     );
 
     // Offsets relative to SIM_POS = (30, -34, 83). Y=0 is the ground floor.
@@ -165,8 +175,9 @@ public enum SimRoom {
     // New Sim Building 2.0 whole-building envelope, split by floor (absolute world coords,
     // padded slightly beyond the surveyed room list so a player anywhere in the building still
     // resolves to a floor rather than OUTSIDE — see docs/new_sim_building2_rooms.md).
-    private static final AABB NEW_SIM2_GROUND_BOUNDS = new AABB(-119, -34, 433, -80, -23, 543);
-    private static final AABB NEW_SIM2_UPPER_BOUNDS  = new AABB(-119, -23, 433, -80, -13, 543);
+    // 2026-07-14: shifted 1 block to match NEW_SIM2_GROUND_ROOMS/NEW_SIM2_UPPER_ROOMS's recalibration.
+    private static final AABB NEW_SIM2_GROUND_BOUNDS = new AABB(-119, -35, 433, -80, -24, 543);
+    private static final AABB NEW_SIM2_UPPER_BOUNDS  = new AABB(-119, -24, 433, -80, -13, 543);
 
     /** Coarse floor bucket (not a named room) — matches {@link #fromCCSPos}'s resolution, used for telemetry. */
     public static SimRoom fromNewSim2Pos(BlockPos playerPos) {

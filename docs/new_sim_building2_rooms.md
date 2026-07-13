@@ -12,6 +12,20 @@ No `/sim_earthquake` variant targets this building yet. This doc remains the sou
 data the room tables were transcribed from — re-survey and update both together if the schematic
 ever changes.
 
+**2026-07-14 Y recalibration:** in-game F3 re-observation found the derived room volumes below
+reading too high for the 1st floor and too low for the 2nd floor against the real structure. The
+tables below are the original raw `//copyroom` captures and are left as-is (still the historical
+record of what was literally selected), but `SimRoom.NEW_SIM2_GROUND_ROOMS`/`NEW_SIM2_UPPER_ROOMS`
+(and the matching `NEW_SIM2_FLOOR_Y_BOUNDARY` in the dashboard repo's `floorplans.ts`) now apply a
+correction on top of these raw numbers:
+- **1st floor:** floor Y −33 → −34 **and** ceiling Y −24 → −25 (the whole floor shifted down 1
+  block, height unchanged).
+- **2nd floor:** floor Y −23 → −24 only; ceiling Y −14 is unchanged (the floor gained 1 block of
+  height rather than shifting as a whole).
+
+If you re-survey this building, capture the *real* per-room Y ranges directly instead of applying
+this offset again — this note describes a one-time correction, not a permanent transform.
+
 Pos1 = minimum corner, Pos2 = maximum corner (as returned by `//copyroom`), both inclusive.
 
 ## 2nd Floor
