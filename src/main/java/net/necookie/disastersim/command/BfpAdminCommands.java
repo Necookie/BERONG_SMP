@@ -261,6 +261,36 @@ public class BfpAdminCommands {
                                     return 1;
                                 })))
 
+                .then(Commands.literal("user")
+                        .then(Commands.argument("username", StringArgumentType.word())
+                                .executes(ctx -> {
+                                    String username = StringArgumentType.getString(ctx, "username");
+                                    String json = TursoClient.query(
+                                            "SELECT id, start_time, simulation_type, simulation_score, passed, status, prep_level " +
+                                            "FROM sessions WHERE username=? ORDER BY start_time DESC LIMIT 10",
+                                            username);
+                                    JsonArray rows = TursoClient.parseRows(json);
+                                    if (rows.isEmpty()) {
+                                        ctx.getSource().sendFailure(Component.literal(
+                                                "No sessions found for account: " + username));
+                                        return 0;
+                                    }
+                                    StringBuilder sb = new StringBuilder("§6Sessions for §f@" + username + "§6:\n");
+                                    for (JsonElement el : rows) {
+                                        JsonObject r = el.getAsJsonObject();
+                                        sb.append("§7#").append(str(r, "id"))
+                                          .append(" §f").append(str(r, "start_time"))
+                                          .append(" §e").append(str(r, "simulation_type"))
+                                          .append(" §ascore=").append(str(r, "simulation_score"))
+                                          .append(" pass=").append(str(r, "passed"))
+                                          .append(" §b").append(str(r, "prep_level"))
+                                          .append(" [").append(str(r, "status")).append("]\n");
+                                    }
+                                    String msg = sb.toString();
+                                    ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                    return 1;
+                                })))
+
                 .then(Commands.literal("note")
                         .then(Commands.argument("text", StringArgumentType.greedyString())
                                 .executes(ctx -> {
