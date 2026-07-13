@@ -22,6 +22,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.necookie.disastersim.common.simulation.SimulationManager;
+import net.necookie.disastersim.common.simulation.SimulationSession;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.Map;
 import java.util.Set;
@@ -130,7 +133,10 @@ public abstract class AbstractExtinguisherItem extends Item {
             level.playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.LEVER_CLICK, SoundSource.PLAYERS, 0.8F, 1.4F);
             player.sendSystemMessage(Component.literal(pinPulledMessage()));
-            if (player instanceof ServerPlayer sp) onPinPulled(sp);
+            if (player instanceof ServerPlayer sp) {
+                onPinPulled(sp);
+                emitPinPullTelemetry(sp);
+            }
             return InteractionResult.SUCCESS;
         }
 
@@ -192,7 +198,13 @@ public abstract class AbstractExtinguisherItem extends Item {
         }
 
         // Scoring + telemetry are read before the durability tick below, matching legacy ordering.
-        if (user instanceof ServerPlayer sp) onSprayResolved(level, sp, stack, anyHit);
+        if (user instanceof ServerPlayer sp) {
+            onSprayResolved(level, sp, stack, anyHit);
+            // Throttled to the same cadence subclasses already sample at (every 20 charge units) —
+            // sprayServer runs every server tick while holding right-click, so unthrottled this
+            // would flood the CSV with ~20 rows/second.
+            if (stack.getDamageValue() % 20 == 0) emitExtSprayTelemetry(level, sp, anyHit);
+        }
 
         spawnSprayParticlesServer(level, origin, look, side, up, sputtering);
 
@@ -260,6 +272,42 @@ public abstract class AbstractExtinguisherItem extends Item {
         return level.getEntitiesOfClass(Player.class, box, p -> !p.getUUID().equals(self.getUUID())).size();
     }
 
+    // ── Contract v1.2 telemetry (pin_pull / ext_spray) ──────────────────────
+    // Shared across all three units — applies to any active fire-type session (Library, CCS, and
+    // New Sim Building 2.0 alike), not just the new scenario.
+
+    private void emitPinPullTelemetry(ServerPlayer sp) {
+        SimulationSession session = SimulationManager.getSession(sp.getUUID());
+        if (session == null || !session.getState().isFire()) return;
+        double tRounded = round2(session.elapsedSeconds());
+        int nearby = countNearbyPlayers((ServerLevel) sp.level(), sp, 5.0);
+        session.logger.log("pin_pull", Map.of(
+                "t", tRounded, "x", sp.getX(), "y", sp.getY(), "z", sp.getZ(),
+                "extinguisher_class", extinguisherClass(), "nearby_player_count", nearby));
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                session.getSessionId(), sp.getUUID().toString(), session.getState().name().toLowerCase(),
+                tRounded, "pin_pull", sp.getX(), sp.getY(), sp.getZ(),
+                round2(SimulationManager.nearestFireDistance((ServerLevel) sp.level(), sp.blockPosition())),
+                "extinguisher", nearby, null, extinguisherClass(), session.firePhaseLabel()));
+    }
+
+    private void emitExtSprayTelemetry(ServerLevel level, ServerPlayer sp, boolean hitFire) {
+        SimulationSession session = SimulationManager.getSession(sp.getUUID());
+        if (session == null || !session.getState().isFire()) return;
+        double tRounded = round2(session.elapsedSeconds());
+        int nearby = countNearbyPlayers(level, sp, 5.0);
+        session.logger.log("ext_spray", Map.of(
+                "t", tRounded, "x", sp.getX(), "y", sp.getY(), "z", sp.getZ(),
+                "hit_fire", hitFire, "extinguisher_class", extinguisherClass(), "nearby_player_count", nearby));
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                session.getSessionId(), sp.getUUID().toString(), session.getState().name().toLowerCase(),
+                tRounded, "ext_spray", sp.getX(), sp.getY(), sp.getZ(),
+                round2(SimulationManager.nearestFireDistance(level, sp.blockPosition())),
+                "extinguisher", nearby, hitFire, extinguisherClass(), session.firePhaseLabel()));
+    }
+
+    private static double round2(double v) { return Math.round(v * 100.0) / 100.0; }
+
     /** True if {@code block} is one of the five Class F/K cafeteria/kitchen hazard props. */
     public static boolean isKitchenHazard(Block block) {
         return KITCHEN_HAZARD_IDS.contains(BuiltInRegistries.BLOCK.getKey(block).getPath());
@@ -302,6 +350,9 @@ public abstract class AbstractExtinguisherItem extends Item {
 
     /** Chat line shown when the pin is first pulled. */
     protected abstract String pinPulledMessage();
+
+    /** Contract v1.2 {@code extinguisher_class} value for this unit ({@code ABC}/{@code CO2}/{@code WET_CHEMICAL}). */
+    protected abstract String extinguisherClass();
 
     /** Called server-side the moment the pin is pulled (e.g. to log a telemetry event). No-op by default. */
     protected void onPinPulled(ServerPlayer player) {}

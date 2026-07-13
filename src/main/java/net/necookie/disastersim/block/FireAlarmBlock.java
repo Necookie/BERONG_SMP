@@ -24,7 +24,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.necookie.disastersim.registry.ModSounds;
 import net.necookie.disastersim.BerongSMP;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -119,7 +118,9 @@ public class FireAlarmBlock extends Block {
         level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
         ((ServerLevel) level).scheduleTick(pos, this, BEEP_INTERVAL);
 
-        double t = (double)(Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        session.markAlarmRung();
+
+        double t = session.elapsedSeconds();
         double hazardDist = SimulationManager.nearestFireDistance(
                 (ServerLevel) level, player.blockPosition());
         session.logger.log("fire_alarm_activate", java.util.Map.of(

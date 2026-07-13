@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -50,6 +49,11 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
     @Override
     protected String pinPulledMessage() {
         return "§ePIN PULLED — wet chemical unit ready! Hold right-click to discharge.";
+    }
+
+    @Override
+    protected String extinguisherClass() {
+        return "WET_CHEMICAL";
     }
 
     @Override
@@ -97,7 +101,7 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
                 session.recordExtinguish(1);
             }
             if (session.consumeExtinguishEventPending()) {
-                double elapsedS = (double) (Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+                double elapsedS = session.elapsedSeconds();
                 double hazDist = SimulationManager.nearestFireDistance(level, sp.blockPosition());
                 session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                         session.getSessionId(), sp.getUUID().toString(),

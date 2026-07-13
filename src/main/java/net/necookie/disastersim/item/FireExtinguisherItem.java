@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 import net.necookie.disastersim.BerongSMP;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.tutorial.TutorialManager;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -42,6 +41,11 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
     @Override
     protected String pinPulledMessage() {
         return "§ePIN PULLED — ready to spray! Hold right-click to discharge.";
+    }
+
+    @Override
+    protected String extinguisherClass() {
+        return "ABC";
     }
 
     @Override
@@ -110,7 +114,7 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
 
         // One throttled CSV row per "extinguisher hit fire" window.
         if (anyHit && session.consumeExtinguishEventPending()) {
-            double elapsedS = (double) (Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+            double elapsedS = session.elapsedSeconds();
             double hazDist = nearestFireDist(level, sp.blockPosition());
             session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                     session.getSessionId(), sp.getUUID().toString(),
