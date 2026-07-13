@@ -8,12 +8,23 @@ import net.necookie.disastersim.Config;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class SimulationSession {
 
     public enum EarthquakePhase { RUMBLE, PEAK, AFTERSHOCK, END }
+
+    /**
+     * New Sim Building 2.0's fire story: PREVENTION (find/defuse the armed hazards) →
+     * INTERVENTION (extinguish whichever escalated into small fires) → EVACUATION (a fire went
+     * uncontained, reach the assembly zone) → END. Mirrors {@link EarthquakePhase}'s shape —
+     * {@link #tickFirePhase()} is the fire-side equivalent of {@link #tickQuakePhase}. Null for
+     * every scenario except {@code NEW_SIM_BUILDING2_FIRE}.
+     */
+    public enum FirePhase { PREVENTION, INTERVENTION, EVACUATION, END }
 
     private final SimulationManager.SimulationState state;
     private final ServerPlayer player;
@@ -55,6 +66,24 @@ public class SimulationSession {
     private int aftershockCount;
     private double aftershockMagnitudeScale = 1.0;
 
+    // --- New Sim Building 2.0 fire-phase state ---
+    private FirePhase firePhase;
+    private int firePhaseTimer;
+    private List<BlockPos> armedHazards = new ArrayList<>();
+    private final Set<BlockPos> preventedHazards = new HashSet<>();
+    private final Set<BlockPos> escalatedHazards = new HashSet<>();
+    private final Set<BlockPos> extinguishedEscalated = new HashSet<>();
+    private boolean alarmRung = false;
+
+    /**
+     * The session's own duration anchor, captured alongside {@link #timerTicks} — needed because
+     * {@link #elapsedTicks()} must work correctly for scenarios like New Sim Building 2.0 whose
+     * total duration isn't {@code Config.SIM_DURATION_TICKS} (see {@link #bindDuration}). Every
+     * other scenario's elapsed-time math is unaffected: this equals the config default unless
+     * overridden.
+     */
+    private int initialTimerTicks;
+
     public SimulationSession(ServerPlayer player, SimulationManager.SimulationState state) {
         this.player     = player;
         this.state      = state;
@@ -62,7 +91,22 @@ public class SimulationSession {
         // here (rather than a constant) means you can change berongsmp-common.toml and
         // the next session will use the new value without restarting the JVM.
         this.timerTicks = Config.SIM_DURATION_TICKS.get();
+        this.initialTimerTicks = this.timerTicks;
     }
+
+    /**
+     * Overrides both the remaining and total session duration — used by scenarios whose length
+     * isn't the config default (e.g. New Sim Building 2.0's prevention+intervention+evacuation
+     * budget). Must be called before the session's first tick.
+     */
+    public void bindDuration(int ticks) {
+        this.timerTicks = ticks;
+        this.initialTimerTicks = ticks;
+    }
+
+    /** Ticks elapsed since session start — the correct anchor for telemetry {@code t}, per the contract's SIM_START rule. */
+    public int elapsedTicks() { return initialTimerTicks - timerTicks; }
+    public double elapsedSeconds() { return elapsedTicks() / 20.0; }
 
     /** Called by SimulationManager right after construction to bind the arena. */
     public void setArena(BlockPos origin, int spanX, int spanZ, int height) {
@@ -160,6 +204,72 @@ public class SimulationSession {
             };
         }
     }
+
+    /**
+     * Initializes a New Sim Building 2.0 run: arms {@code armed} as the 5 (or fewer, if the
+     * building's hazard pool came up short) hunt targets and enters PREVENTION. Called once from
+     * {@code SimulationManager.startSimulation} after the hazards have actually been set
+     * {@code HAZARDOUS=true} in the world.
+     */
+    public void initPhasedFire(List<BlockPos> armed) {
+        this.armedHazards = new ArrayList<>(armed);
+        this.preventedHazards.clear();
+        this.escalatedHazards.clear();
+        this.extinguishedEscalated.clear();
+        this.firePhase = FirePhase.PREVENTION;
+        this.firePhaseTimer = 0;
+    }
+
+    /**
+     * Advances the fire-phase state machine by one tick — pure bookkeeping, no world access (the
+     * caller, {@code SimulationManager.tickNewSim2FireSession}, compares the phase before/after
+     * and performs the actual world mutation — escalating unfound hazards, igniting escalated
+     * ones further — exactly like {@link #tickQuakePhase} delegates its world effects back to
+     * {@code SimulationManager}).
+     */
+    public void tickFirePhase() {
+        if (firePhase == null || firePhase == FirePhase.END) return;
+        firePhaseTimer++;
+        switch (firePhase) {
+            case PREVENTION -> {
+                if (preventedHazards.size() >= armedHazards.size()) {
+                    firePhase = FirePhase.END;
+                    firePhaseTimer = 0;
+                } else if (firePhaseTimer >= Config.NEW_SIM2_PREVENTION_TICKS.get()) {
+                    firePhase = FirePhase.INTERVENTION;
+                    firePhaseTimer = 0;
+                }
+            }
+            case INTERVENTION -> {
+                if (!escalatedHazards.isEmpty() && extinguishedEscalated.containsAll(escalatedHazards)) {
+                    firePhase = FirePhase.END;
+                    firePhaseTimer = 0;
+                } else if (firePhaseTimer >= Config.NEW_SIM2_INTERVENTION_TICKS.get()) {
+                    firePhase = FirePhase.EVACUATION;
+                    firePhaseTimer = 0;
+                }
+            }
+            case EVACUATION -> {
+                // Terminal here — ends via AssemblyZone.onPlayerArrived or the overall session timer.
+            }
+            default -> { }
+        }
+    }
+
+    public FirePhase getFirePhase() { return firePhase; }
+    /** Lowercase phase name for telemetry ({@code prevention}/{@code intervention}/{@code evacuation}), or null outside New Sim Building 2.0. */
+    public String firePhaseLabel() { return firePhase == null ? null : firePhase.name().toLowerCase(); }
+    public List<BlockPos> getArmedHazards() { return armedHazards; }
+    public Set<BlockPos> getPreventedHazards() { return preventedHazards; }
+    public Set<BlockPos> getEscalatedHazards() { return escalatedHazards; }
+    public Set<BlockPos> getExtinguishedEscalated() { return extinguishedEscalated; }
+    public boolean isArmedHazard(BlockPos pos) { return armedHazards.contains(pos); }
+    public boolean isEscalatedHazard(BlockPos pos) { return escalatedHazards.contains(pos); }
+    public void recordPrevented(BlockPos pos) { preventedHazards.add(pos); }
+    public void recordEscalated(BlockPos pos) { escalatedHazards.add(pos); }
+    public void recordEscalatedExtinguished(BlockPos pos) { extinguishedEscalated.add(pos); }
+    public void markAlarmRung() { alarmRung = true; }
+    public boolean wasAlarmRung() { return alarmRung; }
 
     public double computeIntensityAt(BlockPos pos) {
         if (epicenter == null || quakePhase == null || quakePhase == EarthquakePhase.END) return 0.0;
