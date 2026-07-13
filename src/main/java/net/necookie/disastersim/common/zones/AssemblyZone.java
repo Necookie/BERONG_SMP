@@ -29,13 +29,15 @@ public class AssemblyZone {
     // PLACEHOLDER — walk with F3 to confirm exact coordinates (see docs/f3_tuning_todo.md).
     private static final AABB CCS_ZONE = new AABB(76, -35, 73, 136, -28, 90);
 
-    // New Sim Building 2.0 assembly zone.
-    // PLACEHOLDER — no F3 survey has been done for this building yet (unlike ZONE/CCS_ZONE,
-    // which are at least approximately walked). Sized/shaped like CCS_ZONE, roughly outside the
-    // Lobby's west-facing entrance (docs/new_sim_building2_rooms.md: Lobby X -118..-81, Z
-    // 482..498) — MUST be F3-verified in-game before this scenario is trusted for real data
-    // collection; see the New Sim Building 2.0 plan's manual prerequisites.
-    private static final AABB NEW_SIM2_ZONE = new AABB(-140, -34, 480, -119, -28, 500);
+    // New Sim Building 2.0 assembly zone — the building's own 1st-floor "Lobby" room, per the
+    // //copyroom survey in docs/new_sim_building2_rooms.md (X -118..-81, floor Y -33, Z 482..498).
+    // Decided deliberately (not yet F3-walked as a "step outside" fire-drill assembly point): it's
+    // the only room in the surveyed table that reads as the building's literal muster/entrance
+    // area, and is reachable from every surveyed room via Hallway 1/2 without crossing back through
+    // a hazard zone. minY=-34 catches feet at the floor's Y=-33; maxY=-27 gives head clearance under
+    // the room's Y=-24 ceiling. Best-effort derivation from the room table, not a fresh F3 survey —
+    // see docs/f3_tuning_todo.md.
+    private static final AABB NEW_SIM2_ZONE = new AABB(-118, -34, 482, -81, -27, 498);
 
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;

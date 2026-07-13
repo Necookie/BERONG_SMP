@@ -44,14 +44,17 @@ public class ExitZones {
     );
 
     /**
-     * Emergency exits for New Sim Building 2.0.
-     * PLACEHOLDER — no F3 survey has been done for this building's doors yet; roughly the Lobby's
-     * west-facing threshold (docs/new_sim_building2_rooms.md: Lobby X -118..-81, Z 482..498) toward
-     * {@link AssemblyZone#getNewSim2Zone()}. MUST be F3-verified before this scenario is trusted
-     * for real data collection.
+     * Emergency exits for New Sim Building 2.0 — the two thresholds where "Main Hallway"
+     * (X -95..-91, Z 446..530) meets the "Lobby" assembly zone (X -118..-81, Z 482..498), per the
+     * {@code //copyroom} survey in docs/new_sim_building2_rooms.md. These are the only doorway
+     * geometry derivable from the room table alone (every surveyed room reaches the Lobby via one
+     * of the two hallways), so a player crossing from either hallway into the Lobby triggers
+     * {@code emergency_exit} before {@code assembly_area_reached}. Best-effort derivation, not a
+     * fresh F3 walk-through — see docs/f3_tuning_todo.md.
      */
     public static final List<ExitZone> NEW_SIM2_ZONES = List.of(
-        new ExitZone("new_sim2_main_exit", new AABB(-121, -33, 486, -117, -29, 494))
+        new ExitZone("new_sim2_lobby_south_door", new AABB(-96, -33, 481, -90, -29, 483)),
+        new ExitZone("new_sim2_lobby_north_door", new AABB(-96, -33, 497, -90, -29, 499))
     );
 
     /**
