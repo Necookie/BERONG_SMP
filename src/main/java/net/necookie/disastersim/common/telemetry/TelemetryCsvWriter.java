@@ -280,12 +280,29 @@ public class TelemetryCsvWriter {
             "{\"min\":{\"x\":%d,\"y\":%d,\"z\":%d},\"max\":{\"x\":%d,\"y\":%d,\"z\":%d}}",
             (int) az.minX, (int) az.minY, (int) az.minZ,
             (int) az.maxX, (int) az.maxY, (int) az.maxZ);
+        net.minecraft.world.phys.AABB nsb2Zone = AssemblyZone.getNewSim2Zone();
+        String nsb2AssemblyJson = String.format(
+            "{\"min\":{\"x\":%d,\"y\":%d,\"z\":%d},\"max\":{\"x\":%d,\"y\":%d,\"z\":%d}}",
+            (int) nsb2Zone.minX, (int) nsb2Zone.minY, (int) nsb2Zone.minZ,
+            (int) nsb2Zone.maxX, (int) nsb2Zone.maxY, (int) nsb2Zone.maxZ);
+        StringBuilder nsb2Exits = new StringBuilder();
+        for (ExitZones.ExitZone z : ExitZones.NEW_SIM2_ZONES) {
+            net.minecraft.world.phys.AABB b = z.bounds();
+            if (nsb2Exits.length() > 0) nsb2Exits.append(",\n        ");
+            nsb2Exits.append(String.format(
+                "{\"label\":\"%s\",\"min\":{\"x\":%d,\"y\":%d,\"z\":%d},\"max\":{\"x\":%d,\"y\":%d,\"z\":%d}}",
+                z.label(),
+                (int) b.minX, (int) b.minY, (int) b.minZ,
+                (int) b.maxX, (int) b.maxY, (int) b.maxZ));
+        }
         net.minecraft.core.BlockPos sp = SimulationManager.SIM_POS;
         net.minecraft.core.BlockPos ccs = SimulationManager.CCS_POS;
+        net.minecraft.core.BlockPos nsb2 = SimulationManager.NEW_SIM_BUILDING2_POS;
         String json = "{\n" +
             "  \"contract_version\": \"" + CONTRACT_VERSION + "\",\n" +
             "  \"sim_pos\": {\"x\": " + sp.getX() + ", \"y\": " + sp.getY() + ", \"z\": " + sp.getZ() + "},\n" +
             "  \"ccs_pos\": {\"x\": " + ccs.getX() + ", \"y\": " + ccs.getY() + ", \"z\": " + ccs.getZ() + "},\n" +
+            "  \"new_sim_building2_pos\": {\"x\": " + nsb2.getX() + ", \"y\": " + nsb2.getY() + ", \"z\": " + nsb2.getZ() + "},\n" +
             "  \"scenarios\": {\n" +
             "    \"fire\": {\n" +
             "      \"exits\": [\n        " + exits + "\n      ],\n" +
@@ -310,6 +327,14 @@ public class TelemetryCsvWriter {
             "      \"exits\": [],\n" +
             "      \"assembly_area\": " + assemblyJson + ",\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"Epicenter varies per session inside CCS Admin Building\"}\n" +
+            "    },\n" +
+            "    \"new_sim_building2_fire\": {\n" +
+            "      \"exits\": [\n        " + nsb2Exits + "\n      ],\n" +
+            "      \"assembly_area\": " + nsb2AssemblyJson + ",\n" +
+            "      \"extinguisher_positions\": [{\"note\": \"all 3 classes issued as items at session start\"}],\n" +
+            "      \"hazard_spawn_zone\": {\"note\": \"5 random hazards armed each run from the building's own hazard-prop scan — see new_sim_building2_pos and /sim_scan_hazards\"},\n" +
+            "      \"phases\": [\"prevention\", \"intervention\", \"evacuation\"],\n" +
+            "      \"survey_status\": \"PLACEHOLDER — exits/assembly_area not yet F3-verified in-game\"\n" +
             "    }\n" +
             "  }\n" +
             "}\n";
