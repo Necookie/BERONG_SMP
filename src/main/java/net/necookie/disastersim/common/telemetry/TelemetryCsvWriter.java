@@ -31,7 +31,7 @@ import java.util.Map;
  */
 public class TelemetryCsvWriter {
 
-    private static final String CONTRACT_VERSION = "1.1";
+    private static final String CONTRACT_VERSION = "1.2";
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private static Path telemetryDir;
@@ -80,6 +80,7 @@ public class TelemetryCsvWriter {
             sb.append(',').append(metadata.getOrDefault("aftershock_count", ""));
             sb.append(',').append(metadata.getOrDefault("aftershock_magnitude_scale", ""));
             sb.append(',').append(csv(metadata.getOrDefault("final_earthquake_phase", "")));
+            sb.append(',').append(csv(metadata.getOrDefault("final_fire_phase", "")));
             sb.append(',').append(CONTRACT_VERSION);
             sb.append(',').append(csv(getModVersion()));
             sessionWriter.write(sb.toString());
@@ -90,11 +91,29 @@ public class TelemetryCsvWriter {
         }
     }
 
+    /** Legacy 11-column call shape — delegates with the v1.2 extra fields left blank. */
     public static String writeRow(String sessionId, String playerId, String scenarioType,
                                   double timestamp, String eventType,
                                   double x, double y, double z,
                                   double hazardDistance,
                                   String interactionTarget, Integer nearbyPlayerCount) {
+        return writeRow(sessionId, playerId, scenarioType, timestamp, eventType, x, y, z,
+                hazardDistance, interactionTarget, nearbyPlayerCount, null, null, null);
+    }
+
+    /**
+     * v1.2 call shape carrying the 3-phase fire state machine's extra per-event fields
+     * ({@code hit_fire}/{@code extinguisher_class} on {@code pin_pull}/{@code ext_spray},
+     * {@code phase} on {@code phase_transition} and any event fired during a phased run).
+     * Every row this class writes goes through here — the legacy 11-arg overload just passes
+     * nulls for these three, keeping every row in the CSV the same width.
+     */
+    public static String writeRow(String sessionId, String playerId, String scenarioType,
+                                  double timestamp, String eventType,
+                                  double x, double y, double z,
+                                  double hazardDistance,
+                                  String interactionTarget, Integer nearbyPlayerCount,
+                                  Boolean hitFire, String extinguisherClass, String phase) {
         StringBuilder sb = new StringBuilder();
         sb.append(csv(playerId)).append(',');
         sb.append(csv(sessionId)).append(',');
@@ -106,7 +125,10 @@ public class TelemetryCsvWriter {
         sb.append(round3(z)).append(',');
         sb.append(round2(hazardDistance)).append(',');
         sb.append(interactionTarget != null ? csv(interactionTarget) : "").append(',');
-        sb.append(nearbyPlayerCount != null ? nearbyPlayerCount : "");
+        sb.append(nearbyPlayerCount != null ? nearbyPlayerCount : "").append(',');
+        sb.append(hitFire != null ? (hitFire ? 1 : 0) : "").append(',');
+        sb.append(extinguisherClass != null ? csv(extinguisherClass) : "").append(',');
+        sb.append(phase != null ? csv(phase) : "");
         String row = sb.toString();
         if (telemetryDir != null) {
             try {
@@ -168,7 +190,8 @@ public class TelemetryCsvWriter {
                 new FileOutputStream(file.toFile(), true), StandardCharsets.UTF_8), 8192);
         if (isNew) {
             eventWriter.write("player_id,session_id,scenario_type,timestamp,event_type," +
-                    "x,y,z,hazard_distance,interaction_target,nearby_player_count");
+                    "x,y,z,hazard_distance,interaction_target,nearby_player_count," +
+                    "hit_fire,extinguisher_class,phase");
             eventWriter.newLine();
         }
     }
@@ -183,7 +206,7 @@ public class TelemetryCsvWriter {
             sessionWriter.write("session_id,player_id,scenario_type,started_at,ended_at," +
                     "duration_ticks,end_reason,fires_extinguished_count,magnitude," +
                     "aftershock_count,aftershock_magnitude_scale,final_earthquake_phase," +
-                    "contract_version,mod_version");
+                    "final_fire_phase,contract_version,mod_version");
             sessionWriter.newLine();
         }
     }
