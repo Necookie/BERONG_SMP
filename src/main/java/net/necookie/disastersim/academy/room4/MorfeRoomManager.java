@@ -13,9 +13,13 @@ import net.necookie.disastersim.academy.MorfePhase;
 import net.necookie.disastersim.academy.SantosPhase;
 import net.necookie.disastersim.academy.room1.CruzRoomManager;
 import net.necookie.disastersim.academy.room2.ReyesRoomManager;
+import net.necookie.disastersim.common.simulation.NewSimScoring;
+import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.entity.CustomNpcEntity;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Room 4 — Capt. Cesar Morfe Jr.'s Evaluation. Gated on Room 3 ({@link SantosPhase#DONE}).
@@ -95,5 +99,45 @@ public final class MorfeRoomManager {
 
     /** No-op — Room 4 has no ongoing per-tick state, only the interact-driven evaluation flow. */
     public static void tick(ServerLevel level) {
+    }
+
+    /**
+     * Delivers an in-character debrief of a real graded {@code /sim_fire new_sim_building2} run —
+     * narrates the score, never computes it (that's {@link NewSimScoring}). Fully independent of
+     * {@link AcademyProgress}/{@link SantosPhase} gating: fires programmatically from
+     * {@code SimulationManager.endSimulation} the instant that scenario ends, so it must work even
+     * for a player who has never touched the Academy tutorial at all.
+     */
+    public static void startSimDebrief(ServerPlayer player, NewSimScoring.Result result, String endReason) {
+        List<AcademyDialogue.DialogueLine> lines = new ArrayList<>();
+        lines.add(new AcademyDialogue.DialogueLine(
+                "§c[Capt. Morfe] §fWelcome back, trainee. I just got the report from New Sim Building 2.0 — let's go over it.", false));
+        lines.add(new AcademyDialogue.DialogueLine(
+                "§c[Capt. Morfe] §fYour score: §f" + result.score() + " / 100 §7(" + result.prepLevel() + ")", false));
+        lines.add(new AcademyDialogue.DialogueLine(outcomeLine(endReason), false));
+        if (!result.weakAreas().isEmpty()) {
+            lines.add(new AcademyDialogue.DialogueLine(
+                    "§c[Capt. Morfe] §fWork on: §f" + String.join("; ", result.weakAreas()), false));
+        }
+        lines.add(new AcademyDialogue.DialogueLine(
+                result.passed()
+                        ? "§c[Capt. Morfe] §fSolid work out there — that's the kind of response that keeps people safe. Head back and keep training!"
+                        : "§c[Capt. Morfe] §fNot your best run, but every drill teaches something. Come back and try again when you're ready!",
+                false));
+
+        AcademyManager.forceStartDialogue(player, lines, () -> {
+            ServerLevel level = (ServerLevel) player.level();
+            player.teleportTo(level, LobbyManager.SPAWN_X, LobbyManager.SPAWN_Y, LobbyManager.SPAWN_Z,
+                    Collections.emptySet(), 0.0f, 0.0f, true);
+        });
+    }
+
+    private static String outcomeLine(String endReason) {
+        return switch (endReason) {
+            case "all_hazards_prevented" -> "§c[Capt. Morfe] §fEvery hazard caught before it ever became a fire — textbook prevention.";
+            case "intervention_success" -> "§c[Capt. Morfe] §fA few hazards got past you, but you caught the fires before they spread. That's real composure under pressure.";
+            case "assembly_reached" -> "§c[Capt. Morfe] §fThe fire got away from you, but you got everyone out and reached the assembly area. Evacuation always comes first.";
+            default -> "§c[Capt. Morfe] §fThings got out of hand and you didn't make it to the assembly area in time. Let's talk about what happened.";
+        };
     }
 }
