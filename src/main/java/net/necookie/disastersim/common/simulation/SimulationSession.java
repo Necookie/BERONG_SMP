@@ -42,6 +42,23 @@ public class SimulationSession {
     public void bufferCsvRow(String row) { csvBuffer.append(row).append('\n'); }
     public String buildMoveCsv() { return csvBuffer.toString(); }
 
+    /**
+     * Every fire block that actually ignites or gets put out during this session, buffered
+     * in-memory the same way {@link #csvBuffer} buffers move ticks — never written to Turso
+     * per-event, only once as a whole blob at session end (see {@code SimulationManager.endSimulation}'s
+     * {@code fire_log_csv} column). Distinct from the general {@code event_log} JSON (which already
+     * carries a "hazard_failure"/"hazard_neutralize" entry per hazard prop, not a row per actual
+     * fire *block*) — this is what the dashboard's animated fire-spread map replays. Rows come from
+     * {@code TelemetryCsvWriter.writeFireLogRow}, which also durably writes each one to
+     * {@code run/telemetry/fire_logs_<date>.csv} as it happens — the same dual local-file +
+     * in-memory-buffer-for-Turso shape {@link #bufferCsvRow} already uses for move ticks.
+     */
+    private static final String FIRE_LOG_HEADER = "session_id,timestamp,x,y,z,event";
+    private final StringBuilder fireLogBuffer = new StringBuilder(FIRE_LOG_HEADER).append('\n');
+
+    public void bufferFireLogRow(String row) { fireLogBuffer.append(row).append('\n'); }
+    public String buildFireLogCsv() { return fireLogBuffer.toString(); }
+
     private final String sessionId = UUID.randomUUID().toString().substring(0, 8);
     private final Instant startedAt = Instant.now();
 

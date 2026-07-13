@@ -100,30 +100,40 @@ public abstract class HazardBlock extends Block {
         igniteAdjacent(level, pos, 1);
     }
 
-    /** Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is standing in/near. */
-    public static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
-        int lit = 0;
+    /**
+     * Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is
+     * standing in/near. Returns the positions actually lit (callers with a live
+     * {@code SimulationSession} use this to log fire-spread rows — see
+     * {@code SimulationSession#bufferFireLogRow}); ignore the return value if unneeded.
+     */
+    public static List<BlockPos> igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
+        List<BlockPos> lit = new ArrayList<>();
         for (Direction dir : Direction.values()) {
-            if (lit >= maxBlocks) break;
+            if (lit.size() >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
             if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
-                lit++;
+                lit.add(target.immutable());
             }
         }
+        return lit;
     }
 
-    /** Lights up to {@code maxBlocks} air blocks within a horizontal {@code radius} — for explosive failures. */
-    public static void igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
-        int lit = 0;
+    /**
+     * Lights up to {@code maxBlocks} air blocks within a horizontal {@code radius} — for explosive
+     * failures. Returns the positions actually lit, same convention as {@link #igniteAdjacent}.
+     */
+    public static List<BlockPos> igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
+        List<BlockPos> lit = new ArrayList<>();
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
-            if (lit >= maxBlocks) break;
+            if (lit.size() >= maxBlocks) break;
             if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
-                lit++;
+                lit.add(target.immutable());
             }
         }
+        return lit;
     }
 
     /**
@@ -134,7 +144,7 @@ public abstract class HazardBlock extends Block {
      * floor). Falls back to {@link #igniteAdjacent} if no planks are found in range, so a failure
      * always visibly starts a fire even in an all-non-flammable room.
      */
-    public static void igniteNearestFlammable(Level level, BlockPos origin, int maxTargets, int searchRadius) {
+    public static List<BlockPos> igniteNearestFlammable(Level level, BlockPos origin, int maxTargets, int searchRadius) {
         List<BlockPos> planks = new ArrayList<>();
         for (BlockPos check : BlockPos.betweenClosed(
                 origin.offset(-searchRadius, -searchRadius, -searchRadius),
@@ -144,29 +154,30 @@ public abstract class HazardBlock extends Block {
             }
         }
         if (planks.isEmpty()) {
-            igniteAdjacent(level, origin, maxTargets);
-            return;
+            return igniteAdjacent(level, origin, maxTargets);
         }
         planks.sort(Comparator.comparingDouble(p -> p.distSqr(origin)));
-        int lit = 0;
+        List<BlockPos> lit = new ArrayList<>();
         for (BlockPos plank : planks) {
-            if (lit >= maxTargets) break;
-            if (igniteAdjacentTo(level, plank)) lit++;
+            if (lit.size() >= maxTargets) break;
+            BlockPos ignited = igniteAdjacentTo(level, plank);
+            if (ignited != null) lit.add(ignited);
         }
         // Every nearest plank's neighbors happened to be occupied/non-air — still guarantee a fire.
-        if (lit == 0) igniteAdjacent(level, origin, maxTargets);
+        if (lit.isEmpty()) return igniteAdjacent(level, origin, maxTargets);
+        return lit;
     }
 
-    /** Lights the first available adjacent air cell touching {@code target}. Returns true if one was lit. */
-    private static boolean igniteAdjacentTo(Level level, BlockPos target) {
+    /** Lights the first available adjacent air cell touching {@code target}. Returns the lit position, or null. */
+    private static BlockPos igniteAdjacentTo(Level level, BlockPos target) {
         for (Direction dir : Direction.values()) {
             BlockPos adj = target.relative(dir);
             if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
                 level.setBlockAndUpdate(adj, Blocks.FIRE.defaultBlockState());
-                return true;
+                return adj.immutable();
             }
         }
-        return false;
+        return null;
     }
 
     /**

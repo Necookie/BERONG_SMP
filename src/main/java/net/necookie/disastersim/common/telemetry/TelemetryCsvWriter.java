@@ -37,6 +37,7 @@ public class TelemetryCsvWriter {
     private static Path telemetryDir;
     private static BufferedWriter eventWriter;
     private static BufferedWriter sessionWriter;
+    private static BufferedWriter fireLogWriter;
     private static final List<BlockPos> fireAlarmPositions = new ArrayList<>();
     private static boolean fireAlarmsScanDone = false;
     private static final List<BlockPos> nsb2FireAlarmPositions = new ArrayList<>();
@@ -144,9 +145,41 @@ public class TelemetryCsvWriter {
         return row;
     }
 
+    /**
+     * Writes one fire-spread row (a real fire block igniting or being put out) to its own local
+     * file, {@code run/telemetry/fire_logs_<YYYYMMDD>.csv} — separate from the general
+     * {@code gameplay_logs} CSV so it doesn't get buried among move-tick rows, and so the dashboard
+     * can consume a clean ignite/extinguish stream directly. Returns the formatted row so the
+     * caller can also buffer it in-memory (via {@code SimulationSession#bufferFireLogRow}) for the
+     * once-per-session {@code fire_log_csv} Turso column — this file write and that buffer are the
+     * *only* two places fire-spread data goes; nothing about it hits Turso per-event, exactly the
+     * "log to a file, batch-upload once" shape the general telemetry already uses for move ticks.
+     *
+     * @param event {@code "ignite"} or {@code "extinguish"}
+     */
+    public static String writeFireLogRow(String sessionId, double timestamp, int x, int y, int z, String event) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(csv(sessionId)).append(',');
+        sb.append(round2(timestamp)).append(',');
+        sb.append(x).append(',').append(y).append(',').append(z).append(',');
+        sb.append(csv(event));
+        String row = sb.toString();
+        if (telemetryDir != null) {
+            try {
+                ensureFireLogWriter();
+                fireLogWriter.write(row);
+                fireLogWriter.newLine();
+            } catch (IOException e) {
+                BerongSMP.LOGGER.error("[TelemetryCsvWriter] writeFireLogRow error: {}", e.getMessage());
+            }
+        }
+        return row;
+    }
+
     public static void flush() {
         try {
             if (eventWriter != null) eventWriter.flush();
+            if (fireLogWriter != null) fireLogWriter.flush();
         } catch (IOException e) {
             BerongSMP.LOGGER.error("[TelemetryCsvWriter] flush error: {}", e.getMessage());
         }
@@ -206,6 +239,7 @@ public class TelemetryCsvWriter {
         try {
             if (eventWriter != null)   { eventWriter.flush();   eventWriter.close(); }
             if (sessionWriter != null) { sessionWriter.flush(); sessionWriter.close(); }
+            if (fireLogWriter != null) { fireLogWriter.flush(); fireLogWriter.close(); }
         } catch (IOException ignored) {}
     }
 
@@ -238,12 +272,28 @@ public class TelemetryCsvWriter {
         }
     }
 
+    private static void openFireLogWriter() throws IOException {
+        String date = LocalDate.now().format(DATE_FMT);
+        Path file = telemetryDir.resolve("fire_logs_" + date + ".csv");
+        boolean isNew = !Files.exists(file);
+        fireLogWriter = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file.toFile(), true), StandardCharsets.UTF_8), 8192);
+        if (isNew) {
+            fireLogWriter.write("session_id,timestamp,x,y,z,event");
+            fireLogWriter.newLine();
+        }
+    }
+
     private static void ensureEventWriter() throws IOException {
         if (eventWriter == null) openEventWriter();
     }
 
     private static void ensureSessionWriter() throws IOException {
         if (sessionWriter == null) openSessionWriter();
+    }
+
+    private static void ensureFireLogWriter() throws IOException {
+        if (fireLogWriter == null) openFireLogWriter();
     }
 
     private static String getModVersion() {

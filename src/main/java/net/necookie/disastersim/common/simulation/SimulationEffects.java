@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -79,6 +80,8 @@ public class SimulationEffects {
                         "x", firePos.getX(), "y", firePos.getY(), "z", firePos.getZ(),
                         "total_count", session.getFireSpreadCount()
                     ));
+                    session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                            session.elapsedSeconds(), firePos.getX(), firePos.getY(), firePos.getZ(), "ignite"));
                 }
                 // Dense smoke plume above each new fire block
                 for (int s = 0; s < 14; s++) {
@@ -125,6 +128,8 @@ public class SimulationEffects {
                     "total_count", session.getFireSpreadCount(),
                     "type", "computer_ignition"
                 ));
+                session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                        session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "ignite"));
             }
             // Electrical ignition sound + spark burst
             level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,

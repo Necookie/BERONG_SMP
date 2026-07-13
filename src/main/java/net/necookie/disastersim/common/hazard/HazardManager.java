@@ -292,6 +292,8 @@ public final class HazardManager {
             session.logger.log("hazard_failure", Map.of(
                     "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
                     "hazard", BuiltInRegistries.BLOCK.getKey(block).getPath()));
+            session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                    session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "ignite"));
         }
         notifyFailure(notifyPlayer, message);
     }
@@ -322,6 +324,7 @@ public final class HazardManager {
     public static boolean defuse(ServerLevel level, SimulationSession session, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!isHazardous(state)) return false;
+        boolean wasOnFire = state.hasProperty(HazardBlock.ON_FIRE) && state.getValue(HazardBlock.ON_FIRE);
         String hazardId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         BlockState safe = state.setValue(HazardBlock.HAZARDOUS, false);
         if (safe.hasProperty(HazardBlock.ON_FIRE)) safe = safe.setValue(HazardBlock.ON_FIRE, false);
@@ -329,6 +332,10 @@ public final class HazardManager {
         level.levelEvent(null, 1009, pos, 0);
         if (session != null) {
             session.getHazardTimers().remove(pos);
+            if (wasOnFire) {
+                session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                        session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "extinguish"));
+            }
             if (session.getState().isFire()) {
                 double t = session.elapsedSeconds();
                 double tRounded = Math.round(t * 100.0) / 100.0;

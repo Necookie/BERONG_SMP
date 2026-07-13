@@ -396,24 +396,26 @@ public class SimulationManager {
                 // manually via /bfp prep_level and this UPDATE would otherwise null it back out.
                 TursoClient.executeAsync(
                         "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, prep_level=?," +
-                        " end_time=?, status='completed', event_log=?, move_log_csv=?" +
+                        " end_time=?, status='completed', event_log=?, move_log_csv=?, fire_log_csv=?" +
                         " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
                         " ORDER BY id DESC LIMIT 1)",
                         simType, finalScore, passed, newSimResult.prepLevel(),
                         java.time.Instant.now().toString(),
                         session.logger.toJson(),
                         session.buildMoveCsv(),
+                        session.buildFireLogCsv(),
                         uuid.toString());
             } else {
                 TursoClient.executeAsync(
                         "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
-                        " end_time=?, status='completed', event_log=?, move_log_csv=?" +
+                        " end_time=?, status='completed', event_log=?, move_log_csv=?, fire_log_csv=?" +
                         " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
                         " ORDER BY id DESC LIMIT 1)",
                         simType, finalScore, passed,
                         java.time.Instant.now().toString(),
                         session.logger.toJson(),
                         session.buildMoveCsv(),
+                        session.buildFireLogCsv(),
                         uuid.toString());
             }
         } else {
@@ -646,7 +648,10 @@ public class SimulationManager {
                         // Catch the 2 nearest wood-plank blocks (not just an adjacent air cell) so
                         // the fire has real fuel and actually spreads through the room, instead of
                         // risking a lone fire block fizzling out on a stone/tile floor.
-                        HazardBlock.igniteNearestFlammable(level, pos, 2, 6);
+                        for (BlockPos lit : HazardBlock.igniteNearestFlammable(level, pos, 2, 6)) {
+                            session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                                    session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
+                        }
                     }
                 }
                 player.sendSystemMessage(Component.literal(String.format(
@@ -656,7 +661,10 @@ public class SimulationManager {
             } else if (after == SimulationSession.FirePhase.EVACUATION) {
                 for (BlockPos pos : session.getEscalatedHazards()) {
                     if (!session.getExtinguishedEscalated().contains(pos)) {
-                        HazardBlock.igniteRadius(level, pos, 3, 10);
+                        for (BlockPos lit : HazardBlock.igniteRadius(level, pos, 3, 10)) {
+                            session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                                    session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
+                        }
                     }
                 }
                 player.sendSystemMessage(Component.literal(
