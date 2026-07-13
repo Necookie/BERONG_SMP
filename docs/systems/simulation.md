@@ -66,3 +66,81 @@ Two real-world drill techniques are modeled as live gameplay, not just tutorial 
   - **Crawling under the table**: a table's kneehole (under 1 block tall) is shorter than even vanilla's `Pose.CROUCHING` hitbox, so normal collision would stop a player at its edge before they could ever shrink into it. `DuckCoverHoldManager.allowCrawlUnderTable` pre-emptively forces `Pose.SWIMMING` (vanilla's own crawl-through-tight-gaps hitbox) whenever a crouching player is facing or beside a `TableBlock` (`facingOrBesideTable` — stricter than `hasNearbyTable`: adjacent or a short look-direction raycast only, not "somewhere nearby"), letting ordinary movement carry them into the kneehole. Sneak/shift itself is untouched; this only changes what fits under the player once they're already crouching near a table, and vanilla's own per-tick pose logic (`Player.updatePlayerPose`) takes back over seamlessly on the way back out.
   - **Message scoping fix (2026-07-05)**: `DuckCoverHoldManager.onHoldAchieved`'s "Duck, Cover, and Hold maintained" chat message (and its telemetry log) now requires an active quake-type `SimulationSession` before firing — it used to fire unconditionally, since `tick()` deliberately runs for every online player regardless of session (so the drill can be tested by just crouching under any block). That meant it popped up during completely unrelated activity, most visibly crouching under Officer Cruz's Go/Stop tunnel slabs in Room 1 (which satisfies the same crouch+cover check), and would have doubled up with `SantosRoomManager`'s own tailored completion message in Room 3 too.
 
+### New Sim Building 2.0 — Prevention/Intervention/Evacuation (`/sim_fire new_sim_building2`)
+
+A third, real graded FIRE scenario (`SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE`), targeting
+the 34-room/2-floor `new_sim_building2.0.schem` building. Unlike Library/CCS FIRE (continuous fire spread
+with organic hazard escalation until timeout/exit), this scenario runs its own explicit 3-phase story via
+`SimulationSession.FirePhase` (`PREVENTION → INTERVENTION → EVACUATION → END`), mirroring how
+`EarthquakePhase`/`tickQuakePhase` already work — `tickFirePhase()` is pure bookkeeping; all world mutation
+happens in `SimulationManager.tickNewSim2FireSession` on the phase-change edge, exactly like
+`tickEarthquakeSession` does for quake phases.
+
+```
+startSimulation(NEW_SIM_BUILDING2_FIRE)
+  → arena bound to the whole building (both floors); session.bindDuration(prevention+intervention+evacuation ticks)
+  → HazardManager.scanHazardProps across the full arena finds every hazard-capable prop/computer/outlet
+    already baked into the schematic (no new blocks spawned) — HazardManager.armRandomHazards shuffles
+    that pool and HazardManager.activate()s 5 of them (NEW_SIM2_HAZARD_COUNT)
+  → session.initPhasedFire(armed) → PREVENTION; player spawns in a random 2nd-floor room
+    (findRandomSpawnInNewSim2Upper), issued all 3 extinguishers (ABC/CO2/Wet Chemical — armed
+    hazards may need any class)
+  → phase_transition(prevention) telemetry emitted
+
+PREVENTION (Config.NEW_SIM2_PREVENTION_TICKS, default 2:00):
+  → bare-hand right-click on a hazardous prop (HazardBlock/HazardFacingBlock.useWithoutItem's existing
+    prevention interaction) now also calls HazardManager.onManualPrevention — logs hazard_neutralize,
+    and for this state records the hazard as found (session.recordPrevented)
+  → HazardManager.tick() early-returns for this state, so no *other* prop in the building can go
+    hazardous organically — only the deliberately-armed 5 are ever live
+  → all 5 found before the timer → phase jumps straight to END (endReason=all_hazards_prevented)
+  → timer expires with some unfound → HazardManager.forceFailure ignites every unfound hazard
+    (small fire, ON_FIRE=true) → INTERVENTION; phase_transition(intervention) emitted
+
+INTERVENTION (Config.NEW_SIM2_INTERVENTION_TICKS, default 1:30):
+  → each escalated hazard needs its class-correct extinguisher — this is free: the existing
+    AbstractExtinguisherItem block-ID-set gating (KITCHEN_HAZARD_IDS/WET_CHEMICAL_UNSAFE_IDS/
+    OXIDIZER_HAZARD_IDS) and HazardManager.defuse already enforce it for every hazard prop in the mod
+  → HazardManager.defuse, extended: for an armed+escalated hazard, records it resolved
+    (session.recordEscalatedExtinguished) and logs hazard_neutralize
+  → ringing the building's fire alarm (FireAlarmBlock, unchanged — just gates on session.getState().isFire())
+    marks session.alarmRung — scored as a bonus, never a hard gate
+  → all escalated hazards extinguished before the timer → END (endReason=intervention_success)
+  → timer expires with any still burning → HazardBlock.igniteRadius widens those fires and real
+    arena-wide fire spread begins (EFFECTS.simulateFire, library-style) → EVACUATION;
+    phase_transition(evacuation) emitted
+
+EVACUATION:
+  → AssemblyZone/ExitZones' New Sim Building 2.0-specific methods (isInsideNewSim2/findNewSim2/
+    spawnBorderParticlesNewSim2) only start mattering here — tickAssemblyZone gates on
+    firePhase == EVACUATION so standing in the zone during prevention/intervention doesn't
+    end the run early. Both zones are PLACEHOLDER pending an in-game F3 survey.
+  → reaching assembly → endSimulation("assembly_reached"); overall session timer expiring first → "timeout"
+
+endSimulation (any endReason):
+  → NewSimScoring.evaluate() (armed/prevented/escalated/extinguished counts + alarmRung +
+    assemblyReached + endReason) → score, prep_level (>=75 HIGH / 40-74 MODERATE / <40 LOW, per
+    telemetry_contract.md v1.2), passed — written to the Turso sessions row (prep_level column is
+    ONLY touched for this scenario, never clobbering a /bfp-set value on Library/CCS runs)
+  → player alive: teleported to Capt. Morfe's Academy viewpoint; MorfeRoomManager.startSimDebrief
+    plays an in-character score readout (Morfe narrates, never computes) — fully independent of
+    AcademyProgress/SantosPhase gating, so it works even for a player who never touched the Academy
+  → player dead: falls back to the existing pendingLobbyRespawn path, no debrief
+```
+
+**Telemetry contract v1.2 note:** this scenario is what motivated closing several gaps that applied
+mod-wide, not just here — `phase_transition`, `hazard_neutralize`, and `pin_pull`/`ext_spray` (with
+`hit_fire`/`extinguisher_class`) are now emitted for *any* active fire-type session via
+`AbstractExtinguisherItem`/`HazardManager`, and every session's telemetry timestamp now anchors off
+`SimulationSession.elapsedSeconds()` instead of the `Config.SIM_DURATION_TICKS` default (needed because
+this scenario's total duration isn't the default, but it fixed the same math for every other scenario too).
+`TelemetryCsvWriter`'s CSV header (and the embedded `move_log_csv` header) gained the corresponding
+`hit_fire,extinguisher_class,phase` columns — a breaking change for existing CSV consumers, flagged in the
+New Sim Building 2.0 plan for dashboard/ML-side coordination.
+
+**Dev tooling:** `/sim_scan_hazards` (GM-only) runs the building-wide hazard scan without starting a
+session and prints a per-named-room breakdown (`SimRoom.NEW_SIM2_UPPER_ROOMS`/`NEW_SIM2_GROUND_ROOMS`,
+`SimRoom.nameInNewSim2`) — the verification tool for confirming the arena bounds in `SimulationManager`
+actually cover every hazard prop/computer/outlet placed in the building, since an early palette-level
+NBT scan undercounted them.
+

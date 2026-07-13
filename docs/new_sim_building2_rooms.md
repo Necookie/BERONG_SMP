@@ -5,9 +5,12 @@ F3/WorldEdit-verified absolute world coordinates for every named room in New Sim
 -34, 358)`). Captured room-by-room with `//copyroom <name>` (see `CopyRoomCommand`) the same way
 `SimRoom`'s `CCS_UPPER_ROOMS`/`CCS_GROUND_ROOMS` tables in CLAUDE.md were originally compiled.
 
-This building is not yet wired into `SimRoom`, `/sim_fire`, or `/sim_earthquake` as a scenario
-target — this doc is the raw survey data for whenever that integration happens (a `SimRoom.NEW_SIM_BUILDING2_UPPER_ROOMS`/`_GROUND_ROOMS`-style pair of arrays, mirroring the CCS pattern,
-is the natural next step once room-level telemetry/spawning is needed here).
+This building is now wired into `SimRoom` (`NEW_SIM2_UPPER_ROOMS`/`NEW_SIM2_GROUND_ROOMS`, mirroring
+the CCS pattern) and `/sim_fire new_sim_building2` (`SimulationState.NEW_SIM_BUILDING2_FIRE` — a
+prevention/intervention/evacuation scenario, see [docs/systems/simulation.md](systems/simulation.md)).
+No `/sim_earthquake` variant targets this building yet. This doc remains the source-of-truth survey
+data the room tables were transcribed from — re-survey and update both together if the schematic
+ever changes.
 
 Pos1 = minimum corner, Pos2 = maximum corner (as returned by `//copyroom`), both inclusive.
 
