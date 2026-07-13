@@ -265,9 +265,21 @@ public class TursoClient {
             .thenRun(() -> executeAsync("CREATE INDEX IF NOT EXISTS idx_sessions_username ON sessions(username)"));
 
         // Separate account table for the /register + /login username/password system — decoupled
-        // from `sessions` (one user row can have many session rows across return visits).
-        String usersDdl = """
-                CREATE TABLE IF NOT EXISTS users (
+        // from `sessions` (one account row can have many session rows across return visits).
+        //
+        // IMPORTANT: this Turso database is SHARED with the BERONG_SMP_WEB dashboard, which
+        // already owns a table literally named `users` for its own admin/staff logins
+        // (id, username, password_hash, created_at, role, status — no student_id/section/
+        // full_name/tutorial_completed columns at all). `CREATE TABLE IF NOT EXISTS users` was a
+        // silent no-op against that pre-existing table, so every mod-side INSERT referencing
+        // student_id/section/full_name failed with "no such column" (surfaced to players as
+        // "db_error"), and any student who happened to pick a username matching a real dashboard
+        // admin account (e.g. the developer's own login) got a spurious "already taken". Named
+        // `student_accounts` instead — verify against the live schema
+        // (`SELECT sql FROM sqlite_master WHERE name=...`) before ever reusing a bare, generic
+        // table name in this shared database again.
+        String studentAccountsDdl = """
+                CREATE TABLE IF NOT EXISTS student_accounts (
                     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
                     username            TEXT    NOT NULL UNIQUE,
                     password_hash       TEXT    NOT NULL,
@@ -278,8 +290,8 @@ public class TursoClient {
                     created_at          TEXT    NOT NULL,
                     last_login          TEXT
                 )""";
-        executeAsync(usersDdl)
-            .thenRun(() -> executeAsync("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)"));
+        executeAsync(studentAccountsDdl)
+            .thenRun(() -> executeAsync("CREATE UNIQUE INDEX IF NOT EXISTS idx_student_accounts_username ON student_accounts(username)"));
     }
 
     /** Runs an ALTER TABLE statement, silently swallowing the error if the column already exists. */

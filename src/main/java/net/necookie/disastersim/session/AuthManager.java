@@ -82,7 +82,7 @@ public final class AuthManager {
         if (account == null || account.tutorialCompleted()) return;
         active.put(uuid, new AuthAccount(account.userId(), account.username(), account.studentId(),
                 account.section(), account.fullName(), true));
-        TursoClient.executeAsync("UPDATE users SET tutorial_completed=1 WHERE id=?", account.userId());
+        TursoClient.executeAsync("UPDATE student_accounts SET tutorial_completed=1 WHERE id=?", account.userId());
     }
 
     public static void logout(UUID uuid) {
@@ -107,7 +107,7 @@ public final class AuthManager {
             return;
         }
         CompletableFuture.runAsync(() -> {
-            String json = TursoClient.query("SELECT id FROM users WHERE username=?", username);
+            String json = TursoClient.query("SELECT id FROM student_accounts WHERE username=?", username);
             JsonArray rows = TursoClient.parseRows(json);
             if (!rows.isEmpty()) {
                 server.execute(() -> onError.accept("taken"));
@@ -115,7 +115,7 @@ public final class AuthManager {
             }
             String hash = PasswordHasher.hash(password);
             long id = TursoClient.insert(
-                    "INSERT INTO users (username, password_hash, student_id, section, full_name, created_at) VALUES (?,?,?,?,?,?)",
+                    "INSERT INTO student_accounts (username, password_hash, student_id, section, full_name, created_at) VALUES (?,?,?,?,?,?)",
                     username, hash, studentId, section, fullName, Instant.now().toString());
             if (id < 0) {
                 server.execute(() -> onError.accept("db_error"));
@@ -154,7 +154,7 @@ public final class AuthManager {
         CompletableFuture.runAsync(() -> {
             String json = TursoClient.query(
                     "SELECT id, username, password_hash, student_id, section, full_name, tutorial_completed " +
-                    "FROM users WHERE username=?", username);
+                    "FROM student_accounts WHERE username=?", username);
             JsonArray rows = TursoClient.parseRows(json);
             if (rows.isEmpty()) {
                 recordFailure(rec, now);
@@ -173,7 +173,7 @@ public final class AuthManager {
                     && row.get("tutorial_completed").getAsInt() == 1;
             AuthAccount account = new AuthAccount(id, username, str(row, "student_id"),
                     str(row, "section"), str(row, "full_name"), tutorialDone);
-            TursoClient.executeAsync("UPDATE users SET last_login=? WHERE id=?", Instant.now().toString(), id);
+            TursoClient.executeAsync("UPDATE student_accounts SET last_login=? WHERE id=?", Instant.now().toString(), id);
             server.execute(() -> {
                 active.put(uuid, account);
                 onSuccess.accept(account);

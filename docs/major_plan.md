@@ -181,8 +181,8 @@ exposed (20 Hz sampling, real assembly/exit zones, per-building fire-alarm scan)
 
 **Key deliverables:**
 - [x] `PasswordHasher` — salted `PBKDF2WithHmacSHA256` password hashing, unit-tested
-- [x] `users` Turso table + `sessions.username` column/index; `AuthManager` (per-station login
-      state, async `/register`+`/login`, rate-limited)
+- [x] `student_accounts` Turso table + `sessions.username` column/index; `AuthManager`
+      (per-station login state, async `/register`+`/login`, rate-limited)
 - [x] `/register <username> <password> <student_id> <section> <full_name>`, `/login`, `/logout`,
       `/history` (player); `/bfp user <username>` (instructor)
 - [x] `SessionManager.checkin` resets `AcademySavedData` per station (closes a certification leak
@@ -205,6 +205,14 @@ exposed (20 Hz sampling, real assembly/exit zones, per-building fire-alarm scan)
 **See full flow:** `docs/systems/simulation.md` ("Lobby Buttons & the Academy→Simulation Bridge")
 and `docs/systems/academy.md` (auth system + Morfe's redirect).
 
+**2026-07-13 hotfix (post-ship):** the account table was originally named `users`, colliding with
+a pre-existing table of the same name the `BERONG_SMP_WEB` dashboard already used for its own
+admin/staff logins (this Turso database is shared between the mod and the dashboard). `CREATE
+TABLE IF NOT EXISTS users` was a silent no-op against that table, so every `/register` failed
+("db_error" — the INSERT referenced columns that don't exist on the dashboard's `users` schema)
+and a student picking a username matching a real dashboard admin got a false "already taken".
+Renamed to `student_accounts` — see `TursoClient`'s Key Classes entry in CLAUDE.md.
+
 **Follow-up:** a fresh in-game F3 survey of the New Sim Building 2.0 assembly zone/exit doors
 (currently derived from the room table, not walked) — see `docs/f3_tuning_todo.md` §7.
 
@@ -223,7 +231,7 @@ and `docs/systems/academy.md` (auth system + Morfe's redirect).
 
 ---
 
-## Turso Schema (target after Phase 1; `users` added in Phase 6)
+## Turso Schema (target after Phase 1; `student_accounts` added in Phase 6)
 
 ```sql
 CREATE TABLE sessions (
@@ -233,7 +241,7 @@ CREATE TABLE sessions (
   section             TEXT,                    -- e.g. BSIT-3A
   station_account     TEXT NOT NULL,
   account_uuid        TEXT NOT NULL,
-  username            TEXT,                    -- FK-by-value to users.username (Phase 6); NULL for pre-Phase-6 rows
+  username            TEXT,                    -- FK-by-value to student_accounts.username (Phase 6); NULL for pre-Phase-6 rows
   start_time          TEXT NOT NULL,
   end_time            TEXT,
   status              TEXT DEFAULT 'active',   -- active | completed | aborted
@@ -250,8 +258,11 @@ CREATE TABLE sessions (
 );
 
 -- Phase 6: persistent /register + /login accounts, decoupled from `sessions`
--- (one user can have many session rows across return visits).
-CREATE TABLE users (
+-- (one account can have many session rows across return visits). Named
+-- `student_accounts`, NOT `users` — this Turso database is shared with the
+-- BERONG_SMP_WEB dashboard, which already has its own `users` table for
+-- admin/staff logins with an entirely different schema.
+CREATE TABLE student_accounts (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
   username            TEXT NOT NULL UNIQUE,
   password_hash       TEXT NOT NULL,           -- salted PBKDF2WithHmacSHA256, see PasswordHasher

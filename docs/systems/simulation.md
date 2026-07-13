@@ -73,10 +73,12 @@ dev/admin use, but the buttons themselves now drive the Academy → New Sim Buil
 - **Button 2** (higher Z) — `SimulationManager.startSimulation(player, NEW_SIM_BUILDING2_FIRE)`
   directly (same path `/sim_fire new_sim_building2` uses), gated on **Academy certification**:
   either this session's Capt. Morfe `MorfePhase.EVALUATED_PASS`, or a restored `/login` account
-  whose `users.tutorial_completed` flag is set (`AuthManager.isTutorialCompleted`).
+  whose `student_accounts.tutorial_completed` flag is set (`AuthManager.isTutorialCompleted`).
 - Both buttons still require **registration** (`LobbyManager.baseGatesPassed`): `/register
-  <username> <password> <student_id> <section> <full_name>` (creates a persistent Turso `users`
-  account alongside the existing world-saved registration) or `/login <username> <password>` for
+  <username> <password> <student_id> <section> <full_name>` (creates a persistent Turso
+  `student_accounts` account — deliberately not named `users`, which already belongs to the
+  `BERONG_SMP_WEB` dashboard's admin/staff logins in this shared database — alongside the
+  existing world-saved registration) or `/login <username> <password>` for
   a returning student — see `docs/systems/academy.md` for the full auth flow and why a returning
   student's Academy certification survives without replaying the tutorial.
 - Default spawn is always the main lobby now (`LobbyManager.routePlayer`) — the old routing to a
