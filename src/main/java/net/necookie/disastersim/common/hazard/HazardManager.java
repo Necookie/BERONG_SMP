@@ -12,9 +12,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.necookie.disastersim.block.ComputerBlock;
+import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
+import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -55,12 +58,72 @@ public final class HazardManager {
         return found;
     }
 
-    /** Called every tick a FIRE-type session runs. */
+    /**
+     * Called every tick a FIRE-type session runs. New Sim Building 2.0 drives its own 5-hazard
+     * prevention/intervention/evacuation state machine ({@code SimulationManager.tickNewSim2FireSession})
+     * instead of this class's organic random-escalation ({@link #developHazards}) — every other
+     * hazard prop in that building must stay in its default state until deliberately armed, so
+     * this returns before touching anything for that state. Library/CCS are unaffected.
+     */
     public static void tick(ServerLevel level, SimulationSession session, int ticks) {
+        if (session.getState() == SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE) return;
         if (session.getHazardPositions().isEmpty()) return;
         if (ticks % SCAN_INTERVAL_TICKS == 0) developHazards(level, session);
         seedComputerTimers(level, session);
         advanceFailureTimers(level, session);
+    }
+
+    /**
+     * Filters {@code pool} down to props carrying the shared {@code HAZARDOUS} property (excludes
+     * {@link ComputerBlock}/{@link WoodshopSawdustLayerBlock}, which use their own state instead
+     * of the discrete armed-hazard model), shuffles, and {@link #activate}s up to {@code count} of
+     * them. Returns the positions actually armed — used by New Sim Building 2.0 to pick 5 random
+     * hazards from whatever the building's own hazard-prop scan finds, not a hardcoded pool.
+     */
+    public static List<BlockPos> armRandomHazards(ServerLevel level, SimulationSession session,
+                                                   List<BlockPos> pool, int count, RandomSource random) {
+        List<BlockPos> candidates = new ArrayList<>();
+        for (BlockPos pos : pool) {
+            if (isHazardCapable(level.getBlockState(pos))) candidates.add(pos);
+        }
+        Collections.shuffle(candidates, new java.util.Random(random.nextLong()));
+        List<BlockPos> armed = new ArrayList<>();
+        for (BlockPos pos : candidates) {
+            if (armed.size() >= count) break;
+            if (activate(level, session, pos)) armed.add(pos);
+        }
+        return armed;
+    }
+
+    /**
+     * Called by {@link HazardBlock}/{@link HazardFacingBlock#useWithoutItem} right after a
+     * bare-hand prevention interaction succeeds — the interaction itself has no session/telemetry
+     * awareness, so this is the hook that turns "player right-clicked a hazardous prop" into a
+     * {@code hazard_neutralize} telemetry row and, for New Sim Building 2.0, a found-hazard tally.
+     */
+    public static void onManualPrevention(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState previousState) {
+        SimulationSession session = SimulationManager.getSession(player.getUUID());
+        if (session == null || !session.getState().isFire()) return;
+
+        String hazardId = BuiltInRegistries.BLOCK.getKey(previousState.getBlock()).getPath();
+        double t = session.elapsedSeconds();
+        double tRounded = Math.round(t * 100.0) / 100.0;
+        session.logger.log("hazard_neutralize", Map.of(
+                "t", tRounded, "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                "hazard", hazardId, "method", "prevention"));
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                session.getSessionId(), player.getUUID().toString(), session.getState().name().toLowerCase(),
+                tRounded, "hazard_neutralize",
+                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0.0,
+                hazardId, null, null, null, session.firePhaseLabel()));
+
+        if (session.getState() == SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE
+                && session.isArmedHazard(pos)) {
+            session.recordPrevented(pos);
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§a✔ Hazard prevented! (%d/%d found)",
+                    session.getPreventedHazards().size(), session.getArmedHazards().size())));
+        }
     }
 
     /**
@@ -259,11 +322,38 @@ public final class HazardManager {
     public static boolean defuse(ServerLevel level, SimulationSession session, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
         if (!isHazardous(state)) return false;
+        String hazardId = BuiltInRegistries.BLOCK.getKey(state.getBlock()).getPath();
         BlockState safe = state.setValue(HazardBlock.HAZARDOUS, false);
         if (safe.hasProperty(HazardBlock.ON_FIRE)) safe = safe.setValue(HazardBlock.ON_FIRE, false);
         level.setBlock(pos, safe, 3);
         level.levelEvent(null, 1009, pos, 0);
-        if (session != null) session.getHazardTimers().remove(pos);
+        if (session != null) {
+            session.getHazardTimers().remove(pos);
+            if (session.getState().isFire()) {
+                double t = session.elapsedSeconds();
+                double tRounded = Math.round(t * 100.0) / 100.0;
+                ServerPlayer sessionPlayer = session.getPlayer();
+                String playerId = sessionPlayer != null ? sessionPlayer.getUUID().toString() : "";
+                session.logger.log("hazard_neutralize", Map.of(
+                        "t", tRounded, "x", pos.getX(), "y", pos.getY(), "z", pos.getZ(),
+                        "hazard", hazardId, "method", "extinguisher"));
+                session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                        session.getSessionId(), playerId, session.getState().name().toLowerCase(),
+                        tRounded, "hazard_neutralize",
+                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 0.0,
+                        hazardId, null, null, null, session.firePhaseLabel()));
+            }
+            if (session.getState() == SimulationManager.SimulationState.NEW_SIM_BUILDING2_FIRE
+                    && session.isEscalatedHazard(pos)
+                    && !session.getExtinguishedEscalated().contains(pos)) {
+                session.recordEscalatedExtinguished(pos);
+                if (session.getPlayer() != null) {
+                    session.getPlayer().sendSystemMessage(Component.literal(String.format(
+                            "§a✔ Fire contained! (%d/%d resolved)",
+                            session.getExtinguishedEscalated().size(), session.getEscalatedHazards().size())));
+                }
+            }
+        }
         return true;
     }
 }

@@ -63,7 +63,7 @@ public class SimulationManager {
 
     private static final BlockPos SSC_POS = new BlockPos(11,  -33, 90);
     public static final BlockPos CCS_POS = new BlockPos(76, -34, 4);
-    private static final BlockPos NEW_SIM_BUILDING2_POS = new BlockPos(-182, -34, 358);
+    public static final BlockPos NEW_SIM_BUILDING2_POS = new BlockPos(-182, -34, 358);
 
     // Separate from QUAKE_INTERVAL so tuning earthquake rate doesn't silently change HUD update frequency.
     private static final int HUD_SYNC_INTERVAL_TICKS = 10;
@@ -107,10 +107,10 @@ public class SimulationManager {
     private static final SimulationEffects EFFECTS = new SimulationEffects();
 
     public enum SimulationState {
-        IDLE, FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE;
+        IDLE, FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE, NEW_SIM_BUILDING2_FIRE;
 
-        /** True for any fire-type simulation (library or CCS building). */
-        public boolean isFire()  { return this == FIRE || this == CCS_FIRE; }
+        /** True for any fire-type simulation (library, CCS building, or New Sim Building 2.0). */
+        public boolean isFire()  { return this == FIRE || this == CCS_FIRE || this == NEW_SIM_BUILDING2_FIRE; }
         /** True for any earthquake-type simulation (library or CCS building). */
         public boolean isQuake() { return this == EARTHQUAKE || this == CCS_EARTHQUAKE; }
         /** True when the simulation is set inside the CCS admin building. */
@@ -123,6 +123,18 @@ public class SimulationManager {
     private static final int CCS_AREA_SPAN_X = 55;
     private static final int CCS_AREA_SPAN_Z = 63;
     private static final int CCS_AREA_HEIGHT = 12;
+
+    // New Sim Building 2.0 arena bounds — covers the whole surveyed building envelope (both
+    // floors, docs/new_sim_building2_rooms.md: X -118..-81, Z 434..542, Y -34..-13) with a margin
+    // so hazard scanning doesn't clip anything near the edges. Provisional: if the hazard-scan
+    // verification tool (/sim_scan_hazards) finds fewer props than are actually placed, widen
+    // this rather than trusting the surveyed room list alone — see the New Sim Building 2.0 plan.
+    private static final BlockPos NEW_SIM2_ARENA_BASE = new BlockPos(-119, -34, 433);
+    private static final int NEW_SIM2_ARENA_SPAN_X = 40;
+    private static final int NEW_SIM2_ARENA_SPAN_Z = 111;
+    private static final int NEW_SIM2_ARENA_HEIGHT = 22;
+
+    private static final int NEW_SIM2_HAZARD_COUNT = 5;
 
     public static synchronized void startSimulation(ServerPlayer player, SimulationState state) {
         startSimulation(player, state, Config.QUAKE_MAGNITUDE.get());
@@ -140,7 +152,14 @@ public class SimulationManager {
         activeSessions.put(uuid, session);
 
         // Bind arena bounds so effects and epicenter calculations target the right building.
-        if (state.isCCS()) {
+        if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            session.setArena(NEW_SIM2_ARENA_BASE, NEW_SIM2_ARENA_SPAN_X, NEW_SIM2_ARENA_SPAN_Z, NEW_SIM2_ARENA_HEIGHT);
+            // Total budget = prevention + intervention + evacuation; a single overall countdown
+            // long enough to cover every phase, distinct from each phase's own internal timer.
+            session.bindDuration(Config.NEW_SIM2_PREVENTION_TICKS.get()
+                    + Config.NEW_SIM2_INTERVENTION_TICKS.get()
+                    + Config.NEW_SIM2_EVACUATION_TICKS.get());
+        } else if (state.isCCS()) {
             session.setArena(CCS_FIRE_BASE, CCS_AREA_SPAN_X, CCS_AREA_SPAN_Z, CCS_AREA_HEIGHT);
         } else {
             session.setArena(SIM_POS, Config.SIM_AREA_SIZE.get(), Config.SIM_AREA_SIZE.get(), Config.SIM_AREA_HEIGHT.get());
@@ -160,6 +179,15 @@ public class SimulationManager {
                     session.getArenaOrigin(), session.getArenaSpanX(), session.getArenaSpanZ(), session.getArenaHeight()));
         }
 
+        if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            List<BlockPos> armed = HazardManager.armRandomHazards(level, session,
+                    session.getHazardPositions(), NEW_SIM2_HAZARD_COUNT, level.getRandom());
+            session.initPhasedFire(armed);
+            BerongSMP.LOGGER.info(
+                    "[SimulationManager] New Sim Building 2.0: scanned {} hazard-capable prop(s) across the building, armed {}",
+                    session.getHazardPositions().size(), armed.size());
+        }
+
         BlockPos spawnPos;
         if (state == SimulationState.CCS_FIRE) {
             List<BlockPos> computers = findComputersInCCS(level);
@@ -169,6 +197,8 @@ public class SimulationManager {
             spawnPos = findSpawnNearComputer(level, computers);
         } else if (state.isCCS()) {
             spawnPos = findRandomSpawnInCCS(level);
+        } else if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            spawnPos = findRandomSpawnInNewSim2Upper(level);
         } else {
             spawnPos = findRandomSpawnInLibrary(level);
         }
@@ -198,6 +228,16 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("§eA fire has started from a computer workstation!"));
             player.sendSystemMessage(Component.literal("§fLocate the burning computer and suppress it immediately."));
             player.sendSystemMessage(Component.literal("§7CO2 extinguisher issued — §ePull pin → Aim → Sweep"));
+        } else if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            player.getInventory().setItem(0, new ItemStack(ModItems.FIRE_EXTINGUISHER.get()));
+            player.getInventory().setItem(1, new ItemStack(ModItems.CO2_EXTINGUISHER.get()));
+            player.getInventory().setItem(2, new ItemStack(ModItems.WET_CHEMICAL_EXTINGUISHER.get()));
+            player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            player.sendSystemMessage(Component.literal("§c§l⚠  FIRE PREVENTION DRILL — New Sim Building 2.0"));
+            player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
+            player.sendSystemMessage(Component.literal("§e5 developing hazards are hidden somewhere in this building."));
+            player.sendSystemMessage(Component.literal("§fFind each one and §aright-click it bare-handed§f to prevent it — you have §c2:00§f."));
+            player.sendSystemMessage(Component.literal("§7Any hazard you miss will catch fire; you'll then need the §ecorrect extinguisher§7 to contain it."));
         } else if (state.isQuake()) {
             player.sendSystemMessage(Component.literal(String.format(
                     "§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!%s",
@@ -215,6 +255,22 @@ public class SimulationManager {
                 0.0, "session_start",
                 player.getX(), player.getY(), player.getZ(),
                 startHazDist, null, null));
+
+        if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            emitPhaseTransition(session, uuid, player, "prevention");
+        }
+    }
+
+    /** Logs a {@code phase_transition} event (contract v1.2) — New Sim Building 2.0 only. */
+    private static void emitPhaseTransition(SimulationSession session, UUID uuid, ServerPlayer player, String phase) {
+        double t = session.elapsedSeconds();
+        double tRounded = Math.round(t * 100.0) / 100.0;
+        session.logger.log("phase_transition", java.util.Map.of("t", tRounded, "phase", phase));
+        session.bufferCsvRow(TelemetryCsvWriter.writeRow(
+                session.getSessionId(), uuid.toString(), session.getState().name().toLowerCase(),
+                tRounded, "phase_transition",
+                player.getX(), player.getY(), player.getZ(), 0.0,
+                null, null, null, null, phase));
     }
 
     @SubscribeEvent
@@ -701,12 +757,14 @@ public class SimulationManager {
      * Picks a random named room from either CCS floor and finds a valid spawn inside it.
      * Returns empty if no room on either floor has a solid-floor + 2-air-above position.
      */
-    private static Optional<BlockPos> findSpawnInCcsNamedRoom(ServerLevel level) {
+    /**
+     * Shuffles {@code rooms} and finds a valid solid-floor + 2-air-above spawn inside the first
+     * one that has one. Shared by every "spawn inside a named room, not a blind arena scan"
+     * building (CCS, New Sim Building 2.0).
+     */
+    private static Optional<BlockPos> findSpawnInNamedRoom(ServerLevel level, List<SimRoom.CcsRoom> rooms) {
         net.minecraft.util.RandomSource random = level.getRandom();
-        List<SimRoom.CcsRoom> all = new ArrayList<>(SimRoom.CCS_UPPER_ROOMS.size() + SimRoom.CCS_GROUND_ROOMS.size());
-        all.addAll(SimRoom.CCS_UPPER_ROOMS);
-        all.addAll(SimRoom.CCS_GROUND_ROOMS);
-        List<SimRoom.CcsRoom> shuffled = all;
+        List<SimRoom.CcsRoom> shuffled = new ArrayList<>(rooms);
         Collections.shuffle(shuffled, new java.util.Random(random.nextLong()));
         for (SimRoom.CcsRoom room : shuffled) {
             List<BlockPos> candidates = new ArrayList<>();
@@ -732,10 +790,27 @@ public class SimulationManager {
         return Optional.empty();
     }
 
+    private static Optional<BlockPos> findSpawnInCcsNamedRoom(ServerLevel level) {
+        List<SimRoom.CcsRoom> all = new ArrayList<>(SimRoom.CCS_UPPER_ROOMS.size() + SimRoom.CCS_GROUND_ROOMS.size());
+        all.addAll(SimRoom.CCS_UPPER_ROOMS);
+        all.addAll(SimRoom.CCS_GROUND_ROOMS);
+        return findSpawnInNamedRoom(level, all);
+    }
+
     private static BlockPos findRandomSpawnInCCS(ServerLevel level) {
         // Only spawn inside a known named room — no blind arena scan.
         return findSpawnInCcsNamedRoom(level)
                 .orElseGet(() -> new BlockPos(133, -24, 27)); // Computer Lab centre, absolute last resort
+    }
+
+    /**
+     * Picks a random 2nd-floor room in New Sim Building 2.0 for the fire-drill spawn — deliberately
+     * the upper floor only (not a random floor pick), so every run starts somewhere the player has
+     * to actually descend/explore to search both floors for the 5 hidden hazards.
+     */
+    private static BlockPos findRandomSpawnInNewSim2Upper(ServerLevel level) {
+        return findSpawnInNamedRoom(level, SimRoom.NEW_SIM2_UPPER_ROOMS)
+                .orElseGet(() -> new BlockPos(-84, -23, 490)); // Lecture Hall centre, absolute last resort
     }
 
     /** Scans the CCS arena for every computer and returns their positions. */
