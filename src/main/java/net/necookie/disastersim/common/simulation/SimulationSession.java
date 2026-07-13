@@ -35,7 +35,8 @@ public class SimulationSession {
     public final SimulationEventLogger logger = new SimulationEventLogger();
 
     private static final String CSV_HEADER =
-        "player_id,session_id,scenario_type,timestamp,event_type,x,y,z,hazard_distance,interaction_target,nearby_player_count";
+        "player_id,session_id,scenario_type,timestamp,event_type,x,y,z,hazard_distance,interaction_target,nearby_player_count," +
+        "hit_fire,extinguisher_class,phase";
     private final StringBuilder csvBuffer = new StringBuilder(CSV_HEADER).append('\n');
 
     public void bufferCsvRow(String row) { csvBuffer.append(row).append('\n'); }
