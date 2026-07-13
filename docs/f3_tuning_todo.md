@@ -117,23 +117,28 @@ style of not punishing imperfect technique on non-critical steps).
 captured "facing" shot yet, unlike `officer_cruz`). Capture a proper facing angle for each and
 update those three entries the same way `officer_cruz` was captured.
 
-## 7. New Sim Building 2.0 — Assembly Zone + Exit Doors
+## 7. New Sim Building 2.0 — Exit Doors (Assembly Zone now F3-verified)
 
-**Why:** `AssemblyZone.NEW_SIM2_ZONE` and `ExitZones.NEW_SIM2_ZONES` were upgraded from
-building-exterior placeholders to a **best-effort derivation** from the room survey table in
-`docs/new_sim_building2_rooms.md` (the 1st-floor "Lobby" room as the assembly zone; the two
-Hallway↔Lobby thresholds as exit doors) — not a fresh F3 walk-through. This is a real improvement
-(the old placeholder sat entirely outside the building) but should still be confirmed in person:
-walk from a 2nd-floor hazard room down to the Lobby and verify the exit-door AABBs are actually
-crossed before the assembly zone, and that the assembly AABB's Y-range (-34 to -27) doesn't clip
-through the floor/ceiling given the Lobby's actual 1-block-floor-layer capture in the survey.
+**Status update (2026-07-14):** `AssemblyZone.NEW_SIM2_ZONE` is now a **real F3/WorldEdit-verified
+`//copyroom` capture** — Corner1 `(-164,-34,466)`, Corner2 `(-148,-34,512)`, genuine open ground
+west of the building (the building itself spans X -118..-81 per `docs/new_sim_building2_rooms.md`,
+so this sits ~30 blocks further west). This is no longer a derivation — done.
 
-**What to capture:** Stand at the Hallway 1/Hallway 2 → Lobby thresholds with F3 and confirm/tune
-the door AABBs; stand inside the Lobby and confirm the assembly zone bounds feel right as a muster
-point (not blocked by furniture/schematic geometry the room survey didn't capture).
+**Why exit doors still need work:** `ExitZones.NEW_SIM2_ZONES` was previously derived as the two
+Hallway↔"Lobby" thresholds, back when the assembly zone was itself approximated as the Lobby room.
+Now that the real assembly zone is confirmed to be well outside the building to the west (not the
+Lobby), those doorway coordinates point the wrong direction entirely and are **known-stale** —
+kept only so `emergency_exit` still fires *something*. The building must have a real west-facing
+exit leading out toward the new assembly area; its actual doorway position is still unknown.
+
+**What to capture:** Starting from the assembly zone at X -164..-148, Z 466..512, walk east back
+toward the building and note where you actually cross from outside into the building interior
+(likely a door somewhere on the Lobby's or General CR's west wall, both of which reach X=-118) —
+that threshold AABB is the real `new_sim2_main_exit`. Replace both of the current placeholder
+`new_sim2_lobby_*_door` entries with it (or keep multiple if there turns out to be more than one
+usable exit route).
 
 **Files to update:**
-- `src/main/java/net/necookie/disastersim/common/zones/AssemblyZone.java` — `NEW_SIM2_ZONE`
 - `src/main/java/net/necookie/disastersim/common/zones/ExitZones.java` — `NEW_SIM2_ZONES`
 
 ---

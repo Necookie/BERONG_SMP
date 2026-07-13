@@ -366,7 +366,7 @@ public class TelemetryCsvWriter {
             "      \"extinguisher_positions\": [{\"note\": \"all 3 classes issued as items at session start\"}],\n" +
             "      \"hazard_spawn_zone\": {\"note\": \"5 random hazards armed each run from the building's own hazard-prop scan — see new_sim_building2_pos and /sim_scan_hazards\"},\n" +
             "      \"phases\": [\"prevention\", \"intervention\", \"evacuation\"],\n" +
-            "      \"survey_status\": \"assembly/exits derived from docs/new_sim_building2_rooms.md room survey; not F3-walked\"\n" +
+            "      \"survey_status\": \"assembly_area F3-verified via //copyroom (2026-07-14); exits are STALE placeholders derived from an earlier (now-wrong) assembly location, need a fresh F3 walk-through\"\n" +
             "    }\n" +
             "  }\n" +
             "}\n";

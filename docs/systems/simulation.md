@@ -164,10 +164,12 @@ EVACUATION:
   → AssemblyZone/ExitZones' New Sim Building 2.0-specific methods (isInsideNewSim2/findNewSim2/
     spawnBorderParticlesNewSim2) only start mattering here — tickAssemblyZone gates on
     firePhase == EVACUATION so standing in the zone during prevention/intervention doesn't
-    end the run early. Both zones are now derived from the docs/new_sim_building2_rooms.md room
-    survey (the 1st-floor "Lobby" room as assembly area, the two Hallway↔Lobby thresholds as exit
-    doors) — a real improvement over the old exterior-placeholder box, but still a best-effort
-    derivation rather than a fresh F3 walk-through; see docs/f3_tuning_todo.md §7.
+    end the run early. AssemblyZone.NEW_SIM2_ZONE is now F3/WorldEdit-verified (2026-07-14, via
+    //copyroom) — real open ground west of the building (X -164..-148, Z 466..512), not the
+    earlier "Lobby room" approximation. ExitZones.NEW_SIM2_ZONES is now STALE by comparison — it
+    still points at the old Hallway↔Lobby thresholds, which no longer lead toward the real
+    (much-further-west) assembly area; the actual west-facing exit door needs its own F3 walk-
+    through. See docs/f3_tuning_todo.md §7.
   → reaching assembly → endSimulation("assembly_reached"); overall session timer expiring first → "timeout"
 
 endSimulation (any endReason):

@@ -29,15 +29,15 @@ public class AssemblyZone {
     // PLACEHOLDER — walk with F3 to confirm exact coordinates (see docs/f3_tuning_todo.md).
     private static final AABB CCS_ZONE = new AABB(76, -35, 73, 136, -28, 90);
 
-    // New Sim Building 2.0 assembly zone — the building's own 1st-floor "Lobby" room, per the
-    // //copyroom survey in docs/new_sim_building2_rooms.md (X -118..-81, floor Y -33, Z 482..498).
-    // Decided deliberately (not yet F3-walked as a "step outside" fire-drill assembly point): it's
-    // the only room in the surveyed table that reads as the building's literal muster/entrance
-    // area, and is reachable from every surveyed room via Hallway 1/2 without crossing back through
-    // a hazard zone. minY=-34 catches feet at the floor's Y=-33; maxY=-27 gives head clearance under
-    // the room's Y=-24 ceiling. Best-effort derivation from the room table, not a fresh F3 survey —
-    // see docs/f3_tuning_todo.md.
-    private static final AABB NEW_SIM2_ZONE = new AABB(-118, -34, 482, -81, -27, 498);
+    // New Sim Building 2.0 assembly zone — F3/WorldEdit-verified via //copyroom (2026-07-14),
+    // replacing the earlier best-effort "Lobby room" derivation. Real open ground west of the
+    // building itself (building spans X -118..-81 — see docs/new_sim_building2_rooms.md — so this
+    // sits ~30 blocks further west): Corner1 (-164,-34,466), Corner2 (-148,-34,512), a genuine
+    // 1-block-floor-layer capture (Width 17, Length 47, Height 1), same idiom as the "Lobby"/
+    // "Main Hallway" captures in the room survey. minY=-35 catches feet one block below the
+    // surveyed floor Y=-34 (mirrors the -1 offset used for the other two zones' floor captures);
+    // maxY=-28 gives 6 blocks of head clearance above it.
+    private static final AABB NEW_SIM2_ZONE = new AABB(-164, -35, 466, -148, -28, 512);
 
     private static final double PARTICLE_STEP = 1.0;
     private static final int    WALL_HEIGHT   = 5;
