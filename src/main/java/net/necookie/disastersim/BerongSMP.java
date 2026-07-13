@@ -33,6 +33,7 @@ import net.necookie.disastersim.registry.ModCreativeTabs;
 import net.necookie.disastersim.registry.ModEntities;
 import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModSounds;
+import net.necookie.disastersim.session.AuthManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -158,6 +159,10 @@ public class BerongSMP {
         // Same class-loading rule for the safety-device tick handler (smoke detectors,
         // sprinklers, emergency lights) — see SafetyDeviceManager's javadoc.
         SafetyDeviceManager.bootstrap();
+        // Same class-loading rule again — AuthManager's static block registers the per-station
+        // logout hook that clears who's logged in; nothing else in the codebase calls real code
+        // on this class otherwise.
+        AuthManager.bootstrap();
     }
 
     /**
