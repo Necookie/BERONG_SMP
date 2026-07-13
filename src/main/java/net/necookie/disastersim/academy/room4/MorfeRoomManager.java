@@ -16,6 +16,7 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.common.simulation.NewSimScoring;
 import net.necookie.disastersim.common.structure.LobbyManager;
 import net.necookie.disastersim.entity.CustomNpcEntity;
+import net.necookie.disastersim.session.AuthManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +74,9 @@ public final class MorfeRoomManager {
         if (passed) {
             data.mutate(player.getUUID(), p -> p.setMorfePhase(MorfePhase.EVALUATED_PASS));
             AcademyTelemetry.record(player, "academy_certified", "score=" + result.score());
+            // Persists to the logged-in account (if any) so a returning student's /login restores
+            // certification without replaying the tutorial — see AuthManager/LobbyManager.
+            AuthManager.markTutorialCompleted(player.getUUID());
             AcademyManager.startOrAdvanceDialogue(player, AcademyDialogue.MORFE_PASS_LINES, () -> { });
             return;
         }
