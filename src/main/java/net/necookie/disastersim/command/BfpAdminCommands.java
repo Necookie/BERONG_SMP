@@ -414,17 +414,13 @@ public class BfpAdminCommands {
      * alias for the same reset-and-teleport the bare command performs.
      */
     private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> academyTutorialCommand() {
-        AcademyBuildingManager.Viewpoint defaultViewpoint =
-                AcademyBuildingManager.VIEWPOINTS.get(AcademyBuildingManager.DEFAULT_VIEWPOINT);
-
         var root = Commands.literal("tutorial")
                 .executes(ctx -> {
                     if (!ctx.getSource().isPlayer()) return 0;
-                    return academyReset(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
+                    return academyReset(ctx, ctx.getSource().getPlayer());
                 })
                 .then(Commands.argument("player", EntityArgument.player())
-                        .executes(ctx -> academyReset(
-                                ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint)));
+                        .executes(ctx -> academyReset(ctx, EntityArgument.getPlayer(ctx, "player"))));
 
         for (Map.Entry<String, AcademyBuildingManager.Viewpoint> entry : AcademyBuildingManager.VIEWPOINTS.entrySet()) {
             AcademyBuildingManager.Viewpoint viewpoint = entry.getValue();
@@ -441,11 +437,10 @@ public class BfpAdminCommands {
         root.then(Commands.literal("reset")
                 .executes(ctx -> {
                     if (!ctx.getSource().isPlayer()) return 0;
-                    return academyReset(ctx, ctx.getSource().getPlayer(), defaultViewpoint);
+                    return academyReset(ctx, ctx.getSource().getPlayer());
                 })
                 .then(Commands.argument("player", EntityArgument.player())
-                        .executes(ctx -> academyReset(
-                                ctx, EntityArgument.getPlayer(ctx, "player"), defaultViewpoint))));
+                        .executes(ctx -> academyReset(ctx, EntityArgument.getPlayer(ctx, "player")))));
 
         root.then(Commands.literal("skipto")
                 .then(skipToLiteral("cruz", AcademyBuildingManager.VIEWPOINTS.get("officer_cruz"),
@@ -507,20 +502,10 @@ public class BfpAdminCommands {
         return 1;
     }
 
-    private static int academyReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target,
-                                     AcademyBuildingManager.Viewpoint startViewpoint) {
+    private static int academyReset(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
         net.minecraft.server.level.ServerLevel level = ctx.getSource().getServer().overworld();
-        AcademySavedData.get(level).reset(target.getUUID());
-        AcademyManager.cancelDialogue(target);
-        AcademyManager.clearTransientState(target);
-        // Snap Officer Cruz back to her briefing anchor so the restarting trainee always finds
-        // her right beside them — not stranded wherever the previous run's escort ended.
-        CruzRoomManager.resetCruz(level);
-        // Refill the Tool Selection Wall — the previous run took the extinguishers off it, and
-        // the schematic only restores the frames on a full server reboot.
-        ReyesRoomManager.restockExtinguisherFrames(level);
-        target.teleportTo(level, startViewpoint.x(), startViewpoint.y(), startViewpoint.z(),
-                java.util.Collections.emptySet(), startViewpoint.yaw(), startViewpoint.pitch(), true);
+        // Shared with the main lobby's first button — see AcademyManager.startAcademyRun.
+        AcademyManager.startAcademyRun(target, level);
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "§eAcademy progress reset for §f" + target.getName().getString()
                         + "§e — teleported back to Room 1."), true);

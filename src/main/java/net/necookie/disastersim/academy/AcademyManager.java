@@ -121,6 +121,26 @@ public final class AcademyManager {
         AcademyGuardrails.clearPlayer(id);
     }
 
+    /**
+     * Fully (re)starts the Academy for this player: wipes {@link AcademyProgress} back to a fresh
+     * start, clears every room manager's transient state, resets Officer Cruz to her briefing
+     * anchor, restocks Sgt. Reyes's extinguisher wall, and teleports to Room 1's default viewpoint.
+     * Extracted from what {@code BfpAdminCommands}'s {@code /bfp tutorial} (bare/reset forms) did
+     * inline, so the main lobby's first button can trigger the exact same "clean run" behavior —
+     * pressing either always begins fresh, never resumes a stale mid-progress state.
+     */
+    public static void startAcademyRun(ServerPlayer player, ServerLevel level) {
+        AcademySavedData.get(level).reset(player.getUUID());
+        cancelDialogue(player);
+        clearTransientState(player);
+        CruzRoomManager.resetCruz(level);
+        ReyesRoomManager.restockExtinguisherFrames(level);
+        AcademyBuildingManager.Viewpoint start =
+                AcademyBuildingManager.VIEWPOINTS.get(AcademyBuildingManager.DEFAULT_VIEWPOINT);
+        player.teleportTo(level, start.x(), start.y(), start.z(),
+                java.util.Collections.emptySet(), start.yaw(), start.pitch(), true);
+    }
+
     // -----------------------------------------------------------------------
     // Shared helpers — used by all 4 room managers
     // -----------------------------------------------------------------------
