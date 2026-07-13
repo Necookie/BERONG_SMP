@@ -45,6 +45,7 @@
 | 3 | Synthetic Data Generator | `[x] done` |
 | 4 | Thesis Extras | `[x] done` |
 | 5 | ML Telemetry Contract | `[x] done` |
+| 6 | Lobby/Auth/Academy↔Simulation Bridge | `[x] done` |
 
 Update status to `[~] in progress` or `[x] done` as work progresses.
 
@@ -155,7 +156,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 - [x] `AssemblyZone` — green particle force-field border outside library; detects player arrival → `assembly_area_reached`
 - [x] `TelemetryCsvWriter` — writes `run/telemetry/gameplay_logs_<date>.csv` + `sessions_<date>.csv` + `map_metadata.json`
 - [x] `session_start` / `session_end` contract events with `end_reason` (`assembly_reached` / `injured` / `timeout`)
-- [x] Per-tick `move` sampler (10 Hz) with `hazard_distance` (nearest fire block or epicenter distance)
+- [x] Per-tick `move` sampler (20 Hz, per contract v1.2 §2 — fixed 2026-07-13, was silently sampling at 10 Hz) with `hazard_distance` (nearest fire block or epicenter distance)
 - [x] `extinguisher_use` event with `nearby_player_count` (5-block radius scan)
 - [x] `door_open` event via `PlayerInteractEvent.RightClickBlock`
 - [x] `emergency_exit` zone check (AABB near library doors, placeholder → tune in-game)
@@ -167,6 +168,45 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 **Telemetry output location:** `run/telemetry/` (not committed — add to `.gitignore`)
 
 **Coordinate note:** All zone/exit/alarm positions in `AssemblyZone.java` and `map_metadata.json` are PLACEHOLDER. Walk the LSPU library structure in-game with `./gradlew runServer` + F3, note the real coordinates, and update both files before sending data to the ML team.
+
+---
+
+## Phase 6 — Lobby/Auth/Academy↔Simulation Bridge
+
+**Goal:** Make the Academy the default tutorial, wire the main lobby's two buttons to
+Academy/New Sim Building 2.0 instead of the old Library/CCS simulations, add a persistent
+`/register`+`/login` account system so a returning student's Academy certification survives
+across sessions, and close out several telemetry_contract.md v1.2 gaps New Sim Building 2.0
+exposed (20 Hz sampling, real assembly/exit zones, per-building fire-alarm scan).
+
+**Key deliverables:**
+- [x] `PasswordHasher` — salted `PBKDF2WithHmacSHA256` password hashing, unit-tested
+- [x] `users` Turso table + `sessions.username` column/index; `AuthManager` (per-station login
+      state, async `/register`+`/login`, rate-limited)
+- [x] `/register <username> <password> <student_id> <section> <full_name>`, `/login`, `/logout`,
+      `/history` (player); `/bfp user <username>` (instructor)
+- [x] `SessionManager.checkin` resets `AcademySavedData` per station (closes a certification leak
+      across students sharing one account)
+- [x] `/bfp new_tutorial*` → `/bfp tutorial*` (Academy is now the default); old `/bfp tutorial` →
+      `/bfp old_tutorial`
+- [x] `AcademyManager.startAcademyRun` extracted, shared by `/bfp tutorial` and lobby button 1
+- [x] Lobby button 1 → Academy; button 2 → New Sim Building 2.0, gated on Academy certification
+      (session `EVALUATED_PASS` or a restored `/login` account); default spawn always the lobby
+- [x] `TickScheduler.scheduleOnce` (one-shot delayed tasks) — backs two 5-second handoffs:
+      Capt. Morfe's PASS → auto-deploy into New Sim Building 2.0, and that session's end →
+      delayed teleport/debrief back to Morfe
+- [x] `move_tick` sampling fixed to true 20 Hz (was silently 10 Hz) per contract v1.2 §2
+- [x] Real New Sim Building 2.0 assembly zone + exit doors, derived from the
+      `docs/new_sim_building2_rooms.md` room survey (still pending a fresh F3 walk-through —
+      `docs/f3_tuning_todo.md` §7)
+- [x] `map_metadata.json`'s `new_sim_building2_fire` section gains its own `fire_alarm_positions`
+      scan and an accurate `survey_status` string
+
+**See full flow:** `docs/systems/simulation.md` ("Lobby Buttons & the Academy→Simulation Bridge")
+and `docs/systems/academy.md` (auth system + Morfe's redirect).
+
+**Follow-up:** a fresh in-game F3 survey of the New Sim Building 2.0 assembly zone/exit doors
+(currently derived from the room table, not walked) — see `docs/f3_tuning_todo.md` §7.
 
 ---
 
@@ -183,7 +223,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 
 ---
 
-## Turso Schema (target after Phase 1)
+## Turso Schema (target after Phase 1; `users` added in Phase 6)
 
 ```sql
 CREATE TABLE sessions (
@@ -193,19 +233,34 @@ CREATE TABLE sessions (
   section             TEXT,                    -- e.g. BSIT-3A
   station_account     TEXT NOT NULL,
   account_uuid        TEXT NOT NULL,
+  username            TEXT,                    -- FK-by-value to users.username (Phase 6); NULL for pre-Phase-6 rows
   start_time          TEXT NOT NULL,
   end_time            TEXT,
   status              TEXT DEFAULT 'active',   -- active | completed | aborted
   tutorial_completed  INTEGER DEFAULT 0,
   tutorial_duration_s INTEGER,
-  simulation_type     TEXT,                    -- FIRE | EARTHQUAKE
+  simulation_type     TEXT,                    -- FIRE | EARTHQUAKE | CCS_FIRE | CCS_EARTHQUAKE | NEW_SIM_BUILDING2_FIRE
   simulation_score    INTEGER DEFAULT 0,
   passed              INTEGER DEFAULT 0,
   event_log           TEXT,                    -- JSON array of SimEvent objects
-  prep_level          TEXT,                    -- HIGH | MODERATE | LOW (written by RF script)
+  prep_level          TEXT,                    -- HIGH | MODERATE | LOW (written by RF script, or NewSimScoring)
   confidence          REAL,                    -- 0.0-1.0 RF confidence
   bfp_notes           TEXT,                    -- BFP officer validation notes
   notes               TEXT
+);
+
+-- Phase 6: persistent /register + /login accounts, decoupled from `sessions`
+-- (one user can have many session rows across return visits).
+CREATE TABLE users (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  username            TEXT NOT NULL UNIQUE,
+  password_hash       TEXT NOT NULL,           -- salted PBKDF2WithHmacSHA256, see PasswordHasher
+  student_id          TEXT,
+  section             TEXT,
+  full_name           TEXT,
+  tutorial_completed  INTEGER DEFAULT 0,       -- Academy certification, restored on /login
+  created_at          TEXT NOT NULL,
+  last_login          TEXT
 );
 ```
 
