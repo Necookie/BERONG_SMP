@@ -108,6 +108,22 @@ public class Config {
             .comment("Minimum score (0-100) Capt. Morfe requires to certify a player after the Academy.")
             .defineInRange("academyPassThreshold", 70, 0, 100);
 
+    public static final ModConfigSpec.IntValue NEW_SIM2_PREVENTION_TICKS = BUILDER
+            .comment("New Sim Building 2.0: ticks to find and bare-hand-prevent all 5 armed hazards "
+                   + "before unfound ones ignite. Default: 2400 = 2 minutes.")
+            .defineInRange("newSimBuilding2PreventionTicks", 2400, 200, 12000);
+
+    public static final ModConfigSpec.IntValue NEW_SIM2_INTERVENTION_TICKS = BUILDER
+            .comment("New Sim Building 2.0: ticks to extinguish every escalated hazard with its "
+                   + "class-correct extinguisher before it goes big and forces evacuation. Default: 1800 = 90s.")
+            .defineInRange("newSimBuilding2InterventionTicks", 1800, 200, 12000);
+
+    public static final ModConfigSpec.IntValue NEW_SIM2_EVACUATION_TICKS = BUILDER
+            .comment("New Sim Building 2.0: additional ticks budgeted for the evacuation phase once "
+                   + "triggered (added to the prevention+intervention budgets for the session's total "
+                   + "duration). Default: 1800 = 90s.")
+            .defineInRange("newSimBuilding2EvacuationTicks", 1800, 200, 12000);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean validateItemName(final Object obj) {
