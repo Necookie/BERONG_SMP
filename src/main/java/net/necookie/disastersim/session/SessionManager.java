@@ -4,6 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
+import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -65,12 +66,28 @@ public class SessionManager {
      * @param studentName  Real name/ID of the student checking in
      */
     public static void checkin(UUID accountUuid, String accountName, String studentName) {
+        checkin(accountUuid, accountName, studentName, null);
+    }
+
+    /**
+     * Starts a new student session, optionally tied to a {@code /login}/{@code /register}
+     * username (persisted on the {@code sessions} row so run history can be queried by account
+     * rather than just by station+name — see {@code BfpAdminCommands}'s {@code /bfp user}).
+     *
+     * <p>Also wipes {@link AcademySavedData} for this account: the Academy's "certified" gate on
+     * lobby button 2 is otherwise satisfiable by whichever student sat at this station last,
+     * since {@code AcademyProgress} is keyed by the shared station UUID, not by student identity.
+     * A returning student's real certification lives on their {@code users} row instead
+     * ({@code AuthManager.isTutorialCompleted}), restored on {@code /login}.
+     */
+    public static void checkin(UUID accountUuid, String accountName, String studentName, String username) {
         // Close any in-progress session first
         checkout(accountUuid, "replaced");
 
         // Wipe tutorial state so the new student starts fresh
         if (server != null) {
             TutorialSavedData.get(server.overworld()).reset(accountUuid);
+            AcademySavedData.get(server.overworld()).reset(accountUuid);
         }
 
         StudentSession session = new StudentSession(studentName, accountName, accountUuid);
@@ -78,9 +95,9 @@ public class SessionManager {
 
         // Insert row into Turso; store the returned row ID for later updates
         long rowId = TursoClient.insert(
-                "INSERT INTO sessions (student_name, station_account, account_uuid, start_time, status) VALUES (?,?,?,?,?)",
+                "INSERT INTO sessions (student_name, station_account, account_uuid, start_time, status, username) VALUES (?,?,?,?,?,?)",
                 studentName, accountName, accountUuid.toString(),
-                session.getStartTime().toString(), "active");
+                session.getStartTime().toString(), "active", username);
         session.setDbRowId(rowId);
 
         BerongSMP.LOGGER.info("[SessionManager] Checked in: student='{}' account='{}' rowId={}", studentName, accountName, rowId);
