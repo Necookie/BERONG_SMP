@@ -214,159 +214,34 @@ public final class ModBlocks {
     public static final DeferredBlock<ConvectionOvenBlock> CONVECTION_OVEN = ModBlocksHazardsSchoolKitchen.CONVECTION_OVEN;
     public static final DeferredBlock<LechonRotisserieSpitBlock> LECHON_ROTISSERIE_SPIT = ModBlocksHazardsSchoolKitchen.LECHON_ROTISSERIE_SPIT;
 
-    /** Teacher's Desk — see {@link TeachersDeskBlock}. */
-    public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
-            "teachers_desk", TeachersDeskBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+    // ── School decor/furniture — see ModBlocksSchoolDecor ───────────────────
+    public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = ModBlocksSchoolDecor.TEACHERS_DESK;
+    public static final DeferredBlock<ArmchairDeskBlock> ARMCHAIR_DESK = ModBlocksSchoolDecor.ARMCHAIR_DESK;
+    public static final DeferredBlock<TallBookshelfBlock> TALL_BOOKSHELF = ModBlocksSchoolDecor.TALL_BOOKSHELF;
+    public static final DeferredBlock<PhilippineFlagStandBlock> PHILIPPINE_FLAG_STAND = ModBlocksSchoolDecor.PHILIPPINE_FLAG_STAND;
+    public static final DeferredBlock<TrophyCabinetBlock> TROPHY_CABINET = ModBlocksSchoolDecor.TROPHY_CABINET;
+    public static final DeferredBlock<WaterDispenserBlock> WATER_DISPENSER = ModBlocksSchoolDecor.WATER_DISPENSER;
+    public static final DeferredBlock<WallClockBlock> WALL_CLOCK = ModBlocksSchoolDecor.WALL_CLOCK;
+    public static final DeferredBlock<BlackboardBlock> BLACKBOARD = ModBlocksSchoolDecor.BLACKBOARD;
+    public static final DeferredBlock<PodiumLecternBlock> PODIUM_LECTERN = ModBlocksSchoolDecor.PODIUM_LECTERN;
+    public static final DeferredBlock<ClassroomGlobeBlock> CLASSROOM_GLOBE = ModBlocksSchoolDecor.CLASSROOM_GLOBE;
+    public static final DeferredBlock<ModernStudentDeskBlock> MODERN_STUDENT_DESK = ModBlocksSchoolDecor.MODERN_STUDENT_DESK;
+    public static final DeferredBlock<ScienceLabWorkbenchBlock> SCIENCE_LAB_WORKBENCH = ModBlocksSchoolDecor.SCIENCE_LAB_WORKBENCH;
+    public static final DeferredBlock<ComputerLabDeskRowBlock> COMPUTER_LAB_DESK_ROW = ModBlocksSchoolDecor.COMPUTER_LAB_DESK_ROW;
+    public static final DeferredBlock<LibraryStudyCarrelBlock> LIBRARY_STUDY_CARREL = ModBlocksSchoolDecor.LIBRARY_STUDY_CARREL;
+    public static final DeferredBlock<RollingBookCartBlock> ROLLING_BOOK_CART = ModBlocksSchoolDecor.ROLLING_BOOK_CART;
 
-    /** Armchair Desk — see {@link ArmchairDeskBlock}. */
-    public static final DeferredBlock<ArmchairDeskBlock> ARMCHAIR_DESK = BLOCKS.registerBlock(
-            "armchair_desk", ArmchairDeskBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Tall Bookshelf — see {@link TallBookshelfBlock}. */
-    public static final DeferredBlock<TallBookshelfBlock> TALL_BOOKSHELF = BLOCKS.registerBlock(
-            "tall_bookshelf", TallBookshelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Philippine Flag Stand — see {@link PhilippineFlagStandBlock}. */
-    public static final DeferredBlock<PhilippineFlagStandBlock> PHILIPPINE_FLAG_STAND = BLOCKS.registerBlock(
-            "philippine_flag_stand", PhilippineFlagStandBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.GOLD)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Trophy Cabinet — see {@link TrophyCabinetBlock}. */
-    public static final DeferredBlock<TrophyCabinetBlock> TROPHY_CABINET = BLOCKS.registerBlock(
-            "trophy_cabinet", TrophyCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 4.0f).sound(SoundType.GLASS).noOcclusion()
-                    .lightLevel(s -> 3));
-
-    /** Water Dispenser — see {@link WaterDispenserBlock}. */
-    public static final DeferredBlock<WaterDispenserBlock> WATER_DISPENSER = BLOCKS.registerBlock(
-            "water_dispenser", WaterDispenserBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Wall Clock — see {@link WallClockBlock}. */
-    public static final DeferredBlock<WallClockBlock> WALL_CLOCK = BLOCKS.registerBlock(
-            "wall_clock", WallClockBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Blackboard — see {@link BlackboardBlock}. */
-    public static final DeferredBlock<BlackboardBlock> BLACKBOARD = BLOCKS.registerBlock(
-            "blackboard", BlackboardBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
-                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Podium Lectern — see {@link PodiumLecternBlock}. */
-    public static final DeferredBlock<PodiumLecternBlock> PODIUM_LECTERN = BLOCKS.registerBlock(
-            "podium_lectern", PodiumLecternBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Classroom Globe — see {@link ClassroomGlobeBlock}. */
-    public static final DeferredBlock<ClassroomGlobeBlock> CLASSROOM_GLOBE = BLOCKS.registerBlock(
-            "classroom_globe", ClassroomGlobeBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLUE)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Modern Single-Seat Student Desk — see {@link ModernStudentDeskBlock}. */
-    public static final DeferredBlock<ModernStudentDeskBlock> MODERN_STUDENT_DESK = BLOCKS.registerBlock(
-            "modern_student_desk", ModernStudentDeskBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Science Lab Workbench — see {@link ScienceLabWorkbenchBlock}. */
-    public static final DeferredBlock<ScienceLabWorkbenchBlock> SCIENCE_LAB_WORKBENCH = BLOCKS.registerBlock(
-            "science_lab_workbench", ScienceLabWorkbenchBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.STONE).noOcclusion());
-
-    /** Computer Lab Desk Row — see {@link ComputerLabDeskRowBlock}. */
-    public static final DeferredBlock<ComputerLabDeskRowBlock> COMPUTER_LAB_DESK_ROW = BLOCKS.registerBlock(
-            "computer_lab_desk_row", ComputerLabDeskRowBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Library Study Carrel — see {@link LibraryStudyCarrelBlock}. */
-    public static final DeferredBlock<LibraryStudyCarrelBlock> LIBRARY_STUDY_CARREL = BLOCKS.registerBlock(
-            "library_study_carrel", LibraryStudyCarrelBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Rolling Book Cart — see {@link RollingBookCartBlock}. */
-    public static final DeferredBlock<RollingBookCartBlock> ROLLING_BOOK_CART = BLOCKS.registerBlock(
-            "rolling_book_cart", RollingBookCartBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Emergency Exit Sign — see {@link ExitSignBlock}. */
-    public static final DeferredBlock<ExitSignBlock> EXIT_SIGN = BLOCKS.registerBlock(
-            "exit_sign", ExitSignBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.EMERALD)
-                    .strength(0.5f, 2.0f).sound(SoundType.GLASS).noOcclusion()
-                    .lightLevel(s -> 7));
-
-    /** Smoke Detector — see {@link SmokeDetectorBlock}. */
-    public static final DeferredBlock<SmokeDetectorBlock> SMOKE_DETECTOR = BLOCKS.registerBlock(
-            "smoke_detector", SmokeDetectorBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Sprinkler Head — see {@link SprinklerHeadBlock}. */
-    public static final DeferredBlock<SprinklerHeadBlock> SPRINKLER_HEAD = BLOCKS.registerBlock(
-            "sprinkler_head", SprinklerHeadBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.GOLD)
-                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Emergency Light — see {@link EmergencyLightBlock}. */
-    public static final DeferredBlock<EmergencyLightBlock> EMERGENCY_LIGHT = BLOCKS.registerBlock(
-            "emergency_light", EmergencyLightBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(BlockStateProperties.LIT) ? 10 : 0));
-
-    /** Evacuation Map — see {@link EvacuationMapBlock}. */
-    public static final DeferredBlock<EvacuationMapBlock> EVACUATION_MAP = BLOCKS.registerBlock(
-            "evacuation_map", EvacuationMapBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Fire Extinguisher Cabinet — see {@link FireExtinguisherCabinetBlock}. */
-    public static final DeferredBlock<FireExtinguisherCabinetBlock> FIRE_EXTINGUISHER_CABINET = BLOCKS.registerBlock(
-            "fire_extinguisher_cabinet", FireExtinguisherCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(1.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Evacuation Assembly Point Sign — see {@link AssemblyPointSignBlock}. */
-    public static final DeferredBlock<AssemblyPointSignBlock> ASSEMBLY_POINT_SIGN = BLOCKS.registerBlock(
-            "assembly_point_sign", AssemblyPointSignBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.EMERALD)
-                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion()
-                    .lightLevel(s -> 7));
-
-    /** First-Aid Wall Cabinet — see {@link FirstAidWallCabinetBlock}. */
-    public static final DeferredBlock<FirstAidWallCabinetBlock> FIRST_AID_WALL_CABINET = BLOCKS.registerBlock(
-            "first_aid_wall_cabinet", FirstAidWallCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Fire Safety Poster — see {@link FireSafetyPosterBlock}. */
-    public static final DeferredBlock<FireSafetyPosterBlock> FIRE_SAFETY_POSTER = BLOCKS.registerBlock(
-            "fire_safety_poster", FireSafetyPosterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_YELLOW)
-                    .strength(0.2f, 1.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Blocked Exit Clutter Pile — see {@link BlockedExitClutterBlock}. */
-    public static final DeferredBlock<BlockedExitClutterBlock> BLOCKED_EXIT_CLUTTER = BLOCKS.registerBlock(
-            "blocked_exit_clutter", BlockedExitClutterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
+    // ── Safety equipment — see ModBlocksSafetyEquipment ─────────────────────
+    public static final DeferredBlock<ExitSignBlock> EXIT_SIGN = ModBlocksSafetyEquipment.EXIT_SIGN;
+    public static final DeferredBlock<SmokeDetectorBlock> SMOKE_DETECTOR = ModBlocksSafetyEquipment.SMOKE_DETECTOR;
+    public static final DeferredBlock<SprinklerHeadBlock> SPRINKLER_HEAD = ModBlocksSafetyEquipment.SPRINKLER_HEAD;
+    public static final DeferredBlock<EmergencyLightBlock> EMERGENCY_LIGHT = ModBlocksSafetyEquipment.EMERGENCY_LIGHT;
+    public static final DeferredBlock<EvacuationMapBlock> EVACUATION_MAP = ModBlocksSafetyEquipment.EVACUATION_MAP;
+    public static final DeferredBlock<FireExtinguisherCabinetBlock> FIRE_EXTINGUISHER_CABINET = ModBlocksSafetyEquipment.FIRE_EXTINGUISHER_CABINET;
+    public static final DeferredBlock<AssemblyPointSignBlock> ASSEMBLY_POINT_SIGN = ModBlocksSafetyEquipment.ASSEMBLY_POINT_SIGN;
+    public static final DeferredBlock<FirstAidWallCabinetBlock> FIRST_AID_WALL_CABINET = ModBlocksSafetyEquipment.FIRST_AID_WALL_CABINET;
+    public static final DeferredBlock<FireSafetyPosterBlock> FIRE_SAFETY_POSTER = ModBlocksSafetyEquipment.FIRE_SAFETY_POSTER;
+    public static final DeferredBlock<BlockedExitClutterBlock> BLOCKED_EXIT_CLUTTER = ModBlocksSafetyEquipment.BLOCKED_EXIT_CLUTTER;
 
     /** Long cafeteria lunch table with attached bench seats — see {@link CafeteriaTableBlock}. */
     public static final DeferredBlock<CafeteriaTableBlock> CAFETERIA_TABLE = BLOCKS.registerBlock(
