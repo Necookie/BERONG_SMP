@@ -243,139 +243,31 @@ public final class ModBlocks {
     public static final DeferredBlock<FireSafetyPosterBlock> FIRE_SAFETY_POSTER = ModBlocksSafetyEquipment.FIRE_SAFETY_POSTER;
     public static final DeferredBlock<BlockedExitClutterBlock> BLOCKED_EXIT_CLUTTER = ModBlocksSafetyEquipment.BLOCKED_EXIT_CLUTTER;
 
-    /** Long cafeteria lunch table with attached bench seats — see {@link CafeteriaTableBlock}. */
-    public static final DeferredBlock<CafeteriaTableBlock> CAFETERIA_TABLE = BLOCKS.registerBlock(
-            "cafeteria_table", CafeteriaTableBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLUE)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
+    // ── Cafeteria — see ModBlocksCafeteria ───────────────────────────────────
+    public static final DeferredBlock<CafeteriaTableBlock> CAFETERIA_TABLE = ModBlocksCafeteria.CAFETERIA_TABLE;
+    public static final DeferredBlock<TrayStackBlock> TRAY_STACK = ModBlocksCafeteria.TRAY_STACK;
+    public static final DeferredBlock<ServingCounterBlock> SERVING_COUNTER = ModBlocksCafeteria.SERVING_COUNTER;
+    public static final DeferredBlock<CafeteriaMenuBoardBlock> CAFETERIA_MENU_BOARD = ModBlocksCafeteria.CAFETERIA_MENU_BOARD;
+    public static final DeferredBlock<CondimentStationBlock> CONDIMENT_STATION = ModBlocksCafeteria.CONDIMENT_STATION;
+    public static final DeferredBlock<CafeteriaTrashBinBlock> CAFETERIA_TRASH_BIN = ModBlocksCafeteria.CAFETERIA_TRASH_BIN;
+    public static final DeferredBlock<SodaFountainMachineBlock> SODA_FOUNTAIN_MACHINE = ModBlocksCafeteria.SODA_FOUNTAIN_MACHINE;
+    public static final DeferredBlock<CafeteriaStoolBlock> CAFETERIA_STOOL = ModBlocksCafeteria.CAFETERIA_STOOL;
+    public static final DeferredBlock<SaladBarBlock> SALAD_BAR = ModBlocksCafeteria.SALAD_BAR;
+    public static final DeferredBlock<SnackVendingMachineBlock> SNACK_VENDING_MACHINE = ModBlocksCafeteria.SNACK_VENDING_MACHINE;
+    public static final DeferredBlock<KitchenPrepCounterBlock> KITCHEN_PREP_COUNTER = ModBlocksCafeteria.KITCHEN_PREP_COUNTER;
+    public static final DeferredBlock<DishwashingSinkStationBlock> DISHWASHING_SINK_STATION = ModBlocksCafeteria.DISHWASHING_SINK_STATION;
+    public static final DeferredBlock<BeverageJuiceDispenserBlock> BEVERAGE_JUICE_DISPENSER = ModBlocksCafeteria.BEVERAGE_JUICE_DISPENSER;
+    public static final DeferredBlock<CutleryNapkinCaddyBlock> CUTLERY_NAPKIN_CADDY = ModBlocksCafeteria.CUTLERY_NAPKIN_CADDY;
+    public static final DeferredBlock<ServingHatchWindowBlock> SERVING_HATCH_WINDOW = ModBlocksCafeteria.SERVING_HATCH_WINDOW;
+    public static final DeferredBlock<GlowingOakPlanksBlock> GLOWING_OAK_PLANKS = ModBlocksCafeteria.GLOWING_OAK_PLANKS;
 
-    /** Stack of plastic lunch trays — see {@link TrayStackBlock}. */
-    public static final DeferredBlock<TrayStackBlock> TRAY_STACK = BLOCKS.registerBlock(
-            "cafeteria_tray_stack", TrayStackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_ORANGE)
-                    .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Steam-table serving counter with sneeze guard — see {@link ServingCounterBlock}. */
-    public static final DeferredBlock<ServingCounterBlock> SERVING_COUNTER = BLOCKS.registerBlock(
-            "serving_counter", ServingCounterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Wall-mounted cafeteria menu board — see {@link CafeteriaMenuBoardBlock}. */
-    public static final DeferredBlock<CafeteriaMenuBoardBlock> CAFETERIA_MENU_BOARD = BLOCKS.registerBlock(
-            "cafeteria_menu_board", CafeteriaMenuBoardBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(0.5f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Condiment station with squeeze bottles and napkin holder — see {@link CondimentStationBlock}. */
-    public static final DeferredBlock<CondimentStationBlock> CONDIMENT_STATION = BLOCKS.registerBlock(
-            "condiment_station", CondimentStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Dual recycle/trash bin station — see {@link CafeteriaTrashBinBlock}. */
-    public static final DeferredBlock<CafeteriaTrashBinBlock> CAFETERIA_TRASH_BIN = BLOCKS.registerBlock(
-            "cafeteria_trash_bin", CafeteriaTrashBinBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
-                    .strength(0.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Soda fountain dispenser machine — see {@link SodaFountainMachineBlock}. */
-    public static final DeferredBlock<SodaFountainMachineBlock> SODA_FOUNTAIN_MACHINE = BLOCKS.registerBlock(
-            "soda_fountain_machine", SodaFountainMachineBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Round vinyl-seat cafeteria stool — see {@link CafeteriaStoolBlock}. */
-    public static final DeferredBlock<CafeteriaStoolBlock> CAFETERIA_STOOL = BLOCKS.registerBlock(
-            "cafeteria_stool", CafeteriaStoolBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Refrigerated salad bar with sneeze guard — see {@link SaladBarBlock}. */
-    public static final DeferredBlock<SaladBarBlock> SALAD_BAR = BLOCKS.registerBlock(
-            "salad_bar", SaladBarBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Glass-front snack vending machine — see {@link SnackVendingMachineBlock}. */
-    public static final DeferredBlock<SnackVendingMachineBlock> SNACK_VENDING_MACHINE = BLOCKS.registerBlock(
-            "snack_vending_machine", SnackVendingMachineBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(SnackVendingMachineBlock.CONNECTED_DOWN) ? 4 : 0));
-
-    /** Kitchen Prep Counter — see {@link KitchenPrepCounterBlock}. */
-    public static final DeferredBlock<KitchenPrepCounterBlock> KITCHEN_PREP_COUNTER = BLOCKS.registerBlock(
-            "kitchen_prep_counter", KitchenPrepCounterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Dishwashing Sink Station — see {@link DishwashingSinkStationBlock}. */
-    public static final DeferredBlock<DishwashingSinkStationBlock> DISHWASHING_SINK_STATION = BLOCKS.registerBlock(
-            "dishwashing_sink_station", DishwashingSinkStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Iced-Tea / Juice Dispenser — see {@link BeverageJuiceDispenserBlock}. */
-    public static final DeferredBlock<BeverageJuiceDispenserBlock> BEVERAGE_JUICE_DISPENSER = BLOCKS.registerBlock(
-            "beverage_juice_dispenser", BeverageJuiceDispenserBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Cutlery & Napkin Caddy — see {@link CutleryNapkinCaddyBlock}. */
-    public static final DeferredBlock<CutleryNapkinCaddyBlock> CUTLERY_NAPKIN_CADDY = BLOCKS.registerBlock(
-            "cutlery_napkin_caddy", CutleryNapkinCaddyBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Serving Hatch Window — see {@link ServingHatchWindowBlock}. */
-    public static final DeferredBlock<ServingHatchWindowBlock> SERVING_HATCH_WINDOW = BLOCKS.registerBlock(
-            "serving_hatch_window", ServingHatchWindowBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Disguised light source — looks/sounds/burns exactly like vanilla oak planks — see {@link GlowingOakPlanksBlock}. */
-    public static final DeferredBlock<GlowingOakPlanksBlock> GLOWING_OAK_PLANKS = BLOCKS.registerBlock(
-            "glowing_oak_planks", GlowingOakPlanksBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(2.0f, 3.0f).sound(SoundType.WOOD)
-                    .lightLevel(s -> 15));
-
-    /** Smooth white auto-connecting court-marking line — see {@link CourtLineBlock}. */
-    public static final DeferredBlock<CourtLineBlock> COURT_LINE = BLOCKS.registerBlock(
-            "court_line", CourtLineBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.2f, 0.5f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Badminton net anchor post ("stitch") — see {@link BadmintonNetPostBlock}. */
-    public static final DeferredBlock<BadmintonNetPostBlock> BADMINTON_NET_POST = BLOCKS.registerBlock(
-            "badminton_net_post", BadmintonNetPostBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Auto-filled badminton net panel — see {@link BadmintonNetMeshBlock}. */
-    public static final DeferredBlock<BadmintonNetMeshBlock> BADMINTON_NET_MESH = BLOCKS.registerBlock(
-            "badminton_net_mesh", BadmintonNetMeshBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Basketball hoop stand base (bottom anchor of the expandable pole) — see {@link BasketballHoopPostBlock}. */
-    public static final DeferredBlock<BasketballHoopPostBlock> BASKETBALL_HOOP_POST = BLOCKS.registerBlock(
-            "basketball_hoop_post", BasketballHoopPostBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Auto-filled basketball pole segment — see {@link BasketballPoleSegmentBlock}. */
-    public static final DeferredBlock<BasketballPoleSegmentBlock> BASKETBALL_POLE = BLOCKS.registerBlock(
-            "basketball_pole", BasketballPoleSegmentBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Basketball backboard + rim + net (top anchor of the expandable pole) — see {@link BasketballHoopBlock}. */
-    public static final DeferredBlock<BasketballHoopBlock> BASKETBALL_HOOP = BLOCKS.registerBlock(
-            "basketball_hoop", BasketballHoopBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_ORANGE)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
+    // ── Sports courts — see ModBlocksSportsCourts ────────────────────────────
+    public static final DeferredBlock<CourtLineBlock> COURT_LINE = ModBlocksSportsCourts.COURT_LINE;
+    public static final DeferredBlock<BadmintonNetPostBlock> BADMINTON_NET_POST = ModBlocksSportsCourts.BADMINTON_NET_POST;
+    public static final DeferredBlock<BadmintonNetMeshBlock> BADMINTON_NET_MESH = ModBlocksSportsCourts.BADMINTON_NET_MESH;
+    public static final DeferredBlock<BasketballHoopPostBlock> BASKETBALL_HOOP_POST = ModBlocksSportsCourts.BASKETBALL_HOOP_POST;
+    public static final DeferredBlock<BasketballPoleSegmentBlock> BASKETBALL_POLE = ModBlocksSportsCourts.BASKETBALL_POLE;
+    public static final DeferredBlock<BasketballHoopBlock> BASKETBALL_HOOP = ModBlocksSportsCourts.BASKETBALL_HOOP;
 
     // ── Conference Room furniture ───────────────────────────────────────────
 
