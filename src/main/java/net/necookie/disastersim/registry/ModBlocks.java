@@ -269,133 +269,27 @@ public final class ModBlocks {
     public static final DeferredBlock<BasketballPoleSegmentBlock> BASKETBALL_POLE = ModBlocksSportsCourts.BASKETBALL_POLE;
     public static final DeferredBlock<BasketballHoopBlock> BASKETBALL_HOOP = ModBlocksSportsCourts.BASKETBALL_HOOP;
 
-    // ── Conference Room furniture ───────────────────────────────────────────
-
-    /** Self-connecting dark-laminate boardroom table — see {@link ConferenceTableBlock}. */
-    public static final DeferredBlock<ConferenceTableBlock> CONFERENCE_TABLE = BLOCKS.registerBlock(
-            "conference_table", ConferenceTableBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** High-back leather swivel chair — see {@link ExecutiveOfficeChairBlock}. */
-    public static final DeferredBlock<ExecutiveOfficeChairBlock> EXECUTIVE_OFFICE_CHAIR = BLOCKS.registerBlock(
-            "executive_office_chair", ExecutiveOfficeChairBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Low walnut sideboard with sliding doors — see {@link ConferenceCredenzaBlock}. */
-    public static final DeferredBlock<ConferenceCredenzaBlock> CONFERENCE_CREDENZA = BLOCKS.registerBlock(
-            "conference_credenza", ConferenceCredenzaBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BROWN)
-                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Wall-mounted meeting display, dark standby screen — see {@link ConferenceWallDisplayBlock}. */
-    public static final DeferredBlock<ConferenceWallDisplayBlock> CONFERENCE_WALL_DISPLAY = BLOCKS.registerBlock(
-            "conference_wall_display", ConferenceWallDisplayBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** A-frame flip-chart easel with paper pad — see {@link FlipChartEaselBlock}. */
-    public static final DeferredBlock<FlipChartEaselBlock> FLIP_CHART_EASEL = BLOCKS.registerBlock(
-            "flip_chart_easel", FlipChartEaselBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Three-legged "spider" speakerphone centerpiece — see {@link ConferenceSpeakerphoneBlock}. */
-    public static final DeferredBlock<ConferenceSpeakerphoneBlock> CONFERENCE_SPEAKERPHONE = BLOCKS.registerBlock(
-            "conference_speakerphone", ConferenceSpeakerphoneBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Frosted-glass partition panel in an aluminum frame — see {@link GlassOfficePartitionBlock}. */
-    public static final DeferredBlock<GlassOfficePartitionBlock> GLASS_OFFICE_PARTITION = BLOCKS.registerBlock(
-            "glass_office_partition", GlassOfficePartitionBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
-
-    /** Two-seat fabric reception sofa — see {@link LoungeSofaBlock}. */
-    public static final DeferredBlock<LoungeSofaBlock> LOUNGE_SOFA = BLOCKS.registerBlock(
-            "lounge_sofa", LoungeSofaBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Decorative floor planter with a broadleaf plant — see {@link PottedOfficePlantBlock}. */
-    public static final DeferredBlock<PottedOfficePlantBlock> POTTED_OFFICE_PLANT = BLOCKS.registerBlock(
-            "potted_office_plant", PottedOfficePlantBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.PLANT)
-                    .strength(0.5f, 1.0f).sound(SoundType.GRASS).noOcclusion());
-
-    /** Wall-mounted venetian blinds, slats half-open — see {@link WindowBlindsBlock}. */
-    public static final DeferredBlock<WindowBlindsBlock> WINDOW_BLINDS = BLOCKS.registerBlock(
-            "window_blinds", WindowBlindsBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
-
-    // ── Conference Room hazards (props 56-65) ───────────────────────────────
-
-    /** Space heater tipped against papers — see {@link PortableSpaceHeaterBlock}. */
-    public static final DeferredBlock<PortableSpaceHeaterBlock> PORTABLE_SPACE_HEATER = BLOCKS.registerBlock(
-            "portable_space_heater", PortableSpaceHeaterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
-
-    /** Tipped torchiere scorching a curtain — see {@link HalogenFloorLampBlock}. */
-    public static final DeferredBlock<HalogenFloorLampBlock> HALOGEN_FLOOR_LAMP = BLOCKS.registerBlock(
-            "halogen_floor_lamp", HalogenFloorLampBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 3));
-
-    /** Stalled ceiling projection-screen motor — see {@link JammedProjectionScreenBlock}. */
-    public static final DeferredBlock<JammedProjectionScreenBlock> JAMMED_PROJECTION_SCREEN = BLOCKS.registerBlock(
-            "jammed_projection_screen", JammedProjectionScreenBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Overheating driver stack behind an LED video wall — see {@link OverheatingVideoWallBlock}. */
-    public static final DeferredBlock<OverheatingVideoWallBlock> OVERHEATING_VIDEO_WALL = BLOCKS.registerBlock(
-            "overheating_video_wall", OverheatingVideoWallBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
-
-    /** Aerosol dispenser misting propellant near a heat register — see {@link AerosolFreshenerDispenserBlock}. */
-    public static final DeferredBlock<AerosolFreshenerDispenserBlock> AEROSOL_FRESHENER_DISPENSER = BLOCKS.registerBlock(
-            "aerosol_freshener_dispenser", AerosolFreshenerDispenserBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Laptop smothered under sofa cushions — see {@link SmotheredLaptopBlock}. */
-    public static final DeferredBlock<SmotheredLaptopBlock> SMOTHERED_LAPTOP = BLOCKS.registerBlock(
-            "smothered_laptop", SmotheredLaptopBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Cigarette smoldering in a planter's peat — see {@link SmolderingPlanterBlock}. */
-    public static final DeferredBlock<SmolderingPlanterBlock> SMOLDERING_PLANTER = BLOCKS.registerBlock(
-            "smoldering_planter", SmolderingPlanterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.PLANT)
-                    .strength(0.5f, 1.0f).sound(SoundType.GRAVEL).noOcclusion());
-
-    /** TV power cord crushed by its wall mount — see {@link PinchedTvCordBlock}. */
-    public static final DeferredBlock<PinchedTvCordBlock> PINCHED_TV_CORD = BLOCKS.registerBlock(
-            "pinched_tv_cord", PinchedTvCordBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Failing UPS battery off-gassing under a credenza — see {@link VentingUpsBatteryBlock}. */
-    public static final DeferredBlock<VentingUpsBatteryBlock> VENTING_UPS_BATTERY = BLOCKS.registerBlock(
-            "venting_ups_battery", VentingUpsBatteryBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Over-lamped dimmer switch scorching its faceplate — see {@link FaultyDimmerSwitchBlock}. */
-    public static final DeferredBlock<FaultyDimmerSwitchBlock> FAULTY_DIMMER_SWITCH = BLOCKS.registerBlock(
-            "faulty_dimmer_switch", FaultyDimmerSwitchBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
+    // ── Conference Room furniture + hazards (56-65) — see ModBlocksConference ─
+    public static final DeferredBlock<ConferenceTableBlock> CONFERENCE_TABLE = ModBlocksConference.CONFERENCE_TABLE;
+    public static final DeferredBlock<ExecutiveOfficeChairBlock> EXECUTIVE_OFFICE_CHAIR = ModBlocksConference.EXECUTIVE_OFFICE_CHAIR;
+    public static final DeferredBlock<ConferenceCredenzaBlock> CONFERENCE_CREDENZA = ModBlocksConference.CONFERENCE_CREDENZA;
+    public static final DeferredBlock<ConferenceWallDisplayBlock> CONFERENCE_WALL_DISPLAY = ModBlocksConference.CONFERENCE_WALL_DISPLAY;
+    public static final DeferredBlock<FlipChartEaselBlock> FLIP_CHART_EASEL = ModBlocksConference.FLIP_CHART_EASEL;
+    public static final DeferredBlock<ConferenceSpeakerphoneBlock> CONFERENCE_SPEAKERPHONE = ModBlocksConference.CONFERENCE_SPEAKERPHONE;
+    public static final DeferredBlock<GlassOfficePartitionBlock> GLASS_OFFICE_PARTITION = ModBlocksConference.GLASS_OFFICE_PARTITION;
+    public static final DeferredBlock<LoungeSofaBlock> LOUNGE_SOFA = ModBlocksConference.LOUNGE_SOFA;
+    public static final DeferredBlock<PottedOfficePlantBlock> POTTED_OFFICE_PLANT = ModBlocksConference.POTTED_OFFICE_PLANT;
+    public static final DeferredBlock<WindowBlindsBlock> WINDOW_BLINDS = ModBlocksConference.WINDOW_BLINDS;
+    public static final DeferredBlock<PortableSpaceHeaterBlock> PORTABLE_SPACE_HEATER = ModBlocksConference.PORTABLE_SPACE_HEATER;
+    public static final DeferredBlock<HalogenFloorLampBlock> HALOGEN_FLOOR_LAMP = ModBlocksConference.HALOGEN_FLOOR_LAMP;
+    public static final DeferredBlock<JammedProjectionScreenBlock> JAMMED_PROJECTION_SCREEN = ModBlocksConference.JAMMED_PROJECTION_SCREEN;
+    public static final DeferredBlock<OverheatingVideoWallBlock> OVERHEATING_VIDEO_WALL = ModBlocksConference.OVERHEATING_VIDEO_WALL;
+    public static final DeferredBlock<AerosolFreshenerDispenserBlock> AEROSOL_FRESHENER_DISPENSER = ModBlocksConference.AEROSOL_FRESHENER_DISPENSER;
+    public static final DeferredBlock<SmotheredLaptopBlock> SMOTHERED_LAPTOP = ModBlocksConference.SMOTHERED_LAPTOP;
+    public static final DeferredBlock<SmolderingPlanterBlock> SMOLDERING_PLANTER = ModBlocksConference.SMOLDERING_PLANTER;
+    public static final DeferredBlock<PinchedTvCordBlock> PINCHED_TV_CORD = ModBlocksConference.PINCHED_TV_CORD;
+    public static final DeferredBlock<VentingUpsBatteryBlock> VENTING_UPS_BATTERY = ModBlocksConference.VENTING_UPS_BATTERY;
+    public static final DeferredBlock<FaultyDimmerSwitchBlock> FAULTY_DIMMER_SWITCH = ModBlocksConference.FAULTY_DIMMER_SWITCH;
 
     // ── Office furniture ─────────────────────────────────────────────────
 
