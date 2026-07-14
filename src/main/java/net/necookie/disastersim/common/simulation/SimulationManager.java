@@ -5,8 +5,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
 import net.necookie.disastersim.registry.ModItems;
 import net.necookie.disastersim.registry.ModBlocks;
@@ -14,7 +12,6 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.room4.MorfeRoomManager;
 import net.necookie.disastersim.block.ComputerBlock;
-import net.necookie.disastersim.common.hazard.HazardBlock;
 import net.necookie.disastersim.common.hazard.HazardManager;
 import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.LobbyManager;
@@ -48,7 +45,11 @@ import net.necookie.disastersim.common.scheduling.TickScheduler;
  *
  * <p>Holds one {@link SimulationSession} per player UUID in a {@link ConcurrentHashMap} and advances
  * them from {@link #onServerTick}. Each tick a session runs, in order: telemetry sampling, the
- * scenario effect (fire or earthquake), exit-zone and assembly-zone checks, and a HUD sync packet.
+ * scenario effect, exit-zone and assembly-zone checks, and a HUD sync packet. The scenario effect
+ * itself is delegated to one of three package-private tickers ({@link LegacyFireTicker},
+ * {@link NewSim2FireTicker}, {@link EarthquakeTicker}) — three independent state machines that
+ * used to be private methods on this class — via {@link #FIRE_EFFECTS}/{@link #EARTHQUAKE_EFFECTS}
+ * and {@link #emitPhaseTransition}, which are package-private for exactly that reason.
  *
  * <p>{@link #startSimulation}/{@link #endSimulation} are {@code synchronized}; everything else runs
  * single-threaded on the server tick thread. Buildings are (re)placed from {@link #BUILDINGS} on both
@@ -107,8 +108,9 @@ public class SimulationManager {
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/new_sim_building2.0.schem"), 0), NEW_SIM_BUILDING2_POS)
     );
 
-    private static final FireEffects FIRE_EFFECTS = new FireEffects();
-    private static final EarthquakeEffects EARTHQUAKE_EFFECTS = new EarthquakeEffects();
+    /** Package-private (not private) so {@link LegacyFireTicker}/{@link NewSim2FireTicker}/{@link EarthquakeTicker} can call them. */
+    static final FireEffects FIRE_EFFECTS = new FireEffects();
+    static final EarthquakeEffects EARTHQUAKE_EFFECTS = new EarthquakeEffects();
 
     public enum SimulationState {
         IDLE, FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE, NEW_SIM_BUILDING2_FIRE;
@@ -191,7 +193,7 @@ public class SimulationManager {
             // Plain Library FIRE has no other explicit ignition (unlike CCS_FIRE's igniteRandomComputers
             // below, or NEW_SIM_BUILDING2_FIRE's armRandomHazards): force-fail one random scanned hazard
             // so there's always a real, identifiable "hazard that caught fire" for
-            // SimulationEffects.simulateFire to scatter near — it never seeds fire at an arbitrary
+            // FireEffects.simulateFire to scatter near — it never seeds fire at an arbitrary
             // arena-wide position anymore.
             List<BlockPos> hazards = session.getHazardPositions();
             if (!hazards.isEmpty()) {
@@ -282,8 +284,11 @@ public class SimulationManager {
         }
     }
 
-    /** Logs a {@code phase_transition} event (contract v1.2) — New Sim Building 2.0 only. */
-    private static void emitPhaseTransition(SimulationSession session, UUID uuid, ServerPlayer player, String phase) {
+    /**
+     * Logs a {@code phase_transition} event (contract v1.2) — New Sim Building 2.0 only.
+     * Package-private so {@link NewSim2FireTicker} can call it.
+     */
+    static void emitPhaseTransition(SimulationSession session, UUID uuid, ServerPlayer player, String phase) {
         double t = session.elapsedSeconds();
         double tRounded = Math.round(t * 100.0) / 100.0;
         session.logger.log("phase_transition", java.util.Map.of("t", tRounded, "phase", phase));
@@ -553,11 +558,11 @@ public class SimulationManager {
             tickTelemetry(session, uuid, level, player, ticks);
 
             if (session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE) {
-                if (tickNewSim2FireSession(session, uuid, level, player, ticks)) continue;
+                if (NewSim2FireTicker.tick(session, uuid, level, player, ticks)) continue;
             } else if (session.getState().isFire()) {
-                tickFireSession(session, level, player, ticks);
+                LegacyFireTicker.tick(session, level, player, ticks);
             } else if (session.getState().isQuake()) {
-                tickEarthquakeSession(session, level, player, ticks);
+                EarthquakeTicker.tick(session, level, player, ticks);
             }
 
             tickExitZone(session, uuid, level, player, ticks);
@@ -606,167 +611,6 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("§c⏳ Simulation starts in §c1..."));
         } else if (w == 1) {
             player.sendSystemMessage(Component.literal("§a§l▶ Simulation has started!"));
-        }
-    }
-
-    private static void tickFireSession(SimulationSession session, ServerLevel level,
-                                        ServerPlayer player, int ticks) {
-        if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-            if (session.getState().isCCS()) {
-                int spreadBefore = session.getFireSpreadCount();
-                FIRE_EFFECTS.spreadComputerFire(level, session);
-                int spreadAfter = session.getFireSpreadCount();
-                if (spreadAfter > spreadBefore) {
-                    sendCcsFireSpreadAlert(player, spreadBefore, spreadAfter);
-                }
-            } else {
-                FIRE_EFFECTS.simulateFire(level, session);
-            }
-        }
-        if (ticks % 20 == 0) {
-            FIRE_EFFECTS.applyFireProximityEffects(level, player);
-        }
-        if (ticks % 40 == 0) {
-            FIRE_EFFECTS.cleanupFireOutsideBounds(level, session);
-        }
-        if (ticks % 20 == 0) {
-            session.resetExtinguishEventPending();
-        }
-        HazardManager.tick(level, session, ticks);
-        if (session.getState().isCCS()) {
-            tickCcsFireNarrative(player, ticks);
-        }
-    }
-
-    /**
-     * Drives New Sim Building 2.0's prevention→intervention→evacuation state machine (own branch
-     * in {@link #onServerTick}, not {@link #tickFireSession} — the organic random-escalation
-     * {@code HazardManager.tick} drives is deliberately not used here). Returns true once the run
-     * has ended (caller should {@code continue} the outer loop, matching {@link #tickAssemblyZone}'s
-     * convention) — {@code tickFirePhase()} is pure bookkeeping, so all the actual world mutation
-     * (igniting unfound hazards, letting contained fires "go big", ending the session) happens here
-     * on the phase-change edge, exactly like {@link #tickEarthquakeSession} does for quake phases.
-     */
-    private static boolean tickNewSim2FireSession(SimulationSession session, UUID uuid,
-                                                   ServerLevel level, ServerPlayer player, int ticks) {
-        SimulationSession.FirePhase before = session.getFirePhase();
-        session.tickFirePhase();
-        SimulationSession.FirePhase after = session.getFirePhase();
-
-        if (before != after) {
-            if (after == SimulationSession.FirePhase.INTERVENTION) {
-                for (BlockPos pos : session.getArmedHazards()) {
-                    if (!session.getPreventedHazards().contains(pos)) {
-                        HazardManager.forceFailure(level, session, pos, player);
-                        session.recordEscalated(pos);
-                        // Catch the 2 nearest wood-plank blocks (not just an adjacent air cell) so
-                        // the fire has real fuel and actually spreads through the room, instead of
-                        // risking a lone fire block fizzling out on a stone/tile floor.
-                        for (BlockPos lit : HazardBlock.igniteNearestFlammable(level, pos, 2, 6)) {
-                            session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
-                                    session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
-                            session.addFireSource(lit);
-                        }
-                    }
-                }
-                player.sendSystemMessage(Component.literal(String.format(
-                        "§c⚠ Time's up! %d hazard(s) you missed have caught fire — grab the correct extinguisher!",
-                        session.getEscalatedHazards().size())));
-                emitPhaseTransition(session, uuid, player, "intervention");
-            } else if (after == SimulationSession.FirePhase.EVACUATION) {
-                for (BlockPos pos : session.getEscalatedHazards()) {
-                    if (!session.getExtinguishedEscalated().contains(pos)) {
-                        for (BlockPos lit : HazardBlock.igniteRadius(level, pos, 3, 10)) {
-                            session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
-                                    session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
-                            session.addFireSource(lit);
-                        }
-                    }
-                }
-                player.sendSystemMessage(Component.literal(
-                        "§4§l⚠ The fire is out of control — EVACUATE to the assembly area now!"));
-                emitPhaseTransition(session, uuid, player, "evacuation");
-            } else if (after == SimulationSession.FirePhase.END) {
-                String endReason = before == SimulationSession.FirePhase.PREVENTION
-                        ? "all_hazards_prevented" : "intervention_success";
-                player.sendSystemMessage(Component.literal(
-                        "all_hazards_prevented".equals(endReason)
-                                ? "§a✓ Every hazard prevented before it ever caught fire!"
-                                : "§a✓ Every fire contained — nice work!"));
-                endSimulation(uuid, endReason);
-                return true;
-            }
-        }
-
-        // Real arena-wide fire spread only kicks in once evacuation has actually begun.
-        if (session.getFirePhase() == SimulationSession.FirePhase.EVACUATION
-                && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-            FIRE_EFFECTS.simulateFire(level, session);
-        }
-        if (ticks % 20 == 0) {
-            FIRE_EFFECTS.applyFireProximityEffects(level, player);
-            session.resetExtinguishEventPending();
-        }
-        if (ticks % 40 == 0) {
-            FIRE_EFFECTS.cleanupFireOutsideBounds(level, session);
-        }
-        return false;
-    }
-
-    /** Sends a one-time alert when the total spread count crosses a dramatic threshold. */
-    private static void sendCcsFireSpreadAlert(ServerPlayer player, int before, int after) {
-        if (before == 0) {
-            player.sendSystemMessage(Component.literal("§c⚠ The electrical fire is spreading to nearby workstations!"));
-        } else if (before < 4 && after >= 4) {
-            player.sendSystemMessage(Component.literal("§4⚠ More computers are catching fire! Suppress them before it's too late!"));
-        } else if (before < 8 && after >= 8) {
-            player.sendSystemMessage(Component.literal("§4§l⚠ CRITICAL — The lab is ablaze! Use your CO2 extinguisher immediately!"));
-        }
-    }
-
-    /** Time-based narrative escalation for CCS fire, keyed to exact elapsed ticks. */
-    private static void tickCcsFireNarrative(ServerPlayer player, int ticks) {
-        int elapsed = Config.SIM_DURATION_TICKS.get() - ticks;
-        if (elapsed == 20 * 15) {
-            player.sendSystemMessage(Component.literal("§e[15s] The fire is still active — locate the burning computer!"));
-        } else if (elapsed == 20 * 30) {
-            player.sendSystemMessage(Component.literal("§c[30s] Electrical fires spread fast — check all workstations in the lab!"));
-        } else if (elapsed == 20 * 55) {
-            player.sendSystemMessage(Component.literal("§4[55s] ⚠ The fire has been burning for nearly a minute. Multiple stations may be at risk!"));
-        } else if (elapsed == 20 * 90) {
-            player.sendSystemMessage(Component.literal("§4§l[90s] DANGER — If you cannot control the fire, evacuate to the assembly area!"));
-        }
-    }
-
-    private static void tickEarthquakeSession(SimulationSession session, ServerLevel level,
-                                              ServerPlayer player, int ticks) {
-        SimulationSession.EarthquakePhase phaseBefore = session.getQuakePhase();
-        session.tickQuakePhase(level.getRandom());
-        SimulationSession.EarthquakePhase phaseAfter = session.getQuakePhase();
-        if (phaseBefore != phaseAfter) {
-            if (phaseAfter == SimulationSession.EarthquakePhase.PEAK) {
-                player.sendSystemMessage(Component.literal("§c⚠ Earthquake is intensifying!"));
-            } else if (phaseAfter == SimulationSession.EarthquakePhase.AFTERSHOCK) {
-                player.sendSystemMessage(Component.literal("§e⚠ Aftershock!"));
-            } else if (phaseAfter == SimulationSession.EarthquakePhase.END) {
-                player.sendSystemMessage(Component.literal("§a✓ The shaking has stopped."));
-            }
-        }
-        if (ticks % 60 == 0 && session.getQuakePhase() != SimulationSession.EarthquakePhase.END) {
-            int nauseaAmp = switch (session.getQuakePhase()) {
-                case PEAK       -> (int) Math.min(3, session.getSessionMagnitude() / 2.5);
-                case AFTERSHOCK -> (int) Math.min(2,
-                        session.getSessionMagnitude() * session.getAftershockMagnitudeScale() / 3.0);
-                default         -> 0;
-            };
-            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
-        }
-        if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
-            EARTHQUAKE_EFFECTS.simulateEarthquake(level, session);
-        }
-        EARTHQUAKE_EFFECTS.drainEarthquakePending(level, session);
-        if (ticks % 20 == 0) {
-            FIRE_EFFECTS.clearFireInArena(level, session);
         }
     }
 

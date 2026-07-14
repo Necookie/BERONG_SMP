@@ -96,12 +96,12 @@ public class SimulationSession {
     /**
      * Real, currently-burning positions (a hazard prop that's ON_FIRE, a computer that's BURNING,
      * or a literal vanilla fire/soul-fire block already placed by a previous scatter) — every
-     * scenario's {@code SimulationEffects.simulateFire} call picks a random member of this set and
+     * scenario's {@code FireEffects.simulateFire} call picks a random member of this set and
      * scatters new fire near it, never at an arbitrary arena-wide position. {@code addFireSource}/
      * {@code removeFireSource} are called from every real ignite/extinguish call site (see
-     * {@code HazardManager.triggerFailure}/{@code defuse}, {@code SimulationEffects.simulateFire}
+     * {@code HazardManager.triggerFailure}/{@code defuse}, {@code FireEffects.simulateFire}
      * itself for outward chain-growth, and the New Sim Building 2.0 phase-transition ignitions in
-     * {@code SimulationManager}).
+     * {@code NewSim2FireTicker}).
      */
     private final Set<BlockPos> activeFireSources = new HashSet<>();
 
@@ -252,10 +252,10 @@ public class SimulationSession {
 
     /**
      * Advances the fire-phase state machine by one tick — pure bookkeeping, no world access (the
-     * caller, {@code SimulationManager.tickNewSim2FireSession}, compares the phase before/after
-     * and performs the actual world mutation — escalating unfound hazards, igniting escalated
-     * ones further — exactly like {@link #tickQuakePhase} delegates its world effects back to
-     * {@code SimulationManager}).
+     * caller, {@code NewSim2FireTicker.tick}, compares the phase before/after and performs the
+     * actual world mutation — escalating unfound hazards, igniting escalated ones further —
+     * exactly like {@link #tickQuakePhase} delegates its world effects back to
+     * {@code EarthquakeTicker}).
      */
     public void tickFirePhase() {
         if (firePhase == null || firePhase == FirePhase.END) return;

@@ -60,7 +60,7 @@ public final class HazardManager {
 
     /**
      * Called every tick a FIRE-type session runs. New Sim Building 2.0 drives its own 5-hazard
-     * prevention/intervention/evacuation state machine ({@code SimulationManager.tickNewSim2FireSession})
+     * prevention/intervention/evacuation state machine ({@code NewSim2FireTicker.tick})
      * instead of this class's organic random-escalation ({@link #developHazards}) — every other
      * hazard prop in that building must stay in its default state until deliberately armed, so
      * this returns before touching anything for that state. Library/CCS are unaffected.
@@ -294,7 +294,7 @@ public final class HazardManager {
                     "hazard", BuiltInRegistries.BLOCK.getKey(block).getPath()));
             session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
                     session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "ignite"));
-            // This hazard is now a real "the fire started here" anchor — SimulationEffects.simulateFire
+            // This hazard is now a real "the fire started here" anchor — FireEffects.simulateFire
             // only ever scatters new fire near an active source, never at an arbitrary arena position.
             session.addFireSource(pos.immutable());
         }
