@@ -12,7 +12,7 @@ Command (/sim_fire, /sim_earthquake) → SimulationManager.startSimulation
   → (FIRE only) gives fire extinguisher in hotbar slot 0
   → (plain FIRE only, 2026-07-14) force-fails one random scanned hazard prop (HazardManager.forceFailure)
       right at session start — the Library's bootstrap ignition, so there's always a real,
-      identifiable "hazard that caught fire" for SimulationEffects.simulateFire to spread from
+      identifiable "hazard that caught fire" for FireEffects.simulateFire to spread from
       instead of nothing to scatter near. CCS_FIRE already has its own bootstrap
       (igniteRandomComputers below); NEW_SIM_BUILDING2_FIRE has armRandomHazards+initPhasedFire.
   → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
@@ -22,7 +22,7 @@ Command (/sim_fire, /sim_earthquake) → SimulationManager.startSimulation
       → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
-  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval — 2026-07-14: no longer picks an
+  → (FIRE) FireEffects.simulateFire at fireSpawnInterval — 2026-07-14: no longer picks an
            arbitrary arena-wide position. It scatters new fire within FIRE_SPREAD_RADIUS (4 blocks)
            of a random member of SimulationSession.getActiveFireSources() (pruned of anything that's
            burned itself out), and every newly-placed block joins that source pool too, so fire grows
@@ -49,7 +49,7 @@ SimulationManager.onServerTick (every tick):
         normal; 25% chance of stronger 0.6–1.1× wave) before finally reaching END
       → every 60 ticks: Nausea applied based on phase (PEAK: amp 0–3 scaled by magnitude;
         AFTERSHOCK: amp 0–2 scaled by effectiveMag) for realistic dizziness
-      → at quakeInterval: SimulationEffects.simulateEarthquake(level, session) — phase dispatch:
+      → at quakeInterval: EarthquakeEffects.simulateEarthquake(level, session) — phase dispatch:
           RUMBLE: breakOrDebris count = ceil(baseCount × magnitude / 5) within magnitude×3 radius
           PEAK: enqueuePeakDestructions — scans for unsupported (air below) blocks sorted
                 closest-first; adds batch to pendingDestructions queue
@@ -130,8 +130,9 @@ the 34-room/2-floor `new_sim_building2.0.schem` building. Unlike Library/CCS FIR
 with organic hazard escalation until timeout/exit), this scenario runs its own explicit 3-phase story via
 `SimulationSession.FirePhase` (`PREVENTION → INTERVENTION → EVACUATION → END`), mirroring how
 `EarthquakePhase`/`tickQuakePhase` already work — `tickFirePhase()` is pure bookkeeping; all world mutation
-happens in `SimulationManager.tickNewSim2FireSession` on the phase-change edge, exactly like
-`tickEarthquakeSession` does for quake phases.
+happens in `NewSim2FireTicker.tick` on the phase-change edge, exactly like `EarthquakeTicker.tick`
+does for quake phases (2026-07-14: both, plus the legacy Library/CCS fire ticker, were split out of
+`SimulationManager` into their own package-private classes in `common/simulation/` — see Key Classes).
 
 ```
 startSimulation(NEW_SIM_BUILDING2_FIRE)
