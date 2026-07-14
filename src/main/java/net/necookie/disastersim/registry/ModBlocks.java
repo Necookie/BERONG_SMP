@@ -104,9 +104,15 @@ import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 /**
- * All block registrations for the mod: the computer/fire-alarm interactive blocks, the furniture
- * blocks, and the 20 hazard prop blocks. Extracted from {@code BerongSMP} so the entry point
- * stays a thin bootstrap; {@link #register(IEventBus)} is called from its constructor.
+ * All 179 block registrations for the mod, as a lean index over 9 package-private domain
+ * registrar classes ({@code ModBlocksFurnitureClassroom}, {@code ModBlocksHazardsSchoolKitchen},
+ * {@code ModBlocksSchoolDecor}, {@code ModBlocksSafetyEquipment}, {@code ModBlocksCafeteria},
+ * {@code ModBlocksSportsCourts}, {@code ModBlocksConference}, {@code ModBlocksOffice},
+ * {@code ModBlocksLaboratory}) — only the computer/fire-alarm/example blocks register directly
+ * here. Every sub-registrar field is re-exported below in its original declared order, so no call
+ * site elsewhere in the codebase needed to change when this file was split apart (2026-07-14).
+ * Extracted from {@code BerongSMP} so the entry point stays a thin bootstrap;
+ * {@link #register(IEventBus)} is called from its constructor.
  *
  * <p>Block items live with the other item registrations (which reference these fields); the split
  * per registry type matches the standard NeoForge Mod* convention.
@@ -313,131 +319,27 @@ public final class ModBlocks {
     public static final DeferredBlock<OverheatingCctvDvrBlock> OVERHEATING_CCTV_DVR = ModBlocksOffice.OVERHEATING_CCTV_DVR;
     public static final DeferredBlock<FaultyParolLanternBlock> FAULTY_PAROL_LANTERN = ModBlocksOffice.FAULTY_PAROL_LANTERN;
 
-    // ── Laboratory furniture ─────────────────────────────────────────────
-
-    /** Full-height fume hood with glass sash — see {@link LaboratoryFumeHoodBlock}. */
-    public static final DeferredBlock<LaboratoryFumeHoodBlock> LABORATORY_FUME_HOOD = BLOCKS.registerBlock(
-            "laboratory_fume_hood", LaboratoryFumeHoodBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Floor-standing 19-inch instrument rack — see {@link EquipmentRackBlock}. */
-    public static final DeferredBlock<EquipmentRackBlock> EQUIPMENT_RACK = BLOCKS.registerBlock(
-            "equipment_rack", EquipmentRackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Adjustable lab stool on a steel column — see {@link LabStoolBlock}. */
-    public static final DeferredBlock<LabStoolBlock> LAB_STOOL = BLOCKS.registerBlock(
-            "lab_stool", LabStoolBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Rolling oscilloscope instrument cart — see {@link OscilloscopeCartBlock}. */
-    public static final DeferredBlock<OscilloscopeCartBlock> OSCILLOSCOPE_CART = BLOCKS.registerBlock(
-            "oscilloscope_cart", OscilloscopeCartBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Bench microscope on a small stand — see {@link MicroscopeStationBlock}. */
-    public static final DeferredBlock<MicroscopeStationBlock> MICROSCOPE_STATION = BLOCKS.registerBlock(
-            "microscope_station", MicroscopeStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Green wall eyewash fountain — see {@link EyeWashStationBlock}. */
-    public static final DeferredBlock<EyeWashStationBlock> EYE_WASH_STATION = BLOCKS.registerBlock(
-            "eye_wash_station", EyeWashStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Wall cabinet of labeled electronics-parts drawers — see {@link ComponentDrawerCabinetBlock}. */
-    public static final DeferredBlock<ComponentDrawerCabinetBlock> COMPONENT_DRAWER_CABINET = BLOCKS.registerBlock(
-            "component_drawer_cabinet", ComponentDrawerCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Wall rack of properly chained gas cylinders — see {@link SecuredCylinderRackBlock}. */
-    public static final DeferredBlock<SecuredCylinderRackBlock> SECURED_CYLINDER_RACK = BLOCKS.registerBlock(
-            "secured_cylinder_rack", SecuredCylinderRackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Shelf of labeled sample boxes and vial trays — see {@link SampleStorageRackBlock}. */
-    public static final DeferredBlock<SampleStorageRackBlock> SAMPLE_STORAGE_RACK = BLOCKS.registerBlock(
-            "sample_storage_rack", SampleStorageRackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Anti-vibration granite balance table — see {@link BalanceScaleTableBlock}. */
-    public static final DeferredBlock<BalanceScaleTableBlock> BALANCE_SCALE_TABLE = BLOCKS.registerBlock(
-            "balance_scale_table", BalanceScaleTableBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.STONE).noOcclusion());
-
-    // ── Laboratory hazards (props 76-85) ────────────────────────────────────
-
-    /** Unbalanced centrifuge rotor walking the bench — see {@link UnbalancedCentrifugeBlock}. */
-    public static final DeferredBlock<UnbalancedCentrifugeBlock> UNBALANCED_CENTRIFUGE = BLOCKS.registerBlock(
-            "unbalanced_centrifuge", UnbalancedCentrifugeBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** 3D printer thermal-runaway on a dislodged heater cartridge — see {@link Runaway3dPrinterBlock}. */
-    public static final DeferredBlock<Runaway3dPrinterBlock> RUNAWAY_3D_PRINTER = BLOCKS.registerBlock(
-            "runaway_3d_printer", Runaway3dPrinterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
-
-    /** Soldering iron left powered at full temperature — see {@link UnattendedSolderingIronBlock}. */
-    public static final DeferredBlock<UnattendedSolderingIronBlock> UNATTENDED_SOLDERING_IRON = BLOCKS.registerBlock(
-            "unattended_soldering_iron", UnattendedSolderingIronBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Class-4 test laser running with its beam dump missing — see {@link UnshieldedTestLaserBlock}. */
-    public static final DeferredBlock<UnshieldedTestLaserBlock> UNSHIELDED_TEST_LASER = BLOCKS.registerBlock(
-            "unshielded_test_laser", UnshieldedTestLaserBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
-
-    /** Leaking oxygen cylinder — oxidizer enrichment, CO2-only — see {@link LeakingOxygenCylinderBlock}. */
-    public static final DeferredBlock<LeakingOxygenCylinderBlock> LEAKING_OXYGEN_CYLINDER = BLOCKS.registerBlock(
-            "leaking_oxygen_cylinder", LeakingOxygenCylinderBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Shorted bench DC power supply — see {@link ShortedBenchSupplyBlock}. */
-    public static final DeferredBlock<ShortedBenchSupplyBlock> SHORTED_BENCH_SUPPLY = BLOCKS.registerBlock(
-            "shorted_bench_supply", ShortedBenchSupplyBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Vacuum pump running on degraded oil, belt slipping — see {@link OverheatedVacuumPumpBlock}. */
-    public static final DeferredBlock<OverheatedVacuumPumpBlock> OVERHEATED_VACUUM_PUMP = BLOCKS.registerBlock(
-            "overheated_vacuum_pump", OverheatedVacuumPumpBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Environmental chamber with a welded heater relay — see {@link StuckEnvironmentChamberBlock}. */
-    public static final DeferredBlock<StuckEnvironmentChamberBlock> STUCK_ENVIRONMENT_CHAMBER = BLOCKS.registerBlock(
-            "stuck_environment_chamber", StuckEnvironmentChamberBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Drying oven with flammable solvent vapor accumulating — see {@link SolventDryingOvenBlock}. */
-    public static final DeferredBlock<SolventDryingOvenBlock> SOLVENT_DRYING_OVEN = BLOCKS.registerBlock(
-            "solvent_drying_oven", SolventDryingOvenBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Dehumidifier with an iced coil, compressor short-cycling — see {@link FaultyDehumidifierBlock}. */
-    public static final DeferredBlock<FaultyDehumidifierBlock> FAULTY_DEHUMIDIFIER = BLOCKS.registerBlock(
-            "faulty_dehumidifier", FaultyDehumidifierBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
+    // ── Laboratory furniture + hazards (76-85) — see ModBlocksLaboratory ─────
+    public static final DeferredBlock<LaboratoryFumeHoodBlock> LABORATORY_FUME_HOOD = ModBlocksLaboratory.LABORATORY_FUME_HOOD;
+    public static final DeferredBlock<EquipmentRackBlock> EQUIPMENT_RACK = ModBlocksLaboratory.EQUIPMENT_RACK;
+    public static final DeferredBlock<LabStoolBlock> LAB_STOOL = ModBlocksLaboratory.LAB_STOOL;
+    public static final DeferredBlock<OscilloscopeCartBlock> OSCILLOSCOPE_CART = ModBlocksLaboratory.OSCILLOSCOPE_CART;
+    public static final DeferredBlock<MicroscopeStationBlock> MICROSCOPE_STATION = ModBlocksLaboratory.MICROSCOPE_STATION;
+    public static final DeferredBlock<EyeWashStationBlock> EYE_WASH_STATION = ModBlocksLaboratory.EYE_WASH_STATION;
+    public static final DeferredBlock<ComponentDrawerCabinetBlock> COMPONENT_DRAWER_CABINET = ModBlocksLaboratory.COMPONENT_DRAWER_CABINET;
+    public static final DeferredBlock<SecuredCylinderRackBlock> SECURED_CYLINDER_RACK = ModBlocksLaboratory.SECURED_CYLINDER_RACK;
+    public static final DeferredBlock<SampleStorageRackBlock> SAMPLE_STORAGE_RACK = ModBlocksLaboratory.SAMPLE_STORAGE_RACK;
+    public static final DeferredBlock<BalanceScaleTableBlock> BALANCE_SCALE_TABLE = ModBlocksLaboratory.BALANCE_SCALE_TABLE;
+    public static final DeferredBlock<UnbalancedCentrifugeBlock> UNBALANCED_CENTRIFUGE = ModBlocksLaboratory.UNBALANCED_CENTRIFUGE;
+    public static final DeferredBlock<Runaway3dPrinterBlock> RUNAWAY_3D_PRINTER = ModBlocksLaboratory.RUNAWAY_3D_PRINTER;
+    public static final DeferredBlock<UnattendedSolderingIronBlock> UNATTENDED_SOLDERING_IRON = ModBlocksLaboratory.UNATTENDED_SOLDERING_IRON;
+    public static final DeferredBlock<UnshieldedTestLaserBlock> UNSHIELDED_TEST_LASER = ModBlocksLaboratory.UNSHIELDED_TEST_LASER;
+    public static final DeferredBlock<LeakingOxygenCylinderBlock> LEAKING_OXYGEN_CYLINDER = ModBlocksLaboratory.LEAKING_OXYGEN_CYLINDER;
+    public static final DeferredBlock<ShortedBenchSupplyBlock> SHORTED_BENCH_SUPPLY = ModBlocksLaboratory.SHORTED_BENCH_SUPPLY;
+    public static final DeferredBlock<OverheatedVacuumPumpBlock> OVERHEATED_VACUUM_PUMP = ModBlocksLaboratory.OVERHEATED_VACUUM_PUMP;
+    public static final DeferredBlock<StuckEnvironmentChamberBlock> STUCK_ENVIRONMENT_CHAMBER = ModBlocksLaboratory.STUCK_ENVIRONMENT_CHAMBER;
+    public static final DeferredBlock<SolventDryingOvenBlock> SOLVENT_DRYING_OVEN = ModBlocksLaboratory.SOLVENT_DRYING_OVEN;
+    public static final DeferredBlock<FaultyDehumidifierBlock> FAULTY_DEHUMIDIFIER = ModBlocksLaboratory.FAULTY_DEHUMIDIFIER;
 
     private ModBlocks() {}
 
