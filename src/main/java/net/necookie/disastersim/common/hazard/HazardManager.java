@@ -294,6 +294,9 @@ public final class HazardManager {
                     "hazard", BuiltInRegistries.BLOCK.getKey(block).getPath()));
             session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
                     session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "ignite"));
+            // This hazard is now a real "the fire started here" anchor — SimulationEffects.simulateFire
+            // only ever scatters new fire near an active source, never at an arbitrary arena position.
+            session.addFireSource(pos.immutable());
         }
         notifyFailure(notifyPlayer, message);
     }
@@ -335,6 +338,7 @@ public final class HazardManager {
             if (wasOnFire) {
                 session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
                         session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "extinguish"));
+                session.removeFireSource(pos);
             }
             if (session.getState().isFire()) {
                 double t = session.elapsedSeconds();

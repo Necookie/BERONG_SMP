@@ -58,7 +58,27 @@ public class SimulationEffects {
         Blocks.GLASS, Blocks.GLASS_PANE
     );
 
+    /** How far (blocks, horizontal/vertical) a new fire block can land from the source it's spreading from. */
+    private static final int FIRE_SPREAD_RADIUS = 4;
+
+    /**
+     * Scatters new fire blocks near an actually-burning source — never at an arbitrary position
+     * anywhere in the arena. Each call picks a random member of {@link SimulationSession#getActiveFireSources()}
+     * (pruned first of anything that's burned itself out since it was recorded) and offsets within
+     * {@link #FIRE_SPREAD_RADIUS} of it; a newly-placed block joins the source pool itself, so fire
+     * grows outward in a real chain instead of teleporting around the building. If nothing is
+     * burning yet, this is a no-op — every fire-type scenario is responsible for igniting an actual
+     * hazard first (see {@code SimulationManager}'s Library-FIRE bootstrap ignition and CCS's
+     * `igniteRandomComputers`), so there's always an identifiable "hazard that caught fire."
+     */
     public void simulateFire(ServerLevel level, SimulationSession session) {
+        if (session == null) return;
+
+        Set<BlockPos> sourceSet = session.getActiveFireSources();
+        sourceSet.removeIf(pos -> !isActuallyOnFire(level, pos));
+        if (sourceSet.isEmpty()) return;
+        List<BlockPos> sources = new ArrayList<>(sourceSet);
+
         int count      = Config.FIRE_SPAWN_COUNT.get();
         BlockPos base  = session.getArenaOrigin();
         int spanX      = session.getArenaSpanX();
@@ -66,23 +86,31 @@ public class SimulationEffects {
         int areaHeight = session.getArenaHeight();
 
         for (int i = 0; i < count; i++) {
-            BlockPos firePos = base.offset(
-                    level.getRandom().nextInt(spanX),
-                    level.getRandom().nextInt(areaHeight),
-                    level.getRandom().nextInt(spanZ));
+            BlockPos source = sources.get(level.getRandom().nextInt(sources.size()));
+            BlockPos firePos = source.offset(
+                    level.getRandom().nextInt(FIRE_SPREAD_RADIUS * 2 + 1) - FIRE_SPREAD_RADIUS,
+                    level.getRandom().nextInt(3) - 1,
+                    level.getRandom().nextInt(FIRE_SPREAD_RADIUS * 2 + 1) - FIRE_SPREAD_RADIUS);
+
+            // Stay inside the arena the source itself lives in, even if it's near an edge.
+            if (firePos.getX() < base.getX() || firePos.getX() >= base.getX() + spanX
+                    || firePos.getZ() < base.getZ() || firePos.getZ() >= base.getZ() + spanZ
+                    || firePos.getY() < base.getY() || firePos.getY() >= base.getY() + areaHeight) {
+                continue;
+            }
 
             if (level.getBlockState(firePos).isAir()
                     && !level.getBlockState(firePos.below()).isAir()) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
-                if (session != null) {
-                    session.incrementFireSpread();
-                    session.logger.log("FIRE_SPREAD", java.util.Map.of(
-                        "x", firePos.getX(), "y", firePos.getY(), "z", firePos.getZ(),
-                        "total_count", session.getFireSpreadCount()
-                    ));
-                    session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
-                            session.elapsedSeconds(), firePos.getX(), firePos.getY(), firePos.getZ(), "ignite"));
-                }
+                BlockPos immutableFirePos = firePos.immutable();
+                session.incrementFireSpread();
+                session.addFireSource(immutableFirePos);
+                session.logger.log("FIRE_SPREAD", java.util.Map.of(
+                    "x", firePos.getX(), "y", firePos.getY(), "z", firePos.getZ(),
+                    "total_count", session.getFireSpreadCount()
+                ));
+                session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                        session.elapsedSeconds(), firePos.getX(), firePos.getY(), firePos.getZ(), "ignite"));
                 // Dense smoke plume above each new fire block
                 for (int s = 0; s < 14; s++) {
                     double px = firePos.getX() + 0.5 + (level.getRandom().nextDouble() - 0.5) * 2.2;
@@ -92,6 +120,16 @@ public class SimulationEffects {
                 }
             }
         }
+    }
+
+    /** True if {@code pos} is a real fire source right now: literal fire/soul fire, a burning hazard prop, or a burning computer. */
+    private static boolean isActuallyOnFire(ServerLevel level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+        if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) return true;
+        if (state.hasProperty(net.necookie.disastersim.common.hazard.HazardBlock.ON_FIRE)
+                && state.getValue(net.necookie.disastersim.common.hazard.HazardBlock.ON_FIRE)) return true;
+        if (state.getBlock() instanceof ComputerBlock && state.getValue(ComputerBlock.BURNING)) return true;
+        return false;
     }
 
     /**

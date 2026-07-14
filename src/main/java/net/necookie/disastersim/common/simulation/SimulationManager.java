@@ -186,6 +186,19 @@ public class SimulationManager {
                     session.getArenaOrigin(), session.getArenaSpanX(), session.getArenaSpanZ(), session.getArenaHeight()));
         }
 
+        if (state == SimulationState.FIRE) {
+            // Plain Library FIRE has no other explicit ignition (unlike CCS_FIRE's igniteRandomComputers
+            // below, or NEW_SIM_BUILDING2_FIRE's armRandomHazards): force-fail one random scanned hazard
+            // so there's always a real, identifiable "hazard that caught fire" for
+            // SimulationEffects.simulateFire to scatter near — it never seeds fire at an arbitrary
+            // arena-wide position anymore.
+            List<BlockPos> hazards = session.getHazardPositions();
+            if (!hazards.isEmpty()) {
+                BlockPos bootstrapHazard = hazards.get(level.getRandom().nextInt(hazards.size()));
+                HazardManager.forceFailure(level, session, bootstrapHazard, player);
+            }
+        }
+
         if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
             List<BlockPos> armed = HazardManager.armRandomHazards(level, session,
                     session.getHazardPositions(), NEW_SIM2_HAZARD_COUNT, level.getRandom());
@@ -651,6 +664,7 @@ public class SimulationManager {
                         for (BlockPos lit : HazardBlock.igniteNearestFlammable(level, pos, 2, 6)) {
                             session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
                                     session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
+                            session.addFireSource(lit);
                         }
                     }
                 }
@@ -664,6 +678,7 @@ public class SimulationManager {
                         for (BlockPos lit : HazardBlock.igniteRadius(level, pos, 3, 10)) {
                             session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
                                     session.elapsedSeconds(), lit.getX(), lit.getY(), lit.getZ(), "ignite"));
+                            session.addFireSource(lit);
                         }
                     }
                 }

@@ -10,6 +10,11 @@ Command (/sim_fire, /sim_earthquake) → SimulationManager.startSimulation
   → places all buildings (LSPU Library + SSC Building + CCS Admin Building) via BUILDINGS list
   → teleports player to a random valid position inside the target building (library for FIRE/EARTHQUAKE, CCS for CCS_FIRE/CCS_EARTHQUAKE); scans arena for solid-floor + 2-air-block-tall gaps, picks one at random; falls back to building centre if none found
   → (FIRE only) gives fire extinguisher in hotbar slot 0
+  → (plain FIRE only, 2026-07-14) force-fails one random scanned hazard prop (HazardManager.forceFailure)
+      right at session start — the Library's bootstrap ignition, so there's always a real,
+      identifiable "hazard that caught fire" for SimulationEffects.simulateFire to spread from
+      instead of nothing to scatter near. CCS_FIRE already has its own bootstrap
+      (igniteRandomComputers below); NEW_SIM_BUILDING2_FIRE has armRandomHazards+initPhasedFire.
   → (EARTHQUAKE only) session.initEarthquake(random, magnitude) places epicenter near the library interior
       → epicenter fixed 3–9 blocks from SIM_POS in XZ so destruction concentrates inside the structure
       → aftershockCount initialised to 2–4 (random) for multi-wave aftershock support
@@ -17,7 +22,14 @@ Command (/sim_fire, /sim_earthquake) → SimulationManager.startSimulation
       → player receives "§c⚠ Magnitude X.X Earthquake has begun!" message
 SimulationManager.onServerTick (every tick):
   → session.tick() decrements timer
-  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval (spawns 14 LARGE_SMOKE particles per fire block placed with wide 2.2-block XZ spread and 3-block Y rise);
+  → (FIRE) SimulationEffects.simulateFire at fireSpawnInterval — 2026-07-14: no longer picks an
+           arbitrary arena-wide position. It scatters new fire within FIRE_SPREAD_RADIUS (4 blocks)
+           of a random member of SimulationSession.getActiveFireSources() (pruned of anything that's
+           burned itself out), and every newly-placed block joins that source pool too, so fire grows
+           outward from an actual "hazard that caught fire" in a real chain instead of teleporting
+           around the building. A no-op if nothing is burning yet — see the FIRE-state bootstrap
+           ignition below and HazardManager.triggerFailure/defuse (both add/remove sources). Spawns
+           14 LARGE_SMOKE particles per fire block placed with wide 2.2-block XZ spread and 3-block Y rise;
            cleanupFireOutsideBounds every 40 ticks;
            applyFireProximityEffects every 20 ticks — scans 7-block radius, applies Nausea (amp 0–2) and
            drains air supply (oxygen depletion; vanilla suffocation triggers at zero) scaling with fire density +

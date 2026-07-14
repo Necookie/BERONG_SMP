@@ -94,6 +94,18 @@ public class SimulationSession {
     private boolean alarmRung = false;
 
     /**
+     * Real, currently-burning positions (a hazard prop that's ON_FIRE, a computer that's BURNING,
+     * or a literal vanilla fire/soul-fire block already placed by a previous scatter) — every
+     * scenario's {@code SimulationEffects.simulateFire} call picks a random member of this set and
+     * scatters new fire near it, never at an arbitrary arena-wide position. {@code addFireSource}/
+     * {@code removeFireSource} are called from every real ignite/extinguish call site (see
+     * {@code HazardManager.triggerFailure}/{@code defuse}, {@code SimulationEffects.simulateFire}
+     * itself for outward chain-growth, and the New Sim Building 2.0 phase-transition ignitions in
+     * {@code SimulationManager}).
+     */
+    private final Set<BlockPos> activeFireSources = new HashSet<>();
+
+    /**
      * The session's own duration anchor, captured alongside {@link #timerTicks} — needed because
      * {@link #elapsedTicks()} must work correctly for scenarios like New Sim Building 2.0 whose
      * total duration isn't {@code Config.SIM_DURATION_TICKS} (see {@link #bindDuration}). Every
@@ -288,6 +300,10 @@ public class SimulationSession {
     public void recordEscalatedExtinguished(BlockPos pos) { extinguishedEscalated.add(pos); }
     public void markAlarmRung() { alarmRung = true; }
     public boolean wasAlarmRung() { return alarmRung; }
+
+    public Set<BlockPos> getActiveFireSources() { return activeFireSources; }
+    public void addFireSource(BlockPos pos) { activeFireSources.add(pos); }
+    public void removeFireSource(BlockPos pos) { activeFireSources.remove(pos); }
 
     public double computeIntensityAt(BlockPos pos) {
         if (epicenter == null || quakePhase == null || quakePhase == EarthquakePhase.END) return 0.0;
