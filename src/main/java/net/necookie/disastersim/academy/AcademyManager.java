@@ -114,7 +114,7 @@ public final class AcademyManager {
      */
     public static void clearTransientState(ServerPlayer player) {
         UUID id = player.getUUID();
-        CruzRoomManager.clearPlayer(id);
+        CruzRoomManager.clearPlayer(player);
         ReyesRoomManager.clearPlayer(player);
         SantosRoomManager.clearPlayer(player);
         AcademyVisuals.clearPlayer(id);

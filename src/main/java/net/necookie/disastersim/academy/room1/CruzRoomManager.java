@@ -807,10 +807,29 @@ public final class CruzRoomManager {
         }
     }
 
-    /** Called from {@code AcademyManager}'s logout handler to drop this room's per-player state. */
-    public static void clearPlayer(UUID id) {
+    /**
+     * Called from {@code AcademyManager}'s logout/login handlers to drop this room's per-player
+     * transient state. Also rolls a mid-run {@link CruzPhase} (anything past NOT_STARTED but not
+     * yet DONE) back to NOT_STARTED — same idiom as {@code ReyesRoomManager}/{@code SantosRoomManager}
+     * rolling back their own "mid-effect" phases on logout, just simpler here since none of Room 1's
+     * phases place blocks/fire that need cleanup. Without this, closing the game mid-Room-1 and
+     * reconnecting left {@code CruzPhase} at whatever it was; since login always routes to the main
+     * lobby (far outside {@link #ROOM1_BOUNDS}), the player would still get Cruz's idle-nudge chat
+     * prompts and her escort/teleport logic firing at them there, even though the room's own tick
+     * dispatch and {@link #isEscortablePhase} never checked physical location — reported as "Cruz
+     * follows me into the main lobby after reconnecting."
+     */
+    public static void clearPlayer(ServerPlayer player) {
+        UUID id = player.getUUID();
         marksHit.remove(id);
         goStopStates.remove(id);
         waypointIdx.remove(id);
+
+        ServerLevel level = (ServerLevel) player.level();
+        AcademySavedData data = AcademySavedData.get(level);
+        CruzPhase phase = data.get(id).cruzPhase();
+        if (phase != CruzPhase.NOT_STARTED && phase != CruzPhase.DONE) {
+            data.mutate(id, p -> p.setCruzPhase(CruzPhase.NOT_STARTED));
+        }
     }
 }
