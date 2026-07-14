@@ -291,134 +291,27 @@ public final class ModBlocks {
     public static final DeferredBlock<VentingUpsBatteryBlock> VENTING_UPS_BATTERY = ModBlocksConference.VENTING_UPS_BATTERY;
     public static final DeferredBlock<FaultyDimmerSwitchBlock> FAULTY_DIMMER_SWITCH = ModBlocksConference.FAULTY_DIMMER_SWITCH;
 
-    // ── Office furniture ─────────────────────────────────────────────────
-
-    /** Fabric-covered cubicle divider panel — see {@link OfficeCubiclePartitionBlock}. */
-    public static final DeferredBlock<OfficeCubiclePartitionBlock> OFFICE_CUBICLE_PARTITION = BLOCKS.registerBlock(
-            "office_cubicle_partition", OfficeCubiclePartitionBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Tall front-counter reception desk — see {@link ReceptionDeskBlock}. */
-    public static final DeferredBlock<ReceptionDeskBlock> RECEPTION_DESK = BLOCKS.registerBlock(
-            "reception_desk", ReceptionDeskBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(2.0f, 4.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Wall pigeonhole mail-slot unit — see {@link MailSortingShelfBlock}. */
-    public static final DeferredBlock<MailSortingShelfBlock> MAIL_SORTING_SHELF = BLOCKS.registerBlock(
-            "mail_sorting_shelf", MailSortingShelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Large floor office copier — see {@link OfficePhotocopierBlock}. */
-    public static final DeferredBlock<OfficePhotocopierBlock> OFFICE_PHOTOCOPIER = BLOCKS.registerBlock(
-            "office_photocopier", OfficePhotocopierBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Desktop stack of letter trays — see {@link DocumentTrayStackBlock}. */
-    public static final DeferredBlock<DocumentTrayStackBlock> DOCUMENT_TRAY_STACK = BLOCKS.registerBlock(
-            "document_tray_stack", DocumentTrayStackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(0.5f, 1.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Wall shelf of colored ring binders — see {@link WallBinderShelfBlock}. */
-    public static final DeferredBlock<WallBinderShelfBlock> WALL_BINDER_SHELF = BLOCKS.registerBlock(
-            "wall_binder_shelf", WallBinderShelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Squat steel safe with a dial — see {@link OfficeSafeBlock}. */
-    public static final DeferredBlock<OfficeSafeBlock> OFFICE_SAFE = BLOCKS.registerBlock(
-            "office_safe", OfficeSafeBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3.0f, 8.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Standing wooden coat rack — see {@link CoatRackStandBlock}. */
-    public static final DeferredBlock<CoatRackStandBlock> COAT_RACK_STAND = BLOCKS.registerBlock(
-            "coat_rack_stand", CoatRackStandBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.0f, 2.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Wall punch clock with a timecard rack — see {@link BundyTimeClockBlock}. */
-    public static final DeferredBlock<BundyTimeClockBlock> BUNDY_TIME_CLOCK = BLOCKS.registerBlock(
-            "bundy_time_clock", BundyTimeClockBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Tall stationery cabinet, doors ajar — see {@link OfficeSupplyCabinetBlock}. */
-    public static final DeferredBlock<OfficeSupplyCabinetBlock> OFFICE_SUPPLY_CABINET = BLOCKS.registerBlock(
-            "office_supply_cabinet", OfficeSupplyCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    // ── Office hazards (props 66-75) ────────────────────────────────────────
-
-    /** Jammed, overfed paper shredder — see {@link JammedPaperShredderBlock}. */
-    public static final DeferredBlock<JammedPaperShredderBlock> JAMMED_PAPER_SHREDDER = BLOCKS.registerBlock(
-            "jammed_paper_shredder", JammedPaperShredderBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Clogged-fan comms cabinet overheating — see {@link OverheatedNetworkCabinetBlock}. */
-    public static final DeferredBlock<OverheatedNetworkCabinetBlock> OVERHEATED_NETWORK_CABINET = BLOCKS.registerBlock(
-            "overheated_network_cabinet", OverheatedNetworkCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** E-bike thermal-runaway charging station — see {@link EbikeChargingStationBlock}. */
-    public static final DeferredBlock<EbikeChargingStationBlock> EBIKE_CHARGING_STATION = BLOCKS.registerBlock(
-            "ebike_charging_station", EbikeChargingStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Failing fluorescent ballast dripping tar — see {@link FailingFluorescentBallastBlock}. */
-    public static final DeferredBlock<FailingFluorescentBallastBlock> FAILING_FLUORESCENT_BALLAST = BLOCKS.registerBlock(
-            "failing_fluorescent_ballast", FailingFluorescentBallastBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 8));
-
-    /** Aquarium heater exposed by a dropped water level — see {@link DryAquariumHeaterBlock}. */
-    public static final DeferredBlock<DryAquariumHeaterBlock> DRY_AQUARIUM_HEATER = BLOCKS.registerBlock(
-            "dry_aquarium_heater", DryAquariumHeaterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
-
-    /** Desk mug warmer buried under a memo pile — see {@link UnattendedMugWarmerBlock}. */
-    public static final DeferredBlock<UnattendedMugWarmerBlock> UNATTENDED_MUG_WARMER = BLOCKS.registerBlock(
-            "unattended_mug_warmer", UnattendedMugWarmerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(0.5f, 1.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 2 : 0));
-
-    /** Old CRT monitor arcing through years of dust — see {@link DustyCrtMonitorBlock}. */
-    public static final DeferredBlock<DustyCrtMonitorBlock> DUSTY_CRT_MONITOR = BLOCKS.registerBlock(
-            "dusty_crt_monitor", DustyCrtMonitorBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Baseboard wiring gnawed to bare copper — see {@link RodentChewedWiringBlock}. */
-    public static final DeferredBlock<RodentChewedWiringBlock> RODENT_CHEWED_WIRING = BLOCKS.registerBlock(
-            "rodent_chewed_wiring", RodentChewedWiringBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion());
-
-    /** 24/7 security DVR with blocked vents — see {@link OverheatingCctvDvrBlock}. */
-    public static final DeferredBlock<OverheatingCctvDvrBlock> OVERHEATING_CCTV_DVR = BLOCKS.registerBlock(
-            "overheating_cctv_dvr", OverheatingCctvDvrBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Faulty parol lantern with substandard series lights — see {@link FaultyParolLanternBlock}. */
-    public static final DeferredBlock<FaultyParolLanternBlock> FAULTY_PAROL_LANTERN = BLOCKS.registerBlock(
-            "faulty_parol_lantern", FaultyParolLanternBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_YELLOW)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOD).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 2));
+    // ── Office furniture + hazards (66-75) — see ModBlocksOffice ─────────────
+    public static final DeferredBlock<OfficeCubiclePartitionBlock> OFFICE_CUBICLE_PARTITION = ModBlocksOffice.OFFICE_CUBICLE_PARTITION;
+    public static final DeferredBlock<ReceptionDeskBlock> RECEPTION_DESK = ModBlocksOffice.RECEPTION_DESK;
+    public static final DeferredBlock<MailSortingShelfBlock> MAIL_SORTING_SHELF = ModBlocksOffice.MAIL_SORTING_SHELF;
+    public static final DeferredBlock<OfficePhotocopierBlock> OFFICE_PHOTOCOPIER = ModBlocksOffice.OFFICE_PHOTOCOPIER;
+    public static final DeferredBlock<DocumentTrayStackBlock> DOCUMENT_TRAY_STACK = ModBlocksOffice.DOCUMENT_TRAY_STACK;
+    public static final DeferredBlock<WallBinderShelfBlock> WALL_BINDER_SHELF = ModBlocksOffice.WALL_BINDER_SHELF;
+    public static final DeferredBlock<OfficeSafeBlock> OFFICE_SAFE = ModBlocksOffice.OFFICE_SAFE;
+    public static final DeferredBlock<CoatRackStandBlock> COAT_RACK_STAND = ModBlocksOffice.COAT_RACK_STAND;
+    public static final DeferredBlock<BundyTimeClockBlock> BUNDY_TIME_CLOCK = ModBlocksOffice.BUNDY_TIME_CLOCK;
+    public static final DeferredBlock<OfficeSupplyCabinetBlock> OFFICE_SUPPLY_CABINET = ModBlocksOffice.OFFICE_SUPPLY_CABINET;
+    public static final DeferredBlock<JammedPaperShredderBlock> JAMMED_PAPER_SHREDDER = ModBlocksOffice.JAMMED_PAPER_SHREDDER;
+    public static final DeferredBlock<OverheatedNetworkCabinetBlock> OVERHEATED_NETWORK_CABINET = ModBlocksOffice.OVERHEATED_NETWORK_CABINET;
+    public static final DeferredBlock<EbikeChargingStationBlock> EBIKE_CHARGING_STATION = ModBlocksOffice.EBIKE_CHARGING_STATION;
+    public static final DeferredBlock<FailingFluorescentBallastBlock> FAILING_FLUORESCENT_BALLAST = ModBlocksOffice.FAILING_FLUORESCENT_BALLAST;
+    public static final DeferredBlock<DryAquariumHeaterBlock> DRY_AQUARIUM_HEATER = ModBlocksOffice.DRY_AQUARIUM_HEATER;
+    public static final DeferredBlock<UnattendedMugWarmerBlock> UNATTENDED_MUG_WARMER = ModBlocksOffice.UNATTENDED_MUG_WARMER;
+    public static final DeferredBlock<DustyCrtMonitorBlock> DUSTY_CRT_MONITOR = ModBlocksOffice.DUSTY_CRT_MONITOR;
+    public static final DeferredBlock<RodentChewedWiringBlock> RODENT_CHEWED_WIRING = ModBlocksOffice.RODENT_CHEWED_WIRING;
+    public static final DeferredBlock<OverheatingCctvDvrBlock> OVERHEATING_CCTV_DVR = ModBlocksOffice.OVERHEATING_CCTV_DVR;
+    public static final DeferredBlock<FaultyParolLanternBlock> FAULTY_PAROL_LANTERN = ModBlocksOffice.FAULTY_PAROL_LANTERN;
 
     // ── Laboratory furniture ─────────────────────────────────────────────
 
