@@ -107,7 +107,8 @@ public class SimulationManager {
                     Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/new_sim_building2.0.schem"), 0), NEW_SIM_BUILDING2_POS)
     );
 
-    private static final SimulationEffects EFFECTS = new SimulationEffects();
+    private static final FireEffects FIRE_EFFECTS = new FireEffects();
+    private static final EarthquakeEffects EARTHQUAKE_EFFECTS = new EarthquakeEffects();
 
     public enum SimulationState {
         IDLE, FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE, NEW_SIM_BUILDING2_FIRE;
@@ -613,20 +614,20 @@ public class SimulationManager {
         if (ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
             if (session.getState().isCCS()) {
                 int spreadBefore = session.getFireSpreadCount();
-                EFFECTS.spreadComputerFire(level, session);
+                FIRE_EFFECTS.spreadComputerFire(level, session);
                 int spreadAfter = session.getFireSpreadCount();
                 if (spreadAfter > spreadBefore) {
                     sendCcsFireSpreadAlert(player, spreadBefore, spreadAfter);
                 }
             } else {
-                EFFECTS.simulateFire(level, session);
+                FIRE_EFFECTS.simulateFire(level, session);
             }
         }
         if (ticks % 20 == 0) {
-            EFFECTS.applyFireProximityEffects(level, player);
+            FIRE_EFFECTS.applyFireProximityEffects(level, player);
         }
         if (ticks % 40 == 0) {
-            EFFECTS.cleanupFireOutsideBounds(level, session);
+            FIRE_EFFECTS.cleanupFireOutsideBounds(level, session);
         }
         if (ticks % 20 == 0) {
             session.resetExtinguishEventPending();
@@ -700,14 +701,14 @@ public class SimulationManager {
         // Real arena-wide fire spread only kicks in once evacuation has actually begun.
         if (session.getFirePhase() == SimulationSession.FirePhase.EVACUATION
                 && ticks % Config.FIRE_SPAWN_INTERVAL.get() == 0) {
-            EFFECTS.simulateFire(level, session);
+            FIRE_EFFECTS.simulateFire(level, session);
         }
         if (ticks % 20 == 0) {
-            EFFECTS.applyFireProximityEffects(level, player);
+            FIRE_EFFECTS.applyFireProximityEffects(level, player);
             session.resetExtinguishEventPending();
         }
         if (ticks % 40 == 0) {
-            EFFECTS.cleanupFireOutsideBounds(level, session);
+            FIRE_EFFECTS.cleanupFireOutsideBounds(level, session);
         }
         return false;
     }
@@ -761,11 +762,11 @@ public class SimulationManager {
             player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 120, nauseaAmp, false, true));
         }
         if (ticks % Config.QUAKE_INTERVAL.get() == 0) {
-            EFFECTS.simulateEarthquake(level, session);
+            EARTHQUAKE_EFFECTS.simulateEarthquake(level, session);
         }
-        EFFECTS.drainEarthquakePending(level, session);
+        EARTHQUAKE_EFFECTS.drainEarthquakePending(level, session);
         if (ticks % 20 == 0) {
-            EFFECTS.clearFireInArena(level, session);
+            FIRE_EFFECTS.clearFireInArena(level, session);
         }
     }
 
