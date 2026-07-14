@@ -41,105 +41,31 @@ public final class ModItems {
 
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(BerongSMP.MODID);
 
-    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_REYES =
-            ITEMS.registerItem("npc_sgt_reyes",
-                    p -> new NpcSpawnerItem(NpcType.SGT_REYES, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_SANTOS =
-            ITEMS.registerItem("npc_sgt_santos",
-                    p -> new NpcSpawnerItem(NpcType.SGT_SANTOS, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_OFFICER_CRUZ =
-            ITEMS.registerItem("npc_officer_cruz",
-                    p -> new NpcSpawnerItem(NpcType.OFFICER_CRUZ, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_CAPT_MORFE =
-            ITEMS.registerItem("npc_capt_morfe",
-                    p -> new NpcSpawnerItem(NpcType.CAPT_MORFE, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_SECURITY_TUAZON =
-            ITEMS.registerItem("npc_security_tuazon",
-                    p -> new NpcSpawnerItem(NpcType.SECURITY_TUAZON, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_DM_ORLANDA =
-            ITEMS.registerItem("npc_dm_orlanda",
-                    p -> new NpcSpawnerItem(NpcType.DM_ORLANDA, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_NECOOKIE =
-            ITEMS.registerItem("npc_necookie",
-                    p -> new NpcSpawnerItem(NpcType.NECOOKIE, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_SIR_BOOKMARK =
-            ITEMS.registerItem("npc_sir_bookmark",
-                    p -> new NpcSpawnerItem(NpcType.SIR_BOOKMARK, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT =
-            ITEMS.registerItem("npc_student",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT, p.stacksTo(16)));
-
-    // ── Sim building faculty spawners (npc_prof_* — tab-complete groups them) ──
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_INSTRUCTOR_DAVID =
-            ITEMS.registerItem("npc_prof_instructor_david",
-                    p -> new NpcSpawnerItem(NpcType.PROF_INSTRUCTOR_DAVID, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PRINCIPAL_BROWN =
-            ITEMS.registerItem("npc_prof_principal_brown",
-                    p -> new NpcSpawnerItem(NpcType.PROF_PRINCIPAL_BROWN, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_BALDWIN =
-            ITEMS.registerItem("npc_prof_professor_baldwin",
-                    p -> new NpcSpawnerItem(NpcType.PROF_PROFESSOR_BALDWIN, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_KEVIN =
-            ITEMS.registerItem("npc_prof_professor_kevin",
-                    p -> new NpcSpawnerItem(NpcType.PROF_PROFESSOR_KEVIN, p.stacksTo(16)));
-
-    // ── Sim building student spawners (npc_student_* — tab-complete groups them) ──
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_GOLDY =
-            ITEMS.registerItem("npc_student_goldy",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_GOLDY, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_HARVEY =
-            ITEMS.registerItem("npc_student_harvey",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_HARVEY, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_JENNY =
-            ITEMS.registerItem("npc_student_jenny",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_JENNY, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KAEFLA =
-            ITEMS.registerItem("npc_student_kaefla",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_KAEFLA, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KARL =
-            ITEMS.registerItem("npc_student_karl",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_KARL, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KATH =
-            ITEMS.registerItem("npc_student_kath",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_KATH, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KELLY =
-            ITEMS.registerItem("npc_student_kelly",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_KELLY, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NATH =
-            ITEMS.registerItem("npc_student_nath",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_NATH, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NECOOKIE =
-            ITEMS.registerItem("npc_student_necookie",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_NECOOKIE, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NELL =
-            ITEMS.registerItem("npc_student_nell",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_NELL, p.stacksTo(16)));
-
-    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_PRINCESS =
-            ITEMS.registerItem("npc_student_princess",
-                    p -> new NpcSpawnerItem(NpcType.STUDENT_PRINCESS, p.stacksTo(16)));
+    // ── NPC spawners (all 24) — see ModItemsNpcSpawners ──────────────────────
+    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_REYES = ModItemsNpcSpawners.NPC_SGT_REYES;
+    public static final DeferredItem<NpcSpawnerItem> NPC_SGT_SANTOS = ModItemsNpcSpawners.NPC_SGT_SANTOS;
+    public static final DeferredItem<NpcSpawnerItem> NPC_OFFICER_CRUZ = ModItemsNpcSpawners.NPC_OFFICER_CRUZ;
+    public static final DeferredItem<NpcSpawnerItem> NPC_CAPT_MORFE = ModItemsNpcSpawners.NPC_CAPT_MORFE;
+    public static final DeferredItem<NpcSpawnerItem> NPC_SECURITY_TUAZON = ModItemsNpcSpawners.NPC_SECURITY_TUAZON;
+    public static final DeferredItem<NpcSpawnerItem> NPC_DM_ORLANDA = ModItemsNpcSpawners.NPC_DM_ORLANDA;
+    public static final DeferredItem<NpcSpawnerItem> NPC_NECOOKIE = ModItemsNpcSpawners.NPC_NECOOKIE;
+    public static final DeferredItem<NpcSpawnerItem> NPC_SIR_BOOKMARK = ModItemsNpcSpawners.NPC_SIR_BOOKMARK;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT = ModItemsNpcSpawners.NPC_STUDENT;
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_INSTRUCTOR_DAVID = ModItemsNpcSpawners.NPC_PROF_INSTRUCTOR_DAVID;
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PRINCIPAL_BROWN = ModItemsNpcSpawners.NPC_PROF_PRINCIPAL_BROWN;
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_BALDWIN = ModItemsNpcSpawners.NPC_PROF_PROFESSOR_BALDWIN;
+    public static final DeferredItem<NpcSpawnerItem> NPC_PROF_PROFESSOR_KEVIN = ModItemsNpcSpawners.NPC_PROF_PROFESSOR_KEVIN;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_GOLDY = ModItemsNpcSpawners.NPC_STUDENT_GOLDY;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_HARVEY = ModItemsNpcSpawners.NPC_STUDENT_HARVEY;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_JENNY = ModItemsNpcSpawners.NPC_STUDENT_JENNY;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KAEFLA = ModItemsNpcSpawners.NPC_STUDENT_KAEFLA;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KARL = ModItemsNpcSpawners.NPC_STUDENT_KARL;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KATH = ModItemsNpcSpawners.NPC_STUDENT_KATH;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_KELLY = ModItemsNpcSpawners.NPC_STUDENT_KELLY;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NATH = ModItemsNpcSpawners.NPC_STUDENT_NATH;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NECOOKIE = ModItemsNpcSpawners.NPC_STUDENT_NECOOKIE;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NELL = ModItemsNpcSpawners.NPC_STUDENT_NELL;
+    public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_PRINCESS = ModItemsNpcSpawners.NPC_STUDENT_PRINCESS;
 
     /** Example block item registration. */
     public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
