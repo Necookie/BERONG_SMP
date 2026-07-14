@@ -202,7 +202,7 @@ public final class ModBlocks {
     public static final DeferredBlock<ChefsPrepDrawersBlock> CHEFS_PREP_DRAWERS = ModBlocksHazardsSchoolKitchen.CHEFS_PREP_DRAWERS;
     public static final DeferredBlock<CulinaryFridgeBlock> CULINARY_FRIDGE = ModBlocksHazardsSchoolKitchen.CULINARY_FRIDGE;
     public static final DeferredBlock<StudentLabMicrowaveBlock> STUDENT_LAB_MICROWAVE = ModBlocksHazardsSchoolKitchen.STUDENT_LAB_MICROWAVE;
-    public static final DeferredBlock<CorrodedGasLineJointBlock> CORRODED_GAS_LINE_JOINT = ModBlocksHazardsSchoolKitchen.CORRODED_GAS_LINE_JOINT;
+    public static final DeferredBlock<SimpleHazardFacingBlock> CORRODED_GAS_LINE_JOINT = ModBlocksHazardsSchoolKitchen.CORRODED_GAS_LINE_JOINT;
     public static final DeferredBlock<GasRangeStuckBurnerBlock> GAS_RANGE_STUCK_BURNER = ModBlocksHazardsSchoolKitchen.GAS_RANGE_STUCK_BURNER;
     public static final DeferredBlock<CommercialStandMixerBlock> COMMERCIAL_STAND_MIXER = ModBlocksHazardsSchoolKitchen.COMMERCIAL_STAND_MIXER;
     public static final DeferredBlock<GasDeckOvenBlock> GAS_DECK_OVEN = ModBlocksHazardsSchoolKitchen.GAS_DECK_OVEN;
@@ -310,12 +310,12 @@ public final class ModBlocks {
     public static final DeferredBlock<OfficeSupplyCabinetBlock> OFFICE_SUPPLY_CABINET = ModBlocksOffice.OFFICE_SUPPLY_CABINET;
     public static final DeferredBlock<JammedPaperShredderBlock> JAMMED_PAPER_SHREDDER = ModBlocksOffice.JAMMED_PAPER_SHREDDER;
     public static final DeferredBlock<OverheatedNetworkCabinetBlock> OVERHEATED_NETWORK_CABINET = ModBlocksOffice.OVERHEATED_NETWORK_CABINET;
-    public static final DeferredBlock<EbikeChargingStationBlock> EBIKE_CHARGING_STATION = ModBlocksOffice.EBIKE_CHARGING_STATION;
+    public static final DeferredBlock<SimpleHazardFacingBlock> EBIKE_CHARGING_STATION = ModBlocksOffice.EBIKE_CHARGING_STATION;
     public static final DeferredBlock<FailingFluorescentBallastBlock> FAILING_FLUORESCENT_BALLAST = ModBlocksOffice.FAILING_FLUORESCENT_BALLAST;
-    public static final DeferredBlock<DryAquariumHeaterBlock> DRY_AQUARIUM_HEATER = ModBlocksOffice.DRY_AQUARIUM_HEATER;
+    public static final DeferredBlock<SimpleHazardFacingBlock> DRY_AQUARIUM_HEATER = ModBlocksOffice.DRY_AQUARIUM_HEATER;
     public static final DeferredBlock<UnattendedMugWarmerBlock> UNATTENDED_MUG_WARMER = ModBlocksOffice.UNATTENDED_MUG_WARMER;
-    public static final DeferredBlock<DustyCrtMonitorBlock> DUSTY_CRT_MONITOR = ModBlocksOffice.DUSTY_CRT_MONITOR;
-    public static final DeferredBlock<RodentChewedWiringBlock> RODENT_CHEWED_WIRING = ModBlocksOffice.RODENT_CHEWED_WIRING;
+    public static final DeferredBlock<SimpleHazardFacingBlock> DUSTY_CRT_MONITOR = ModBlocksOffice.DUSTY_CRT_MONITOR;
+    public static final DeferredBlock<SimpleHazardFacingBlock> RODENT_CHEWED_WIRING = ModBlocksOffice.RODENT_CHEWED_WIRING;
     public static final DeferredBlock<OverheatingCctvDvrBlock> OVERHEATING_CCTV_DVR = ModBlocksOffice.OVERHEATING_CCTV_DVR;
     public static final DeferredBlock<FaultyParolLanternBlock> FAULTY_PAROL_LANTERN = ModBlocksOffice.FAULTY_PAROL_LANTERN;
 
@@ -335,11 +335,11 @@ public final class ModBlocks {
     public static final DeferredBlock<UnattendedSolderingIronBlock> UNATTENDED_SOLDERING_IRON = ModBlocksLaboratory.UNATTENDED_SOLDERING_IRON;
     public static final DeferredBlock<UnshieldedTestLaserBlock> UNSHIELDED_TEST_LASER = ModBlocksLaboratory.UNSHIELDED_TEST_LASER;
     public static final DeferredBlock<LeakingOxygenCylinderBlock> LEAKING_OXYGEN_CYLINDER = ModBlocksLaboratory.LEAKING_OXYGEN_CYLINDER;
-    public static final DeferredBlock<ShortedBenchSupplyBlock> SHORTED_BENCH_SUPPLY = ModBlocksLaboratory.SHORTED_BENCH_SUPPLY;
-    public static final DeferredBlock<OverheatedVacuumPumpBlock> OVERHEATED_VACUUM_PUMP = ModBlocksLaboratory.OVERHEATED_VACUUM_PUMP;
+    public static final DeferredBlock<SimpleHazardFacingBlock> SHORTED_BENCH_SUPPLY = ModBlocksLaboratory.SHORTED_BENCH_SUPPLY;
+    public static final DeferredBlock<SimpleHazardBlock> OVERHEATED_VACUUM_PUMP = ModBlocksLaboratory.OVERHEATED_VACUUM_PUMP;
     public static final DeferredBlock<StuckEnvironmentChamberBlock> STUCK_ENVIRONMENT_CHAMBER = ModBlocksLaboratory.STUCK_ENVIRONMENT_CHAMBER;
     public static final DeferredBlock<SolventDryingOvenBlock> SOLVENT_DRYING_OVEN = ModBlocksLaboratory.SOLVENT_DRYING_OVEN;
-    public static final DeferredBlock<FaultyDehumidifierBlock> FAULTY_DEHUMIDIFIER = ModBlocksLaboratory.FAULTY_DEHUMIDIFIER;
+    public static final DeferredBlock<SimpleHazardFacingBlock> FAULTY_DEHUMIDIFIER = ModBlocksLaboratory.FAULTY_DEHUMIDIFIER;
 
     private ModBlocks() {}
 

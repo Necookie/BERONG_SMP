@@ -262,9 +262,9 @@ final class ModBlocksHazardsSchoolKitchen {
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
 
-    /** Corroded Gas Line Joint — see {@link CorrodedGasLineJointBlock}. */
-    static final DeferredBlock<CorrodedGasLineJointBlock> CORRODED_GAS_LINE_JOINT = ModBlocks.BLOCKS.registerBlock(
-            "corroded_gas_line_joint", CorrodedGasLineJointBlock::new,
+    /** Corroded Gas Line Joint — data-driven via {@link HazardSpecs#CORRODED_GAS_LINE_JOINT} (no dedicated class, see {@link SimpleHazardFacingBlock}). */
+    static final DeferredBlock<SimpleHazardFacingBlock> CORRODED_GAS_LINE_JOINT = ModBlocks.BLOCKS.registerBlock(
+            "corroded_gas_line_joint", p -> new SimpleHazardFacingBlock(p, HazardSpecs.CORRODED_GAS_LINE_JOINT),
             () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
                     .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion());
 

@@ -122,15 +122,15 @@ final class ModBlocksLaboratory {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
-    /** Shorted bench DC power supply — see {@link ShortedBenchSupplyBlock}. */
-    static final DeferredBlock<ShortedBenchSupplyBlock> SHORTED_BENCH_SUPPLY = ModBlocks.BLOCKS.registerBlock(
-            "shorted_bench_supply", ShortedBenchSupplyBlock::new,
+    /** Shorted bench DC power supply — data-driven via {@link HazardSpecs#SHORTED_BENCH_SUPPLY} (see {@link SimpleHazardFacingBlock}). */
+    static final DeferredBlock<SimpleHazardFacingBlock> SHORTED_BENCH_SUPPLY = ModBlocks.BLOCKS.registerBlock(
+            "shorted_bench_supply", p -> new SimpleHazardFacingBlock(p, HazardSpecs.SHORTED_BENCH_SUPPLY),
             () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                     .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
 
-    /** Vacuum pump running on degraded oil, belt slipping — see {@link OverheatedVacuumPumpBlock}. */
-    static final DeferredBlock<OverheatedVacuumPumpBlock> OVERHEATED_VACUUM_PUMP = ModBlocks.BLOCKS.registerBlock(
-            "overheated_vacuum_pump", OverheatedVacuumPumpBlock::new,
+    /** Vacuum pump running on degraded oil, belt slipping — data-driven via {@link HazardSpecs#OVERHEATED_VACUUM_PUMP} (see {@link SimpleHazardBlock}). */
+    static final DeferredBlock<SimpleHazardBlock> OVERHEATED_VACUUM_PUMP = ModBlocks.BLOCKS.registerBlock(
+            "overheated_vacuum_pump", p -> new SimpleHazardBlock(p, HazardSpecs.OVERHEATED_VACUUM_PUMP),
             () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
                     .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
 
@@ -146,9 +146,9 @@ final class ModBlocksLaboratory {
             () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                     .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
 
-    /** Dehumidifier with an iced coil, compressor short-cycling — see {@link FaultyDehumidifierBlock}. */
-    static final DeferredBlock<FaultyDehumidifierBlock> FAULTY_DEHUMIDIFIER = ModBlocks.BLOCKS.registerBlock(
-            "faulty_dehumidifier", FaultyDehumidifierBlock::new,
+    /** Dehumidifier with an iced coil, compressor short-cycling — data-driven via {@link HazardSpecs#FAULTY_DEHUMIDIFIER} (see {@link SimpleHazardFacingBlock}). */
+    static final DeferredBlock<SimpleHazardFacingBlock> FAULTY_DEHUMIDIFIER = ModBlocks.BLOCKS.registerBlock(
+            "faulty_dehumidifier", p -> new SimpleHazardFacingBlock(p, HazardSpecs.FAULTY_DEHUMIDIFIER),
             () -> Block.Properties.of().mapColor(MapColor.SNOW)
                     .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
 }
