@@ -157,364 +157,62 @@ public final class ModBlocks {
     public static final DeferredBlock<CeilingFanBlock> CEILING_FAN = ModBlocksFurnitureClassroom.CEILING_FAN;
     public static final DeferredBlock<LightBulbBlock> LIGHT_BULB = ModBlocksFurnitureClassroom.LIGHT_BULB;
 
-    /** Plastic waste bin — emits smoke when has_vape=true (hazardous). */
-    public static final DeferredBlock<PlasticTrashBinBlock> PLASTIC_TRASH_BIN = BLOCKS.registerBlock(
-            "plastic_trash_bin", PlasticTrashBinBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.QUARTZ)
-                    .strength(0.5f, 1.0f).sound(SoundType.STONE).noOcclusion());
-
-    /** Overloaded daisy-chain extension cord — electric sparks when overloaded=true. */
-    public static final DeferredBlock<DaisyChainExtensionBlock> DAISY_CHAIN_EXTENSION = BLOCKS.registerBlock(
-            "daisy_chain_extension", DaisyChainExtensionBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.2f, 0.5f).sound(SoundType.STONE).noOcclusion());
-
-    /** Floor sawdust accumulation layer — emits ash particles at accumulation >= 3. */
-    public static final DeferredBlock<WoodshopSawdustLayerBlock> WOODSHOP_SAWDUST_LAYER = BLOCKS.registerBlock(
-            "woodshop_sawdust_layer", WoodshopSawdustLayerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SAND)
-                    .strength(0.1f, 0.1f).sound(SoundType.SAND).noOcclusion());
-
-    /** Stage/theatre spotlight — overheating housing emits flame and smoke when hazardous. */
-    public static final DeferredBlock<StageSpotlightBlock> STAGE_SPOTLIGHT = BLOCKS.registerBlock(
-            "stage_spotlight", StageSpotlightBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
-
-    /** Stack of flammable archive document boxes — fire proximity raises hazard. */
-    public static final DeferredBlock<ArchiveBoxStackBlock> ARCHIVE_BOX_STACK = BLOCKS.registerBlock(
-            "archive_box_stack", ArchiveBoxStackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BROWN)
-                    .strength(1.0f, 1.0f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Desktop PC tower with dust-clogged vents — overheats and emits smoke when hazardous. */
-    public static final DeferredBlock<DustChokedPcBlock> DUST_CHOKED_PC = BLOCKS.registerBlock(
-            "dust_choked_pc", DustChokedPcBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Rolling Chromebook/laptop charging cart — overloaded outlets spark when hazardous. */
-    public static final DeferredBlock<ChargingCartBlock> CHARGING_CART = BLOCKS.registerBlock(
-            "charging_cart", ChargingCartBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
-
-    /** Frayed AV/console wire on the floor — exposed copper arcs blue sparks when hazardous. */
-    public static final DeferredBlock<FrayedConsoleWireBlock> FRAYED_CONSOLE_WIRE = BLOCKS.registerBlock(
-            "frayed_console_wire", FrayedConsoleWireBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Vending machine with shorted compressor — smokes from back vents when hazardous. */
-    public static final DeferredBlock<MalfunctioningVendingBlock> MALFUNCTIONING_VENDING = BLOCKS.registerBlock(
-            "malfunctioning_vending", MalfunctioningVendingBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Ceiling-mounted projector with failed cooling fan — overheats and smokes. */
-    public static final DeferredBlock<CeilingProjectorBlock> CEILING_PROJECTOR = BLOCKS.registerBlock(
-            "ceiling_projector", CeilingProjectorBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
-
-    /** Swollen Li-ion phone battery left on desk — thermal runaway risk; cyan soul-flame gas when hazardous. */
-    public static final DeferredBlock<SwollenPhoneBatteryBlock> SWOLLEN_PHONE_BATTERY = BLOCKS.registerBlock(
-            "swollen_phone_battery", SwollenPhoneBatteryBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(0.5f, 0.5f).sound(SoundType.METAL).noOcclusion());
-
-    /** Damaged LiPo battery pack (drone/RC) — punctured cells off-gas smoke when hazardous. */
-    public static final DeferredBlock<DamagedLipoPackBlock> DAMAGED_LIPO_PACK = BLOCKS.registerBlock(
-            "damaged_lipo_pack", DamagedLipoPackBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(0.5f, 0.5f).sound(SoundType.WOOL).noOcclusion());
-
-    /** Iron locker with a vape device inside — sparks and smoke leak from vent slot when hazardous. */
-    public static final DeferredBlock<VapeInIronLockerBlock> VAPE_IN_IRON_LOCKER = BLOCKS.registerBlock(
-            "vape_in_iron_locker", VapeInIronLockerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** PA/public-address backup amp rack — faulty capacitors spark and glow when hazardous. */
-    public static final DeferredBlock<PaSystemBackupBlock> PA_SYSTEM_BACKUP = BLOCKS.registerBlock(
-            "pa_system_backup", PaSystemBackupBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
-
-    /** Smartboard power inverter — roof leak drips on live electronics when hazardous. */
-    public static final DeferredBlock<SmartboardInverterBlock> SMARTBOARD_INVERTER = BLOCKS.registerBlock(
-            "smartboard_inverter", SmartboardInverterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Stove with a grease pan left unattended — grease fire erupts when hazardous. */
-    public static final DeferredBlock<UnattendedGreasePanBlock> UNATTENDED_GREASE_PAN = BLOCKS.registerBlock(
-            "unattended_grease_pan", UnattendedGreasePanBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
-
-    /** Kitchen range hood with clogged grease filters — backflow smoke when hazardous. */
-    public static final DeferredBlock<GreaseCloggedHoodBlock> GREASE_CLOGGED_HOOD = BLOCKS.registerBlock(
-            "grease_clogged_hood", GreaseCloggedHoodBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Kitchen waste bin with oil-soaked contaminated rags — self-heating rags emit steam when hazardous. */
-    public static final DeferredBlock<ContaminatedKitchenBinBlock> CONTAMINATED_KITCHEN_BIN = BLOCKS.registerBlock(
-            "contaminated_kitchen_bin", ContaminatedKitchenBinBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GREEN)
-                    .strength(1.0f, 1.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Panini press with jammed lid and burning food — smoking when hazardous. */
-    public static final DeferredBlock<JammedPaniniPressBlock> JAMMED_PANINI_PRESS = BLOCKS.registerBlock(
-            "jammed_panini_press", JammedPaniniPressBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Commercial deep fryer — overheated oil ignites and erupts smoke/flame when hazardous. */
-    public static final DeferredBlock<CommercialDeepFryerBlock> COMMERCIAL_DEEP_FRYER = BLOCKS.registerBlock(
-            "commercial_deep_fryer", CommercialDeepFryerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(3.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
-
-    /** Overloaded Microwave (Electrical Hazard) — see {@link OverloadedMicrowaveBlock}. */
-    public static final DeferredBlock<OverloadedMicrowaveBlock> OVERLOADED_MICROWAVE = BLOCKS.registerBlock(
-            "overloaded_microwave", OverloadedMicrowaveBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
-
-    /** Bunsen Burner Station (Open Flame Hazard) — see {@link BunsenBurnerStationBlock}. */
-    public static final DeferredBlock<BunsenBurnerStationBlock> BUNSEN_BURNER_STATION = BLOCKS.registerBlock(
-            "bunsen_burner_station", BunsenBurnerStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 9 : 0));
-
-    /** Reagent Storage Shelf (Chemical Hazard) — see {@link ReagentStorageShelfBlock}. */
-    public static final DeferredBlock<ReagentStorageShelfBlock> REAGENT_STORAGE_SHELF = BLOCKS.registerBlock(
-            "reagent_storage_shelf", ReagentStorageShelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.0f, 2.0f).sound(SoundType.GLASS).noOcclusion());
-
-    /** Overloaded Breaker Panel (Electrical Hazard) — see {@link OverloadedBreakerPanelBlock}. */
-    public static final DeferredBlock<OverloadedBreakerPanelBlock> OVERLOADED_BREAKER_PANEL = BLOCKS.registerBlock(
-            "overloaded_breaker_panel", OverloadedBreakerPanelBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
-
-    /** Overheating Wall Aircon (Electrical Hazard) — see {@link OverheatingWallAirconBlock}. */
-    public static final DeferredBlock<OverheatingWallAirconBlock> OVERHEATING_WALL_AIRCON = BLOCKS.registerBlock(
-            "overheating_wall_aircon", OverheatingWallAirconBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Jammed Laser Printer (Overheat Hazard) — see {@link JammedLaserPrinterBlock}. */
-    public static final DeferredBlock<JammedLaserPrinterBlock> JAMMED_LASER_PRINTER = BLOCKS.registerBlock(
-            "jammed_laser_printer", JammedLaserPrinterBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Unattended Shrine Candle (Open Flame Hazard) — see {@link UnattendedShrineCandleBlock}. */
-    public static final DeferredBlock<UnattendedShrineCandleBlock> UNATTENDED_SHRINE_CANDLE = BLOCKS.registerBlock(
-            "unattended_shrine_candle", UnattendedShrineCandleBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_RED)
-                    .strength(0.3f, 0.5f).sound(SoundType.WOOL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
-
-    /** Leaking Gas Valve (Kitchen Gas Hazard) — see {@link LeakingGasValveBlock}. */
-    public static final DeferredBlock<LeakingGasValveBlock> LEAKING_GAS_VALVE = BLOCKS.registerBlock(
-            "leaking_gas_valve", LeakingGasValveBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Alcohol Dispenser Station (Flammable Liquid Hazard) — see {@link AlcoholDispenserStationBlock}. */
-    public static final DeferredBlock<AlcoholDispenserStationBlock> ALCOHOL_DISPENSER_STATION = BLOCKS.registerBlock(
-            "alcohol_dispenser_station", AlcoholDispenserStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 2 : 0));
-
-    /** Clogged Exhaust Fan (Dust Overheat Hazard) — see {@link CloggedExhaustFanBlock}. */
-    public static final DeferredBlock<CloggedExhaustFanBlock> CLOGGED_EXHAUST_FAN = BLOCKS.registerBlock(
-            "clogged_exhaust_fan", CloggedExhaustFanBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Overloaded Wall Outlet — see {@link OverloadedWallOutletBlock}. */
-    public static final DeferredBlock<OverloadedWallOutletBlock> OVERLOADED_WALL_OUTLET = BLOCKS.registerBlock(
-            "overloaded_wall_outlet", OverloadedWallOutletBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(0.5f, 2.0f).sound(SoundType.STONE).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Jammed Circuit Breaker Box — see {@link JammedCircuitBreakerBlock}. */
-    public static final DeferredBlock<JammedCircuitBreakerBlock> JAMMED_CIRCUIT_BREAKER = BLOCKS.registerBlock(
-            "jammed_circuit_breaker", JammedCircuitBreakerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 5 : 0));
-
-    /** Unsealed Solvent Shelf — see {@link UnsealedSolventShelfBlock}. */
-    public static final DeferredBlock<UnsealedSolventShelfBlock> UNSEALED_SOLVENT_SHELF = BLOCKS.registerBlock(
-            "unsealed_solvent_shelf", UnsealedSolventShelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion());
-
-    /** Unattended Welding Station — see {@link UnattendedWeldingStationBlock}. */
-    public static final DeferredBlock<UnattendedWeldingStationBlock> UNATTENDED_WELDING_STATION = BLOCKS.registerBlock(
-            "unattended_welding_station", UnattendedWeldingStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 6.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
-
-    /** Leaking Butane Canister Stove — see {@link LeakingButaneCanisterStoveBlock}. */
-    public static final DeferredBlock<LeakingButaneCanisterStoveBlock> LEAKING_BUTANE_CANISTER_STOVE = BLOCKS.registerBlock(
-            "leaking_butane_canister_stove", LeakingButaneCanisterStoveBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
-                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
-
-    /** Chef's Prep Table — see {@link ChefsPrepDrawersBlock}. */
-    public static final DeferredBlock<ChefsPrepDrawersBlock> CHEFS_PREP_DRAWERS = BLOCKS.registerBlock(
-            "chefs_prep_drawers", ChefsPrepDrawersBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Culinary Lab Refrigerator — see {@link CulinaryFridgeBlock}. */
-    public static final DeferredBlock<CulinaryFridgeBlock> CULINARY_FRIDGE = BLOCKS.registerBlock(
-            "culinary_fridge", CulinaryFridgeBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Student Lab Microwave — see {@link StudentLabMicrowaveBlock}. */
-    public static final DeferredBlock<StudentLabMicrowaveBlock> STUDENT_LAB_MICROWAVE = BLOCKS.registerBlock(
-            "student_lab_microwave", StudentLabMicrowaveBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.SNOW)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Corroded Gas Line Joint — see {@link CorrodedGasLineJointBlock}. */
-    public static final DeferredBlock<CorrodedGasLineJointBlock> CORRODED_GAS_LINE_JOINT = BLOCKS.registerBlock(
-            "corroded_gas_line_joint", CorrodedGasLineJointBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.0f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Gas Range, Stuck Burner — see {@link GasRangeStuckBurnerBlock}. */
-    public static final DeferredBlock<GasRangeStuckBurnerBlock> GAS_RANGE_STUCK_BURNER = BLOCKS.registerBlock(
-            "gas_range_stuck_burner", GasRangeStuckBurnerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 11 : 0));
-
-    /** Commercial Stand Mixer — see {@link CommercialStandMixerBlock}. */
-    public static final DeferredBlock<CommercialStandMixerBlock> COMMERCIAL_STAND_MIXER = BLOCKS.registerBlock(
-            "commercial_stand_mixer", CommercialStandMixerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Gas Deck Oven — see {@link GasDeckOvenBlock}. */
-    public static final DeferredBlock<GasDeckOvenBlock> GAS_DECK_OVEN = BLOCKS.registerBlock(
-            "gas_deck_oven", GasDeckOvenBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 10 : 0));
-
-    /** Induction Cooktop — see {@link InductionCooktopStationBlock}. */
-    public static final DeferredBlock<InductionCooktopStationBlock> INDUCTION_COOKTOP_STATION = BLOCKS.registerBlock(
-            "induction_cooktop_station", InductionCooktopStationBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.0f, 2.0f).sound(SoundType.STONE).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
-
-    /** Rice Cooker Bank — see {@link RiceCookerBankBlock}. */
-    public static final DeferredBlock<RiceCookerBankBlock> RICE_COOKER_BANK = BLOCKS.registerBlock(
-            "rice_cooker_bank", RiceCookerBankBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 3 : 0));
-
-    /** Espresso Machine — see {@link EspressoMachineBlock}. */
-    public static final DeferredBlock<EspressoMachineBlock> ESPRESSO_MACHINE = BLOCKS.registerBlock(
-            "espresso_machine", EspressoMachineBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_BLACK)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Hot Water Urn — see {@link HotWaterUrnBlock}. */
-    public static final DeferredBlock<HotWaterUrnBlock> HOT_WATER_URN = BLOCKS.registerBlock(
-            "hot_water_urn", HotWaterUrnBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Countertop Toaster Oven — see {@link ToasterOvenCrumbBlock}. */
-    public static final DeferredBlock<ToasterOvenCrumbBlock> TOASTER_OVEN_CRUMB = BLOCKS.registerBlock(
-            "toaster_oven_crumb", ToasterOvenCrumbBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 9 : 0));
-
-    /** Dry Goods Pantry Shelf — see {@link DryGoodsPantryShelfBlock}. */
-    public static final DeferredBlock<DryGoodsPantryShelfBlock> DRY_GOODS_PANTRY_SHELF = BLOCKS.registerBlock(
-            "dry_goods_pantry_shelf", DryGoodsPantryShelfBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.WOOD)
-                    .strength(1.5f, 3.0f).sound(SoundType.WOOD).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 4 : 0));
-
-    /** Kitchen Exhaust Duct — see {@link GreaseDuctRunBlock}. */
-    public static final DeferredBlock<GreaseDuctRunBlock> GREASE_DUCT_RUN = BLOCKS.registerBlock(
-            "grease_duct_run", GreaseDuctRunBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Dish Sanitizer — see {@link CommercialDishSanitizerBlock}. */
-    public static final DeferredBlock<CommercialDishSanitizerBlock> COMMERCIAL_DISH_SANITIZER = BLOCKS.registerBlock(
-            "commercial_dish_sanitizer", CommercialDishSanitizerBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** Garbage Disposal Unit — see {@link GarbageDisposalUnitBlock}. */
-    public static final DeferredBlock<GarbageDisposalUnitBlock> GARBAGE_DISPOSAL_UNIT = BLOCKS.registerBlock(
-            "garbage_disposal_unit", GarbageDisposalUnitBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion());
-
-    /** UV Knife Sterilizer — see {@link KnifeSterilizerCabinetBlock}. */
-    public static final DeferredBlock<KnifeSterilizerCabinetBlock> KNIFE_STERILIZER_CABINET = BLOCKS.registerBlock(
-            "knife_sterilizer_cabinet", KnifeSterilizerCabinetBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.0f, 2.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 6 : 0));
-
-    /** Chafing Steam Table — see {@link SternoSteamTableBlock}. */
-    public static final DeferredBlock<SternoSteamTableBlock> STERNO_STEAM_TABLE = BLOCKS.registerBlock(
-            "sterno_steam_table", SternoSteamTableBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.METAL)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 8 : 0));
-
-    /** Electric Convection Oven — see {@link ConvectionOvenBlock}. */
-    public static final DeferredBlock<ConvectionOvenBlock> CONVECTION_OVEN = BLOCKS.registerBlock(
-            "convection_oven", ConvectionOvenBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(2.0f, 4.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 7 : 0));
-
-    /** Lechon Rotisserie — see {@link LechonRotisserieSpitBlock}. */
-    public static final DeferredBlock<LechonRotisserieSpitBlock> LECHON_ROTISSERIE_SPIT = BLOCKS.registerBlock(
-            "lechon_rotisserie_spit", LechonRotisserieSpitBlock::new,
-            () -> Block.Properties.of().mapColor(MapColor.COLOR_GRAY)
-                    .strength(1.5f, 3.0f).sound(SoundType.METAL).noOcclusion()
-                    .lightLevel(state -> state.getValue(HazardBlock.HAZARDOUS) ? 12 : 0));
+    // ── School/kitchen hazard props (55) — see ModBlocksHazardsSchoolKitchen ─
+    public static final DeferredBlock<PlasticTrashBinBlock> PLASTIC_TRASH_BIN = ModBlocksHazardsSchoolKitchen.PLASTIC_TRASH_BIN;
+    public static final DeferredBlock<DaisyChainExtensionBlock> DAISY_CHAIN_EXTENSION = ModBlocksHazardsSchoolKitchen.DAISY_CHAIN_EXTENSION;
+    public static final DeferredBlock<WoodshopSawdustLayerBlock> WOODSHOP_SAWDUST_LAYER = ModBlocksHazardsSchoolKitchen.WOODSHOP_SAWDUST_LAYER;
+    public static final DeferredBlock<StageSpotlightBlock> STAGE_SPOTLIGHT = ModBlocksHazardsSchoolKitchen.STAGE_SPOTLIGHT;
+    public static final DeferredBlock<ArchiveBoxStackBlock> ARCHIVE_BOX_STACK = ModBlocksHazardsSchoolKitchen.ARCHIVE_BOX_STACK;
+    public static final DeferredBlock<DustChokedPcBlock> DUST_CHOKED_PC = ModBlocksHazardsSchoolKitchen.DUST_CHOKED_PC;
+    public static final DeferredBlock<ChargingCartBlock> CHARGING_CART = ModBlocksHazardsSchoolKitchen.CHARGING_CART;
+    public static final DeferredBlock<FrayedConsoleWireBlock> FRAYED_CONSOLE_WIRE = ModBlocksHazardsSchoolKitchen.FRAYED_CONSOLE_WIRE;
+    public static final DeferredBlock<MalfunctioningVendingBlock> MALFUNCTIONING_VENDING = ModBlocksHazardsSchoolKitchen.MALFUNCTIONING_VENDING;
+    public static final DeferredBlock<CeilingProjectorBlock> CEILING_PROJECTOR = ModBlocksHazardsSchoolKitchen.CEILING_PROJECTOR;
+    public static final DeferredBlock<SwollenPhoneBatteryBlock> SWOLLEN_PHONE_BATTERY = ModBlocksHazardsSchoolKitchen.SWOLLEN_PHONE_BATTERY;
+    public static final DeferredBlock<DamagedLipoPackBlock> DAMAGED_LIPO_PACK = ModBlocksHazardsSchoolKitchen.DAMAGED_LIPO_PACK;
+    public static final DeferredBlock<VapeInIronLockerBlock> VAPE_IN_IRON_LOCKER = ModBlocksHazardsSchoolKitchen.VAPE_IN_IRON_LOCKER;
+    public static final DeferredBlock<PaSystemBackupBlock> PA_SYSTEM_BACKUP = ModBlocksHazardsSchoolKitchen.PA_SYSTEM_BACKUP;
+    public static final DeferredBlock<SmartboardInverterBlock> SMARTBOARD_INVERTER = ModBlocksHazardsSchoolKitchen.SMARTBOARD_INVERTER;
+    public static final DeferredBlock<UnattendedGreasePanBlock> UNATTENDED_GREASE_PAN = ModBlocksHazardsSchoolKitchen.UNATTENDED_GREASE_PAN;
+    public static final DeferredBlock<GreaseCloggedHoodBlock> GREASE_CLOGGED_HOOD = ModBlocksHazardsSchoolKitchen.GREASE_CLOGGED_HOOD;
+    public static final DeferredBlock<ContaminatedKitchenBinBlock> CONTAMINATED_KITCHEN_BIN = ModBlocksHazardsSchoolKitchen.CONTAMINATED_KITCHEN_BIN;
+    public static final DeferredBlock<JammedPaniniPressBlock> JAMMED_PANINI_PRESS = ModBlocksHazardsSchoolKitchen.JAMMED_PANINI_PRESS;
+    public static final DeferredBlock<CommercialDeepFryerBlock> COMMERCIAL_DEEP_FRYER = ModBlocksHazardsSchoolKitchen.COMMERCIAL_DEEP_FRYER;
+    public static final DeferredBlock<OverloadedMicrowaveBlock> OVERLOADED_MICROWAVE = ModBlocksHazardsSchoolKitchen.OVERLOADED_MICROWAVE;
+    public static final DeferredBlock<BunsenBurnerStationBlock> BUNSEN_BURNER_STATION = ModBlocksHazardsSchoolKitchen.BUNSEN_BURNER_STATION;
+    public static final DeferredBlock<ReagentStorageShelfBlock> REAGENT_STORAGE_SHELF = ModBlocksHazardsSchoolKitchen.REAGENT_STORAGE_SHELF;
+    public static final DeferredBlock<OverloadedBreakerPanelBlock> OVERLOADED_BREAKER_PANEL = ModBlocksHazardsSchoolKitchen.OVERLOADED_BREAKER_PANEL;
+    public static final DeferredBlock<OverheatingWallAirconBlock> OVERHEATING_WALL_AIRCON = ModBlocksHazardsSchoolKitchen.OVERHEATING_WALL_AIRCON;
+    public static final DeferredBlock<JammedLaserPrinterBlock> JAMMED_LASER_PRINTER = ModBlocksHazardsSchoolKitchen.JAMMED_LASER_PRINTER;
+    public static final DeferredBlock<UnattendedShrineCandleBlock> UNATTENDED_SHRINE_CANDLE = ModBlocksHazardsSchoolKitchen.UNATTENDED_SHRINE_CANDLE;
+    public static final DeferredBlock<LeakingGasValveBlock> LEAKING_GAS_VALVE = ModBlocksHazardsSchoolKitchen.LEAKING_GAS_VALVE;
+    public static final DeferredBlock<AlcoholDispenserStationBlock> ALCOHOL_DISPENSER_STATION = ModBlocksHazardsSchoolKitchen.ALCOHOL_DISPENSER_STATION;
+    public static final DeferredBlock<CloggedExhaustFanBlock> CLOGGED_EXHAUST_FAN = ModBlocksHazardsSchoolKitchen.CLOGGED_EXHAUST_FAN;
+    public static final DeferredBlock<OverloadedWallOutletBlock> OVERLOADED_WALL_OUTLET = ModBlocksHazardsSchoolKitchen.OVERLOADED_WALL_OUTLET;
+    public static final DeferredBlock<JammedCircuitBreakerBlock> JAMMED_CIRCUIT_BREAKER = ModBlocksHazardsSchoolKitchen.JAMMED_CIRCUIT_BREAKER;
+    public static final DeferredBlock<UnsealedSolventShelfBlock> UNSEALED_SOLVENT_SHELF = ModBlocksHazardsSchoolKitchen.UNSEALED_SOLVENT_SHELF;
+    public static final DeferredBlock<UnattendedWeldingStationBlock> UNATTENDED_WELDING_STATION = ModBlocksHazardsSchoolKitchen.UNATTENDED_WELDING_STATION;
+    public static final DeferredBlock<LeakingButaneCanisterStoveBlock> LEAKING_BUTANE_CANISTER_STOVE = ModBlocksHazardsSchoolKitchen.LEAKING_BUTANE_CANISTER_STOVE;
+    public static final DeferredBlock<ChefsPrepDrawersBlock> CHEFS_PREP_DRAWERS = ModBlocksHazardsSchoolKitchen.CHEFS_PREP_DRAWERS;
+    public static final DeferredBlock<CulinaryFridgeBlock> CULINARY_FRIDGE = ModBlocksHazardsSchoolKitchen.CULINARY_FRIDGE;
+    public static final DeferredBlock<StudentLabMicrowaveBlock> STUDENT_LAB_MICROWAVE = ModBlocksHazardsSchoolKitchen.STUDENT_LAB_MICROWAVE;
+    public static final DeferredBlock<CorrodedGasLineJointBlock> CORRODED_GAS_LINE_JOINT = ModBlocksHazardsSchoolKitchen.CORRODED_GAS_LINE_JOINT;
+    public static final DeferredBlock<GasRangeStuckBurnerBlock> GAS_RANGE_STUCK_BURNER = ModBlocksHazardsSchoolKitchen.GAS_RANGE_STUCK_BURNER;
+    public static final DeferredBlock<CommercialStandMixerBlock> COMMERCIAL_STAND_MIXER = ModBlocksHazardsSchoolKitchen.COMMERCIAL_STAND_MIXER;
+    public static final DeferredBlock<GasDeckOvenBlock> GAS_DECK_OVEN = ModBlocksHazardsSchoolKitchen.GAS_DECK_OVEN;
+    public static final DeferredBlock<InductionCooktopStationBlock> INDUCTION_COOKTOP_STATION = ModBlocksHazardsSchoolKitchen.INDUCTION_COOKTOP_STATION;
+    public static final DeferredBlock<RiceCookerBankBlock> RICE_COOKER_BANK = ModBlocksHazardsSchoolKitchen.RICE_COOKER_BANK;
+    public static final DeferredBlock<EspressoMachineBlock> ESPRESSO_MACHINE = ModBlocksHazardsSchoolKitchen.ESPRESSO_MACHINE;
+    public static final DeferredBlock<HotWaterUrnBlock> HOT_WATER_URN = ModBlocksHazardsSchoolKitchen.HOT_WATER_URN;
+    public static final DeferredBlock<ToasterOvenCrumbBlock> TOASTER_OVEN_CRUMB = ModBlocksHazardsSchoolKitchen.TOASTER_OVEN_CRUMB;
+    public static final DeferredBlock<DryGoodsPantryShelfBlock> DRY_GOODS_PANTRY_SHELF = ModBlocksHazardsSchoolKitchen.DRY_GOODS_PANTRY_SHELF;
+    public static final DeferredBlock<GreaseDuctRunBlock> GREASE_DUCT_RUN = ModBlocksHazardsSchoolKitchen.GREASE_DUCT_RUN;
+    public static final DeferredBlock<CommercialDishSanitizerBlock> COMMERCIAL_DISH_SANITIZER = ModBlocksHazardsSchoolKitchen.COMMERCIAL_DISH_SANITIZER;
+    public static final DeferredBlock<GarbageDisposalUnitBlock> GARBAGE_DISPOSAL_UNIT = ModBlocksHazardsSchoolKitchen.GARBAGE_DISPOSAL_UNIT;
+    public static final DeferredBlock<KnifeSterilizerCabinetBlock> KNIFE_STERILIZER_CABINET = ModBlocksHazardsSchoolKitchen.KNIFE_STERILIZER_CABINET;
+    public static final DeferredBlock<SternoSteamTableBlock> STERNO_STEAM_TABLE = ModBlocksHazardsSchoolKitchen.STERNO_STEAM_TABLE;
+    public static final DeferredBlock<ConvectionOvenBlock> CONVECTION_OVEN = ModBlocksHazardsSchoolKitchen.CONVECTION_OVEN;
+    public static final DeferredBlock<LechonRotisserieSpitBlock> LECHON_ROTISSERIE_SPIT = ModBlocksHazardsSchoolKitchen.LECHON_ROTISSERIE_SPIT;
 
     /** Teacher's Desk — see {@link TeachersDeskBlock}. */
     public static final DeferredBlock<TeachersDeskBlock> TEACHERS_DESK = BLOCKS.registerBlock(
