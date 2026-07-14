@@ -78,6 +78,13 @@ public final class CruzRoomManager {
     private static final double GOSTOP_STARTING_LINE_MIN_Z = 46.0;
     private static final double GOSTOP_STARTING_LINE_MAX_Z = 56.0;
     /**
+     * The exact block just inside the pen, right beside Cruz's {@link #STAGING_POS} waiting spot,
+     * where the player should stand to talk to her. Highlighted the same way as
+     * {@link #GREEN_MARKS} so the {@link #GOSTOP_STARTING_LINE_X} barrier reads as "stand on the
+     * green tile" instead of an unexplained invisible wall.
+     */
+    private static final BlockPos GOSTOP_STAGE_MARK = new BlockPos(-102, -33, 51);
+    /**
      * The crouch-tunnel corridor, schem-verified: the three low-ceiling slab lanes sit at X=-106/
      * -107, -110, and -114/-115 (each spanning the full Z 40..62 corridor width), so this covers a
      * margin around all of them plus the open runs between. Cruz shrinks to
@@ -213,8 +220,8 @@ public final class CruzRoomManager {
         // The Go/Stop briefing (and the crouch teaching in it) only starts once the player is
         // actually standing in the staging pen — not the instant the jump course hands them off.
         if (phase == CruzPhase.GOSTOP_STAGE && !GOSTOP_ZONE.contains(player.position())) {
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Come stand with me in the marked area "
-                    + "first — follow the glowing arrow!");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Come stand with me on the glowing green "
+                    + "tile first — follow the arrow!");
             return;
         }
 
@@ -662,6 +669,9 @@ public final class CruzRoomManager {
      */
     private static void tickGoStopStage(ServerLevel level, ServerPlayer player) {
         AcademyVisuals.setCompassTarget(player, STAGING_POS);
+        if (level.getGameTime() % HIGHLIGHT_INTERVAL_TICKS == 0) {
+            AcademyVisuals.highlightBlocks(level, List.of(GOSTOP_STAGE_MARK));
+        }
 
         if (player.getX() > GOSTOP_STARTING_LINE_X
                 || player.getZ() < GOSTOP_STARTING_LINE_MIN_Z
@@ -676,8 +686,8 @@ public final class CruzRoomManager {
         if (gameTime - lastStartingLineNudgeTick >= STARTING_LINE_NUDGE_COOLDOWN_TICKS
                 && !AcademyManager.isDialogueActive(player.getUUID())) {
             lastStartingLineNudgeTick = gameTime;
-            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Not yet! Wait for me to call §a§lGO§r§7 "
-                    + "before you cross the line.");
+            AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Not yet! Stand on the glowing green "
+                    + "tile and wait for me to call §a§lGO§r§7 first.");
         }
     }
 
