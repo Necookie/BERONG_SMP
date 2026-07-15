@@ -45,8 +45,15 @@ public class FireAlarmBlock extends Block {
     public static final Property<Direction> FACING    = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty     ACTIVATED = BooleanProperty.create("activated");
 
-    /** Interval between alarm beeps (25 ticks = 1.25 s). */
-    private static final int BEEP_INTERVAL = 25;
+    /**
+     * Interval between alarm loop restarts. {@code FIRE_ALARM_RING} is now a real ~31.7 s siren
+     * recording (see sounds.json) rather than a short vanilla bell ding, so this must roughly match
+     * the clip's own length or repeated playSound calls stack overlapping copies of the same clip —
+     * 634 ticks ≈ 31.7 s restarts the loop right as the previous playback finishes. Public so
+     * {@link ReyesRoomManager} (which also schedules this block's tick when the Academy player rings
+     * the alarm) stays in sync instead of duplicating the value.
+     */
+    public static final int BEEP_INTERVAL = 634;
 
     // Housing body 8×11×3 px + bell dome on top + handle grip protrudes to Z=9
     private static final VoxelShape SHAPE_NORTH = Block.box(4, 3,  9, 12, 16, 16);
@@ -115,7 +122,7 @@ public class FireAlarmBlock extends Block {
         player.sendSystemMessage(Component.literal("§c🔔 FIRE ALARM ACTIVATED — Evacuate immediately!"));
 
         // Play the alarm immediately, then start the repeating tick chain.
-        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
+        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
         ((ServerLevel) level).scheduleTick(pos, this, BEEP_INTERVAL);
 
         session.markAlarmRung();
@@ -146,9 +153,8 @@ public class FireAlarmBlock extends Block {
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!state.getValue(ACTIVATED)) return;
-        // Vary pitch slightly each ring for a more realistic clapper-bell feel.
-        float pitch = 1.7f + random.nextFloat() * 0.2f;
-        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, pitch);
+        // Real recording — play at natural pitch and let it finish before restarting the loop.
+        level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
         level.scheduleTick(pos, this, BEEP_INTERVAL);
     }
 

@@ -49,7 +49,7 @@
   "block.fire_alarm.ring": {
     "subtitle": "Fire Alarm",
     "sounds": [
-      { "name": "minecraft:block.bell.use", "type": "event" }
+      "berongsmp:fire_alarm/fire_alarm_ring"
     ]
   }
 }

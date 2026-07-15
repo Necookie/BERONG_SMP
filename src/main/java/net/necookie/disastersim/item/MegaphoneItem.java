@@ -45,7 +45,7 @@ public class MegaphoneItem extends Item {
             }
         }
         serverLevel.playSound(null, sp.blockPosition(), ModSounds.FIRE_ALARM_RING.get(),
-                SoundSource.PLAYERS, 2.0f, 0.6f);
+                SoundSource.PLAYERS, 2.0f, 1.0f);
         sp.getCooldowns().addCooldown(player.getItemInHand(hand), COOLDOWN_TICKS);
         return InteractionResult.SUCCESS;
     }

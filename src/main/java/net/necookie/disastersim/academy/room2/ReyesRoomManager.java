@@ -326,8 +326,8 @@ public final class ReyesRoomManager {
         BlockState state = level.getBlockState(pos);
         if (state.getBlock() instanceof FireAlarmBlock && state.hasProperty(FireAlarmBlock.ACTIVATED)) {
             level.setBlock(pos, state.setValue(FireAlarmBlock.ACTIVATED, true), 3);
-            level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.8f);
-            level.scheduleTick(pos, state.getBlock(), 25);
+            level.playSound(null, pos, ModSounds.FIRE_ALARM_RING.get(), SoundSource.BLOCKS, 2.0f, 1.0f);
+            level.scheduleTick(pos, state.getBlock(), FireAlarmBlock.BEEP_INTERVAL);
         }
         AcademyVisuals.setCompassTarget(player, REYES_ANCHOR);
         AcademyManager.sendPrompt(player, "§6[Sgt. Reyes] §fGreat — the alarm's ringing! Now head back to me "
