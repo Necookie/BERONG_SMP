@@ -2,6 +2,7 @@ package net.necookie.disastersim.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.neoforged.fml.ModList;
 
 /**
  * Command registration entry point. Delegates to focused subclasses:
@@ -23,6 +24,13 @@ public class ModCommands {
         ItemCommands.register(dispatcher);
         SimulationCommands.register(dispatcher);
         BfpAdminCommands.register(dispatcher);
-        CopyRoomCommand.register(dispatcher);
+
+        // CopyRoomCommand touches WorldEdit types (e.g. a catch clause for
+        // IncompleteRegionException) that don't resolve without WorldEdit installed. The class
+        // must not even be loaded on a server that lacks it, or the JVM verifier throws
+        // NoClassDefFoundError before CopyRoomCommand's own ModList guard ever runs.
+        if (ModList.get().isLoaded("worldedit")) {
+            CopyRoomCommand.register(dispatcher);
+        }
     }
 }
