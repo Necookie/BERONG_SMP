@@ -50,3 +50,4 @@ scripts/__pycache__/
 ### Client installer build output (regenerable — downloaded/compiled, not source) ###
 distribution/client-installer/payload/
 distribution/client-installer/*.exe
+distribution/client-installer/*.zip
