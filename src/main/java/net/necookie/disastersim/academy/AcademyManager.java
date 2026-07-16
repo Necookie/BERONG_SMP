@@ -209,8 +209,8 @@ public final class AcademyManager {
     private static final Map<UUID, DialogueSession> activeSessions = new ConcurrentHashMap<>();
 
     private static final int MIN_LINE_TICKS = 60;  // 3s floor
-    private static final int MAX_LINE_TICKS = 200; // 10s ceiling
-    private static final int TICKS_PER_WORD = 5;   // ~0.25s/word reading pace
+    private static final int MAX_LINE_TICKS = 200; // 10s ceiling — text-only lines (no recorded audio) only
+    private static final int TICKS_PER_WORD = 5;   // ~0.25s/word reading pace — text-only lines (no recorded audio) only
     /**
      * Guardrail against rapid over-clicking an NPC: a click-driven skip-ahead (the branch in
      * {@link #startOrAdvanceDialogue} below) is only honored once a line has been showing for at
@@ -219,6 +219,10 @@ public final class AcademyManager {
      * whatever phase transition its {@code onComplete} triggers) within a fraction of a second,
      * skipping content and — for a tick-gated room like Cruz's — visibly racing ahead of what the
      * room's own state machine expected to still be teaching.
+     *
+     * <p>Only used as a floor for lines with no recorded voice line ({@link AcademyVoiceDurations}
+     * returns -1) — a voiced line's skip-gate is its own real audio length instead (see
+     * {@link #ticksFor}), so clicking ahead can never cut an instructor off mid-sentence.
      */
     private static final int MIN_LINE_DISPLAY_TICKS = 20; // 1s
 
@@ -247,7 +251,9 @@ public final class AcademyManager {
 
         if (session != null) {
             long now = ((ServerLevel) player.level()).getGameTime();
-            if (session.lines == lines && now - session.shownAtTick >= MIN_LINE_DISPLAY_TICKS) {
+            AcademyDialogue.DialogueLine currentLine = session.lines.get(session.index);
+            long minDisplayTicks = Math.max(MIN_LINE_DISPLAY_TICKS, ticksFor(currentLine));
+            if (session.lines == lines && now - session.shownAtTick >= minDisplayTicks) {
                 advanceSession(player, session);
             }
             // else: already mid-conversation about something else (ignore rather than clobber), or
@@ -325,9 +331,23 @@ public final class AcademyManager {
         playNpcSound(player, line.soundKey());
         long now = ((ServerLevel) player.level()).getGameTime();
         session.shownAtTick = now;
-        session.nextAdvanceTick = now + ticksFor(line.text());
+        session.nextAdvanceTick = now + ticksFor(line);
     }
 
+    /**
+     * How long to keep a line on screen/audible before auto-advancing (and the minimum a player
+     * must wait before a click-skip is honored, see {@link #startOrAdvanceDialogue}). Uses the
+     * real recorded voice line's length ({@link AcademyVoiceDurations}) whenever one exists, so the
+     * instructor always finishes speaking before the next line's stop-sound can cut them off —
+     * falls back to the old word-count reading-pace estimate only for lines with no recorded audio
+     * (e.g. {@code MorfeRoomManager}'s runtime-built debrief lines).
+     */
+    private static int ticksFor(AcademyDialogue.DialogueLine line) {
+        int voiceTicks = AcademyVoiceDurations.ticksFor(line.soundKey());
+        return voiceTicks >= 0 ? voiceTicks : ticksFor(line.text());
+    }
+
+    /** Word-count reading-pace estimate — used directly by {@link #sendPrompt} (plain-text captions with no {@code DialogueLine}/soundKey at all, e.g. room managers' idle nudges and banners), and as the {@link #ticksFor(AcademyDialogue.DialogueLine)} fallback for lines with no recorded voice line. */
     private static int ticksFor(String text) {
         int words = text.trim().isEmpty() ? 1 : text.trim().split("\\s+").length;
         return Math.max(MIN_LINE_TICKS, Math.min(MAX_LINE_TICKS, words * TICKS_PER_WORD));
