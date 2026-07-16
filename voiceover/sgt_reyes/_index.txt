@@ -1,0 +1,101 @@
+Sgt. Reyes - Room 2 - Fire Safety Drill (prevention/intervention/evacuation)
+============================================================
+
+001.txt  [NOT_STARTED (intro)]  tags: [friendly, professional]
+    Hello, trainee — great to meet you! I'm Sergeant Reyes. Today's lesson has three parts, in this order: prevention first, intervention second, and evacuation last — because preventing a fire beats fighting one, every single time.
+
+002.txt  [NOT_STARTED (intro)]  tags: [calm, instructive]
+    Look around this room — a few everyday hazards, just like you'd see in a real building. A frayed cord, a stack of forgotten boxes, an unattended pan. Most fires never have to happen at all if someone catches them early.
+
+003.txt  [NOT_STARTED (intro)]  tags: [encouraging]
+    Let's practice that first — spotting a hazard before it becomes a fire, and fixing it with nothing but your own two hands. Follow me!
+
+004.txt  [PREVENTION_DEMO (intro)]  tags: [instructive, upbeat]
+    Right-click a glowing hazard to fix it — that's prevention. Work through all three before they get away from you!
+
+005.txt  [PREVENTION_DEMO, hazard 1/3 - archive boxes]  tags: [cautionary, serious]
+    See that stack of boxes starting to spark and smoke? Loose paper piled near anything warm is an easy Class A fire waiting to happen.
+
+006.txt  [PREVENTION_DEMO, hazard 1/3 - archive boxes]  tags: [instructive, approving]
+    Right-click it now — pretend you're clearing it away from the heat source and stacking it properly. That's it. That's the whole fix.
+
+007.txt  [PREVENTION_DEMO, hazard 2/3 - computer]  tags: [serious, cautionary]
+    That computer's sparking — a damaged cord or an overloaded outlet, left plugged in and unwatched.
+
+008.txt  [PREVENTION_DEMO, hazard 2/3 - computer]  tags: [instructive, firm]
+    Right-click it — you're unplugging it and setting it aside for a real repair. Never wait on a sparking cord.
+
+009.txt  [PREVENTION_DEMO, hazard 3/3 - grease pan]  tags: [cautionary, serious]
+    And that pan — oil left heating with nobody watching it. Kitchen fires start this way more than almost anything else.
+
+010.txt  [PREVENTION_DEMO, hazard 3/3 - grease pan]  tags: [instructive, firm]
+    Right-click it — you're pulling it off the heat before it ever catches. Never leave hot oil unattended, even for a minute.
+
+011.txt  [TOOL_SELECTION (intro)]  tags: [upbeat, encouraging]
+    Time to gear up — follow the glowing arrow to each extinguisher and I'll walk you through grabbing it.
+
+012.txt  [TOOL_SELECTION, frame 1/3 - ABC red]  tags: [instructive, clear]
+    First, the RED ABC extinguisher — see it glowing in its frame? Follow the arrow over.
+
+013.txt  [TOOL_SELECTION, frame 1/3 - ABC red]  tags: [instructive, calm]
+    Left-click the frame to pop it loose, then walk over the extinguisher on the floor to pick it up.
+
+014.txt  [TOOL_SELECTION, frame 2/3 - CO2 green]  tags: [instructive, clear]
+    Next, the GREEN CO2 extinguisher — for electrical fires. Follow the arrow to its frame.
+
+015.txt  [TOOL_SELECTION, frame 2/3 - CO2 green]  tags: [instructive, calm]
+    Same as before: left-click to pop it off the wall, then step onto it to grab it.
+
+016.txt  [TOOL_SELECTION, frame 3/3 - wet chemical yellow]  tags: [instructive, clear]
+    Last one — the YELLOW wet chemical extinguisher, for kitchen grease fires. Follow the arrow.
+
+017.txt  [TOOL_SELECTION, frame 3/3 - wet chemical yellow]  tags: [proud, upbeat]
+    Left-click the frame, then scoop it up off the floor. That's all three — you're fully equipped!
+
+018.txt  [LIVE_FIRE_DEMO (intro)]  tags: [instructive, encouraging]
+    To use an extinguisher: press its number key (1-9) to hold it, aim at the base of the fire, and hold the right mouse button. Match the color to what's burning — you can do it!
+
+019.txt  [LIVE_FIRE_DEMO, fire 1/3 - Class A (boxes)]  tags: [urgent, serious]
+    Sometimes prevention doesn't catch it in time — like now. That stack of paper boxes just caught fire! Paper and cardboard are "Class A": ordinary materials.
+
+020.txt  [LIVE_FIRE_DEMO, fire 1/3 - Class A (boxes)]  tags: [urgent, instructive]
+    Press your RED ABC extinguisher's number key to hold it, walk close, aim at the base of the fire, and hold the right mouse button. Sweep side to side!
+
+021.txt  [LIVE_FIRE_DEMO, fire 2/3 - Class C (electrical)]  tags: [urgent, alarmed]
+    Next — that computer is sparking and now it's alight! That's an electrical fire, "Class C".
+
+022.txt  [LIVE_FIRE_DEMO, fire 2/3 - Class C (electrical)]  tags: [serious, warning]
+    Never use water or foam on electrical fires — electricity can travel back to you! Hold your GREEN CO2 extinguisher, get close, and hold the right mouse button to put it out.
+
+023.txt  [LIVE_FIRE_DEMO, fire 3/3 - Class F/K (grease)]  tags: [urgent, alarmed]
+    Last one — that pan of cooking oil just caught fire! Grease fires are special: the wrong extinguisher can make them splash and spread.
+
+024.txt  [LIVE_FIRE_DEMO, fire 3/3 - Class F/K (grease)]  tags: [instructive, urgent]
+    Hold your YELLOW wet chemical extinguisher, aim at the pan, and hold the right mouse button. It cools the oil and seals it safely. Nice and steady!
+
+025.txt  [LIVE_FIRE_DEMO, stop-drop-roll intro]  tags: [serious, caring]
+    One last lesson, and it's an important one: even when you do everything right, sometimes your clothes still catch fire — a stray spark, hot oil, anything. Don't panic when that happens.
+
+026.txt  [LIVE_FIRE_DEMO, stop-drop-roll intro]  tags: [firm, instructive]
+    The only way to put yourself out is STOP, DROP, and ROLL: press and hold Shift to drop down low, then press R to roll — keep pressing it until the flames are gone. Nothing else works, so don't waste time trying to swat it out or run for water.
+
+027.txt  [LIVE_FIRE_DEMO, stop-drop-roll intro]  tags: [reassuring, alert]
+    Ready? I'm going to light a small, completely safe spark on you now, just like everything else here. The instant you catch fire — Shift, then R!
+
+028.txt  [ALARM_CHECKPOINT]  tags: [proud, warm]
+    Well fought!
+
+029.txt  [ALARM_CHECKPOINT]  tags: [serious, instructive]
+    But here's what people forget: the moment a fire starts, ring the alarm — before anything else. It warns everyone else in the building, even if you already put the fire out.
+
+030.txt  [ALARM_CHECKPOINT]  tags: [instructive, calm]
+    Follow the glowing arrow to the fire alarm and press it. Once it's ringing, come straight back to me.
+
+031.txt  [EVACUATION_BRIEF]  tags: [approving, calm]
+    Perfect — alarm's stopped, and everyone's been warned. Now for the very last step, and it's the simplest: once that alarm is ringing, you evacuate. Don't grab your things, don't go back for anything — walk calmly to the nearest exit.
+
+032.txt  [EVACUATION_BRIEF]  tags: [proud, warm]
+    Prevention, intervention, evacuation — in that order, every time. You've got all three now. I'm proud of you, trainee!
+
+033.txt  [DONE]  tags: [proud, warm]
+    Three fires, three perfect matches — and you even put yourself out safely. I'm proud of you! Follow the glowing arrow to Sgt. Santos for the Earthquake Drill.

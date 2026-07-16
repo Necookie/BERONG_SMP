@@ -1,0 +1,2 @@
+[alert, clear]
+Listen for my call! GO means walk (hold W). STOP means let go of all the keys and freeze.

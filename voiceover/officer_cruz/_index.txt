@@ -1,0 +1,65 @@
+Officer Cruz - Room 1 - Movement School (look/walk/jump/crouch/go-stop)
+============================================================
+
+001.txt  [NOT_STARTED]  tags: [warm, welcoming]
+    Hi there, trainee — welcome to the Academy! I'm Officer Cruz, and I'll walk with you every step of the way. First time playing? That's perfectly fine — we'll go slow and easy.
+
+002.txt  [NOT_STARTED]  tags: [gentle, encouraging]
+    Let's start with your eyes. Move your mouse gently to look around — left, right, up, down. Try it right now! Looking around calmly is the very first emergency skill.
+
+003.txt  [NOT_STARTED]  tags: [encouraging, upbeat]
+    Now your feet! Hold the W key to walk forward, the S key to back up, and A and D to step left and right. See the four bright green tiles on the floor? Walk onto each one — I'll come with you!
+
+004.txt  [NOT_STARTED]  tags: [patient, warm]
+    Take all the time you need. Once you've stood on all four green tiles, we'll move on together. Off you go — I'm right behind you!
+
+005.txt  [BRIEFING]  tags: [encouraging]
+    Looking for the green tiles? Watch for the tall beam of green light — that's your next one. Hold the W key and walk toward it. You've got this!
+
+006.txt  [MAZE]  tags: [reassuring, instructive]
+    Walls in the way? That's okay! Move your mouse to look down the open path first, THEN hold W to walk. Look first, walk second.
+
+007.txt  [JUMP]  tags: [playful, encouraging]
+    To hop a hurdle: keep holding W and tap the Spacebar just before you reach it. Missed one? No problem — back up and try again!
+
+008.txt  [GOSTOP_STAGE]  tags: [excited, warm]
+    Last lesson — my favorite: knowing when to GO and when to STOP. You're standing right at the starting line — don't cross it until you hear me call it!
+
+009.txt  [GOSTOP_STAGE]  tags: [instructive, calm]
+    See the low boards up ahead in the tunnel? Press and hold Shift to crouch down low, and you'll slip right underneath them while you keep walking — no need to stop.
+
+010.txt  [GOSTOP_STAGE]  tags: [clear, instructive]
+    Here's how the game works: when I call GO!, hold W and keep walking through the tunnel. When I call STOP!, let go of every key immediately and stand perfectly still — don't take even one more step.
+
+011.txt  [GOSTOP_STAGE]  tags: [serious, encouraging]
+    In a real emergency, freezing the instant you're told keeps everyone safe. Ready? Wait for my call — here we go!
+
+012.txt  [GOSTOP_STAGE (barrier reminder)]  tags: [firm, patient]
+    Not yet! Stand on the glowing green tile and wait for me to call GO first.
+
+013.txt  [GOSTOP_RUN (intro nudge)]  tags: [alert, clear]
+    Listen for my call! GO means walk (hold W). STOP means let go of all the keys and freeze.
+
+014.txt  [GOSTOP_RUN, GO call 1/3]  tags: [commanding, energetic]
+    GO! Hold the W key and keep walking!
+
+015.txt  [GOSTOP_RUN, GO call 2/3]  tags: [urgent, energetic]
+    GO! Move move move — keep that W key down!
+
+016.txt  [GOSTOP_RUN, GO call 3/3]  tags: [commanding, energetic]
+    GO! Forward, trainee — hold W and go!
+
+017.txt  [GOSTOP_RUN, STOP call 1/3]  tags: [sharp, commanding]
+    STOP! Let go of every key and freeze!
+
+018.txt  [GOSTOP_RUN, STOP call 2/3]  tags: [sharp, commanding]
+    STOP! Hands off the keys — statue still!
+
+019.txt  [GOSTOP_RUN, STOP call 3/3]  tags: [sharp, urgent]
+    STOP! Freeze right where you are!
+
+020.txt  [GOSTOP_RUN (moved-after-STOP mistake)]  tags: [gentle, reassuring]
+    Oops — you moved after STOP! That's okay, everyone does it once. Back to the start line: walk on GO, and when you hear STOP, let go of all the keys right away.
+
+021.txt  [DONE]  tags: [proud, warm]
+    You did it! You can look, walk, jump, crouch, and stop on command — that's everything you need. Now follow the glowing arrow to Sgt. Reyes for the Fire Safety Drill. She's friendly, I promise!

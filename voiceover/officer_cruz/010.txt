@@ -1,0 +1,2 @@
+[clear, instructive]
+Here's how the game works: when I call GO!, hold W and keep walking through the tunnel. When I call STOP!, let go of every key immediately and stand perfectly still — don't take even one more step.

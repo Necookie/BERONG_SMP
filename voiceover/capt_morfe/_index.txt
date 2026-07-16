@@ -1,0 +1,26 @@
+Capt. Morfe - Room 4 - Evaluation (pass/fail certification)
+============================================================
+
+001.txt  [NOT_STARTED (intro)]  tags: [formal, warm]
+    Welcome, trainee — I'm Captain Morfe, and it's an honor to meet you. You've walked with Cruz, fought fires with Reyes, and held steady through Santos's earthquake.
+
+002.txt  [NOT_STARTED (intro)]  tags: [calm, thoughtful]
+    Every instructor sent me their notes, and I've put your full record together. Take a breath — let's see how you did.
+
+003.txt  [EVALUATED_PASS (alt. - already certified)]  tags: [warm, approving]
+    You're already certified, trainee — no need to prove anything twice! Head out and enjoy the simulations. Stay sharp out there!
+
+004.txt  [PASS ending 1/3]  tags: [proud, formal]
+    Steady feet, the right extinguisher every time, and calm under a shaking roof. That's a passing record — you are officially certified!
+
+005.txt  [PASS ending 2/3]  tags: [sincere, warm]
+    Be proud of yourself — what you practiced today protects real people in real life. Every drill you just ran was a rehearsal — now it's time for the real thing.
+
+006.txt  [PASS ending 3/3]  tags: [serious, encouraging]
+    I'm sending you to New Sim Building 2.0 for a full, graded fire simulation — no more training wheels. Prevent what you can, contain what you can't, and get everyone out safe. I'll be waiting for your report. Good luck, trainee!
+
+007.txt  [FAIL ending 1/2]  tags: [gentle, reassuring]
+    You're not quite there yet — and that is completely okay. Even our best firefighters ran these drills more than once.
+
+008.txt  [FAIL ending 2/2]  tags: [warm, encouraging]
+    I'm sending you back to Officer Cruz for another practice run. Take it slow, listen to each instructor, and I'll be waiting right here to certify you. You can do this!

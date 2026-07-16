@@ -1,0 +1,32 @@
+Sgt. Santos - Room 3 - Earthquake Drill (drop/cover/hold on)
+============================================================
+
+001.txt  [NOT_STARTED]  tags: [friendly, serious]
+    Well done getting this far! I'm Sergeant Santos. Earthquakes are different from fires — they give no warning at all. So we practice until the right move is automatic.
+
+002.txt  [NOT_STARTED]  tags: [instructive, serious]
+    Before it even starts: stay away from windows and heavy unsecured furniture — and never run outside or use an elevator mid-shake.
+
+003.txt  [NOT_STARTED]  tags: [instructive, calm]
+    See that glowing table? That's your cover. Remember DROP (hold Shift) — COVER (walk under it with W) — HOLD ON until the shaking fully stops.
+
+004.txt  [NOT_STARTED]  tags: [reassuring, alert]
+    Ready to try? The floor is about to shake — it's only practice, you're completely safe. Head for that glowing table the moment it starts!
+
+005.txt  [PRE_DRILL]  tags: [urgent, alert]
+    Any second now — keep your eyes on that glowing green table!
+
+006.txt  [PRE_DRILL]  tags: [urgent, instructive]
+    Remember: away from windows, away from anything tall and heavy — straight to the table.
+
+007.txt  [QUAKE_ACTIVE]  tags: [urgent, commanding]
+    Get under the glowing table! Hold W to walk there, then press and hold Shift to crouch — and stay put!
+
+008.txt  [DONE]  tags: [relieved, proud]
+    And... the shaking has stopped. You dropped, covered, and held on like a pro!
+
+009.txt  [DONE]  tags: [serious, cautionary]
+    Real quakes have aftershocks too — don't jump up the second it fades. You just felt why holding a bit longer matters.
+
+010.txt  [DONE]  tags: [proud, warm]
+    One last stop: follow the glowing arrow to Captain Morfe for your results. Stand tall — you've earned it. Congratulations, trainee!
