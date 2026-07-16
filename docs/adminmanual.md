@@ -75,6 +75,19 @@ Output: `build/libs/berongsmp-1.0.0.jar`. Rebuild and re-upload to the server
 any time source changes — check `git status` first if unsure whether the last
 build is current.
 
+**2026-07-16 update — real Academy voice lines:** the jar now bundles ~6MB of
+real recorded audio (72 ElevenLabs-generated `.ogg` files — all 4 Academy
+instructors now speak instead of caption-only text; see
+[docs/systems/academy.md](systems/academy.md)'s "Real recorded voice lines"
+note). No new config keys, no server-side setup beyond the usual **rebuild →
+re-upload `mods/berongsmp-1.0.0.jar` → restart** flow below. Players who
+haven't updated their client mod jar yet will just get silent captions (same
+as before this change) until they redownload the installer, so re-upload the
+new installer zip (see "Building / updating the client installer" below —
+already done for this update, `distribution/client-installer/BerongSMP-Client-Installer.zip`
+is current) to Google Drive at the same time you update the server jar, so
+players aren't stuck on a stale client for long.
+
 ---
 
 ## Building / updating the client installer

@@ -465,3 +465,20 @@ position, all 4 NPC anchors, the Room 3 table row, the maze wall gaps, the jump 
 Go/Stop tunnel slabs, and the 4 WASD mark cells (which had no green blocks in the schematic at all
 — they're placed as lime concrete at runtime, see `AcademyBuildingManager.placeGreenMarks`).
 
+**Real recorded voice lines (2026-07-16):** `AcademyDialogue`'s `soundKey` field (previously always
+`null` — the field existed but nothing populated it) now carries a real key for every one of the 53
+static dialogue lines, plus `room1.CruzRoomManager`'s 8 dynamic GO/STOP/barrier/oops-moved callouts
+gained matching `AcademyManager.playNpcSound()` calls (those aren't in `AcademyDialogue` at all — see
+`GO_BANNERS`/`GO_SOUND_KEYS`/`STOP_BANNERS`/`STOP_SOUND_KEYS`, index-paired arrays that replaced the
+old independent `AcademyManager.pick()` call so the spoken banner and its audio always match). All
+72 lines were generated via the ElevenLabs API (`eleven_v3` model, inline `[emotion]` delivery tags)
+from source scripts in `voiceover/<character>/<NNN>.txt` — Officer Cruz uses the default voice
+"Laura", Sgt. Reyes "George", Sgt. Santos "Callum", Capt. Morfe "Daniel" (all free-tier-usable
+premade ElevenLabs voices, chosen after the originally-requested Voice Library IDs turned out to be
+blocked on the free API tier). Sound keys follow `academy.<character>.<NNN>` (e.g.
+`academy.officer_cruz.001`), registered in `sounds.json`, audio at
+`assets/berongsmp/sounds/academy/<character>/<NNN>.ogg`. `voiceover/<character>/_index.txt` lists
+every line's trigger phase + emotion tag for reference. One line (`capt_morfe/008`) used a plain
+non-tagged standard-model fallback after the `eleven_v3` monthly quota ran out mid-batch — cosmetic
+inconsistency only (no tag directive on that single line), not a functional gap.
+
