@@ -688,6 +688,7 @@ public final class CruzRoomManager {
             lastStartingLineNudgeTick = gameTime;
             AcademyManager.sendPrompt(player, "§a[Officer Cruz] §7Not yet! Stand on the glowing green "
                     + "tile and wait for me to call §a§lGO§r§7 first.");
+            AcademyManager.playNpcSound(player, "academy.officer_cruz.012");
         }
     }
 
@@ -713,15 +714,32 @@ public final class CruzRoomManager {
         String currentBanner = "";
     }
 
+    /** GO/STOP callout banners and their matching recorded voice lines — index-paired, not picked independently. */
+    private static final String[] GO_BANNERS = {
+            "§a▶ GO! Hold the W key and keep walking!",
+            "§a▶ GO! Move move move — keep that W key down!",
+            "§a▶ GO! Forward, trainee — hold W and go!"
+    };
+    private static final String[] GO_SOUND_KEYS = {
+            "academy.officer_cruz.014", "academy.officer_cruz.015", "academy.officer_cruz.016"
+    };
+    private static final String[] STOP_BANNERS = {
+            "§c■ STOP! Let go of every key and freeze!",
+            "§c■ STOP! Hands off the keys — statue still!",
+            "§c■ STOP! Freeze right where you are!"
+    };
+    private static final String[] STOP_SOUND_KEYS = {
+            "academy.officer_cruz.017", "academy.officer_cruz.018", "academy.officer_cruz.019"
+    };
+
     private static void startGoStop(ServerLevel level, ServerPlayer player) {
         GoStopState state = new GoStopState();
         state.nextFlipTick = level.getGameTime() + randomInterval(level);
-        state.currentBanner = AcademyManager.pick(player,
-                "§a▶ GO! Hold the W key and keep walking!",
-                "§a▶ GO! Move move move — keep that W key down!",
-                "§a▶ GO! Forward, trainee — hold W and go!");
+        int idx = level.getRandom().nextInt(GO_BANNERS.length);
+        state.currentBanner = GO_BANNERS[idx];
         goStopStates.put(player.getUUID(), state);
         AcademyManager.sendPrompt(player, state.currentBanner);
+        AcademyManager.playNpcSound(player, GO_SOUND_KEYS[idx]);
     }
 
     private static long randomInterval(ServerLevel level) {
@@ -745,21 +763,20 @@ public final class CruzRoomManager {
             justFlipped = true;
             state.isGo = !state.isGo;
             state.nextFlipTick = gameTime + randomInterval(level);
+            int idx = level.getRandom().nextInt(GO_BANNERS.length);
+            String soundKey;
             if (state.isGo) {
                 state.stopStartTick = -1;
-                state.currentBanner = AcademyManager.pick(player,
-                        "§a▶ GO! Hold the W key and keep walking!",
-                        "§a▶ GO! Move move move — keep that W key down!",
-                        "§a▶ GO! Forward, trainee — hold W and go!");
+                state.currentBanner = GO_BANNERS[idx];
+                soundKey = GO_SOUND_KEYS[idx];
             } else {
                 state.stopStartTick = gameTime;
                 state.posAtStop = player.position();
-                state.currentBanner = AcademyManager.pick(player,
-                        "§c■ STOP! Let go of every key and freeze!",
-                        "§c■ STOP! Hands off the keys — statue still!",
-                        "§c■ STOP! Freeze right where you are!");
+                state.currentBanner = STOP_BANNERS[idx];
+                soundKey = STOP_SOUND_KEYS[idx];
             }
             AcademyManager.sendPrompt(player, state.currentBanner);
+            AcademyManager.playNpcSound(player, soundKey);
         }
 
         // Fun green countdown to the next call, refreshed once a second — purely cosmetic, doesn't
@@ -787,6 +804,7 @@ public final class CruzRoomManager {
                 AcademyManager.sendPrompt(player, "§c[Officer Cruz] §7Oops — you moved after STOP! That's okay, "
                         + "everyone does it once. Back to the start line: walk on §aGO§7, and when you hear "
                         + "§cSTOP§7, let go of all the keys right away.");
+                AcademyManager.playNpcSound(player, "academy.officer_cruz.020");
                 return;
             }
         }
