@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Pose;
-import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.TableBlock;
 import net.necookie.disastersim.common.scheduling.TickScheduler;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
@@ -185,7 +184,10 @@ public final class DuckCoverHoldManager {
 
         session.logger.log("duck_cover_hold", Map.of(
                 "x", player.getX(), "y", player.getY(), "z", player.getZ()));
-        double elapsedS = (double) (Config.SIM_DURATION_TICKS.get() - session.getTimerTicks()) / 20.0;
+        // session.elapsedSeconds() (not Config.SIM_DURATION_TICKS - timerTicks) is the correct
+        // anchor — it stays right even if a GM ran /sim_time on this session, and for any scenario
+        // whose duration isn't the config default.
+        double elapsedS = session.elapsedSeconds();
         session.bufferCsvRow(TelemetryCsvWriter.writeRow(
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),

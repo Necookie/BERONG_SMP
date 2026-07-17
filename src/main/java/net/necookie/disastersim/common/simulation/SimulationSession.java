@@ -165,8 +165,21 @@ public class SimulationSession {
     public boolean isFrozen() { return frozen; }
     public void setFrozen(boolean frozen) { this.frozen = frozen; }
 
-    /** Directly sets remaining ticks. Clamps to [0, 72000]. */
-    public void setTimerTicks(int ticks) { this.timerTicks = Math.max(0, Math.min(72000, ticks)); }
+    /**
+     * Directly sets remaining ticks (clamped to [0, 72000]) — used by {@code /sim_time set/add}.
+     * Adjusts {@link #initialTimerTicks} by the same delta the clamped change actually applies, so
+     * {@link #elapsedTicks()}/{@link #elapsedSeconds()} — the anchor for every telemetry {@code t}
+     * value emitted for the rest of the session — is unaffected by the adjustment itself: only the
+     * remaining/total budget moves, not how much time the player has already spent. Without this,
+     * a GM's {@code /sim_time add 60} used to silently corrupt every subsequent event's {@code t}
+     * (and could drive it negative).
+     */
+    public void setTimerTicks(int ticks) {
+        int clamped = Math.max(0, Math.min(72000, ticks));
+        int delta = clamped - this.timerTicks;
+        this.timerTicks = clamped;
+        this.initialTimerTicks += delta;
+    }
 
     public boolean isExpired() {
         return timerTicks <= 0;

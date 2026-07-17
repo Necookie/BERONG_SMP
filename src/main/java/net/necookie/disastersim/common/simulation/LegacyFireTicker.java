@@ -41,7 +41,7 @@ final class LegacyFireTicker {
         }
         HazardManager.tick(level, session, ticks);
         if (session.getState().isCCS()) {
-            tickCcsFireNarrative(player, ticks);
+            tickCcsFireNarrative(session, player);
         }
     }
 
@@ -56,9 +56,15 @@ final class LegacyFireTicker {
         }
     }
 
-    /** Time-based narrative escalation for CCS fire, keyed to exact elapsed ticks. */
-    private static void tickCcsFireNarrative(ServerPlayer player, int ticks) {
-        int elapsed = Config.SIM_DURATION_TICKS.get() - ticks;
+    /**
+     * Time-based narrative escalation for CCS fire, keyed to exact elapsed ticks.
+     *
+     * <p>Uses {@link SimulationSession#elapsedTicks()} rather than {@code Config.SIM_DURATION_TICKS
+     * - ticks} — the latter silently drifts wrong the moment a GM runs {@code /sim_time} on the
+     * session, since it assumes the session's total duration always equals the config default.
+     */
+    private static void tickCcsFireNarrative(SimulationSession session, ServerPlayer player) {
+        int elapsed = session.elapsedTicks();
         if (elapsed == 20 * 15) {
             player.sendSystemMessage(Component.literal("§e[15s] The fire is still active — locate the burning computer!"));
         } else if (elapsed == 20 * 30) {
