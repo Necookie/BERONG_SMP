@@ -74,12 +74,12 @@ public class SimulationManager {
 
     private static final int TICKS_PER_SECOND = 20;
 
-    // Half-extents of the proximity scan boxes (XZ radius, Y radius), and the sentinel
-    // distance returned when no hazard is found in range.
+    // Half-extents of the fire-proximity scan box (XZ radius, Y radius) used by
+    // nearestFireDistance/computeNearestFireDistance, and the sentinel distance returned when no
+    // hazard is found in range. CCS's own hazard-distance no longer scans the world at all — see
+    // nearestCCSHazardDistance.
     private static final int FIRE_SCAN_RADIUS_XZ = 10;
     private static final int FIRE_SCAN_RADIUS_Y  = 5;
-    private static final int CCS_HAZARD_RADIUS_XZ = 15;
-    private static final int CCS_HAZARD_RADIUS_Y  = 5;
     private static final double NO_HAZARD_DISTANCE = 99.0;
 
     // Single-slot per-tick memo for the fire scan — the heaviest per-tick world read.
@@ -683,7 +683,7 @@ public class SimulationManager {
             return armedDist != NO_HAZARD_DISTANCE ? armedDist : nearestFireDistance(level, player.blockPosition());
         }
         if (session.getState() == SimulationState.CCS_FIRE) {
-            return nearestCCSHazardDistance(level, player.blockPosition());
+            return nearestCCSHazardDistance(level, session, player.blockPosition());
         }
         if (session.getState().isFire()) {
             return nearestFireDistance(level, player.blockPosition());
@@ -710,18 +710,33 @@ public class SimulationManager {
         return minSq == Double.MAX_VALUE ? NO_HAZARD_DISTANCE : Math.sqrt(minSq);
     }
 
-    private static double nearestCCSHazardDistance(ServerLevel level, BlockPos origin) {
+    /**
+     * Distance to the nearest currently-BURNING cached computer position — {@code
+     * session.getComputerPositions()} is scanned once at CCS_FIRE session start ({@link
+     * #findComputersInCCS}), so this is a small fixed-size loop (tens of positions), never a world
+     * scan. Replaces a per-tick {@code CCS_HAZARD_RADIUS_XZ*2+1} by {@code
+     * CCS_HAZARD_RADIUS_Y*2+1} box scan (31x31x11 ≈ 10,600 block reads) that used to run every
+     * tick for every CCS_FIRE player — the heaviest per-tick world read in the mod, and the one
+     * {@link #nearestFireDistance}'s memoisation didn't help with.
+     *
+     * <p>CCS's fire only ever originates from a burning computer ({@link #igniteRandomComputers} /
+     * {@code FireEffects.spreadComputerFire}) — "no cached computer currently burning" genuinely
+     * means no hazard exists in this scenario right now. This deliberately does not fall back to a
+     * full-arena scan the way {@link #nearestArmedHazardDistance} falls back to {@link
+     * #nearestFireDistance} once New Sim Building 2.0's evacuation phase begins, since CCS has no
+     * equivalent arena-wide-spread phase. The one accuracy trade-off: a burning computer can ignite
+     * adjacent flammable blocks into real vanilla fire via its own {@code randomTick} (see
+     * {@code ComputerBlock}'s class doc), and if that computer is later extinguished (BROKEN) while
+     * the fire it started keeps burning independently, this reports {@link #NO_HAZARD_DISTANCE}
+     * even though a residual fire patch may still exist a block or two away — acceptable for a
+     * descriptive telemetry distance, not a gameplay-blocking check.
+     */
+    private static double nearestCCSHazardDistance(ServerLevel level, SimulationSession session, BlockPos origin) {
         double minSq = Double.MAX_VALUE;
-        for (BlockPos check : BlockPos.betweenClosed(
-                origin.offset(-CCS_HAZARD_RADIUS_XZ, -CCS_HAZARD_RADIUS_Y, -CCS_HAZARD_RADIUS_XZ),
-                origin.offset( CCS_HAZARD_RADIUS_XZ,  CCS_HAZARD_RADIUS_Y,  CCS_HAZARD_RADIUS_XZ))) {
-            net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(check);
-            boolean isHazard = bs.is(net.minecraft.world.level.block.Blocks.FIRE)
-                    || bs.is(net.minecraft.world.level.block.Blocks.SOUL_FIRE)
-                    || (bs.getBlock() instanceof ComputerBlock
-                        && bs.getValue(ComputerBlock.BURNING));
-            if (isHazard) {
-                double d = origin.distSqr(check);
+        for (BlockPos pos : session.getComputerPositions()) {
+            net.minecraft.world.level.block.state.BlockState bs = level.getBlockState(pos);
+            if (bs.getBlock() instanceof ComputerBlock && bs.getValue(ComputerBlock.BURNING)) {
+                double d = origin.distSqr(pos);
                 if (d < minSq) minSq = d;
             }
         }

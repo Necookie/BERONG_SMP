@@ -146,9 +146,14 @@ public final class SafetyDeviceManager {
         List<BlockPos> sprinklers = new ArrayList<>();
         List<BlockPos> lights = new ArrayList<>();
         BlockPos origin = session.getArenaOrigin();
+        // spanX/spanZ are the arena's FULL extent from origin (its corner), the same convention
+        // HazardManager.scanHazardProps and every other arena-bounds loop in the mod uses — this
+        // used to multiply them by 2, scanning a volume roughly double the actual building
+        // footprint in each horizontal direction (~3.7x more block reads than necessary for New
+        // Sim Building 2.0) for no documented reason.
         for (BlockPos pos : BlockPos.betweenClosed(
                 origin.offset(-2, -1, -2),
-                origin.offset(session.getArenaSpanX() * 2 + 2, session.getArenaHeight() + 2, session.getArenaSpanZ() * 2 + 2))) {
+                origin.offset(session.getArenaSpanX() + 2, session.getArenaHeight() + 2, session.getArenaSpanZ() + 2))) {
             BlockState state = level.getBlockState(pos);
             if (state.getBlock() instanceof SmokeDetectorBlock) detectors.add(pos.immutable());
             else if (state.getBlock() instanceof SprinklerHeadBlock) sprinklers.add(pos.immutable());
