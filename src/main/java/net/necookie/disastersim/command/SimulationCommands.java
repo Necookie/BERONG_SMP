@@ -24,6 +24,7 @@ public class SimulationCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("sim_fire")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(context -> {
                     context.getSource().sendFailure(Component.literal(
                             "§cUsage: /sim_fire <library|ccs|new_sim_building2>"));
@@ -55,6 +56,7 @@ public class SimulationCommands {
                         })));
 
         dispatcher.register(Commands.literal("sim_earthquake")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(context -> {
                     context.getSource().sendFailure(Component.literal(
                             "§cUsage: /sim_earthquake <library|ccs> [magnitude]"));
@@ -121,6 +123,7 @@ public class SimulationCommands {
                         })));
 
         dispatcher.register(Commands.literal("sim_stop")
+                .requires(source -> Commands.LEVEL_GAMEMASTERS.check(source.permissions()))
                 .executes(context -> {
                     if (context.getSource().isPlayer()) {
                         UUID uuid = context.getSource().getPlayer().getUUID();
