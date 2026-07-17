@@ -48,13 +48,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class DuckCoverHoldManager {
 
-    static {
-        TickScheduler.register(DuckCoverHoldManager::tick);
-    }
-
     /**
      * No-op. Nothing else in the codebase calls real (non-Javadoc) code on this class — Java only
-     * runs the {@code static} block above on first active use, so without a genuine caller
+     * runs the {@code static} block below on first active use, so without a genuine caller
      * somewhere, this class silently never loads and its tick handler never registers. Call this
      * once at startup to force that load; see {@code BerongSMP.commonSetup}.
      */
@@ -65,6 +61,22 @@ public final class DuckCoverHoldManager {
 
     private static final Map<UUID, Integer> ticksHeld = new ConcurrentHashMap<>();
     private static final Set<UUID> achievedThisHold = ConcurrentHashMap.newKeySet();
+
+    static {
+        TickScheduler.register(DuckCoverHoldManager::tick);
+        // tick() only clears ticksHeld/achievedThisHold for a player found NON-compliant while
+        // iterating the currently-online player list — a player who disconnects mid-hold (still
+        // compliant at the moment they quit) never appears in that list again, so that cleanup
+        // branch never runs for them and both entries would otherwise sit there for the life of
+        // the server. Bounded by distinct-player-count either way, but under real classroom
+        // turnover (many students, many repeated drill attempts) this is easy to accumulate one
+        // stale pair of entries per disconnect-while-crouching.
+        PlayerLifecycleRegistry.registerLogoutHook(player -> {
+            UUID id = player.getUUID();
+            ticksHeld.remove(id);
+            achievedThisHold.remove(id);
+        });
+    }
 
     private DuckCoverHoldManager() {}
 
