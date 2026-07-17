@@ -1,6 +1,7 @@
 package net.necookie.disastersim.common.structure.building.modules;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.necookie.disastersim.common.structure.building.BuildingComponent;
@@ -43,16 +44,16 @@ public class LspuFacadeModule implements BuildingComponent {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 // Default: green main wall surface
-                var block = Blocks.GREEN_CONCRETE.defaultBlockState();
+                var block = Blocks.CONCRETE.pick(DyeColor.GREEN).defaultBlockState();
 
                 // Vertical pillar accent overrides the wall colour
                 if (x % PILLAR_SPACING == 0) {
-                    block = Blocks.BLUE_CONCRETE.defaultBlockState();
+                    block = Blocks.CONCRETE.pick(DyeColor.BLUE).defaultBlockState();
                 }
 
                 // Top trim overrides everything on the highest row
                 if (y == height - 1) {
-                    block = Blocks.RED_CONCRETE.defaultBlockState();
+                    block = Blocks.CONCRETE.pick(DyeColor.RED).defaultBlockState();
                 }
 
                 level.setBlock(pos.offset(x, y, 0), block, 3);

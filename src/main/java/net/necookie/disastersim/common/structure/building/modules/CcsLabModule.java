@@ -1,6 +1,7 @@
 package net.necookie.disastersim.common.structure.building.modules;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.necookie.disastersim.common.structure.building.BuildingComponent;
@@ -46,7 +47,7 @@ public class CcsLabModule implements BuildingComponent {
                 // Outer walls: 3 blocks high (y = 1..3), White Concrete
                 if (x == 0 || x == WIDTH - 1 || z == 0 || z == DEPTH - 1) {
                     for (int y = 1; y < WALL_HEIGHT; y++) {
-                        level.setBlock(pos.offset(x, y, z), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
+                        level.setBlock(pos.offset(x, y, z), Blocks.CONCRETE.pick(DyeColor.WHITE).defaultBlockState(), 3);
                     }
                 }
             }
@@ -66,7 +67,7 @@ public class CcsLabModule implements BuildingComponent {
                 level.setBlock(deskPos, Blocks.SMOOTH_QUARTZ.defaultBlockState(), 3);
 
                 // Monitor (Black Concrete on top of desk)
-                level.setBlock(deskPos.above(), Blocks.BLACK_CONCRETE.defaultBlockState(), 3);
+                level.setBlock(deskPos.above(), Blocks.CONCRETE.pick(DyeColor.BLACK).defaultBlockState(), 3);
 
                 // Keyboard/mouse proxy (Stone Button on monitor level, one block forward)
                 level.setBlock(deskPos.offset(0, 1, 1), Blocks.STONE_BUTTON.defaultBlockState(), 3);

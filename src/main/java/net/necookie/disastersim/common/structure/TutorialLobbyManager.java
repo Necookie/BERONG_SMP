@@ -4,8 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -132,17 +133,17 @@ public class TutorialLobbyManager {
         fill(level, base, 0, 0, 0, 19, 0, 39, Blocks.STONE_BRICKS);
 
         // Ceiling — red concrete with sea-lanterns (2 columns per section)
-        fill(level, base, 0, 6, 0, 19, 6, 39, Blocks.RED_CONCRETE);
+        fill(level, base, 0, 6, 0, 19, 6, 39, Blocks.CONCRETE.pick(DyeColor.RED));
         for (int lz : new int[]{4, 8, 15, 19, 25, 28, 34, 38}) {
             set(level, base,  5, 6, lz, Blocks.SEA_LANTERN);
             set(level, base, 14, 6, lz, Blocks.SEA_LANTERN);
         }
 
         // Outer walls — red concrete, Y=1-5
-        fill(level, base,  0, 1,  0, 19, 5,  0, Blocks.RED_CONCRETE); // front
-        fill(level, base,  0, 1, 39, 19, 5, 39, Blocks.RED_CONCRETE); // back
-        fill(level, base,  0, 1,  0,  0, 5, 39, Blocks.RED_CONCRETE); // west
-        fill(level, base, 19, 1,  0, 19, 5, 39, Blocks.RED_CONCRETE); // east
+        fill(level, base,  0, 1,  0, 19, 5,  0, Blocks.CONCRETE.pick(DyeColor.RED)); // front
+        fill(level, base,  0, 1, 39, 19, 5, 39, Blocks.CONCRETE.pick(DyeColor.RED)); // back
+        fill(level, base,  0, 1,  0,  0, 5, 39, Blocks.CONCRETE.pick(DyeColor.RED)); // west
+        fill(level, base, 19, 1,  0, 19, 5, 39, Blocks.CONCRETE.pick(DyeColor.RED)); // east
 
         // Default floor (polished andesite); sections override below
         fill(level, base, 1, 1, 1, 18, 1, 38, Blocks.POLISHED_ANDESITE);
@@ -155,10 +156,10 @@ public class TutorialLobbyManager {
         }
         // Yellow door frame + lintel
         for (int dy = 2; dy <= 4; dy++) {
-            set(level, base, 7,  dy, 0, Blocks.YELLOW_CONCRETE);
-            set(level, base, 12, dy, 0, Blocks.YELLOW_CONCRETE);
+            set(level, base, 7,  dy, 0, Blocks.CONCRETE.pick(DyeColor.YELLOW));
+            set(level, base, 12, dy, 0, Blocks.CONCRETE.pick(DyeColor.YELLOW));
         }
-        fill(level, base, 7, 5, 0, 12, 5, 0, Blocks.YELLOW_CONCRETE);
+        fill(level, base, 7, 5, 0, 12, 5, 0, Blocks.CONCRETE.pick(DyeColor.YELLOW));
 
         // Side windows — 2 blocks tall at regular Z intervals
         for (int wz : new int[]{5, 15, 25, 35}) {
@@ -175,10 +176,10 @@ public class TutorialLobbyManager {
 
         // ── SECTION 1: Entry Hall (Z=1-9) ──────────────────────────────────
         // BFP emblem centred on floor (5×5 red + yellow cross)
-        fill(level, base,  8, 1, 4, 12, 1, 8, Blocks.RED_CONCRETE);
-        fill(level, base,  9, 1, 4, 11, 1, 8, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  8, 1, 5, 12, 1, 7, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  9, 1, 5, 11, 1, 7, Blocks.RED_CONCRETE); // centre cross back to red
+        fill(level, base,  8, 1, 4, 12, 1, 8, Blocks.CONCRETE.pick(DyeColor.RED));
+        fill(level, base,  9, 1, 4, 11, 1, 8, Blocks.CONCRETE.pick(DyeColor.YELLOW));
+        fill(level, base,  8, 1, 5, 12, 1, 7, Blocks.CONCRETE.pick(DyeColor.YELLOW));
+        fill(level, base,  9, 1, 5, 11, 1, 7, Blocks.CONCRETE.pick(DyeColor.RED)); // centre cross back to red
         // Reception counter — Sgt. Reyes stands at NPC_TRAINER_OFFSET (X=4,Z=5)
         fill(level, base, 2, 2, 2, 7, 2, 2, Blocks.OAK_PLANKS);
         fill(level, base, 2, 3, 2, 7, 3, 2, Blocks.OAK_PLANKS);
@@ -186,40 +187,40 @@ public class TutorialLobbyManager {
         fill(level, base, 14, 2, 2, 17, 2, 8, Blocks.OAK_PLANKS);
         // BFP colour stripe on west wall
         for (int pz = 3; pz <= 8; pz++) {
-            set(level, base, 0, 3, pz, pz % 2 == 0 ? Blocks.RED_CONCRETE   : Blocks.WHITE_CONCRETE);
-            set(level, base, 0, 4, pz, pz % 2 == 0 ? Blocks.WHITE_CONCRETE : Blocks.RED_CONCRETE);
+            set(level, base, 0, 3, pz, pz % 2 == 0 ? Blocks.CONCRETE.pick(DyeColor.RED)   : Blocks.CONCRETE.pick(DyeColor.WHITE));
+            set(level, base, 0, 4, pz, pz % 2 == 0 ? Blocks.CONCRETE.pick(DyeColor.WHITE) : Blocks.CONCRETE.pick(DyeColor.RED));
         }
 
         // ── SECTION 2: Fire Practice Area (Z=11-20) ────────────────────────
         // Danger floor: yellow border, orange interior
-        fill(level, base,  1, 1, 11, 18, 1, 20, Blocks.YELLOW_CONCRETE);
-        fill(level, base,  2, 1, 12, 17, 1, 19, Blocks.ORANGE_CONCRETE);
+        fill(level, base,  1, 1, 11, 18, 1, 20, Blocks.CONCRETE.pick(DyeColor.YELLOW));
+        fill(level, base,  2, 1, 12, 17, 1, 19, Blocks.CONCRETE.pick(DyeColor.ORANGE));
         // Extinguisher rack on east wall
-        fill(level, base, 18, 2, 13, 18, 5, 18, Blocks.RED_CONCRETE);
+        fill(level, base, 18, 2, 13, 18, 5, 18, Blocks.CONCRETE.pick(DyeColor.RED));
         // Warning chevrons on divider Z=10 — start at X=12 to keep the passage (X=9-11) clear
         for (int cx = 12; cx <= 18; cx++)
-            set(level, base, cx, 2, 10, cx % 2 == 0 ? Blocks.YELLOW_CONCRETE : Blocks.RED_CONCRETE);
+            set(level, base, cx, 2, 10, cx % 2 == 0 ? Blocks.CONCRETE.pick(DyeColor.YELLOW) : Blocks.CONCRETE.pick(DyeColor.RED));
 
         // ── SECTION 3: Extinguisher Types Room (Z=22-30) ───────────────────
-        fill(level, base, 1, 1, 22, 18, 1, 30, Blocks.LIGHT_BLUE_CONCRETE);
+        fill(level, base, 1, 1, 22, 18, 1, 30, Blocks.CONCRETE.pick(DyeColor.LIGHT_BLUE));
         // Instructor desk (Officer Cruz at X=4,Z=25)
         fill(level, base, 1, 2, 22, 6, 2, 22, Blocks.OAK_PLANKS);
         fill(level, base, 1, 3, 22, 6, 3, 22, Blocks.OAK_PLANKS);
         // Class A pedestal — green (ordinary combustibles) at X=3-4, Z=28
         fill(level, base, 3, 2, 28, 4, 2, 28, Blocks.STONE_BRICKS);
-        fill(level, base, 3, 3, 28, 4, 4, 28, Blocks.GREEN_WOOL);
-        fill(level, base, 3, 1, 28, 4, 1, 28, Blocks.GREEN_CONCRETE);
+        fill(level, base, 3, 3, 28, 4, 4, 28, Blocks.WOOL.pick(DyeColor.GREEN));
+        fill(level, base, 3, 1, 28, 4, 1, 28, Blocks.CONCRETE.pick(DyeColor.GREEN));
         // Class B pedestal — yellow (flammable liquids) at X=9-10, Z=28
         fill(level, base, 9, 2, 28, 10, 2, 28, Blocks.STONE_BRICKS);
-        fill(level, base, 9, 3, 28, 10, 4, 28, Blocks.YELLOW_WOOL);
-        fill(level, base, 9, 1, 28, 10, 1, 28, Blocks.YELLOW_CONCRETE);
+        fill(level, base, 9, 3, 28, 10, 4, 28, Blocks.WOOL.pick(DyeColor.YELLOW));
+        fill(level, base, 9, 1, 28, 10, 1, 28, Blocks.CONCRETE.pick(DyeColor.YELLOW));
         // Class C pedestal — blue (electrical) at X=15-16, Z=28
         fill(level, base, 15, 2, 28, 16, 2, 28, Blocks.STONE_BRICKS);
-        fill(level, base, 15, 3, 28, 16, 4, 28, Blocks.BLUE_WOOL);
-        fill(level, base, 15, 1, 28, 16, 1, 28, Blocks.BLUE_CONCRETE);
+        fill(level, base, 15, 3, 28, 16, 4, 28, Blocks.WOOL.pick(DyeColor.BLUE));
+        fill(level, base, 15, 1, 28, 16, 1, 28, Blocks.CONCRETE.pick(DyeColor.BLUE));
 
         // ── SECTION 4: Earthquake Drill Zone (Z=32-39) ─────────────────────
-        fill(level, base, 1, 1, 32, 18, 1, 38, Blocks.GRAY_CONCRETE);
+        fill(level, base, 1, 1, 32, 18, 1, 38, Blocks.CONCRETE.pick(DyeColor.GRAY));
         // Cracked tiles scattered around
         for (int[] ct : new int[][]{{4,33},{10,35},{16,37},{7,36},{14,34}})
             set(level, base, ct[0], 1, ct[1], Blocks.CRACKED_STONE_BRICKS);
@@ -240,8 +241,8 @@ public class TutorialLobbyManager {
         fill(level, base, 1, 2, 32, 6, 2, 32, Blocks.OAK_PLANKS);
         fill(level, base, 1, 3, 32, 6, 3, 32, Blocks.OAK_PLANKS);
         // BFP badge on back wall
-        fill(level, base, 7, 2, 39, 12, 4, 39, Blocks.YELLOW_CONCRETE);
-        fill(level, base, 9, 2, 39, 10, 4, 39, Blocks.RED_CONCRETE);
+        fill(level, base, 7, 2, 39, 12, 4, 39, Blocks.CONCRETE.pick(DyeColor.YELLOW));
+        fill(level, base, 9, 2, 39, 10, 4, 39, Blocks.CONCRETE.pick(DyeColor.RED));
     }
 
     /** Places a section-divider wall at the given Z with a 3-block passage at X=9-11, Y=2-3. */
@@ -249,7 +250,7 @@ public class TutorialLobbyManager {
         for (int x = 1; x <= 18; x++) {
             for (int y = 2; y <= 5; y++) {
                 if ((x >= 9 && x <= 11) && (y == 2 || y == 3)) continue; // passage
-                level.setBlock(base.offset(x, y, z), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
+                level.setBlock(base.offset(x, y, z), Blocks.CONCRETE.pick(DyeColor.WHITE).defaultBlockState(), 3);
             }
         }
     }
@@ -278,7 +279,7 @@ public class TutorialLobbyManager {
     }
 
     private static void spawnNpc(ServerLevel level, BlockPos pos, NpcRole role, String name) {
-        Villager villager = new Villager(EntityType.VILLAGER, level);
+        Villager villager = new Villager(EntityTypes.VILLAGER, level);
         villager.setNoAi(true);
         villager.setSilent(true);
         villager.setInvulnerable(true);

@@ -3,6 +3,7 @@ package net.necookie.disastersim.common.structure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -196,7 +197,7 @@ public final class AcademyBuildingManager {
 
     private static void placeGreenMarks(ServerLevel level) {
         for (BlockPos pos : GREEN_MARK_FLOOR) {
-            level.setBlock(pos, Blocks.LIME_CONCRETE.defaultBlockState(), 3);
+            level.setBlock(pos, Blocks.CONCRETE.pick(DyeColor.LIME).defaultBlockState(), 3);
         }
         BerongSMP.LOGGER.info("Placed {} lime concrete WASD marks in the Academy briefing zone", GREEN_MARK_FLOOR.size());
     }

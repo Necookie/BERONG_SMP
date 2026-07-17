@@ -1,6 +1,7 @@
 package net.necookie.disastersim.common.structure.building.modules;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.necookie.disastersim.common.structure.building.BuildingComponent;
@@ -48,7 +49,7 @@ public class LspuHallwayModule implements BuildingComponent {
                 level.setBlock(pos.offset(x, 0, z), Blocks.POLISHED_DIORITE.defaultBlockState(), 3);
 
                 // Ceiling: White Concrete (overwritten by sea lantern where applicable)
-                level.setBlock(pos.offset(x, WALL_HEIGHT, z), Blocks.WHITE_CONCRETE.defaultBlockState(), 3);
+                level.setBlock(pos.offset(x, WALL_HEIGHT, z), Blocks.CONCRETE.pick(DyeColor.WHITE).defaultBlockState(), 3);
 
                 // Overhead lighting: Sea Lantern centred on the ceiling every LIGHT_SPACING blocks
                 if (z % LIGHT_SPACING == 0 && x == CENTRE_COL) {
@@ -60,8 +61,8 @@ public class LspuHallwayModule implements BuildingComponent {
                     for (int y = 1; y < WALL_HEIGHT; y++) {
                         // Two-tone: Light Blue base (y=1), White Concrete above
                         var block = (y == 1)
-                                ? Blocks.LIGHT_BLUE_CONCRETE.defaultBlockState()
-                                : Blocks.WHITE_CONCRETE.defaultBlockState();
+                                ? Blocks.CONCRETE.pick(DyeColor.LIGHT_BLUE).defaultBlockState()
+                                : Blocks.CONCRETE.pick(DyeColor.WHITE).defaultBlockState();
                         level.setBlock(pos.offset(x, y, z), block, 3);
                     }
                 }
