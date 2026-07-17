@@ -4,7 +4,7 @@ BerongSMP - Client Setup
 WHAT THIS IS
 ------------
 This installs everything you need to join the BerongSMP server:
-the NeoForge mod loader (version 26.1.2.80) and the BerongSMP mod itself.
+the NeoForge mod loader (version 26.2.0.23-beta) and the BerongSMP mod itself.
 
 BEFORE YOU START
 -----------------
@@ -28,7 +28,7 @@ HOW TO INSTALL
 4. A black window will open and do the setup automatically:
      - checks that Minecraft is installed
      - finds Java
-     - installs NeoForge 26.1.2.80
+     - installs NeoForge 26.2.0.23-beta
      - installs the BerongSMP mod
    This takes a minute or two. When it says "Install complete!", press
    Enter to close the window.
@@ -37,7 +37,7 @@ AFTER INSTALLING
 ------------------
 1. Open the Minecraft Launcher.
 2. In the profile dropdown (top of the Play button), select
-   "NeoForge 26.1.2.80".
+   "NeoForge 26.2.0.23-beta".
 3. Click Play.
 4. Once you're in the game, go to Multiplayer.
 5. Click "Add Server".
@@ -53,5 +53,5 @@ TROUBLESHOOTING
   Install-BerongSMP.exe and choose "Run as administrator", or let us
   know so we can help.
 - Can't connect to the server -> double check the server address was
-  typed/pasted exactly, and that you selected the NeoForge 26.1.2.80
+  typed/pasted exactly, and that you selected the NeoForge 26.2.0.23-beta
   profile (not vanilla/plain Minecraft) before clicking Play.
