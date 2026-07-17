@@ -52,8 +52,12 @@ import net.necookie.disastersim.common.scheduling.TickScheduler;
  * and {@link #emitPhaseTransition}, which are package-private for exactly that reason.
  *
  * <p>{@link #startSimulation}/{@link #endSimulation} are {@code synchronized}; everything else runs
- * single-threaded on the server tick thread. Buildings are (re)placed from {@link #BUILDINGS} on both
- * start and end so every session begins with clean, undamaged structures.
+ * single-threaded on the server tick thread. Each session places (on start) and restores (on end)
+ * only its own physical {@link Arena} — see {@link #arenaFor}/{@link #ARENA_BUILDINGS}/{@link
+ * #placeArena} — never every building on the server; {@link #arenaOccupants} refuses a second
+ * session from starting in an arena another session is still using, since two sessions sharing a
+ * building would otherwise reset each other's world state out from under them. {@link #BUILDINGS}
+ * (every building at once) is now reserved for the {@code /place_buildings} dev command alone.
  *
  * <p><b>Hot path:</b> the fire-proximity scan ({@link #nearestFireDistance}) is the most frequent
  * heavy world read. It is memoised per (game-tick, position) so the several callers that need it for
@@ -97,16 +101,60 @@ public class SimulationManager {
 
     private static final Set<UUID> pendingLobbyRespawn = ConcurrentHashMap.newKeySet();
 
-    private static final List<Map.Entry<StructurePlacer, BlockPos>> BUILDINGS = List.of(
-            Map.entry(new SimulationStructureLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspu_library_main")), SIM_POS),
-            Map.entry(new SchemLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1), SSC_POS),
-            Map.entry(new SchemLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building.schem"), 0), CCS_POS),
-            Map.entry(new SchemLoader(
-                    Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/new_sim_building2.0.schem"), 0), NEW_SIM_BUILDING2_POS)
+    // Named per-building placer/origin pairs — split out of the old single BUILDINGS list so
+    // startSimulation/endSimulation can place only the one arena a session actually uses (see
+    // Arena/ARENA_BUILDINGS below) instead of unconditionally rewriting every building on the
+    // server on every single session start/end/logout, which used to corrupt any OTHER
+    // concurrently-running session by resetting its arena's blocks/hazards/fire mid-run.
+    private static final Map.Entry<StructurePlacer, BlockPos> LIBRARY_BUILDING = Map.entry(
+            new SimulationStructureLoader(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "lspu_library_main")),
+            SIM_POS);
+    private static final Map.Entry<StructurePlacer, BlockPos> SSC_BUILDING = Map.entry(
+            new SchemLoader(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ssc_building.schem"), 1),
+            SSC_POS);
+    private static final Map.Entry<StructurePlacer, BlockPos> CCS_BUILDING = Map.entry(
+            new SchemLoader(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/ccs_admin_building.schem"), 0),
+            CCS_POS);
+    private static final Map.Entry<StructurePlacer, BlockPos> NEW_SIM2_BUILDING = Map.entry(
+            new SchemLoader(Identifier.fromNamespaceAndPath(BerongSMP.MODID, "structure/new_sim_building2.0.schem"), 0),
+            NEW_SIM_BUILDING2_POS);
+
+    /** Every building on the server — only ever placed all-at-once by the {@code /place_buildings} dev command. */
+    private static final List<Map.Entry<StructurePlacer, BlockPos>> BUILDINGS =
+            List.of(LIBRARY_BUILDING, SSC_BUILDING, CCS_BUILDING, NEW_SIM2_BUILDING);
+
+    /**
+     * The three physically-distinct simulation arenas. A {@link SimulationState} always maps to
+     * exactly one of these (see {@link #arenaFor}) — two states can share an arena (FIRE and
+     * EARTHQUAKE both run in {@link #LIBRARY}, CCS_FIRE and CCS_EARTHQUAKE both run in {@link
+     * #CCS}), which is exactly why occupancy has to be tracked per-arena rather than per-state:
+     * placing the Library building for a second FIRE session would just as surely wreck an
+     * in-progress EARTHQUAKE session sharing that same building.
+     */
+    private enum Arena { LIBRARY, CCS, NEW_SIM_BUILDING2 }
+
+    /** SSC is co-placed with the Library building purely because it always was in the old blanket-{@link #BUILDINGS} loop — its footprint's actual overlap with the Library arena's effect radius has never been surveyed, so this preserves existing behavior for it exactly rather than guessing it's safe to stop re-placing. */
+    private static final Map<Arena, List<Map.Entry<StructurePlacer, BlockPos>>> ARENA_BUILDINGS = Map.of(
+            Arena.LIBRARY,           List.of(LIBRARY_BUILDING, SSC_BUILDING),
+            Arena.CCS,               List.of(CCS_BUILDING),
+            Arena.NEW_SIM_BUILDING2, List.of(NEW_SIM2_BUILDING)
     );
+
+    /** Which arena, if any, currently has a session running in it — the occupancy guard {@link #startSimulation} checks. */
+    private static final Map<Arena, UUID> arenaOccupants = new ConcurrentHashMap<>();
+
+    private static Arena arenaFor(SimulationState state) {
+        return switch (state) {
+            case FIRE, EARTHQUAKE -> Arena.LIBRARY;
+            case CCS_FIRE, CCS_EARTHQUAKE -> Arena.CCS;
+            case NEW_SIM_BUILDING2_FIRE -> Arena.NEW_SIM_BUILDING2;
+            case IDLE -> throw new IllegalStateException("IDLE has no arena — should never reach here");
+        };
+    }
+
+    private static void placeArena(ServerLevel level, Arena arena) {
+        for (var entry : ARENA_BUILDINGS.get(arena)) entry.getKey().place(level, entry.getValue());
+    }
 
     /** Package-private (not private) so {@link LegacyFireTicker}/{@link NewSim2FireTicker}/{@link EarthquakeTicker} can call them. */
     static final FireEffects FIRE_EFFECTS = new FireEffects();
@@ -123,8 +171,9 @@ public class SimulationManager {
         public boolean isCCS()   { return this == CCS_FIRE || this == CCS_EARTHQUAKE; }
     }
 
-    // CCS building fire spawn area (world space after 3-CCW placement at CCS_POS).
-    // Spans the building interior; X: 80–135, Z: 6–69, Y covers both floors.
+    // CCS building fire spawn area (world space after placement at CCS_POS with 0 CCW rotations —
+    // this comment previously said "3-CCW", stale relative to the actual CCS_BUILDING placement
+    // above). Spans the building interior; X: 80–135, Z: 6–69, Y covers both floors.
     private static final BlockPos CCS_FIRE_BASE  = new BlockPos(80, -32, 6);
     private static final int CCS_AREA_SPAN_X = 55;
     private static final int CCS_AREA_SPAN_Z = 63;
@@ -154,8 +203,24 @@ public class SimulationManager {
             return;
         }
 
+        // Arena occupancy guard: two sessions sharing a physical building (e.g. two FIRE runs, or
+        // a FIRE and an EARTHQUAKE run, both in the Library) would each re-place that building on
+        // their own start/end, silently resetting the other session's world state — armed hazards,
+        // fire, damage, everything — out from under it. Refuse rather than let that happen; the
+        // occupant check also self-heals if arenaOccupants ever went stale (a session that ended
+        // without properly clearing it), since it only blocks while the recorded occupant still has
+        // a real active session.
+        Arena arena = arenaFor(state);
+        UUID occupant = arenaOccupants.get(arena);
+        if (occupant != null && activeSessions.containsKey(occupant)) {
+            player.sendSystemMessage(Component.literal(
+                    "§cThat building is currently in use by another student — please try again in a moment."));
+            return;
+        }
+
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
+        arenaOccupants.put(arena, uuid);
 
         // Bind arena bounds so effects and epicenter calculations target the right building.
         if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
@@ -176,8 +241,9 @@ public class SimulationManager {
             session.initEarthquake(level.getRandom(), magnitude);
         }
 
-        // Place all buildings so every session starts with clean, undamaged structures.
-        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+        // Place only this session's own arena so every run starts with clean, undamaged
+        // structures — NOT every building on the server (see Arena/ARENA_BUILDINGS above).
+        placeArena(level, arena);
         TelemetryCsvWriter.scanAndRegisterFireAlarms(level, SIM_POS);
         if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
             TelemetryCsvWriter.scanAndRegisterNewSim2FireAlarms(level,
@@ -346,6 +412,11 @@ public class SimulationManager {
         SimulationSession session = activeSessions.remove(uuid);
         if (session == null) return;
 
+        // Release the arena occupancy guard — compare-and-remove so a stale/duplicate call can
+        // never accidentally free an arena a DIFFERENT, still-running session has since claimed.
+        Arena arena = arenaFor(session.getState());
+        arenaOccupants.remove(arena, uuid);
+
         int finalScore = 0;
         NewSimScoring.Result newSimResult = null;
         if (session.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE) {
@@ -423,7 +494,9 @@ public class SimulationManager {
         if (player == null) return;
 
         ServerLevel level = (ServerLevel) player.level();
-        for (var entry : BUILDINGS) entry.getKey().place(level, entry.getValue());
+        // Restore only this session's own arena — not every building on the server (see
+        // Arena/ARENA_BUILDINGS above). Other arenas may have their own sessions running right now.
+        placeArena(level, arena);
 
         if (player.isAlive()) {
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
