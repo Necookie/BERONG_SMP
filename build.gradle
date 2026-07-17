@@ -161,9 +161,17 @@ dependencies {
     compileOnly("com.sk89q.worldedit:worldedit-neoforge-mc${worldedit_mc_version}:${worldedit_version}") {
         exclude group: 'org.enginehub.worldeditcui-protocol'
     }
-    localRuntime("com.sk89q.worldedit:worldedit-neoforge-mc${worldedit_mc_version}:${worldedit_version}:dist") {
-        exclude group: 'org.enginehub.worldeditcui-protocol'
-    }
+    // localRuntime intentionally disabled while neo_version is pinned to 26.2.0.0-beta: WorldEdit
+    // 7.4.4's own mods.toml requires NeoForge 26.2.0.7-beta or above (confirmed via a real
+    // runServer FML rejection: "Mod worldedit requires neoforge 26.2.0.7-beta or above, Currently
+    // neoforge is 26.2.0.0-beta") — a version floor set by WorldEdit itself, nothing this project
+    // controls. //copyroom (CopyRoomCommand) is already designed to work with WorldEdit absent
+    // (ModList.isLoaded("worldedit") guard at the ModCommands.register() call site), so this only
+    // disables the dev-time //copyroom convenience, not anything players use. Re-enable once either
+    // MCServerHost offers a newer 26.2 build, or a WorldEdit release compatible with .0-beta exists.
+    // localRuntime("com.sk89q.worldedit:worldedit-neoforge-mc${worldedit_mc_version}:${worldedit_version}:dist") {
+    //     exclude group: 'org.enginehub.worldeditcui-protocol'
+    // }
 
     // Unit testing
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
