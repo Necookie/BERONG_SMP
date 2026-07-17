@@ -53,11 +53,12 @@ import net.necookie.disastersim.common.scheduling.TickScheduler;
  *
  * <p>{@link #startSimulation}/{@link #endSimulation} are {@code synchronized}; everything else runs
  * single-threaded on the server tick thread. Each session places (on start) and restores (on end)
- * only its own physical {@link Arena} — see {@link #arenaFor}/{@link #ARENA_BUILDINGS}/{@link
- * #placeArena} — never every building on the server; {@link #arenaOccupants} refuses a second
- * session from starting in an arena another session is still using, since two sessions sharing a
- * building would otherwise reset each other's world state out from under them. {@link #BUILDINGS}
- * (every building at once) is now reserved for the {@code /place_buildings} dev command alone.
+ * only its own physical {@link SimulationArenas.Arena} — see {@link SimulationArenas#arenaFor}/
+ * {@link #ARENA_BUILDINGS}/{@link #placeArena} — never every building on the server; {@link
+ * #arenaOccupants} refuses a second session from starting in an arena another session is still
+ * using, since two sessions sharing a building would otherwise reset each other's world state out
+ * from under them. {@link #BUILDINGS} (every building at once) is now reserved for the {@code
+ * /place_buildings} dev command alone.
  *
  * <p><b>Hot path:</b> the fire-proximity scan ({@link #nearestFireDistance}) is the most frequent
  * heavy world read. It is memoised per (game-tick, position) so the several callers that need it for
@@ -124,35 +125,24 @@ public class SimulationManager {
             List.of(LIBRARY_BUILDING, SSC_BUILDING, CCS_BUILDING, NEW_SIM2_BUILDING);
 
     /**
-     * The three physically-distinct simulation arenas. A {@link SimulationState} always maps to
-     * exactly one of these (see {@link #arenaFor}) — two states can share an arena (FIRE and
-     * EARTHQUAKE both run in {@link #LIBRARY}, CCS_FIRE and CCS_EARTHQUAKE both run in {@link
-     * #CCS}), which is exactly why occupancy has to be tracked per-arena rather than per-state:
-     * placing the Library building for a second FIRE session would just as surely wreck an
-     * in-progress EARTHQUAKE session sharing that same building.
+     * The {@link SimulationArenas.Arena} mapping/occupancy guard below is keyed by physical arena,
+     * not by {@link SimulationState}, precisely because two states can share one arena (FIRE and
+     * EARTHQUAKE both run in {@link #LIBRARY_BUILDING}'s building, CCS_FIRE and CCS_EARTHQUAKE both
+     * run in {@link #CCS_BUILDING}'s) — placing the Library building for a second FIRE session
+     * would just as surely wreck an in-progress EARTHQUAKE session sharing that same building. See
+     * {@link SimulationArenas} for the pure state→arena mapping (kept in its own NeoForge-free
+     * class specifically so it's unit-testable — see {@code SimulationArenasTest}).
      */
-    private enum Arena { LIBRARY, CCS, NEW_SIM_BUILDING2 }
-
-    /** SSC is co-placed with the Library building purely because it always was in the old blanket-{@link #BUILDINGS} loop — its footprint's actual overlap with the Library arena's effect radius has never been surveyed, so this preserves existing behavior for it exactly rather than guessing it's safe to stop re-placing. */
-    private static final Map<Arena, List<Map.Entry<StructurePlacer, BlockPos>>> ARENA_BUILDINGS = Map.of(
-            Arena.LIBRARY,           List.of(LIBRARY_BUILDING, SSC_BUILDING),
-            Arena.CCS,               List.of(CCS_BUILDING),
-            Arena.NEW_SIM_BUILDING2, List.of(NEW_SIM2_BUILDING)
+    private static final Map<SimulationArenas.Arena, List<Map.Entry<StructurePlacer, BlockPos>>> ARENA_BUILDINGS = Map.of(
+            SimulationArenas.Arena.LIBRARY,           List.of(LIBRARY_BUILDING, SSC_BUILDING),
+            SimulationArenas.Arena.CCS,               List.of(CCS_BUILDING),
+            SimulationArenas.Arena.NEW_SIM_BUILDING2, List.of(NEW_SIM2_BUILDING)
     );
 
     /** Which arena, if any, currently has a session running in it — the occupancy guard {@link #startSimulation} checks. */
-    private static final Map<Arena, UUID> arenaOccupants = new ConcurrentHashMap<>();
+    private static final Map<SimulationArenas.Arena, UUID> arenaOccupants = new ConcurrentHashMap<>();
 
-    private static Arena arenaFor(SimulationState state) {
-        return switch (state) {
-            case FIRE, EARTHQUAKE -> Arena.LIBRARY;
-            case CCS_FIRE, CCS_EARTHQUAKE -> Arena.CCS;
-            case NEW_SIM_BUILDING2_FIRE -> Arena.NEW_SIM_BUILDING2;
-            case IDLE -> throw new IllegalStateException("IDLE has no arena — should never reach here");
-        };
-    }
-
-    private static void placeArena(ServerLevel level, Arena arena) {
+    private static void placeArena(ServerLevel level, SimulationArenas.Arena arena) {
         for (var entry : ARENA_BUILDINGS.get(arena)) entry.getKey().place(level, entry.getValue());
     }
 
@@ -210,7 +200,7 @@ public class SimulationManager {
         // occupant check also self-heals if arenaOccupants ever went stale (a session that ended
         // without properly clearing it), since it only blocks while the recorded occupant still has
         // a real active session.
-        Arena arena = arenaFor(state);
+        SimulationArenas.Arena arena = SimulationArenas.arenaFor(state);
         UUID occupant = arenaOccupants.get(arena);
         if (occupant != null && activeSessions.containsKey(occupant)) {
             player.sendSystemMessage(Component.literal(
@@ -451,7 +441,7 @@ public class SimulationManager {
 
         // Release the arena occupancy guard — compare-and-remove so a stale/duplicate call can
         // never accidentally free an arena a DIFFERENT, still-running session has since claimed.
-        Arena arena = arenaFor(session.getState());
+        SimulationArenas.Arena arena = SimulationArenas.arenaFor(session.getState());
         arenaOccupants.remove(arena, uuid);
 
         int finalScore = 0;
