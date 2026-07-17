@@ -410,34 +410,7 @@ public class SimulationManager {
             String simType = session.getState().name(); // FIRE, EARTHQUAKE, CCS_FIRE, CCS_EARTHQUAKE, or NEW_SIM_BUILDING2_FIRE
             net.necookie.disastersim.BerongSMP.LOGGER.info(
                     "[SimulationManager] endSimulation uuid={} simType={} score={}", uuid, simType, finalScore);
-            if (newSimResult != null) {
-                // Only New Sim Building 2.0 writes prep_level — every other scenario type must
-                // leave the column untouched, since a BFP instructor may already have set it
-                // manually via /bfp prep_level and this UPDATE would otherwise null it back out.
-                TursoClient.executeAsync(
-                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, prep_level=?," +
-                        " end_time=?, status='completed', event_log=?, move_log_csv=?, fire_log_csv=?" +
-                        " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
-                        " ORDER BY id DESC LIMIT 1)",
-                        simType, finalScore, passed, newSimResult.prepLevel(),
-                        java.time.Instant.now().toString(),
-                        session.logger.toJson(),
-                        session.buildMoveCsv(),
-                        session.buildFireLogCsv(),
-                        uuid.toString());
-            } else {
-                TursoClient.executeAsync(
-                        "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
-                        " end_time=?, status='completed', event_log=?, move_log_csv=?, fire_log_csv=?" +
-                        " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
-                        " ORDER BY id DESC LIMIT 1)",
-                        simType, finalScore, passed,
-                        java.time.Instant.now().toString(),
-                        session.logger.toJson(),
-                        session.buildMoveCsv(),
-                        session.buildFireLogCsv(),
-                        uuid.toString());
-            }
+            persistSessionEnd(session, uuid, simType, finalScore, passed, newSimResult);
         } else {
             net.necookie.disastersim.BerongSMP.LOGGER.warn(
                     "[SimulationManager] TursoClient not ready — session data NOT saved for {}", uuid);
@@ -487,6 +460,51 @@ public class SimulationManager {
         } else {
             pendingLobbyRespawn.add(uuid);
         }
+    }
+
+    /**
+     * Persists a finished session's result to Turso in two independent statements instead of one:
+     * the score/status/event_log columns, and the (potentially large, now size-capped — see
+     * {@link SimulationSession#bufferCsvRow}) {@code move_log_csv}/{@code fire_log_csv} blob
+     * columns. Splitting them means an oversized or failing blob write can never also take the
+     * session's actual score/passed/status down with it (Turso's fire-and-forget writes fail as a
+     * whole statement).
+     *
+     * <p>The blob statement deliberately targets its row via {@code account_uuid=? ORDER BY id DESC
+     * LIMIT 1} — <em>without</em> the {@code status='active'} filter the core-fields statement uses
+     * — because these are two independent async writes with no ordering guarantee between them: by
+     * the time the blob write fires, the core-fields write may already have flipped this row's
+     * status to {@code 'completed'}, which would make an identical {@code status='active'} filter
+     * match zero rows. "Most recent row for this account" is unambiguous regardless of status,
+     * since ids are monotonic and {@code SessionManager.checkin} always inserts a fresh row per
+     * session start.
+     */
+    private static void persistSessionEnd(SimulationSession session, UUID uuid, String simType,
+                                           int finalScore, boolean passed, NewSimScoring.Result newSimResult) {
+        String eventLogJson = session.logger.toJson();
+        String endTime = java.time.Instant.now().toString();
+        if (newSimResult != null) {
+            // Only New Sim Building 2.0 writes prep_level — every other scenario type must leave
+            // the column untouched, since a BFP instructor may already have set it manually via
+            // /bfp prep_level and this UPDATE would otherwise null it back out.
+            TursoClient.executeAsync(
+                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?, prep_level=?," +
+                    " end_time=?, status='completed', event_log=?" +
+                    " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                    " ORDER BY id DESC LIMIT 1)",
+                    simType, finalScore, passed, newSimResult.prepLevel(), endTime, eventLogJson, uuid.toString());
+        } else {
+            TursoClient.executeAsync(
+                    "UPDATE sessions SET simulation_type=?, simulation_score=?, passed=?," +
+                    " end_time=?, status='completed', event_log=?" +
+                    " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? AND status='active'" +
+                    " ORDER BY id DESC LIMIT 1)",
+                    simType, finalScore, passed, endTime, eventLogJson, uuid.toString());
+        }
+        TursoClient.executeAsync(
+                "UPDATE sessions SET move_log_csv=?, fire_log_csv=?" +
+                " WHERE id=(SELECT id FROM sessions WHERE account_uuid=? ORDER BY id DESC LIMIT 1)",
+                session.buildMoveCsv(), session.buildFireLogCsv(), uuid.toString());
     }
 
     public static void placeAllBuildings(ServerLevel level) {

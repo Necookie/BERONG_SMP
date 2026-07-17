@@ -39,7 +39,28 @@ public class SimulationSession {
         "hit_fire,extinguisher_class,phase";
     private final StringBuilder csvBuffer = new StringBuilder(CSV_HEADER).append('\n');
 
-    public void bufferCsvRow(String row) { csvBuffer.append(row).append('\n'); }
+    /**
+     * Hard cap (in characters, an adequate proxy for bytes — this content is plain ASCII) on the
+     * in-memory move-tick CSV sent to Turso as a single {@code move_log_csv} column value. At 20 Hz
+     * a long or GM-extended session can otherwise grow this unboundedly; a single Turso UPDATE
+     * parameter that ends up multiple megabytes risks the whole write failing (which, before the
+     * blob columns were split into their own statement — see {@code SimulationManager.endSimulation}
+     * — used to also take the session's score/passed/event_log down with it). The local
+     * {@code run/telemetry/gameplay_logs_*.csv} file (written row-by-row as it happens, see
+     * {@code TelemetryCsvWriter}) always has the complete, untruncated record regardless of this cap.
+     */
+    private static final int MAX_MOVE_CSV_CHARS = 3 * 1024 * 1024; // 3 MB
+    private boolean moveCsvTruncated = false;
+
+    public void bufferCsvRow(String row) {
+        if (moveCsvTruncated) return;
+        if (csvBuffer.length() + row.length() + 1 > MAX_MOVE_CSV_CHARS) {
+            csvBuffer.append("TRUNCATED — move_log_csv exceeded its size cap; see the local telemetry CSV for the full record\n");
+            moveCsvTruncated = true;
+            return;
+        }
+        csvBuffer.append(row).append('\n');
+    }
     public String buildMoveCsv() { return csvBuffer.toString(); }
 
     /**
@@ -56,7 +77,19 @@ public class SimulationSession {
     private static final String FIRE_LOG_HEADER = "session_id,timestamp,x,y,z,event";
     private final StringBuilder fireLogBuffer = new StringBuilder(FIRE_LOG_HEADER).append('\n');
 
-    public void bufferFireLogRow(String row) { fireLogBuffer.append(row).append('\n'); }
+    /** Same rationale/idiom as {@link #MAX_MOVE_CSV_CHARS} — fire events are far less frequent than move ticks, so a smaller cap suffices. */
+    private static final int MAX_FIRE_LOG_CSV_CHARS = 512 * 1024; // 512 KB
+    private boolean fireLogCsvTruncated = false;
+
+    public void bufferFireLogRow(String row) {
+        if (fireLogCsvTruncated) return;
+        if (fireLogBuffer.length() + row.length() + 1 > MAX_FIRE_LOG_CSV_CHARS) {
+            fireLogBuffer.append("TRUNCATED — fire_log_csv exceeded its size cap; see the local telemetry CSV for the full record\n");
+            fireLogCsvTruncated = true;
+            return;
+        }
+        fireLogBuffer.append(row).append('\n');
+    }
     public String buildFireLogCsv() { return fireLogBuffer.toString(); }
 
     private final String sessionId = UUID.randomUUID().toString().substring(0, 8);
