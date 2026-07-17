@@ -1,7 +1,7 @@
 package net.necookie.disastersim.client;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -19,7 +19,7 @@ public final class ItemDescriptionTooltip {
     public static void onItemTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
         String descKey = stack.getItem().getDescriptionId() + ".desc";
-        if (I18n.exists(descKey)) {
+        if (Language.getInstance().has(descKey)) {
             event.getToolTip().add(Component.translatable(descKey).withStyle(ChatFormatting.GRAY));
         }
     }
