@@ -25,6 +25,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Base for hazard prop blocks that carry a horizontal {@code FACING} alongside {@code hazardous}
  * and {@code on_fire}. Replicates the FACING boilerplate from
@@ -140,29 +143,42 @@ public abstract class HazardFacingBlock extends Block {
         igniteAdjacent(level, pos, 1);
     }
 
-    /** Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is standing in/near. */
-    public static void igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
-        int lit = 0;
+    /**
+     * Lights up to {@code maxBlocks} adjacent air blocks on fire, never a block a player is
+     * standing in/near. Returns the positions actually lit, matching {@link HazardBlock#igniteAdjacent}
+     * exactly (kept in sync since the 2026-07-14 pass that added this return value to that sibling
+     * method — every current {@code onHazardFailure} override across both hazard base classes
+     * discards it as a bare statement, so this was previously left {@code void} with no live
+     * functional impact, but a facing-type hazard prop written to mirror {@code NewSim2FireTicker}'s
+     * pattern of iterating the result would have hit a confusing compile error).
+     */
+    public static List<BlockPos> igniteAdjacent(Level level, BlockPos pos, int maxBlocks) {
+        List<BlockPos> lit = new ArrayList<>();
         for (Direction dir : Direction.values()) {
-            if (lit >= maxBlocks) break;
+            if (lit.size() >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
             if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
-                lit++;
+                lit.add(target.immutable());
             }
         }
+        return lit;
     }
 
-    /** Lights up to {@code maxBlocks} air blocks within a horizontal {@code radius} — for explosive failures. */
-    public static void igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
-        int lit = 0;
+    /**
+     * Lights up to {@code maxBlocks} air blocks within a horizontal {@code radius} — for explosive
+     * failures. Returns the positions actually lit, same convention as {@link #igniteAdjacent}.
+     */
+    public static List<BlockPos> igniteRadius(Level level, BlockPos pos, int radius, int maxBlocks) {
+        List<BlockPos> lit = new ArrayList<>();
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
-            if (lit >= maxBlocks) break;
+            if (lit.size() >= maxBlocks) break;
             if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
-                lit++;
+                lit.add(target.immutable());
             }
         }
+        return lit;
     }
 }
