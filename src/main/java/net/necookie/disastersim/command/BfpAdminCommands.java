@@ -1,6 +1,5 @@
 package net.necookie.disastersim.command;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
@@ -239,24 +238,26 @@ public class BfpAdminCommands {
                                 .then(Commands.argument("query", StringArgumentType.greedyString())
                                         .executes(ctx -> {
                                             String q = "%" + StringArgumentType.getString(ctx, "query") + "%";
-                                            String json = TursoClient.query(
+                                            var server = ctx.getSource().getServer();
+                                            TursoClient.queryAsync(
                                                     "SELECT id, student_name, station_account, simulation_type, " +
                                                     "simulation_score, passed, status FROM sessions " +
                                                     "WHERE student_name LIKE ? OR station_account LIKE ? " +
                                                     "ORDER BY start_time DESC LIMIT 15",
-                                                    q, q);
-                                            JsonArray rows = TursoClient.parseRows(json);
-                                            if (rows.isEmpty()) {
-                                                ctx.getSource().sendFailure(Component.literal("No sessions matched."));
-                                                return 0;
-                                            }
-                                            StringBuilder sb = new StringBuilder("§6Search results (")
-                                                    .append(rows.size()).append("):\n");
-                                            for (JsonElement el : rows) {
-                                                appendSessionRow(sb, el.getAsJsonObject());
-                                            }
-                                            String msg = sb.toString();
-                                            ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                                    q, q)
+                                                .thenAccept(rows -> server.execute(() -> {
+                                                    if (rows.isEmpty()) {
+                                                        ctx.getSource().sendFailure(Component.literal("No sessions matched."));
+                                                        return;
+                                                    }
+                                                    StringBuilder sb = new StringBuilder("§6Search results (")
+                                                            .append(rows.size()).append("):\n");
+                                                    for (JsonElement el : rows) {
+                                                        appendSessionRow(sb, el.getAsJsonObject());
+                                                    }
+                                                    String msg = sb.toString();
+                                                    ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                                }));
                                             return 1;
                                         }))))
 
@@ -264,28 +265,30 @@ public class BfpAdminCommands {
                         .then(Commands.argument("name", StringArgumentType.greedyString())
                                 .executes(ctx -> {
                                     String name = StringArgumentType.getString(ctx, "name");
-                                    String json = TursoClient.query(
+                                    var server = ctx.getSource().getServer();
+                                    TursoClient.queryAsync(
                                             "SELECT id, start_time, simulation_type, simulation_score, passed, status " +
                                             "FROM sessions WHERE student_name=? ORDER BY start_time DESC LIMIT 10",
-                                            name);
-                                    JsonArray rows = TursoClient.parseRows(json);
-                                    if (rows.isEmpty()) {
-                                        ctx.getSource().sendFailure(Component.literal(
-                                                "No sessions found for: " + name));
-                                        return 0;
-                                    }
-                                    StringBuilder sb = new StringBuilder("§6Sessions for §f" + name + "§6:\n");
-                                    for (JsonElement el : rows) {
-                                        JsonObject r = el.getAsJsonObject();
-                                        sb.append("§7#").append(str(r, "id"))
-                                          .append(" §f").append(str(r, "start_time"))
-                                          .append(" §e").append(str(r, "simulation_type"))
-                                          .append(" §ascore=").append(str(r, "simulation_score"))
-                                          .append(" pass=").append(str(r, "passed"))
-                                          .append(" [").append(str(r, "status")).append("]\n");
-                                    }
-                                    String msg = sb.toString();
-                                    ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                            name)
+                                        .thenAccept(rows -> server.execute(() -> {
+                                            if (rows.isEmpty()) {
+                                                ctx.getSource().sendFailure(Component.literal(
+                                                        "No sessions found for: " + name));
+                                                return;
+                                            }
+                                            StringBuilder sb = new StringBuilder("§6Sessions for §f" + name + "§6:\n");
+                                            for (JsonElement el : rows) {
+                                                JsonObject r = el.getAsJsonObject();
+                                                sb.append("§7#").append(str(r, "id"))
+                                                  .append(" §f").append(str(r, "start_time"))
+                                                  .append(" §e").append(str(r, "simulation_type"))
+                                                  .append(" §ascore=").append(str(r, "simulation_score"))
+                                                  .append(" pass=").append(str(r, "passed"))
+                                                  .append(" [").append(str(r, "status")).append("]\n");
+                                            }
+                                            String msg = sb.toString();
+                                            ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                        }));
                                     return 1;
                                 })))
 
@@ -293,29 +296,31 @@ public class BfpAdminCommands {
                         .then(Commands.argument("username", StringArgumentType.word())
                                 .executes(ctx -> {
                                     String username = StringArgumentType.getString(ctx, "username");
-                                    String json = TursoClient.query(
+                                    var server = ctx.getSource().getServer();
+                                    TursoClient.queryAsync(
                                             "SELECT id, start_time, simulation_type, simulation_score, passed, status, prep_level " +
                                             "FROM sessions WHERE username=? ORDER BY start_time DESC LIMIT 10",
-                                            username);
-                                    JsonArray rows = TursoClient.parseRows(json);
-                                    if (rows.isEmpty()) {
-                                        ctx.getSource().sendFailure(Component.literal(
-                                                "No sessions found for account: " + username));
-                                        return 0;
-                                    }
-                                    StringBuilder sb = new StringBuilder("§6Sessions for §f@" + username + "§6:\n");
-                                    for (JsonElement el : rows) {
-                                        JsonObject r = el.getAsJsonObject();
-                                        sb.append("§7#").append(str(r, "id"))
-                                          .append(" §f").append(str(r, "start_time"))
-                                          .append(" §e").append(str(r, "simulation_type"))
-                                          .append(" §ascore=").append(str(r, "simulation_score"))
-                                          .append(" pass=").append(str(r, "passed"))
-                                          .append(" §b").append(str(r, "prep_level"))
-                                          .append(" [").append(str(r, "status")).append("]\n");
-                                    }
-                                    String msg = sb.toString();
-                                    ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                            username)
+                                        .thenAccept(rows -> server.execute(() -> {
+                                            if (rows.isEmpty()) {
+                                                ctx.getSource().sendFailure(Component.literal(
+                                                        "No sessions found for account: " + username));
+                                                return;
+                                            }
+                                            StringBuilder sb = new StringBuilder("§6Sessions for §f@" + username + "§6:\n");
+                                            for (JsonElement el : rows) {
+                                                JsonObject r = el.getAsJsonObject();
+                                                sb.append("§7#").append(str(r, "id"))
+                                                  .append(" §f").append(str(r, "start_time"))
+                                                  .append(" §e").append(str(r, "simulation_type"))
+                                                  .append(" §ascore=").append(str(r, "simulation_score"))
+                                                  .append(" pass=").append(str(r, "passed"))
+                                                  .append(" §b").append(str(r, "prep_level"))
+                                                  .append(" [").append(str(r, "status")).append("]\n");
+                                            }
+                                            String msg = sb.toString();
+                                            ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                                        }));
                                     return 1;
                                 }))
                         .then(Commands.literal("delete")
@@ -570,48 +575,52 @@ public class BfpAdminCommands {
 
     private static int listSessions(CommandContext<CommandSourceStack> ctx, int page) {
         int offset = (page - 1) * 10;
-        String json = TursoClient.query(
+        var server = ctx.getSource().getServer();
+        TursoClient.queryAsync(
                 "SELECT id, student_name, station_account, start_time, simulation_type, " +
                 "simulation_score, passed, status FROM sessions ORDER BY start_time DESC LIMIT 10 OFFSET ?",
-                offset);
-        JsonArray rows = TursoClient.parseRows(json);
-        if (rows.isEmpty()) {
-            ctx.getSource().sendFailure(Component.literal("No sessions found (page " + page + ")."));
-            return 0;
-        }
-        StringBuilder sb = new StringBuilder("§6--- Sessions (page " + page + ") ---\n");
-        for (JsonElement el : rows) {
-            appendSessionRow(sb, el.getAsJsonObject());
-        }
-        String msg = sb.toString();
-        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                offset)
+            .thenAccept(rows -> server.execute(() -> {
+                if (rows.isEmpty()) {
+                    ctx.getSource().sendFailure(Component.literal("No sessions found (page " + page + ")."));
+                    return;
+                }
+                StringBuilder sb = new StringBuilder("§6--- Sessions (page " + page + ") ---\n");
+                for (JsonElement el : rows) {
+                    appendSessionRow(sb, el.getAsJsonObject());
+                }
+                String msg = sb.toString();
+                ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+            }));
         return 1;
     }
 
     private static int exportSessions(CommandContext<CommandSourceStack> ctx) {
-        String json = TursoClient.query("SELECT * FROM sessions ORDER BY start_time DESC");
-        JsonArray rows = TursoClient.parseRows(json);
-        String path = "bfp_sessions_export.csv";
-        try (PrintWriter pw = new PrintWriter(new FileWriter(path))) {
-            pw.println("id,student_name,station_account,account_uuid,start_time,end_time,status," +
-                       "tutorial_completed,tutorial_duration_s,simulation_type,simulation_score,passed,notes");
-            for (JsonElement el : rows) {
-                JsonObject r = el.getAsJsonObject();
-                pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s%n",
-                        str(r, "id"), csv(str(r, "student_name")), csv(str(r, "station_account")),
-                        str(r, "account_uuid"), str(r, "start_time"), str(r, "end_time"),
-                        str(r, "status"), str(r, "tutorial_completed"), str(r, "tutorial_duration_s"),
-                        str(r, "simulation_type"), str(r, "simulation_score"), str(r, "passed"),
-                        csv(str(r, "notes")));
-            }
-            ctx.getSource().sendSuccess(() -> Component.literal(
-                    "§aExported " + rows.size() + " rows to §f" + path), true);
-            return 1;
-        } catch (IOException e) {
-            BerongSMP.LOGGER.warn("[BfpAdminCommands] Export failed: {}", e.getMessage());
-            ctx.getSource().sendFailure(Component.literal("Export failed: " + e.getMessage()));
-            return 0;
-        }
+        var server = ctx.getSource().getServer();
+        TursoClient.queryAsync("SELECT * FROM sessions ORDER BY start_time DESC")
+            .thenAccept(rows -> server.execute(() -> {
+                String path = "bfp_sessions_export.csv";
+                try (PrintWriter pw = new PrintWriter(new FileWriter(path))) {
+                    pw.println("id,student_name,station_account,account_uuid,start_time,end_time,status," +
+                               "tutorial_completed,tutorial_duration_s,simulation_type,simulation_score,passed,notes");
+                    for (JsonElement el : rows) {
+                        JsonObject r = el.getAsJsonObject();
+                        pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s%n",
+                                str(r, "id"), csv(str(r, "student_name")), csv(str(r, "station_account")),
+                                str(r, "account_uuid"), str(r, "start_time"), str(r, "end_time"),
+                                str(r, "status"), str(r, "tutorial_completed"), str(r, "tutorial_duration_s"),
+                                str(r, "simulation_type"), str(r, "simulation_score"), str(r, "passed"),
+                                csv(str(r, "notes")));
+                    }
+                    int count = rows.size();
+                    ctx.getSource().sendSuccess(() -> Component.literal(
+                            "§aExported " + count + " rows to §f" + path), true);
+                } catch (IOException e) {
+                    BerongSMP.LOGGER.warn("[BfpAdminCommands] Export failed: {}", e.getMessage());
+                    ctx.getSource().sendFailure(Component.literal("Export failed: " + e.getMessage()));
+                }
+            }));
+        return 1;
     }
 
     private static String str(JsonObject obj, String key) {
@@ -653,15 +662,17 @@ public class BfpAdminCommands {
             ctx.getSource().sendFailure(Component.literal("Turso not configured — account system unavailable."));
             return 0;
         }
-        String json = TursoClient.query("SELECT id FROM student_accounts WHERE username=?", username);
-        JsonArray rows = TursoClient.parseRows(json);
-        if (rows.isEmpty()) {
-            ctx.getSource().sendFailure(Component.literal("No account found for username: " + username));
-            return 0;
-        }
-        TursoClient.executeAsync("DELETE FROM student_accounts WHERE username=?", username);
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "§eAccount §f@" + username + "§e deleted — that username can be registered again."), true);
+        var server = ctx.getSource().getServer();
+        TursoClient.queryAsync("SELECT id FROM student_accounts WHERE username=?", username)
+            .thenAccept(rows -> server.execute(() -> {
+                if (rows.isEmpty()) {
+                    ctx.getSource().sendFailure(Component.literal("No account found for username: " + username));
+                    return;
+                }
+                TursoClient.executeAsync("DELETE FROM student_accounts WHERE username=?", username);
+                ctx.getSource().sendSuccess(() -> Component.literal(
+                        "§eAccount §f@" + username + "§e deleted — that username can be registered again."), true);
+            }));
         return 1;
     }
 
@@ -707,39 +718,41 @@ public class BfpAdminCommands {
             ctx.getSource().sendFailure(Component.literal("Turso not configured — stats unavailable."));
             return 0;
         }
+        var server = ctx.getSource().getServer();
         // simulation_type covers 5 real scenario values (FIRE, EARTHQUAKE, CCS_FIRE,
         // CCS_EARTHQUAKE, NEW_SIM_BUILDING2_FIRE) — the IN-list fire/quake breakdown must include
         // all of them, or CCS and New Sim Building 2.0 runs silently vanish from this count even
         // though they're the graded scenario the whole product is built around.
-        String json = TursoClient.query(
+        TursoClient.queryAsync(
                 "SELECT COUNT(*) as total, " +
                 "SUM(CASE WHEN passed=1 THEN 1 ELSE 0 END) as passed_count, " +
                 "AVG(simulation_score) as avg_score, " +
                 "SUM(CASE WHEN simulation_type IN ('FIRE','CCS_FIRE','NEW_SIM_BUILDING2_FIRE') THEN 1 ELSE 0 END) as fire_count, " +
                 "SUM(CASE WHEN simulation_type IN ('EARTHQUAKE','CCS_EARTHQUAKE') THEN 1 ELSE 0 END) as quake_count " +
-                "FROM sessions WHERE status='completed'");
-        JsonArray rows = TursoClient.parseRows(json);
-        if (rows.isEmpty()) {
-            ctx.getSource().sendFailure(Component.literal("No completed sessions found."));
-            return 0;
-        }
-        JsonObject r = rows.get(0).getAsJsonObject();
-        String total    = str(r, "total");
-        String passed   = str(r, "passed_count");
-        String avgScore = str(r, "avg_score");
-        String fire     = str(r, "fire_count");
-        String quake    = str(r, "quake_count");
-        int    totalInt  = total.isEmpty()    ? 0 : (int) Double.parseDouble(total);
-        int    passedInt = passed.isEmpty()   ? 0 : (int) Double.parseDouble(passed);
-        double passRate  = totalInt > 0 ? (passedInt * 100.0 / totalInt) : 0;
-        double avgScoreD = avgScore.isEmpty() ? 0 : Double.parseDouble(avgScore);
-        String msg = "§6--- Session Stats (completed) ---\n" +
-                "§eTotal sessions: §f" + totalInt + "\n" +
-                "§ePassed: §f" + passedInt + " §7(" + String.format("%.1f%%", passRate) + ")\n" +
-                "§eAvg score: §f" + String.format("%.1f", avgScoreD) + "\n" +
-                "§eFire drills (incl. CCS/New Sim Bldg 2.0): §f" + fire
-                        + " §7| §eQuake drills (incl. CCS): §f" + quake;
-        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                "FROM sessions WHERE status='completed'")
+            .thenAccept(rows -> server.execute(() -> {
+                if (rows.isEmpty()) {
+                    ctx.getSource().sendFailure(Component.literal("No completed sessions found."));
+                    return;
+                }
+                JsonObject r = rows.get(0).getAsJsonObject();
+                String total    = str(r, "total");
+                String passed   = str(r, "passed_count");
+                String avgScore = str(r, "avg_score");
+                String fire     = str(r, "fire_count");
+                String quake    = str(r, "quake_count");
+                int    totalInt  = total.isEmpty()    ? 0 : (int) Double.parseDouble(total);
+                int    passedInt = passed.isEmpty()   ? 0 : (int) Double.parseDouble(passed);
+                double passRate  = totalInt > 0 ? (passedInt * 100.0 / totalInt) : 0;
+                double avgScoreD = avgScore.isEmpty() ? 0 : Double.parseDouble(avgScore);
+                String msg = "§6--- Session Stats (completed) ---\n" +
+                        "§eTotal sessions: §f" + totalInt + "\n" +
+                        "§ePassed: §f" + passedInt + " §7(" + String.format("%.1f%%", passRate) + ")\n" +
+                        "§eAvg score: §f" + String.format("%.1f", avgScoreD) + "\n" +
+                        "§eFire drills (incl. CCS/New Sim Bldg 2.0): §f" + fire
+                                + " §7| §eQuake drills (incl. CCS): §f" + quake;
+                ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+            }));
         return 1;
     }
 
@@ -749,21 +762,23 @@ public class BfpAdminCommands {
             return 0;
         }
         String today = LocalDate.now().toString();
-        String json = TursoClient.query(
+        var server = ctx.getSource().getServer();
+        TursoClient.queryAsync(
                 "SELECT id, student_name, station_account, simulation_type, simulation_score, passed, status " +
                 "FROM sessions WHERE start_time LIKE ? ORDER BY start_time DESC",
-                today + "%");
-        JsonArray rows = TursoClient.parseRows(json);
-        if (rows.isEmpty()) {
-            ctx.getSource().sendSuccess(() -> Component.literal("§7No sessions today."), false);
-            return 1;
-        }
-        StringBuilder sb = new StringBuilder("§6Today's sessions (").append(rows.size()).append("):\n");
-        for (JsonElement el : rows) {
-            appendSessionRow(sb, el.getAsJsonObject());
-        }
-        String msg = sb.toString();
-        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                today + "%")
+            .thenAccept(rows -> server.execute(() -> {
+                if (rows.isEmpty()) {
+                    ctx.getSource().sendSuccess(() -> Component.literal("§7No sessions today."), false);
+                    return;
+                }
+                StringBuilder sb = new StringBuilder("§6Today's sessions (").append(rows.size()).append("):\n");
+                for (JsonElement el : rows) {
+                    appendSessionRow(sb, el.getAsJsonObject());
+                }
+                String msg = sb.toString();
+                ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+            }));
         return 1;
     }
 }
