@@ -168,6 +168,10 @@ public class BerongSMP {
         // hook that clears a station's BFP admin grant/test-bypass so it doesn't carry over to
         // the next student sitting down there.
         BfpAdminCommands.bootstrap();
+        // Same class-loading rule again — SessionManager's static block registers the logout hook
+        // that properly closes out a StudentSession (and its Turso row) when a station disconnects
+        // without an explicit /bfp checkout, instead of leaving it stuck at status='active'.
+        SessionManager.bootstrap();
     }
 
     /**

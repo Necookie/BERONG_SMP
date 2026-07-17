@@ -6,6 +6,7 @@ import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademySavedData;
 import net.necookie.disastersim.command.BfpAdminCommands;
+import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -28,6 +29,23 @@ public class SessionManager {
 
     private static final Map<UUID, StudentSession> activeSessions = new ConcurrentHashMap<>();
     private static MinecraftServer server;
+
+    static {
+        // A student who just closes the game (or the whole station disconnects) without an
+        // instructor running /bfp checkout used to leave their StudentSession sitting in
+        // activeSessions and their Turso row stuck at status='active' indefinitely — it only
+        // ever self-healed at THAT SAME account's next /bfp checkin (which always calls
+        // checkout(..., "replaced") first) or at full server shutdown. Under real classroom
+        // turnover (many students rotating through a small number of shared stations over a
+        // day), that's a real gap: a station that goes idle after its last student of the day
+        // just disconnects leaves a phantom "active" row in Turso, muddying /bfp sessions
+        // stats/list until the next server restart. Closing it out on logout keeps the data
+        // clean regardless of whether the next student remembers to check in properly.
+        PlayerLifecycleRegistry.registerLogoutHook(player -> checkout(player.getUUID(), "disconnected"));
+    }
+
+    /** Forces this class to load so the static block above actually registers — see DuckCoverHoldManager. */
+    public static void bootstrap() {}
 
     private SessionManager() {}
 
