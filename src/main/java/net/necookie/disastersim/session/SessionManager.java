@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.necookie.disastersim.BerongSMP;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.academy.AcademySavedData;
+import net.necookie.disastersim.command.BfpAdminCommands;
 import net.necookie.disastersim.tutorial.TutorialSavedData;
 import net.necookie.disastersim.common.simulation.SimulationManager;
 import net.necookie.disastersim.common.simulation.SimulationSession;
@@ -79,6 +80,10 @@ public class SessionManager {
      * since {@code AcademyProgress} is keyed by the shared station UUID, not by student identity.
      * A returning student's real certification lives on their {@code users} row instead
      * ({@code AuthManager.isTutorialCompleted}), restored on {@code /login}.
+     *
+     * <p>Also clears any BFP admin grant/test-bypass left active on this station
+     * ({@link BfpAdminCommands#clearStationAuth}) — the logout hook alone doesn't cover the case
+     * where a station stays connected (e.g. an OP checks a new student in without disconnecting).
      */
     public static void checkin(UUID accountUuid, String accountName, String studentName, String username) {
         // Close any in-progress session first
@@ -89,6 +94,7 @@ public class SessionManager {
             TutorialSavedData.get(server.overworld()).reset(accountUuid);
             AcademySavedData.get(server.overworld()).reset(accountUuid);
         }
+        BfpAdminCommands.clearStationAuth(accountUuid);
 
         StudentSession session = new StudentSession(studentName, accountName, accountUuid);
         activeSessions.put(accountUuid, session);

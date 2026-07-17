@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.LevelData;
+import net.necookie.disastersim.command.BfpAdminCommands;
 import net.necookie.disastersim.command.ModCommands;
 import net.necookie.disastersim.common.player.DuckCoverHoldManager;
 import net.necookie.disastersim.common.safety.SafetyDeviceManager;
@@ -163,6 +164,10 @@ public class BerongSMP {
         // logout hook that clears who's logged in; nothing else in the codebase calls real code
         // on this class otherwise.
         AuthManager.bootstrap();
+        // Same class-loading rule again — BfpAdminCommands' static block registers the logout
+        // hook that clears a station's BFP admin grant/test-bypass so it doesn't carry over to
+        // the next student sitting down there.
+        BfpAdminCommands.bootstrap();
     }
 
     /**

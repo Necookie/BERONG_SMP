@@ -34,9 +34,17 @@ import net.necookie.disastersim.academy.room2.ReyesRoomManager;
 import net.necookie.disastersim.session.SessionManager;
 import net.necookie.disastersim.session.StudentSession;
 import net.necookie.disastersim.session.TursoClient;
+import net.necookie.disastersim.common.player.PlayerLifecycleRegistry;
 import net.necookie.disastersim.common.structure.AcademyBuildingManager;
 import net.necookie.disastersim.common.structure.TutorialLobbyManager;
 
+/**
+ * {@code /bfp} admin commands. {@code bfpAuthorized}/{@code testBypassActive} are keyed by the
+ * station's Minecraft account UUID, not by the person sitting there — on a shared station these
+ * must be cleared whenever the current occupant leaves (logout, or a new student checking in),
+ * otherwise an instructor's PIN grant or a dev's gate-bypass silently carries over to the next
+ * student. See {@link #clearStationAuth}.
+ */
 public class BfpAdminCommands {
 
     private static final Set<UUID> bfpAuthorized = ConcurrentHashMap.newKeySet();
@@ -49,8 +57,26 @@ public class BfpAdminCommands {
     private static final int MAX_PIN_ATTEMPTS = 5;
     private static final long LOCKOUT_MS = 5L * 60 * 1000; // 5 minutes
 
+    static {
+        PlayerLifecycleRegistry.registerLogoutHook(player -> clearStationAuth(player.getUUID()));
+    }
+
+    /** Forces this class to load so the static block above actually registers — see DuckCoverHoldManager. */
+    public static void bootstrap() {}
+
     public static boolean isTestBypass(UUID uuid) {
         return testBypassActive.contains(uuid);
+    }
+
+    /**
+     * Drops {@code uuid}'s BFP admin grant and test-bypass flag — called on logout, and from
+     * {@code SessionManager.checkin} when a new student sits down at a station that stays
+     * connected, so neither survives a station handoff.
+     */
+    public static void clearStationAuth(UUID uuid) {
+        bfpAuthorized.remove(uuid);
+        testBypassActive.remove(uuid);
+        pinFailures.remove(uuid);
     }
 
     public static void clearAuthorizations() {
