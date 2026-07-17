@@ -44,15 +44,38 @@ public final class DropAndRollManager {
 
     private static final Map<UUID, Integer> droppedTicksRemaining = new ConcurrentHashMap<>();
 
+    /**
+     * {@link net.necookie.disastersim.network.DropAndRollPayload} is client-triggered and carries
+     * no server-side rate limit of its own — the client only ever sends it from
+     * {@code KeyMapping.consumeClick()} (edge-triggered, so a real keyboard can't fire it faster
+     * than the OS key-repeat rate), but nothing stops a modified client from calling {@code
+     * ClientPacketDistributor.sendToServer} directly in a loop. Every other player-triggered action
+     * in this codebase throttles itself (e.g. {@code AbstractExtinguisherItem}'s wrong-tool
+     * warning, {@code CruzRoomManager}'s starting-line nudge); this one didn't. The actual per-call
+     * cost is small (a map write, an attachment sync, one MobEffectInstance, a fixed 12-particle
+     * burst) so this isn't a severe DoS, but an unthrottled flood would still mean unnecessary
+     * repeated particle broadcasts to every nearby player every single tick.
+     */
+    private static final int MIN_REQUEST_INTERVAL_TICKS = 2;
+    private static final Map<UUID, Long> lastRequestTick = new ConcurrentHashMap<>();
+
     static {
         TickScheduler.register(DropAndRollManager::tick);
-        PlayerLifecycleRegistry.registerLogoutHook(player -> stickyBurning.remove(player.getUUID()));
+        PlayerLifecycleRegistry.registerLogoutHook(player -> {
+            stickyBurning.remove(player.getUUID());
+            lastRequestTick.remove(player.getUUID());
+        });
     }
 
     private DropAndRollManager() {}
 
     public static void onDropAndRollRequest(ServerPlayer player) {
         UUID id = player.getUUID();
+        long now = player.level().getGameTime();
+        Long last = lastRequestTick.get(id);
+        if (last != null && now - last < MIN_REQUEST_INTERVAL_TICKS) return;
+        lastRequestTick.put(id, now);
+
         boolean wasOnFire = player.getRemainingFireTicks() > 0;
 
         if (wasOnFire) {
