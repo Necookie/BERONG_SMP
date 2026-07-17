@@ -1,9 +1,12 @@
 package net.necookie.disastersim.common.scheduling;
 
 import net.minecraft.server.level.ServerLevel;
+import net.necookie.disastersim.BerongSMP;
 
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
@@ -28,6 +31,11 @@ public final class TickScheduler {
     /** One-shot delayed tasks queued via {@link #scheduleOnce}, decremented/fired from {@link #tick}. */
     private static final List<DelayedTask> DELAYED = new CopyOnWriteArrayList<>();
 
+    /** Throttles repeated-failure log spam: at most one warning per handler per this many ticks. */
+    private static final long ERROR_LOG_THROTTLE_TICKS = 200; // 10s
+    /** Server-thread only (same contract as {@link #tick}), so plain IdentityHashMap is safe. */
+    private static final Map<Object, Long> lastErrorLogTick = new IdentityHashMap<>();
+
     private TickScheduler() {}
 
     /** Registers a handler to run once per server tick, in registration order. */
@@ -45,10 +53,23 @@ public final class TickScheduler {
         DELAYED.add(new DelayedTask(delayTicks, task));
     }
 
-    /** Called once per server tick from {@code SimulationManager.onServerTick}. */
+    /**
+     * Called once per server tick from {@code SimulationManager.onServerTick}. Each handler, and
+     * each delayed task that fires this tick, runs inside its own try/catch — an uncaught
+     * exception from any one subsystem (Academy, DropAndRoll, DuckCoverHold, SafetyDevice, a
+     * scheduled Morfe hand-off, ...) used to propagate straight out of this method and take down
+     * the whole server, mid-class, over a bug in a single unrelated feature. A handler that throws
+     * every tick is logged at most once every {@link #ERROR_LOG_THROTTLE_TICKS} ticks rather than
+     * flooding the log.
+     */
     public static void tick(ServerLevel level) {
+        long now = level.getGameTime();
         for (Consumer<ServerLevel> handler : HANDLERS) {
-            handler.accept(level);
+            try {
+                handler.accept(level);
+            } catch (Exception e) {
+                logThrottled(handler, now, e);
+            }
         }
         if (!DELAYED.isEmpty()) {
             Iterator<DelayedTask> it = DELAYED.iterator();
@@ -56,10 +77,22 @@ public final class TickScheduler {
                 DelayedTask delayed = it.next();
                 if (--delayed.remaining <= 0) {
                     DELAYED.remove(delayed);
-                    delayed.task.accept(level);
+                    try {
+                        delayed.task.accept(level);
+                    } catch (Exception e) {
+                        BerongSMP.LOGGER.error("[TickScheduler] Delayed task threw — skipped: {}", e.toString(), e);
+                    }
                 }
             }
         }
+    }
+
+    private static void logThrottled(Object handler, long now, Exception e) {
+        Long last = lastErrorLogTick.get(handler);
+        if (last != null && now - last < ERROR_LOG_THROTTLE_TICKS) return;
+        lastErrorLogTick.put(handler, now);
+        BerongSMP.LOGGER.error("[TickScheduler] Tick handler {} threw — skipped this tick: {}",
+                handler.getClass().getName(), e.toString(), e);
     }
 
     private static final class DelayedTask {
