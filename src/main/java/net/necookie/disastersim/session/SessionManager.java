@@ -180,27 +180,28 @@ public class SessionManager {
     }
 
     /**
-     * Called by SimulationManager when the simulation ends.
-     * Only updates in-memory StudentSession state and removes from the map.
-     * All Turso writes (simulation_type, score, event_log, status) are handled
-     * directly by SimulationManager.endSimulation using the row ID it already holds.
+     * Called by SimulationManager when the simulation ends. Only updates in-memory StudentSession
+     * state (backing {@code /bfp session info}) and removes from the map — all Turso writes
+     * (simulation_type, score, event_log, status) are handled directly by
+     * SimulationManager.endSimulation using the row ID it already holds.
+     *
+     * <p>{@code finalScore}/{@code passed} are the exact values {@code endSimulation} already
+     * computed (via {@link net.necookie.disastersim.common.simulation.SimulationScoring} for a
+     * legacy fire run, or {@code NewSimScoring} for New Sim Building 2.0) and wrote to Turso — this
+     * method used to independently recompute a legacy fire-only formula for every scenario type,
+     * which both drifted from {@code endSimulation}'s own pass/fail rule (see
+     * {@code SimulationScoring}'s javadoc) and silently overwrote a New Sim Building 2.0 run's real
+     * {@code NewSimScoring} result with the wrong number for {@code /bfp session info}.
      */
-    public static void onSimulationEnd(ServerPlayer player, SimulationSession sim) {
-        // Keep the full scenario name (FIRE/EARTHQUAKE/CCS_FIRE/CCS_EARTHQUAKE) so /bfp session
-        // info matches what SimulationManager persists to Turso; the old isFire()?FIRE:EARTHQUAKE
-        // form silently collapsed both CCS variants.
-        String type = sim.getState().name();
-        int score = sim.getState().isFire()
-                ? Math.min(100, sim.getFiresExtinguished() * 2)
-                : 0;
-        boolean passed = sim.getState().isFire()
-                && sim.getFiresExtinguished() >= Config.PASS_THRESHOLD_FIRE.get();
-
+    public static void onSimulationEnd(ServerPlayer player, SimulationSession sim, int finalScore, boolean passed) {
         StudentSession session = activeSessions.get(player.getUUID());
         if (session == null) return;
 
-        session.setSimulationType(type);
-        session.setSimulationScore(score);
+        // Keep the full scenario name (FIRE/EARTHQUAKE/CCS_FIRE/CCS_EARTHQUAKE/
+        // NEW_SIM_BUILDING2_FIRE) so /bfp session info matches what SimulationManager persists to
+        // Turso; the old isFire()?FIRE:EARTHQUAKE form silently collapsed both CCS variants.
+        session.setSimulationType(sim.getState().name());
+        session.setSimulationScore(finalScore);
         session.setPassed(passed);
         activeSessions.remove(player.getUUID());
     }

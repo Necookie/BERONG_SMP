@@ -359,11 +359,12 @@ public class SimulationManager {
                     endReason);
             finalScore = newSimResult.score();
         } else if (session.getState().isFire()) {
-            finalScore = Math.min(100, session.getFiresExtinguished() * 2);
+            finalScore = SimulationScoring.fireScore(session.getFiresExtinguished());
         }
         boolean passed = newSimResult != null
                 ? newSimResult.passed()
-                : session.getState().isFire() && finalScore >= net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get();
+                : session.getState().isFire() && SimulationScoring.firePassed(
+                        session.getFiresExtinguished(), net.necookie.disastersim.Config.PASS_THRESHOLD_FIRE.get());
         double elapsedT = session.elapsedSeconds();
         session.logger.log("SIM_END", java.util.Map.of(
             "fires_extinguished", session.getFiresExtinguished(),
@@ -444,7 +445,7 @@ public class SimulationManager {
 
         ServerPlayer player = session.getPlayer();
         if (player != null) {
-            SessionManager.onSimulationEnd(player, session);
+            SessionManager.onSimulationEnd(player, session, finalScore, passed);
         }
         if (player == null) return;
 
