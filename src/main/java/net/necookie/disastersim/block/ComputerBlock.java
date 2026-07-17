@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -174,7 +175,13 @@ public class ComputerBlock extends Block {
             }
         }
 
-        // Seed fire next to flammable blocks; vanilla fire propagates from there.
+        // Seed fire next to flammable blocks (desks/furniture near the workstation); vanilla fire
+        // propagates from there. Checks BlockTags.PLANKS/LOGS/WOOL — NOT ignitedByLava(), which
+        // this used to check: that vanilla method is true almost exclusively for TNT-like blocks,
+        // not ordinary wood/wool furniture, so this loop was silently never triggering for the
+        // CCS building's real construction material (confirmed via direct schematic inspection —
+        // dark_oak_planks/stripped_oak_log furniture genuinely sits within this scan radius of
+        // real computer placements, but ignitedByLava() never returns true for either).
         for (int dx = -2; dx <= 2; dx++) {
             for (int dy = -1; dy <= 3; dy++) {
                 for (int dz = -2; dz <= 2; dz++) {
@@ -182,7 +189,7 @@ public class ComputerBlock extends Block {
                     BlockPos checkPos = pos.offset(dx, dy, dz);
                     BlockState checkState = level.getBlockState(checkPos);
 
-                    if (checkState.ignitedByLava() && random.nextInt(5) == 0) {
+                    if (isFlammableFuel(checkState) && random.nextInt(5) == 0) {
                         BlockPos above = checkPos.above();
                         if (level.getBlockState(above).isAir() && !isPlayerNear(level, above)) {
                             level.setBlock(above, Blocks.FIRE.defaultBlockState(), 3);
@@ -191,7 +198,7 @@ public class ComputerBlock extends Block {
 
                     if (checkState.isAir() && !isPlayerNear(level, checkPos) && random.nextInt(8) == 0) {
                         for (Direction checkDir : Direction.values()) {
-                            if (level.getBlockState(checkPos.relative(checkDir)).ignitedByLava()) {
+                            if (isFlammableFuel(level.getBlockState(checkPos.relative(checkDir)))) {
                                 level.setBlock(checkPos, Blocks.FIRE.defaultBlockState(), 3);
                                 break;
                             }
@@ -200,6 +207,11 @@ public class ComputerBlock extends Block {
                 }
             }
         }
+    }
+
+    /** True for common flammable furniture/construction materials — see the randomTick comment above. */
+    private static boolean isFlammableFuel(BlockState state) {
+        return state.is(BlockTags.PLANKS) || state.is(BlockTags.LOGS) || state.is(BlockTags.WOOL);
     }
 
     /**
