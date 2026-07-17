@@ -303,6 +303,20 @@ public class SimulationManager {
             "x", spawnPos.getX(), "y", spawnPos.getY(), "z", spawnPos.getZ()
         ));
 
+        if (state.isFire()) {
+            // A player starting a fire-type run may already be carrying one of these three
+            // extinguisher types — from the Academy's Room 2 pickup, a previous incomplete
+            // attempt, or /item kit. The plain setItem(slot, fresh) calls below only ever
+            // overwrote whatever already sat in THAT ONE slot (silently destroying it with no
+            // drop and no message if it happened to be there) while leaving any OTHER copy
+            // elsewhere in the inventory untouched — either a confusing silent loss (their own
+            // extinguisher just vanished) or a stale duplicate (a used-up unit sitting next to a
+            // fresh one). Clearing every copy first, mirroring
+            // ReyesRoomManager.stripExistingExtinguishers' established pattern, guarantees every
+            // run hands out exactly the intended clean loadout and nothing else.
+            clearExistingExtinguishers(player);
+        }
+
         if (state == SimulationState.FIRE) {
             ItemStack extinguisher = new ItemStack(ModItems.FIRE_EXTINGUISHER.get());
             player.getInventory().setItem(0, extinguisher);
@@ -347,6 +361,29 @@ public class SimulationManager {
 
         if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
             emitPhaseTransition(session, uuid, player, "prevention");
+        }
+    }
+
+    /**
+     * Removes every existing copy of the 3 extinguisher items from anywhere in the player's
+     * inventory — called once, right before a fire-type run hands out its own fresh copies (see
+     * {@link #startSimulation}'s {@code state.isFire()} branch). Without this, handing out an
+     * extinguisher via a plain {@code setItem(slot, fresh)} only ever overwrote whatever already
+     * sat in that one target slot, silently destroying it if a leftover extinguisher (from the
+     * Academy's Room 2 pickup, a previous incomplete attempt, or {@code /item kit}) happened to be
+     * there — while any OTHER copy sitting elsewhere in the inventory was left untouched, either as
+     * a confusing silent loss or a stale duplicate next to the fresh one. Mirrors {@code
+     * ReyesRoomManager.stripExistingExtinguishers}' established pattern.
+     */
+    private static void clearExistingExtinguishers(ServerPlayer player) {
+        var inventory = player.getInventory();
+        for (net.minecraft.world.item.Item item : new net.minecraft.world.item.Item[]{
+                ModItems.FIRE_EXTINGUISHER.get(), ModItems.CO2_EXTINGUISHER.get(), ModItems.WET_CHEMICAL_EXTINGUISHER.get()}) {
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                if (inventory.getItem(i).is(item)) {
+                    inventory.setItem(i, ItemStack.EMPTY);
+                }
+            }
         }
     }
 
