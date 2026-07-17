@@ -1,6 +1,5 @@
 package net.necookie.disastersim.command;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
@@ -122,6 +121,13 @@ public class RegistrationCommands {
         return 1;
     }
 
+    /**
+     * Runs the run-history lookup asynchronously ({@link TursoClient#queryAsync}) so a slow or
+     * stalled Turso endpoint can't freeze the server thread for the whole 10s HTTP timeout — the
+     * command returns immediately and the reply is sent once the query resolves, re-entering the
+     * server thread via {@code server.execute(...)} the same way {@code AuthManager.registerAsync}/
+     * {@code loginAsync} already do for async login/registration.
+     */
     private static int doHistory(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         if (!ctx.getSource().isPlayer()) return 0;
         ServerPlayer player = ctx.getSource().getPlayer();
@@ -131,28 +137,30 @@ public class RegistrationCommands {
                     "§cLog in first with §f/login <username> <password>§c to see your run history."));
             return 0;
         }
-        String json = TursoClient.query(
+        var server = ctx.getSource().getServer();
+        TursoClient.queryAsync(
                 "SELECT id, start_time, simulation_type, simulation_score, passed, status, prep_level " +
                 "FROM sessions WHERE username=? ORDER BY start_time DESC LIMIT 10",
-                account.username());
-        JsonArray rows = TursoClient.parseRows(json);
-        if (rows.isEmpty()) {
-            ctx.getSource().sendSuccess(() -> Component.literal("§7No past runs yet."), false);
-            return 1;
-        }
-        StringBuilder sb = new StringBuilder("§6--- Your run history (@" + account.username() + ") ---\n");
-        for (JsonElement el : rows) {
-            JsonObject r = el.getAsJsonObject();
-            sb.append("§7#").append(str(r, "id"))
-              .append(" §f").append(str(r, "start_time"))
-              .append(" §e").append(str(r, "simulation_type"))
-              .append(" §ascore=").append(str(r, "simulation_score"))
-              .append(" pass=").append(str(r, "passed"))
-              .append(" §b").append(str(r, "prep_level"))
-              .append(" [").append(str(r, "status")).append("]\n");
-        }
-        String msg = sb.toString();
-        ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+                account.username())
+            .thenAccept(rows -> server.execute(() -> {
+                if (rows.isEmpty()) {
+                    ctx.getSource().sendSuccess(() -> Component.literal("§7No past runs yet."), false);
+                    return;
+                }
+                StringBuilder sb = new StringBuilder("§6--- Your run history (@" + account.username() + ") ---\n");
+                for (JsonElement el : rows) {
+                    JsonObject r = el.getAsJsonObject();
+                    sb.append("§7#").append(str(r, "id"))
+                      .append(" §f").append(str(r, "start_time"))
+                      .append(" §e").append(str(r, "simulation_type"))
+                      .append(" §ascore=").append(str(r, "simulation_score"))
+                      .append(" pass=").append(str(r, "passed"))
+                      .append(" §b").append(str(r, "prep_level"))
+                      .append(" [").append(str(r, "status")).append("]\n");
+                }
+                String msg = sb.toString();
+                ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
+            }));
         return 1;
     }
 

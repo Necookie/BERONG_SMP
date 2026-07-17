@@ -19,8 +19,15 @@ public class StudentSession {
     private Double confidence;
     private String prepLevel;
 
-    /** Row ID returned by Turso on INSERT — used for subsequent UPDATE calls. */
-    private long dbRowId = -1;
+    /**
+     * Row ID returned by Turso on INSERT — used for subsequent UPDATE calls. {@code volatile}
+     * because it's now written from a Turso executor thread ({@code SessionManager.checkin}'s
+     * async insert) but read from the server thread by every {@code /bfp note/confidence/
+     * prep_level/score/pass/fail} command — without a memory-visibility guarantee, a command
+     * issued moments after check-in could see the field's default {@code -1} even though the
+     * insert had already completed on another thread.
+     */
+    private volatile long dbRowId = -1;
 
     public StudentSession(String studentName, String stationAccount, UUID accountUuid) {
         this.studentName = studentName;

@@ -99,14 +99,22 @@ public class SessionManager {
         StudentSession session = new StudentSession(studentName, accountName, accountUuid);
         activeSessions.put(accountUuid, session);
 
-        // Insert row into Turso; store the returned row ID for later updates
-        long rowId = TursoClient.insert(
+        // Insert row into Turso asynchronously — this used to block whichever thread called
+        // checkin() (the command thread for /bfp checkin, or the server thread re-entered from
+        // AuthManager's async /register //login callbacks) for the full HTTP round-trip. The row
+        // ID is stored on the session (a volatile field, see StudentSession) once the insert
+        // completes; every /bfp note/confidence/prep_level/score/pass/fail command already checks
+        // getDbRowId() > 0 before writing, so a command issued in the brief window before the
+        // insert resolves just skips its own Turso write rather than blocking for it.
+        TursoClient.insertAsync(
                 "INSERT INTO sessions (student_name, station_account, account_uuid, start_time, status, username) VALUES (?,?,?,?,?,?)",
                 studentName, accountName, accountUuid.toString(),
-                session.getStartTime().toString(), "active", username);
-        session.setDbRowId(rowId);
-
-        BerongSMP.LOGGER.info("[SessionManager] Checked in: student='{}' account='{}' rowId={}", studentName, accountName, rowId);
+                session.getStartTime().toString(), "active", username)
+            .thenAccept(rowId -> {
+                session.setDbRowId(rowId);
+                BerongSMP.LOGGER.info("[SessionManager] Checked in: student='{}' account='{}' rowId={}",
+                        studentName, accountName, rowId);
+            });
     }
 
     /**

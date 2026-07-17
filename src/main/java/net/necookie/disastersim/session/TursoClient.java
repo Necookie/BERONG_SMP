@@ -136,6 +136,34 @@ public class TursoClient {
     }
 
     /**
+     * Async counterpart to {@link #query} — runs the HTTP round-trip on the same dedicated
+     * executor writes use, instead of blocking the calling thread, and returns already-parsed
+     * rows. Every command-thread caller of this must return its Brigadier result code immediately
+     * and reply to the player from inside the returned future's callback, re-entering the server
+     * thread via {@code MinecraftServer.execute(...)} — the same pattern
+     * {@code AuthManager.registerAsync}/{@code loginAsync} already establish for async login/
+     * registration, now extended to read-only {@code /bfp}/{@code /history} queries.
+     */
+    public static CompletableFuture<JsonArray> queryAsync(String sql, Object... args) {
+        if (!ready) return CompletableFuture.completedFuture(new JsonArray());
+        try {
+            return CompletableFuture.supplyAsync(() -> parseRows(query(sql, args)), writeExecutor);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.completedFuture(new JsonArray());
+        }
+    }
+
+    /** Async counterpart to {@link #insert} — see {@link #queryAsync}'s javadoc for the calling convention. */
+    public static CompletableFuture<Long> insertAsync(String sql, Object... args) {
+        if (!ready) return CompletableFuture.completedFuture(-1L);
+        try {
+            return CompletableFuture.supplyAsync(() -> insert(sql, args), writeExecutor);
+        } catch (RejectedExecutionException e) {
+            return CompletableFuture.completedFuture(-1L);
+        }
+    }
+
+    /**
      * Executes a read query synchronously and returns the JSON response body.
      * Returns {@code null} on error.
      */
