@@ -705,12 +705,16 @@ public class BfpAdminCommands {
             ctx.getSource().sendFailure(Component.literal("Turso not configured — stats unavailable."));
             return 0;
         }
+        // simulation_type covers 5 real scenario values (FIRE, EARTHQUAKE, CCS_FIRE,
+        // CCS_EARTHQUAKE, NEW_SIM_BUILDING2_FIRE) — the IN-list fire/quake breakdown must include
+        // all of them, or CCS and New Sim Building 2.0 runs silently vanish from this count even
+        // though they're the graded scenario the whole product is built around.
         String json = TursoClient.query(
                 "SELECT COUNT(*) as total, " +
                 "SUM(CASE WHEN passed=1 THEN 1 ELSE 0 END) as passed_count, " +
                 "AVG(simulation_score) as avg_score, " +
-                "SUM(CASE WHEN simulation_type='FIRE' THEN 1 ELSE 0 END) as fire_count, " +
-                "SUM(CASE WHEN simulation_type='EARTHQUAKE' THEN 1 ELSE 0 END) as quake_count " +
+                "SUM(CASE WHEN simulation_type IN ('FIRE','CCS_FIRE','NEW_SIM_BUILDING2_FIRE') THEN 1 ELSE 0 END) as fire_count, " +
+                "SUM(CASE WHEN simulation_type IN ('EARTHQUAKE','CCS_EARTHQUAKE') THEN 1 ELSE 0 END) as quake_count " +
                 "FROM sessions WHERE status='completed'");
         JsonArray rows = TursoClient.parseRows(json);
         if (rows.isEmpty()) {
@@ -731,7 +735,8 @@ public class BfpAdminCommands {
                 "§eTotal sessions: §f" + totalInt + "\n" +
                 "§ePassed: §f" + passedInt + " §7(" + String.format("%.1f%%", passRate) + ")\n" +
                 "§eAvg score: §f" + String.format("%.1f", avgScoreD) + "\n" +
-                "§eFire drills: §f" + fire + " §7| §eQuake drills: §f" + quake;
+                "§eFire drills (incl. CCS/New Sim Bldg 2.0): §f" + fire
+                        + " §7| §eQuake drills (incl. CCS): §f" + quake;
         ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
         return 1;
     }
