@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntitySpawnRequest;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.GlowItemFrame;
 import net.minecraft.world.entity.decoration.ItemFrame;
@@ -322,7 +323,7 @@ public class SchemLoader implements StructurePlacer {
             try (ProblemReporter.ScopedCollector reporter =
                          new ProblemReporter.ScopedCollector(() -> resourcePath.toString(), BerongSMP.LOGGER)) {
                 var input = TagValueInput.create(reporter, level.registryAccess(), spawnNbt);
-                boolean ok = EntityType.create(input, level, EntitySpawnReason.LOAD)
+                boolean ok = EntityType.create(input, level, new EntitySpawnRequest(EntitySpawnReason.LOAD, false))
                           .map(e -> { level.addFreshEntity(e); return true; })
                           .orElse(false);
                 if (!ok) BerongSMP.LOGGER.warn("[SchemLoader] EntityType.create returned empty for {}", entityId);
