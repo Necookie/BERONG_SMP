@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Lightweight HTTP client for the Turso libSQL REST API.
@@ -27,6 +29,8 @@ import java.util.concurrent.Executors;
 public class TursoClient {
 
     private static final int TIMEOUT_SECONDS = 10;
+    /** Max time {@link #shutdown()} waits for the write queue to drain before giving up. */
+    private static final int SHUTDOWN_DRAIN_SECONDS = 5;
     private static final Gson GSON = new Gson();
 
     private static HttpClient httpClient;
@@ -69,10 +73,26 @@ public class TursoClient {
         createSchemaAsync();
     }
 
+    /**
+     * Stops accepting new writes, then blocks (up to {@link #SHUTDOWN_DRAIN_SECONDS}) for the
+     * write queue to actually drain before tearing down {@code httpClient}. Nulling the client
+     * immediately (the previous behavior) raced with any already-queued write — e.g.
+     * {@code SessionManager.shutdown()}'s "mark session aborted" calls, submitted just before this
+     * runs — which would then NPE inside the executor thread and silently lose that write instead
+     * of completing it.
+     */
     public static void shutdown() {
         ready = false;
         if (writeExecutor != null) {
             writeExecutor.shutdown();
+            try {
+                if (!writeExecutor.awaitTermination(SHUTDOWN_DRAIN_SECONDS, TimeUnit.SECONDS)) {
+                    BerongSMP.LOGGER.warn("[TursoClient] Write queue did not drain within {}s on shutdown — "
+                            + "some pending writes may not have completed.", SHUTDOWN_DRAIN_SECONDS);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             writeExecutor = null;
         }
         httpClient = null;
@@ -93,19 +113,26 @@ public class TursoClient {
     public static CompletableFuture<Void> executeAsync(String sql, Object... args) {
         if (!ready) return CompletableFuture.completedFuture(null);
         String body = buildBody(sql, args);
-        return CompletableFuture.runAsync(() -> {
-            try {
-                HttpRequest req = buildRequest(body);
-                HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                if (resp.statusCode() >= 400) {
-                    BerongSMP.LOGGER.warn("[TursoClient] Write failed HTTP {}: {}", resp.statusCode(), resp.body());
-                } else if (resp.body().contains("\"type\":\"error\"")) {
-                    BerongSMP.LOGGER.warn("[TursoClient] Turso SQL error: {}", resp.body());
+        try {
+            return CompletableFuture.runAsync(() -> {
+                try {
+                    HttpRequest req = buildRequest(body);
+                    HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                    if (resp.statusCode() >= 400) {
+                        BerongSMP.LOGGER.warn("[TursoClient] Write failed HTTP {}: {}", resp.statusCode(), resp.body());
+                    } else if (resp.body().contains("\"type\":\"error\"")) {
+                        BerongSMP.LOGGER.warn("[TursoClient] Turso SQL error: {}", resp.body());
+                    }
+                } catch (Exception e) {
+                    BerongSMP.LOGGER.warn("[TursoClient] Write error: {}", e.getMessage());
                 }
-            } catch (Exception e) {
-                BerongSMP.LOGGER.warn("[TursoClient] Write error: {}", e.getMessage());
-            }
-        }, writeExecutor);
+            }, writeExecutor);
+        } catch (RejectedExecutionException e) {
+            // writeExecutor is mid-shutdown — the submitting thread lost a narrow race against
+            // TursoClient.shutdown(). Nothing to recover; just don't crash the caller.
+            BerongSMP.LOGGER.warn("[TursoClient] Write rejected during shutdown, dropped.");
+            return CompletableFuture.completedFuture(null);
+        }
     }
 
     /**
@@ -299,16 +326,20 @@ public class TursoClient {
     private static void silentAlter(String sql) {
         if (!ready) return;
         String body = buildBody(sql, new Object[0]);
-        CompletableFuture.runAsync(() -> {
-            try {
-                HttpRequest req = buildRequest(body);
-                httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                // Status is intentionally ignored — Turso returns an error if the column already
-                // exists, which is the expected case on all subsequent server starts.
-            } catch (Exception e) {
-                BerongSMP.LOGGER.debug("[TursoClient] silentAlter skipped (column may already exist): {}", e.getMessage());
-            }
-        }, writeExecutor);
+        try {
+            CompletableFuture.runAsync(() -> {
+                try {
+                    HttpRequest req = buildRequest(body);
+                    httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                    // Status is intentionally ignored — Turso returns an error if the column already
+                    // exists, which is the expected case on all subsequent server starts.
+                } catch (Exception e) {
+                    BerongSMP.LOGGER.debug("[TursoClient] silentAlter skipped (column may already exist): {}", e.getMessage());
+                }
+            }, writeExecutor);
+        } catch (RejectedExecutionException e) {
+            // Shutting down mid schema-creation chain — safe to drop, nothing depends on this.
+        }
     }
 
     private static HttpRequest buildRequest(String body) {
