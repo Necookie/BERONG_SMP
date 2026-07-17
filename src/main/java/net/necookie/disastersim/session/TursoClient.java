@@ -38,9 +38,17 @@ public class TursoClient {
     private static String authHeader;
     private static volatile boolean ready = false;
 
-    // Dedicated pool for the blocking HTTP writes. Keeping them off ForkJoinPool.commonPool()
-    // avoids starving the shared pool (which parallel streams elsewhere also use) and bounds the
-    // number of concurrent Turso connections. Daemon threads so they never block JVM shutdown.
+    // Dedicated pool for the blocking HTTP writes (and, since queryAsync/insertAsync were added,
+    // reads too — see below). Keeping them off ForkJoinPool.commonPool() avoids starving the
+    // shared pool (which parallel streams elsewhere also use) and bounds the number of concurrent
+    // Turso connections. Daemon threads so they never block JVM shutdown.
+    //
+    // Sized for classroom-scale bursts (many students /register-ing, /login-ing, and running /bfp
+    // queries within the same few seconds at the start of a period), not steady-state load: every
+    // task here is a blocking HTTP round-trip (I/O-bound, not CPU-bound), so threads spend most of
+    // their time parked waiting on the network rather than competing for CPU — a pool larger than
+    // the host's core count is still safe and just reduces queueing latency during a burst.
+    private static final int WRITE_POOL_SIZE = 8;
     private static ExecutorService writeExecutor;
 
     private TursoClient() {}
@@ -63,7 +71,7 @@ public class TursoClient {
         httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .build();
-        writeExecutor = Executors.newFixedThreadPool(2, runnable -> {
+        writeExecutor = Executors.newFixedThreadPool(WRITE_POOL_SIZE, runnable -> {
             Thread t = new Thread(runnable, "TursoClient-Writer");
             t.setDaemon(true);
             return t;

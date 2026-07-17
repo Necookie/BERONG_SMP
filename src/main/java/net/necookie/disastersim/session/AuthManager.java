@@ -62,7 +62,14 @@ public final class AuthManager {
     private static final Map<UUID, LoginAttempts> loginFailures = new ConcurrentHashMap<>();
 
     // PBKDF2 (~100-200ms) + the Turso HTTP round-trip must never run on the server/command thread.
-    private static final ExecutorService AUTH_EXECUTOR = Executors.newFixedThreadPool(2, runnable -> {
+    // Unlike TursoClient.writeExecutor, this pool's dominant cost (PBKDF2's 210k iterations) is
+    // genuinely CPU-bound, not I/O-bound — so it's deliberately NOT sized as generously as a
+    // pure-I/O pool would be: too many concurrent hashes competing for cores would fight the main
+    // server tick thread for CPU and could show up as TPS lag during a registration burst. 4 gives
+    // real headroom over the original 2 (a classroom's worth of students /register-ing in the same
+    // few seconds) without assuming a large host.
+    private static final int AUTH_POOL_SIZE = 4;
+    private static final ExecutorService AUTH_EXECUTOR = Executors.newFixedThreadPool(AUTH_POOL_SIZE, runnable -> {
         Thread t = new Thread(runnable, "AuthManager-Worker");
         t.setDaemon(true);
         return t;
