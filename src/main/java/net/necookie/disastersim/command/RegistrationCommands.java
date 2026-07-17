@@ -112,8 +112,10 @@ public class RegistrationCommands {
                         error.startsWith("locked:")
                                 ? "§cToo many failed attempts. Try again in " + error.substring(7) + "s."
                                 : switch (error) {
-                            case "not_found" -> "§cNo account found for username '" + username + "'.";
-                            case "bad_password" -> "§cIncorrect password.";
+                            // Deliberately identical wording for an unknown username and a wrong
+                            // password (AuthManager.loginAsync) — distinguishing them lets a
+                            // station enumerate which usernames are actually registered.
+                            case "invalid_credentials" -> "§cIncorrect username or password.";
                             case "offline" -> "§cAccount system is offline — ask an instructor to /register you locally.";
                             default -> "§cLogin failed. (" + error + ")";
                         })));

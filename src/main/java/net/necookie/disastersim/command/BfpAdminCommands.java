@@ -120,7 +120,9 @@ public class BfpAdminCommands {
                                         // lockout expired — reset
                                         rec[0] = 0;
                                     }
-                                    if (entered.equals(correct)) {
+                                    if (java.security.MessageDigest.isEqual(
+                                            entered.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                                            correct.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
                                         pinFailures.remove(uuid);
                                         bfpAuthorized.add(uuid);
                                         ctx.getSource().sendSuccess(() -> Component.literal("§a✓ BFP admin access granted."), false);

@@ -13,6 +13,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -40,12 +41,25 @@ public final class AuthManager {
 
     private static final Pattern USERNAME_PATTERN = Pattern.compile("[a-zA-Z0-9_]{3,16}");
     private static final int MIN_PASSWORD_LENGTH = 6;
+    /** Rejects absurdly long submitted passwords before they ever reach PBKDF2 or Turso. */
+    private static final int MAX_PASSWORD_LENGTH = 128;
     private static final int MAX_LOGIN_ATTEMPTS = 5;
     private static final long LOCKOUT_MS = 5L * 60 * 1000; // 5 minutes
 
     private static final Map<UUID, AuthAccount> active = new ConcurrentHashMap<>();
-    // long[0] = consecutive failure count, long[1] = first-failure epoch-ms — mirrors BfpAdminCommands.pinFailures.
-    private static final Map<UUID, long[]> loginFailures = new ConcurrentHashMap<>();
+    /**
+     * Per-station rate-limit state. The attempt counter is incremented synchronously on the
+     * calling (server) thread at dispatch time — before the async lookup even starts — rather than
+     * only on a confirmed failure once the async result comes back. The old failure-only counting
+     * had a real TOCTOU window: several rapid /login submissions could all pass the
+     * "already locked out?" check before any one of their async results returned and recorded a
+     * failure, letting a burst exceed the intended 5-attempt budget.
+     */
+    private static final class LoginAttempts {
+        final AtomicInteger count = new AtomicInteger(0);
+        volatile long lockoutStartMs = 0L;
+    }
+    private static final Map<UUID, LoginAttempts> loginFailures = new ConcurrentHashMap<>();
 
     // PBKDF2 (~100-200ms) + the Turso HTTP round-trip must never run on the server/command thread.
     private static final ExecutorService AUTH_EXECUTOR = Executors.newFixedThreadPool(2, runnable -> {
@@ -64,7 +78,9 @@ public final class AuthManager {
     }
 
     public static boolean isValidPassword(String password) {
-        return password != null && password.length() >= MIN_PASSWORD_LENGTH;
+        return password != null
+                && password.length() >= MIN_PASSWORD_LENGTH
+                && password.length() <= MAX_PASSWORD_LENGTH;
     }
 
     public static AuthAccount current(UUID uuid) {
@@ -131,7 +147,14 @@ public final class AuthManager {
 
     /**
      * Logs the station into an existing account. Rate-limited the same way {@code /bfp login}
-     * rate-limits PIN attempts (5 tries, 5-minute lockout) to slow down password guessing.
+     * rate-limits PIN attempts (5 tries, 5-minute lockout) to slow down password guessing — every
+     * dispatched attempt counts toward the budget (incremented synchronously here, before the
+     * async lookup even starts), not just confirmed failures, so a burst of concurrent submissions
+     * can't slip past the lockout check before any one of them resolves.
+     *
+     * <p>{@code onError} receives {@code "invalid_credentials"} for both an unknown username and a
+     * wrong password — kept indistinguishable so a station can't be used to enumerate which
+     * usernames are registered.
      */
     public static void loginAsync(ServerPlayer player, String username, String password,
                                    Consumer<AuthAccount> onSuccess, Consumer<String> onError) {
@@ -141,30 +164,41 @@ public final class AuthManager {
             server.execute(() -> onError.accept("offline"));
             return;
         }
-        long[] rec = loginFailures.computeIfAbsent(uuid, k -> new long[]{0, 0});
-        long now = System.currentTimeMillis();
-        if (rec[0] >= MAX_LOGIN_ATTEMPTS) {
-            long remaining = (rec[1] + LOCKOUT_MS - now) / 1000;
-            if (remaining > 0) {
-                server.execute(() -> onError.accept("locked:" + remaining));
-                return;
-            }
-            rec[0] = 0;
+        if (password != null && password.length() > MAX_PASSWORD_LENGTH) {
+            // Reject before ever touching PBKDF2/Turso — no point spending 210k iterations
+            // hashing input that can't possibly match a stored (bounded-length) password anyway.
+            server.execute(() -> onError.accept("invalid_credentials"));
+            return;
         }
+
+        LoginAttempts rec = loginFailures.computeIfAbsent(uuid, k -> new LoginAttempts());
+        long now = System.currentTimeMillis();
+        synchronized (rec) {
+            if (rec.count.get() >= MAX_LOGIN_ATTEMPTS) {
+                long remaining = (rec.lockoutStartMs + LOCKOUT_MS - now) / 1000;
+                if (remaining > 0) {
+                    server.execute(() -> onError.accept("locked:" + remaining));
+                    return;
+                }
+                rec.count.set(0);
+            }
+            if (rec.count.incrementAndGet() == 1) {
+                rec.lockoutStartMs = now;
+            }
+        }
+
         CompletableFuture.runAsync(() -> {
             String json = TursoClient.query(
                     "SELECT id, username, password_hash, student_id, section, full_name, tutorial_completed " +
                     "FROM student_accounts WHERE username=?", username);
             JsonArray rows = TursoClient.parseRows(json);
             if (rows.isEmpty()) {
-                recordFailure(rec, now);
-                server.execute(() -> onError.accept("not_found"));
+                server.execute(() -> onError.accept("invalid_credentials"));
                 return;
             }
             JsonObject row = rows.get(0).getAsJsonObject();
             if (!PasswordHasher.verify(password, str(row, "password_hash"))) {
-                recordFailure(rec, now);
-                server.execute(() -> onError.accept("bad_password"));
+                server.execute(() -> onError.accept("invalid_credentials"));
                 return;
             }
             loginFailures.remove(uuid);
@@ -179,11 +213,6 @@ public final class AuthManager {
                 onSuccess.accept(account);
             });
         }, AUTH_EXECUTOR);
-    }
-
-    private static void recordFailure(long[] rec, long now) {
-        if (rec[0] == 0) rec[1] = now; // start lockout window
-        rec[0]++;
     }
 
     private static String str(JsonObject obj, String key) {
