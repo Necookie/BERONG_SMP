@@ -332,15 +332,18 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("§fLocate the burning computer and suppress it immediately."));
             player.sendSystemMessage(Component.literal("§7CO2 extinguisher issued — §ePull pin → Aim → Sweep"));
         } else if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
-            player.getInventory().setItem(0, new ItemStack(ModItems.FIRE_EXTINGUISHER.get()));
-            player.getInventory().setItem(1, new ItemStack(ModItems.CO2_EXTINGUISHER.get()));
-            player.getInventory().setItem(2, new ItemStack(ModItems.WET_CHEMICAL_EXTINGUISHER.get()));
+            // No extinguisher is handed out here — New Sim Building 2.0's own schematic already
+            // bakes in ~24 item frames holding all 3 extinguisher types around the building
+            // (left-click a frame to pop its extinguisher out, then walk over to pick it up, same
+            // vanilla mechanic as Sgt. Reyes's extinguisher wall in the Academy). Player enters this
+            // building with an empty inventory — see the full clearContent() below.
             player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
             player.sendSystemMessage(Component.literal("§c§l⚠  FIRE PREVENTION DRILL — New Sim Building 2.0"));
             player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
             player.sendSystemMessage(Component.literal("§e5 developing hazards are hidden somewhere in this building."));
             player.sendSystemMessage(Component.literal("§fFind each one and §aright-click it bare-handed§f to prevent it — you have §c2:00§f."));
             player.sendSystemMessage(Component.literal("§7Any hazard you miss will catch fire; you'll then need the §ecorrect extinguisher§7 to contain it."));
+            player.sendSystemMessage(Component.literal("§7Extinguishers aren't issued — grab one from a wall-mounted frame when you need it."));
         } else if (state.isQuake()) {
             player.sendSystemMessage(Component.literal(String.format(
                     "§c⚠ Magnitude %.1f Earthquake has begun! Brace for impact!%s",
