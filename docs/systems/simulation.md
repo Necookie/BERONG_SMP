@@ -141,9 +141,25 @@ startSimulation(NEW_SIM_BUILDING2_FIRE)
     already baked into the schematic (no new blocks spawned) — HazardManager.armRandomHazards shuffles
     that pool and HazardManager.activate()s 5 of them (NEW_SIM2_HAZARD_COUNT)
   → session.initPhasedFire(armed) → PREVENTION; player spawns in a random 2nd-floor room
-    (findRandomSpawnInNewSim2Upper), issued all 3 extinguishers (ABC/CO2/Wet Chemical — armed
-    hazards may need any class)
+    (findRandomSpawnInNewSim2Upper) with a fully empty inventory (player.getInventory().clearContent())
+    and full HP/no invulnerability — see below
   → phase_transition(prevention) telemetry emitted
+
+**Extinguishers are not auto-issued (2026-07-19):** unlike the legacy Library/CCS branches, no
+extinguisher is placed in the player's hotbar on entry. `new_sim_building2.0.schem` already bakes in
+~24 item frames (6 `item_frame` + 19 `glow_item_frame`, mixed ABC/CO2/Wet Chemical) scattered around
+both floors — left-click a frame to pop its extinguisher out, then walk over the dropped item to pick
+it up (same vanilla mechanic as Sgt. Reyes's extinguisher wall in the Academy). Frames reset every
+session automatically since `placeArena` restores the whole schematic — including baked-in entity
+item stacks — fresh each run.
+
+**Damage/health/invulnerability scoping (2026-07-19):** `startSimulation` clears
+`player.setInvulnerable(false)` and heals to full HP + clears fire before teleporting in (a trainee
+deployed from the Academy still carries `AcademyManager.startAcademyRun`'s invulnerability flag —
+see `docs/systems/academy.md`). `endSimulation`'s alive-player branch mirrors this on the way out —
+full HP, fire cleared, inventory `clearContent()`'d — for every simulation type, before either exit
+path (Morfe debrief or direct-to-lobby) runs, so nothing carried into or picked up during a run
+survives the trip back to the lobby.
 
 PREVENTION (Config.NEW_SIM2_PREVENTION_TICKS, default 2:00):
   → bare-hand right-click on a hazardous prop (HazardBlock/HazardFacingBlock.useWithoutItem's existing
