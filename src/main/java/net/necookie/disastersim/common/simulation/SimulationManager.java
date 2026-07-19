@@ -217,6 +217,13 @@ public class SimulationManager {
         // itself, never something carried in from whatever happened before this button was pressed.
         player.setHealth(player.getMaxHealth());
         player.clearFire();
+        if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
+            // A trainee walks in with nothing — including whatever they were still holding from the
+            // Academy (extinguishers, first aid kit, ...). Every extinguisher they'll need is in a
+            // wall-mounted item frame in-building (see the NEW_SIM_BUILDING2_FIRE message branch
+            // below), so nothing here needs to survive the trip.
+            player.getInventory().clearContent();
+        }
 
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
@@ -544,6 +551,9 @@ public class SimulationManager {
             // skips this: vanilla respawn already resets health to full on its own.
             player.setHealth(player.getMaxHealth());
             player.clearFire();
+            // Nothing picked up or issued during the run (item-frame extinguishers, a legacy
+            // sim's auto-issued extinguisher, ...) should be carried back out into the lobby.
+            player.getInventory().clearContent();
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
             if (newSimResult != null) {
