@@ -213,6 +213,10 @@ public class SimulationManager {
         // unconditionally here regardless of entry path (Academy deploy, lobby button, or a dev
         // /sim_fire command).
         player.setInvulnerable(false);
+        // Every run starts at full HP — damage should only ever be a consequence of the simulation
+        // itself, never something carried in from whatever happened before this button was pressed.
+        player.setHealth(player.getMaxHealth());
+        player.clearFire();
 
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
@@ -532,6 +536,11 @@ public class SimulationManager {
         placeArena(level, arena);
 
         if (player.isAlive()) {
+            // Damage is only ever a consequence of the simulation itself — heal to full the instant
+            // it ends, before either exit path (Morfe debrief or direct-to-lobby) runs. A dead player
+            // skips this: vanilla respawn already resets health to full on its own.
+            player.setHealth(player.getMaxHealth());
+            player.clearFire();
             PacketDistributor.sendToPlayer(player, new SimulationStatusPayload("", 0, 0f));
             player.sendSystemMessage(Component.literal("Simulation ended. Restoring structure..."));
             if (newSimResult != null) {
