@@ -208,6 +208,12 @@ public class SimulationManager {
             return;
         }
 
+        // A trainee deployed straight from the Academy still carries AcademyManager.startAcademyRun's
+        // invulnerability flag — the real graded simulation must hurt like anything else, so clear it
+        // unconditionally here regardless of entry path (Academy deploy, lobby button, or a dev
+        // /sim_fire command).
+        player.setInvulnerable(false);
+
         SimulationSession session = new SimulationSession(player, state);
         activeSessions.put(uuid, session);
         arenaOccupants.put(arena, uuid);

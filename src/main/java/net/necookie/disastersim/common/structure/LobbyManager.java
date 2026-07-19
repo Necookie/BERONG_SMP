@@ -154,6 +154,11 @@ public class LobbyManager {
      * directly). The legacy tutorial is still reachable via {@code /bfp old_tutorial} for dev use.
      */
     private static void routePlayer(ServerPlayer player, ServerLevel level) {
+        // Safety net for a player who logged out mid-Academy (AcademyManager.startAcademyRun sets
+        // this true, and the Entity.invulnerable flag persists in player NBT across a relog) — every
+        // login lands in the main lobby, never back inside a live tutorial, so invulnerability should
+        // never carry over here.
+        player.setInvulnerable(false);
         player.teleportTo(level, SPAWN_X, SPAWN_Y, SPAWN_Z,
             Collections.emptySet(), 0.0f, 0.0f, true);
     }

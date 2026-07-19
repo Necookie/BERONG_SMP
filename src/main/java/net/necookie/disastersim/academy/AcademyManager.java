@@ -135,6 +135,12 @@ public final class AcademyManager {
         clearTransientState(player);
         CruzRoomManager.resetCruz(level);
         ReyesRoomManager.restockExtinguisherFrames(level);
+        // The Academy is a scripted training tour, not a graded hazard — no damage source in it
+        // (Reyes's ignite demo, Santos's earthquake drill, stray fall damage) should ever be able
+        // to hurt the trainee. SimulationManager.startSimulation clears this the moment a real
+        // graded simulation begins, and LobbyManager.routePlayer resets it on every login as a
+        // safety net for a player who logged out mid-tutorial.
+        player.setInvulnerable(true);
         AcademyBuildingManager.Viewpoint start =
                 AcademyBuildingManager.VIEWPOINTS.get(AcademyBuildingManager.DEFAULT_VIEWPOINT);
         player.teleportTo(level, start.x(), start.y(), start.z(),
