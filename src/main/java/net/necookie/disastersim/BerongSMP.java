@@ -6,6 +6,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.clock.ClockTimeMarkers;
+import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -227,11 +229,24 @@ public class BerongSMP {
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
+        MinecraftServer server = event.getServer();
+
         // Entity chunk storage is fully loaded by now — safe to find and remove old NPCs
-        TutorialLobbyManager.initNpcs(event.getServer().overworld());
+        TutorialLobbyManager.initNpcs(server.overworld());
         // Also bakes in its own NPCs/armor stands from the schematic's Entities tag — same
         // entity-storage-must-be-ready requirement as the call above.
-        AcademyBuildingManager.place(event.getServer().overworld());
+        AcademyBuildingManager.place(server.overworld());
+
+        // Pin the overworld clock to "day" — MC 26.x replaced the old long dayTime tick counter
+        // with a WorldClock/ServerClockManager registry (see ServerClockManager.tick / MinecraftServer's
+        // own DEBUG-level-only setupDebugLevel, which does the identical moveToTimeMarker call with
+        // NOON instead of DAY). ADVANCE_TIME=false (set in onServerStarting) only freezes whatever
+        // time the clock happens to already be at; this actually moves it to daytime before freezing
+        // takes effect, so a server restarted at night doesn't stay dark forever. clockManager() is
+        // only guaranteed initialized once the server has fully started, hence ServerStartedEvent
+        // rather than ServerStartingEvent.
+        server.clockManager().moveToTimeMarker(
+                server.registryAccess().getOrThrow(WorldClocks.OVERWORLD), ClockTimeMarkers.DAY);
     }
 
     @SubscribeEvent
@@ -290,8 +305,14 @@ public class BerongSMP {
         // ADVANCE_TIME (formerly doDaylightCycle) — stops the sun from moving.
         // ADVANCE_WEATHER (formerly doWeatherCycle) — stops rain/thunder from starting.
         // Both gamerules were renamed in Minecraft 1.21 / NeoForge 26.x.
+        // SPAWN_MONSTERS — blocks natural hostile-mob spawning only (zombies, skeletons, etc.);
+        // deliberately not the broader SPAWN_MOBS rule, which would also suppress passive animals.
+        // berongsmp:custom_npc is MobCategory.MISC and is never placed through natural spawning
+        // (baked into schematics via SchemLoader, or handed out by ModItemsNpcSpawners), so this
+        // rule can never touch Academy/lobby NPCs.
         GameRules rules = level.getGameRules();
         rules.set(GameRules.ADVANCE_TIME, false, server);
         rules.set(GameRules.ADVANCE_WEATHER, false, server);
+        rules.set(GameRules.SPAWN_MONSTERS, false, server);
     }
 }
