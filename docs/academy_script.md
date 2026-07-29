@@ -356,7 +356,14 @@ Then the score printout: `§eYour Academy score: §fX / 100` (and, on a fail, `�
 > That's a passing record — §a§lyou are officially certified!§r
 >
 > §c[Capt. Morfe] §fBe proud of yourself — what you practiced today protects real people in real
-> life. You're cleared for the full simulations. Congratulations, trainee!
+> life. Every drill you just ran was a rehearsal — now it's time for the real thing.
+>
+> §c[Capt. Morfe] §fI'm sending you to New Sim Building 2.0 for a full, graded fire simulation — no
+> more training wheels. Prevent what you can, contain what you can't, and get everyone out safe.
+> I'll be waiting for your report. Good luck, trainee!
+
+`MorfeRoomManager.deploySimAfterCountdown` then deploys the player into `NEW_SIM_BUILDING2_FIRE`
+after a 5-second countdown, same as before — only the dialogue text changed.
 
 ### Already certified (re-click after passing)
 > §c[Capt. Morfe] §fYou're already certified, trainee — no need to prove anything twice! Head out

@@ -137,9 +137,11 @@ public final class MorfeRoomManager {
     public static void startSimDebrief(ServerPlayer player, NewSimScoring.Result result, String endReason) {
         List<AcademyDialogue.DialogueLine> lines = new ArrayList<>();
         lines.add(new AcademyDialogue.DialogueLine(
-                "§c[Capt. Morfe] §fWelcome back, trainee. I just got the report from New Sim Building 2.0 — let's go over it.", false));
+                "§c[Capt. Morfe] §fWell done out there, trainee — you made it out. Catch your breath while I pull up the report from New Sim Building 2.0.", false));
         lines.add(new AcademyDialogue.DialogueLine(
-                "§c[Capt. Morfe] §fYour score: §f" + result.score() + " / 100 §7(" + result.prepLevel() + ")", false));
+                "§c[Capt. Morfe] §7...reviewing your run now, one moment...", false));
+        lines.add(new AcademyDialogue.DialogueLine(
+                "§c[Capt. Morfe] §fAlright, here's the evaluation. Your score: §f" + result.score() + " / 100 §7(" + result.prepLevel() + ")", false));
         lines.add(new AcademyDialogue.DialogueLine(outcomeLine(endReason), false));
         if (!result.weakAreas().isEmpty()) {
             lines.add(new AcademyDialogue.DialogueLine(
