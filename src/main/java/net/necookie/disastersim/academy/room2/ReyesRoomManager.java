@@ -698,6 +698,18 @@ public final class ReyesRoomManager {
     }
 
     /**
+     * True if {@code pos} is one of the 3 Tool Selection Wall frame cells — the only item frames
+     * in the Academy that must stay left-click-poppable (see {@code AcademyManager#onAttackEntity},
+     * which cancels attacks on every other item frame inside the building).
+     */
+    public static boolean isToolWallFrame(BlockPos pos) {
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            if (spec.pos().equals(pos)) return true;
+        }
+        return false;
+    }
+
+    /**
      * Removes the 3 code-spawned hazard props and any leftover vanilla fire in Room 2. The props
      * only ever exist because {@link #igniteHazard} places them, and their forced failure spreads
      * real fire — without this sweep both would persist in the world forever after the drill.
