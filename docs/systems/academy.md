@@ -348,7 +348,13 @@ Room 4 — Capt. Morfe (Evaluation): gated on Santos DONE. Morfe speaks through 
   style), prints the score (+ weak areas on a fail), then plays `MORFE_PASS_LINES` or
   `MORFE_FAIL_LINES`. **Pass (2026-07-13):** certifies the trainee (`MorfePhase.EVALUATED_PASS`),
   calls `AuthManager.markTutorialCompleted` (persists certification to a logged-in `/login`
-  account, if any), then `MORFE_PASS_LINES`'s `onComplete` runs `deploySimAfterCountdown` — a
+  account, if any). **2026-07-29:** the same PASS branch also resets health to full and hunger to
+  20/5.0 saturation (`player.setHealth`/`getFoodData().setFoodLevel`/`setSaturation`) — the Academy
+  is invulnerable throughout (see Room 1 below), so health never actually drops, but hunger still
+  depletes from ordinary movement over a full run and nothing was resetting it. Mirrors
+  `SimulationManager.startSimulation`/`endSimulation`'s own HP+hunger resets on the simulation side
+  (see `CLAUDE.md`'s `SimulationManager` row). Then `MORFE_PASS_LINES`'s `onComplete` runs
+  `deploySimAfterCountdown` — a
   5-second countdown message followed by `SimulationManager.startSimulation(NEW_SIM_BUILDING2_FIRE)`
   (the exact `/sim_fire new_sim_building2` path), skipped if the player logged out, died, or
   already started something else during the wait. The tutorial's completion is no longer a dead
