@@ -57,14 +57,34 @@ public final class AcademyManager {
      * player rejoins: a full-strength earthquake out of nowhere, with no dialogue and no context.
      * Running the same (idempotent, phase-gated) rollback on login closes that path; for players
      * whose logout hook already ran, every step is a no-op.
+     *
+     * <p>Both hooks also now fully reset the player's {@link AcademyProgress}
+     * ({@link #forfeitProgressOnDisconnect}): leaving the server forfeits any in-progress Academy
+     * run outright, same as {@link #startAcademyRun}'s own "always begins fresh" rule for the
+     * lobby button — a player who disconnects mid-Room-2 and reconnects lands back in the lobby
+     * (per {@code LobbyManager.routePlayer}) with no stale phase left for a stray NPC interaction
+     * to silently resume. Registered/{@code /login}'d certification is unaffected: it's durably
+     * stored in Turso ({@code AuthManager.isTutorialCompleted} /
+     * {@code student_accounts.tutorial_completed}), independent of this per-station
+     * {@link AcademyProgress} record, and is restored the next time the player runs {@code /login}.
      */
     static {
         PlayerLifecycleRegistry.registerLogoutHook(player -> {
             cancelDialogue(player);
             clearTransientState(player);
+            forfeitProgressOnDisconnect(player);
         });
-        PlayerLifecycleRegistry.registerLoginHook(AcademyManager::clearTransientState);
+        PlayerLifecycleRegistry.registerLoginHook(player -> {
+            clearTransientState(player);
+            forfeitProgressOnDisconnect(player);
+        });
         TickScheduler.register(AcademyManager::tick);
+    }
+
+    /** See the static block's javadoc above. */
+    private static void forfeitProgressOnDisconnect(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        AcademySavedData.get(level).reset(player.getUUID());
     }
 
     @SubscribeEvent
