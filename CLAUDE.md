@@ -26,7 +26,8 @@ This file is a lean index; deep-dive content lives under `docs/`:
   [multiplayer-concurrency-audit-log-2026-07-17.md](docs/history/multiplayer-concurrency-audit-log-2026-07-17.md),
   [deep-dive-audit-log-2026-07-17.md](docs/history/deep-dive-audit-log-2026-07-17.md),
   [neoforge-26.2-migration-log-2026-07-17.md](docs/history/neoforge-26.2-migration-log-2026-07-17.md),
-  [neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md](docs/history/neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md)
+  [neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md](docs/history/neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md),
+  [neoforge-client-lwjgl-crash-fix-log-2026-07-20.md](docs/history/neoforge-client-lwjgl-crash-fix-log-2026-07-20.md)
 - **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
 - **`docs/code_review_2026-07-17.md`** — full-codebase architecture/security/performance review;
   see the Code Review Remediation Log below for what was fixed from it and what's still open
@@ -410,6 +411,7 @@ Shared station accounts (e.g. `station1`) rotate through multiple students. `Ses
 | `/bfp tutorial reset [player]` | Explicit, discoverable alias for the same reset-and-teleport the bare command above performs. |
 | `/bfp tutorial <section> [player]` | Teleport to a named F3-captured reference viewpoint inside the Academy building (`AcademyBuildingManager.VIEWPOINTS`: `officer_cruz`, `sgt_reyes`, `sgt_santos`, `capt_morfe`) — plain dev-navigation teleport, no reset. One literal subcommand per map entry. For tuning NPC placement in-game (see `docs/major_plan.md`-style "needs in-game F3 tuning" tasks). |
 | `/bfp tutorial skipto <instructor> [player]` | Dev shortcut to jump straight into any Academy room without replaying every prior one by hand. `<instructor>` is one of `cruz`/`reyes`/`santos`/`morfe`; marks every room strictly before it `DONE`, resets the target room (and everything after) to `NOT_STARTED`, applies the same cleanup `reset` does (dialogue cancelled, room-manager transient state cleared, Cruz snapped to her anchor, Reyes's extinguisher frames restocked, leftover Room 2 hazard props cleared), then teleports to that instructor's `VIEWPOINTS` entry. `skipto cruz` is equivalent to a full reset. |
+| `/bfp dialogue skip [player]` | (2026-07-20) Advances the target's currently-playing Academy dialogue by exactly one line (one recorded voice `.ogg`), instantly — `AcademyManager.skipCurrentLine`, without needing to be near the NPC and without the 1-second anti-spam floor that guards a re-click's skip-ahead against accidental button-mashing. Deliberately narrower than a re-click, though: it **refuses on the last line** instead of completing the sequence, since finishing a dialogue is what fires its `onComplete` (a phase transition, hazard ignition, room advance, …) — a demo command that skips a recording must never also trigger the room's next state. Distinct from `/bfp tutorial skipto`, which jumps whole rooms: this steps through one instructor's lines one at a time, added for live demos where waiting out every recording (or breaking camera position to re-click the NPC) isn't practical. Fails with a chat message if no dialogue is playing, or if already on the last line. |
 | `/bfp note <text>` | Append instructor observation to active session (bfp_notes column) |
 | `/bfp confidence <1-5>` | Set instructor confidence rating 1.0–5.0 (confidence column) |
 | `/bfp prep_level <none|low|moderate|high>` | Set prep-level assessment (prep_level column) |
@@ -704,6 +706,16 @@ so none of the MC-API fixes above needed revisiting) and WorldEdit's `localRunti
 was disabled (`compileOnly` stays; `//copyroom` already tolerates WorldEdit's absence). All gates
 re-verified clean. Full log:
 **[docs/history/neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md](docs/history/neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md)**.
+
+**2026-07-20 client crash fix:** `26.2.0.0-beta` itself turned out to have a real upstream NeoForge
+bug ([#3233](https://github.com/neoforged/NeoForge/issues/3233), fixed in `26.2.0.6-beta`) that
+crashed every player's client instantly on launch (before mod loading even starts), no crash report
+generated. Fixed by bundling `neoforge-26.2.0.7-beta-installer.jar` in the **client installer only**
+— `gradle.properties`' `neo_version` and the live server stay on `26.2.0.0-beta` unchanged, since
+`neoforge.mods.toml`'s dependency range (`[${neo_version},)`) is an open-ended minimum, and a
+`26.2.0.7-beta` client was verified end-to-end (real launch + real connection to the live server) to
+work against the unchanged `26.2.0.0-beta` server. Full log:
+**[docs/history/neoforge-client-lwjgl-crash-fix-log-2026-07-20.md](docs/history/neoforge-client-lwjgl-crash-fix-log-2026-07-20.md)**.
 
 ---
 
