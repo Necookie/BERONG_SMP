@@ -185,7 +185,10 @@ public final class HazardManager {
         int lit = 0;
         for (BlockPos target : BlockPos.betweenClosed(pos.offset(-1, 0, -1), pos.offset(1, 2, 1))) {
             if (lit >= 6) break;
-            if (level.getBlockState(target).isAir()) {
+            // isAir() reports true for an item frame's own floating cell too — see HazardBlock's
+            // isFrameNear javadoc. Without this guard the 3x3 flash-ignite could place fire right
+            // on top of a nearby wall-mounted extinguisher frame, popping/breaking it.
+            if (level.getBlockState(target).isAir() && !HazardBlock.isFrameNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit++;
             }
