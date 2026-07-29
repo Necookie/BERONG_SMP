@@ -76,6 +76,12 @@ public final class MorfeRoomManager {
 
         if (passed) {
             data.mutate(player.getUUID(), p -> p.setMorfePhase(MorfePhase.EVALUATED_PASS));
+            // The tutorial is invulnerable throughout, so health never actually drops — but hunger
+            // still depletes from ordinary movement over a full Academy run. Reset both the instant
+            // the tutorial is truly finished, mirroring SimulationManager's own start/end resets.
+            player.setHealth(player.getMaxHealth());
+            player.getFoodData().setFoodLevel(20);
+            player.getFoodData().setSaturation(5.0F);
             AcademyTelemetry.record(player, "academy_certified", "score=" + result.score());
             // Persists to the logged-in account (if any) so a returning student's /login restores
             // certification without replaying the tutorial — see AuthManager/LobbyManager.
