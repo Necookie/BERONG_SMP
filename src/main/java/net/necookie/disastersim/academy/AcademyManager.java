@@ -22,6 +22,7 @@ import net.necookie.disastersim.entity.NpcType;
 import net.necookie.disastersim.network.AcademyStatusPayload;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -85,6 +86,24 @@ public final class AcademyManager {
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }
+    }
+
+    /**
+     * Blocks left-click/attack on the Academy's purely-decorative gear-display item frames (10 of
+     * them, baked into {@code academy_building.schem} alongside their armor stands) — vanilla's
+     * default item-frame behavior pops the held item out onto the floor on attack, and unlike
+     * Sgt. Reyes's 3 Tool Selection Wall frames ({@link ReyesRoomManager#isToolWallFrame}), nothing
+     * ever restocks these, so a bored player emptying one leaves a permanently empty display for
+     * every future trainee. Scoped to {@link AcademyBuildingManager#ACADEMY_BOUNDS} so New Sim
+     * Building 2.0's ~24 intentionally-poppable wall-mounted extinguisher frames elsewhere on the
+     * map are completely unaffected.
+     */
+    @SubscribeEvent
+    public static void onAttackEntity(AttackEntityEvent event) {
+        if (!(event.getTarget() instanceof net.minecraft.world.entity.decoration.ItemFrame frame)) return;
+        if (!AcademyBuildingManager.ACADEMY_BOUNDS.contains(frame.position())) return;
+        if (ReyesRoomManager.isToolWallFrame(frame.blockPosition())) return;
+        event.setCanceled(true);
     }
 
     /** Called once per server tick from {@code SimulationManager.onServerTick}. */
