@@ -656,7 +656,18 @@ public final class ReyesRoomManager {
                 frame = new GlowItemFrame(level, pos, Direction.SOUTH);
                 level.addFreshEntity(frame);
             } else {
+                // A disk-persisted frame from a previous server session can attach to the level
+                // well after boot — a chunk's saved entities aren't loaded until promoted to the
+                // entity-ticking ring (same mechanism as AcademyBuildingManager's stray-Cruz
+                // problem), landing right on top of the fresh frame this method already spawned
+                // at boot. Keep exactly one; discard any extras so this cell never shows two
+                // independently-poppable, independently-filled frames — the actual cause of the
+                // "duplicate extinguishers on the wall" report (a duplicate ItemFrame, not a
+                // stray dropped ItemEntity the sweep below would have caught).
                 frame = frames.get(0);
+                for (int i = 1; i < frames.size(); i++) {
+                    frames.get(i).discard();
+                }
             }
             frame.setItem(new ItemStack(spec.item().get()));
         }
