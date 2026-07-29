@@ -163,6 +163,7 @@ public final class ReyesRoomManager {
     }
 
     public static void tick(ServerLevel level) {
+        dedupeExtinguisherFrameEntities(level);
         AcademySavedData data = AcademySavedData.get(level);
         for (ServerPlayer player : level.getServer().getPlayerList().getPlayers()) {
             AcademyProgress progress = data.get(player.getUUID());
@@ -672,6 +673,29 @@ public final class ReyesRoomManager {
             frame.setItem(new ItemStack(spec.item().get()));
         }
         sweepStrayExtinguisherDrops(level);
+    }
+
+    /**
+     * Continuous per-tick safety net for the same duplicate-frame race
+     * {@link #restockExtinguisherFrames} already dedupes at its own discrete trigger points (boot,
+     * Academy run start, admin reset/skipto): a disk-persisted frame from a previous server
+     * session can attach to the level well after any of those already ran, the moment its chunk is
+     * promoted to the entity-ticking ring — see the comment inside {@link #restockExtinguisherFrames}
+     * for the exact mechanism, identical to why {@code AcademyBuildingManager.sweepStrayCruz} has
+     * to run every tick instead of once at boot. Cheap: 3 tiny single-block-cell entity queries.
+     * Deliberately doesn't touch frame contents (unlike {@link #restockExtinguisherFrames}) — just
+     * keeps at most one frame per cell.
+     */
+    private static void dedupeExtinguisherFrameEntities(ServerLevel level) {
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            BlockPos pos = spec.pos();
+            AABB cell = new AABB(pos.getX(), pos.getY(), pos.getZ(),
+                    pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+            List<ItemFrame> frames = level.getEntitiesOfClass(ItemFrame.class, cell);
+            for (int i = 1; i < frames.size(); i++) {
+                frames.get(i).discard();
+            }
+        }
     }
 
     /**
