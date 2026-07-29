@@ -270,7 +270,32 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
   `AcademyManager.onAttackEntity` cancels any attack on an item frame inside
   `AcademyBuildingManager.ACADEMY_BOUNDS` except the 3 Tool Selection Wall cells
   (`ReyesRoomManager.isToolWallFrame`), leaving New Sim Building 2.0's ~24 intentionally-poppable
-  wall-mounted extinguisher frames elsewhere on the map unaffected.
+  wall-mounted extinguisher frames elsewhere on the map unaffected. **The actual duplicate-frame
+  root cause (2026-07-29 follow-up):** the stray-drop sweep above didn't fully resolve the report —
+  the real cause was a genuine duplicate `ItemFrame` entity, not a stray dropped `ItemEntity`. A
+  chunk's disk-persisted entities from a previous server session aren't attached to the level until
+  that chunk is promoted to the entity-ticking ring (a player walking close) — the exact race
+  `AcademyBuildingManager.discardDuplicateCruz`/`sweepStrayCruz` already exists to catch for Officer
+  Cruz, just never generalized to the tool-wall frames. `SchemLoader`'s fresh boot-time frame and a
+  stale previous-session frame could both end up occupying the same wall cell, independently
+  poppable and independently filled. `restockExtinguisherFrames` now discards every frame beyond
+  the first found in a cell before refilling it, and a new `dedupeExtinguisherFrameEntities` runs
+  the same check every tick (not just at restock's discrete trigger points), since the stale frame
+  can attach well after any of those already ran.
+
+  **Fire-vs-frame collision (2026-07-29):** separately, `FireEffects.simulateFire` (New Sim
+  Building 2.0/library fire spread) and `HazardManager.flashIgniteSawdust` were placing vanilla
+  fire directly into item-frame cells — `BlockState.isAir()` reports true for a frame's own
+  floating cell, and vanilla fire damage pops (then eventually breaks) a hit frame. Both now check
+  for a nearby `ItemFrame` first, same guard already applied to `HazardBlock`/`HazardFacingBlock`/
+  `ComputerBlock`'s fire-placement helpers.
+
+  **Progress forfeited on disconnect (2026-07-29):** `AcademyManager`'s logout/login hooks now also
+  reset `AcademyProgress` to a fresh `NOT_STARTED` state (`AcademySavedData.reset`) — previously
+  only mid-effect transient state rolled back on disconnect, so a player who logged back in and
+  interacted with an NPC directly (without pressing the lobby button again) could silently resume
+  the exact room/phase they'd left. Registered `/login` certification is unaffected — it's durable
+  in Turso (`student_accounts.tutorial_completed`), independent of this per-station record.
 
 Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
   TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
