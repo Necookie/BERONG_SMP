@@ -783,5 +783,9 @@ public final class ReyesRoomManager {
         } else if (phase == ReyesPhase.ALARM_CHECKPOINT && alarmRinging.remove(id) != null) {
             stopAlarm(level);
         }
+        // A player who quit mid-TOOL_SELECTION may have popped a frame and never walked over the
+        // result — sweep it now (age-gated, see sweepStrayExtinguisherDrops) rather than waiting
+        // for the next trainee's restock to notice it.
+        sweepStrayExtinguisherDrops(level);
     }
 }
