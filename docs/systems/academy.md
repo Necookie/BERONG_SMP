@@ -389,7 +389,19 @@ Dialogue is a timed auto-advancing sequence, not click-per-line: one right-click
   drops a player's in-flight session without firing its `onComplete` — used at the two spots that
   mutate phase state out from under a possibly-active sequence (Cruz's Go/Stop violation revert,
   Morfe's fail-path reset) — plus a `PlayerEvent.PlayerLoggedOutEvent` hook that cancels dialogue
-  and clears every room manager's transient per-player maps. Each room's periodic "idle nudge"
+  and clears every room manager's transient per-player maps. **`AcademyManager.skipCurrentLine`
+  (2026-07-20)** is a narrower way to move a sequence forward than either the natural auto-advance
+  or the click-to-skip above: it advances exactly one line immediately, with no proximity
+  requirement and no `MIN_LINE_DISPLAY_TICKS` floor (a deliberate command is never the accidental
+  spam-clicking that floor guards against), stopping the current VOICE-channel sound first so
+  skipping never overlaps two lines' audio — but it **refuses (`LineSkipResult.ALREADY_LAST_LINE`)
+  instead of completing the sequence** when called on the last line, since finishing a sequence is
+  exactly what fires `onComplete` (a phase transition, hazard ignition, room advance — whatever that
+  room wired up). A tool for skipping a recording must never also be the thing that advances the
+  room's actual state; only a genuine re-click (or the tick-driven auto-advance) is allowed to
+  complete a sequence. Backs `/bfp dialogue skip [player]` — built for live demos, so a presenter can
+  step through one instructor's recorded lines one at a time from chat instead of waiting out each
+  `.ogg` or walking back to re-click the NPC. Each room's periodic "idle nudge"
   reminders check `AcademyManager.isDialogueActive(uuid)` before firing, so a coincidental idle
   nudge can no longer stomp an in-progress dialogue line's caption while its voice line may still
   be playing. **Caption auto-clear (2026-07-05):** every non-dialogue-sequence caption (idle

@@ -324,6 +324,32 @@ public final class AcademyManager {
         activeSessions.remove(player.getUUID());
     }
 
+    /** Outcome of {@link #skipCurrentLine} — distinguishes "nothing to skip" from "won't skip past the end." */
+    public enum LineSkipResult { NO_DIALOGUE, ALREADY_LAST_LINE, ADVANCED }
+
+    /**
+     * Immediately advances the player's active dialogue by exactly one line's worth of audio/
+     * caption — never the sequence's completion. This is deliberately narrower than a re-click of
+     * the NPC (see {@link #startOrAdvanceDialogue}): re-clicking on the last line finishes the
+     * sequence and fires {@code onComplete}, which is how a phase transition, hazard ignition, or
+     * room advance actually happens. A skip command used mid-demo must never trigger that — the
+     * presenter is skipping a recording, not asking the room's state machine to move forward — so
+     * this refuses ({@link LineSkipResult#ALREADY_LAST_LINE}) instead of completing when already on
+     * the last line. Callable without being near the NPC and without the
+     * {@link #MIN_LINE_DISPLAY_TICKS} anti-spam floor, since a deliberate admin command is never an
+     * accidental button-mash. Stops whatever VOICE-channel sound is currently playing before
+     * advancing, so the skipped line's audio never overlaps the next one.
+     */
+    public static LineSkipResult skipCurrentLine(ServerPlayer player) {
+        DialogueSession session = activeSessions.get(player.getUUID());
+        if (session == null) return LineSkipResult.NO_DIALOGUE;
+        if (session.index + 1 >= session.lines.size()) return LineSkipResult.ALREADY_LAST_LINE;
+        player.connection.send(new ClientboundStopSoundPacket(null, SoundSource.VOICE));
+        session.index++;
+        playCurrentLine(player, session);
+        return LineSkipResult.ADVANCED;
+    }
+
     /** Called from {@link #tick} — auto-advances any session whose delay has elapsed. */
     private static void tickDialogues(ServerLevel level) {
         if (activeSessions.isEmpty()) return;

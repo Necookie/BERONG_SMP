@@ -199,6 +199,15 @@ public class BfpAdminCommands {
 
                 .then(academyTutorialCommand())
 
+                .then(Commands.literal("dialogue")
+                        .then(Commands.literal("skip")
+                                .executes(ctx -> {
+                                    if (!ctx.getSource().isPlayer()) return 0;
+                                    return dialogueSkip(ctx, ctx.getSource().getPlayer());
+                                })
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> dialogueSkip(ctx, EntityArgument.getPlayer(ctx, "player"))))))
+
                 .then(Commands.literal("session")
                         .then(Commands.literal("info")
                                 .executes(ctx -> {
@@ -556,6 +565,37 @@ public class BfpAdminCommands {
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "§eTeleported §f" + target.getName().getString() + "§e to the Academy building."), true);
         return 1;
+    }
+
+    /**
+     * {@code /bfp dialogue skip [player]} — advances the target's currently-playing Academy
+     * dialogue by exactly one line (one voice recording), instantly. Distinct from
+     * {@code /bfp tutorial skipto}, which jumps whole rooms; this is for stepping through a single
+     * NPC's lines one at a time during a live demo without waiting out each recording or walking
+     * back up to re-click the NPC. Deliberately refuses on the last line rather than completing the
+     * sequence — see {@link AcademyManager#skipCurrentLine} — so this command only ever skips a
+     * recording, never triggers the phase transition/room advance that finishing the dialogue would.
+     */
+    private static int dialogueSkip(CommandContext<CommandSourceStack> ctx, ServerPlayer target) {
+        AcademyManager.LineSkipResult result = AcademyManager.skipCurrentLine(target);
+        switch (result) {
+            case NO_DIALOGUE -> {
+                ctx.getSource().sendFailure(Component.literal(
+                        "§cNo Academy dialogue is currently playing for §f" + target.getName().getString() + "§c."));
+                return 0;
+            }
+            case ALREADY_LAST_LINE -> {
+                ctx.getSource().sendFailure(Component.literal(
+                        "§cAlready on the last line — skipping further would end the dialogue and advance the "
+                                + "room's state. Let it finish naturally or re-click the NPC instead."));
+                return 0;
+            }
+            default -> {
+                ctx.getSource().sendSuccess(() -> Component.literal(
+                        "§7Skipped to next line for §f" + target.getName().getString()), true);
+                return 1;
+            }
+        }
     }
 
     /** Resets the legacy tutorial (now {@code /bfp old_tutorial}) — the Academy's reset lives in {@link #academyReset}. */
