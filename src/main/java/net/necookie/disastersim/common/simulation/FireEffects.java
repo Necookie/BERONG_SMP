@@ -8,8 +8,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.necookie.disastersim.Config;
 import net.necookie.disastersim.block.ComputerBlock;
 import net.necookie.disastersim.common.telemetry.TelemetryCsvWriter;
@@ -72,7 +74,8 @@ public class FireEffects {
             }
 
             if (level.getBlockState(firePos).isAir()
-                    && !level.getBlockState(firePos.below()).isAir()) {
+                    && !level.getBlockState(firePos.below()).isAir()
+                    && !isFrameNear(level, firePos)) {
                 level.setBlockAndUpdate(firePos, Blocks.FIRE.defaultBlockState());
                 BlockPos immutableFirePos = firePos.immutable();
                 session.incrementFireSpread();
@@ -92,6 +95,17 @@ public class FireEffects {
                 }
             }
         }
+    }
+
+    /**
+     * True if an item frame (or glow item frame) occupies {@code pos} — see the matching helpers
+     * and full explanation on {@code HazardBlock.isFrameNear}/{@code ComputerBlock.isFrameNear}.
+     * An item frame's own floating cell still reports {@code BlockState.isAir() == true}, so
+     * without this check New Sim Building 2.0's ~24 wall-mounted extinguisher frames (scattered
+     * through the same arena volume this scatters fire near) were fair game for a new fire block.
+     */
+    private static boolean isFrameNear(ServerLevel level, BlockPos pos) {
+        return !level.getEntitiesOfClass(ItemFrame.class, new AABB(pos)).isEmpty();
     }
 
     /** True if {@code pos} is a real fire source right now: literal fire/soul fire, a burning hazard prop, or a burning computer. */
