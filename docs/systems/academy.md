@@ -256,7 +256,21 @@ Room 2 — Sgt. Reyes (Fire Safety): gated on Cruz DONE. Teaches the full respon
   (`restockExtinguisherFrames`): the 3 glow item frames on the Tool Selection Wall are refilled
   (and respawned if missing) on both reset paths and after building placement — the schematic only
   restores them on a full reboot, so a mid-session reset previously left them empty and made
-  TOOL_SELECTION uncompletable.
+  TOOL_SELECTION uncompletable. **Stray-drop sweep (2026-07-29):** the Academy building is a
+  single shared, persistent world instance (placed once at server boot, unlike New Sim Building
+  2.0's arena which fully re-places on every session start/end) — a trainee who popped an
+  extinguisher out of a frame but never walked over it (logged out, got distracted, or an admin
+  reset/skipto ran first) left the physical dropped item sitting on the floor forever, so the next
+  trainee saw duplicate extinguishers under an already-restocked frame. `restockExtinguisherFrames`
+  (and `clearPlayer` on logout) now also call `sweepStrayExtinguisherDrops`, which discards any
+  floor-dropped extinguisher in Room 2 older than 15s / 300 ticks (`STALE_DROP_MIN_AGE_TICKS`) —
+  young enough drops are spared so a concurrently-present second trainee's own just-popped item is
+  never touched. The Academy's 10 other, purely-decorative gear-display item frames have no
+  restock mechanism at all, so instead of sweeping them they're protected outright:
+  `AcademyManager.onAttackEntity` cancels any attack on an item frame inside
+  `AcademyBuildingManager.ACADEMY_BOUNDS` except the 3 Tool Selection Wall cells
+  (`ReyesRoomManager.isToolWallFrame`), leaving New Sim Building 2.0's ~24 intentionally-poppable
+  wall-mounted extinguisher frames elsewhere on the map unaffected.
 
 Room 3 — Sgt. Santos (Earthquake Drill): gated on Reyes DONE. PRE_DRILL highlights the safe-zone
   TableBlock row (-170,-33,29 to -167,-33,29) green every 5 ticks (AcademyVisuals.highlightBlocks,
