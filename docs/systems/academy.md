@@ -108,9 +108,21 @@ Room 1 — Officer Cruz (Movement School): BRIEFING (4 green-tile WASD walk — 
   as a violation. **She can never strand**:
   with nobody in an escortable phase, `tickReturnHome` walks her back to the briefing anchor
   (-153.5,-33,32.5) (stuck → poof-teleport home) and drops escort mode on arrival;
-  `CruzRoomManager.resetCruz` (called by `/bfp tutorial [reset]` and Morfe's fail-reset)
-  instantly snaps her there so a restarting trainee always finds her waiting; and a `ROOM1_BOUNDS`
-  safety net poof-recovers her to the escorted player if she's ever outside Room 1's footprint.
+  `CruzRoomManager.resetCruz` (called by `/bfp tutorial [reset]`, Morfe's fail-reset, and
+  `AcademyManager.startAcademyRun`) snaps her there so a restarting trainee always finds her
+  waiting; and a `ROOM1_BOUNDS` safety net poof-recovers her to the escorted player if she's ever
+  outside Room 1's footprint. **2026-07-29 bug fix:** `resetCruz` used to silently no-op if
+  `findCruz` couldn't resolve her (the exact same "chunk not attached yet" gap described below for
+  the stray tunnel-finish copy) — and this is the *common* case for its actual real-world call site:
+  `startAcademyRun` fires from a lobby button press, i.e. while the player is still standing in the
+  main lobby, far from the Academy building, with nothing else keeping her chunk loaded in between
+  runs (no forceload anywhere in the mod). A player who finished part of Room 1, disconnected, and
+  reconnected later reported Cruz simply missing when they pressed the tutorial button again —
+  she was still exactly where the *previous* run left her (or unloaded and un-queryable), because
+  the reset silently failed. Fixed with the same self-healing shape as `sweepStrayCruz`: a
+  `pendingReset` flag set on a failed resolve, checked and applied every tick from
+  `CruzRoomManager.tick()` the moment her chunk actually loads (i.e. the moment the player arrives
+  and can see her), instead of a single fire-and-forget attempt.
   The duplicate second Cruz from the old two-NPC handoff design was **removed from the .schem file
   itself** (NBT-edited, 29 → 28 entities — confirmed by parsing the schematic directly: it now
   bakes in exactly one Officer Cruz, at the briefing anchor), but a stray copy kept reappearing at
