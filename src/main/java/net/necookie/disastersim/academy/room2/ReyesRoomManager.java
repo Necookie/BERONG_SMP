@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.decoration.GlowItemFrame;
 import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -638,7 +639,11 @@ public final class ReyesRoomManager {
      * a mid-session restart via {@code /bfp tutorial [reset]} or a Capt. Morfe fail previously
      * left the frames empty (the previous run took the items) or missing (popped/burned), so the
      * next trainee couldn't complete TOOL_SELECTION at all. Called from both reset paths and,
-     * self-healingly, right after building placement.
+     * self-healingly, right after building placement. Also sweeps any stale floor-dropped
+     * extinguisher a previous occupant popped and never picked up — see
+     * {@link #sweepStrayExtinguisherDrops} — since the Academy building is a single shared,
+     * persistent instance (unlike New Sim Building 2.0's arena, which is fully re-placed on every
+     * session start/end) and nothing else ever cleans that debris up between trainees.
      */
     public static void restockExtinguisherFrames(ServerLevel level) {
         for (FrameSpec spec : EXTINGUISHER_FRAMES) {
@@ -655,6 +660,41 @@ public final class ReyesRoomManager {
             }
             frame.setItem(new ItemStack(spec.item().get()));
         }
+        sweepStrayExtinguisherDrops(level);
+    }
+
+    /**
+     * A floor-dropped extinguisher younger than this (ticks since it spawned) is treated as a
+     * concurrent trainee's just-popped item mid-pickup and spared; older ones are stale leftovers
+     * abandoned by a previous occupant (logged out, got distracted, or an admin reset/skipto ran
+     * before they walked over it). Comfortably above the normal pop-then-walk-over window, far
+     * below vanilla's own ~6000-tick unpicked-item despawn timer.
+     */
+    private static final int STALE_DROP_MIN_AGE_TICKS = 300; // 15s
+
+    /**
+     * Discards stale floor-dropped extinguisher {@link ItemEntity} instances left in Room 2 by a
+     * previous occupant, so a fresh trainee's Tool Selection Wall never shows duplicate loose
+     * extinguishers lying under already-restocked frames. Only ever touches floor items — never a
+     * player's inventory/held item — and the age gate means a *concurrently present* second
+     * trainee's own freshly-popped, not-yet-collected extinguisher is left alone.
+     */
+    public static void sweepStrayExtinguisherDrops(ServerLevel level) {
+        AABB room = new AABB(ROOM_MIN.getX(), ROOM_MIN.getY(), ROOM_MIN.getZ(),
+                ROOM_MAX.getX() + 1, ROOM_MAX.getY() + 1, ROOM_MAX.getZ() + 1);
+        for (ItemEntity item : level.getEntitiesOfClass(ItemEntity.class, room,
+                ReyesRoomManager::isStaleExtinguisherDrop)) {
+            item.discard();
+        }
+    }
+
+    private static boolean isStaleExtinguisherDrop(ItemEntity item) {
+        if (item.tickCount < STALE_DROP_MIN_AGE_TICKS) return false; // fresh — likely mid-pickup
+        ItemStack stack = item.getItem();
+        for (FrameSpec spec : EXTINGUISHER_FRAMES) {
+            if (stack.is(spec.item().get())) return true;
+        }
+        return false;
     }
 
     /**
