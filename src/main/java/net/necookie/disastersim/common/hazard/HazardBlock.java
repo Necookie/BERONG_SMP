@@ -8,6 +8,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
@@ -111,7 +112,7 @@ public abstract class HazardBlock extends Block {
         for (Direction dir : Direction.values()) {
             if (lit.size() >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
-            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target) && !isFrameNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit.add(target.immutable());
             }
@@ -128,7 +129,7 @@ public abstract class HazardBlock extends Block {
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
             if (lit.size() >= maxBlocks) break;
-            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !isPlayerNear(level, target) && !isFrameNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit.add(target.immutable());
             }
@@ -172,7 +173,7 @@ public abstract class HazardBlock extends Block {
     private static BlockPos igniteAdjacentTo(Level level, BlockPos target) {
         for (Direction dir : Direction.values()) {
             BlockPos adj = target.relative(dir);
-            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
+            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj) && !isFrameNear(level, adj)) {
                 level.setBlockAndUpdate(adj, Blocks.FIRE.defaultBlockState());
                 return adj.immutable();
             }
@@ -188,5 +189,22 @@ public abstract class HazardBlock extends Block {
      */
     protected static boolean isPlayerNear(Level level, BlockPos pos) {
         return !level.getEntitiesOfClass(Player.class, new AABB(pos).inflate(0.6)).isEmpty();
+    }
+
+    /**
+     * True if an item frame (or glow item frame — a subclass) occupies {@code pos}. Item frames
+     * render inside what {@code BlockState.isAir()} reports as an empty cell (see
+     * {@code SchemLoader}'s own item-frame placement model), so every ignite helper here was
+     * treating a frame's own floating position as fair game for a fresh fire block — vanilla fire
+     * damages any entity touching it, and a damaged {@code ItemFrame} instantly pops its held item
+     * out as a dropped {@code ItemEntity} (then breaks the frame itself on a second hit). New Sim
+     * Building 2.0's ~24 extinguisher-holding frames and hazard props are scattered through the same
+     * building volume, so this collision was routine, not rare — see
+     * docs/history/item-frame-fire-collision-fix-log-2026-07-20.md for the full trace. No inflate
+     * needed (unlike {@link #isPlayerNear}) since a frame's bounding box is already contained within
+     * its own block cell.
+     */
+    protected static boolean isFrameNear(Level level, BlockPos pos) {
+        return !level.getEntitiesOfClass(ItemFrame.class, new AABB(pos)).isEmpty();
     }
 }

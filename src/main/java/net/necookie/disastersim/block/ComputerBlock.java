@@ -104,7 +104,7 @@ public class ComputerBlock extends Block {
 
             for (Direction dir : Direction.values()) {
                 BlockPos adj = pos.relative(dir);
-                if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
+                if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj) && !isFrameNear(level, adj)) {
                     level.setBlock(adj, Blocks.FIRE.defaultBlockState(), 3);
                 }
             }
@@ -170,7 +170,7 @@ public class ComputerBlock extends Block {
 
         for (Direction dir : Direction.values()) {
             BlockPos adj = pos.relative(dir);
-            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj)) {
+            if (level.getBlockState(adj).isAir() && !isPlayerNear(level, adj) && !isFrameNear(level, adj)) {
                 level.setBlock(adj, Blocks.FIRE.defaultBlockState(), 3);
             }
         }
@@ -191,12 +191,12 @@ public class ComputerBlock extends Block {
 
                     if (isFlammableFuel(checkState) && random.nextInt(5) == 0) {
                         BlockPos above = checkPos.above();
-                        if (level.getBlockState(above).isAir() && !isPlayerNear(level, above)) {
+                        if (level.getBlockState(above).isAir() && !isPlayerNear(level, above) && !isFrameNear(level, above)) {
                             level.setBlock(above, Blocks.FIRE.defaultBlockState(), 3);
                         }
                     }
 
-                    if (checkState.isAir() && !isPlayerNear(level, checkPos) && random.nextInt(8) == 0) {
+                    if (checkState.isAir() && !isPlayerNear(level, checkPos) && !isFrameNear(level, checkPos) && random.nextInt(8) == 0) {
                         for (Direction checkDir : Direction.values()) {
                             if (isFlammableFuel(level.getBlockState(checkPos.relative(checkDir)))) {
                                 level.setBlock(checkPos, Blocks.FIRE.defaultBlockState(), 3);
@@ -224,6 +224,18 @@ public class ComputerBlock extends Block {
     private static boolean isPlayerNear(Level level, BlockPos pos) {
         return !level.getEntitiesOfClass(net.minecraft.world.entity.player.Player.class,
                 new net.minecraft.world.phys.AABB(pos).inflate(0.6)).isEmpty();
+    }
+
+    /**
+     * True if an item frame (or glow item frame) occupies {@code pos} — see the matching helper
+     * and full explanation on {@code HazardBlock.isFrameNear}. Item frames float inside a cell
+     * {@code BlockState.isAir()} reports as empty, so without this check the CCS computer's own
+     * fire-spread scan would happily place a fire block right where an item frame is mounted,
+     * which drops its held item onto the ground the instant vanilla fire damage hits the frame.
+     */
+    private static boolean isFrameNear(Level level, BlockPos pos) {
+        return !level.getEntitiesOfClass(net.minecraft.world.entity.decoration.ItemFrame.class,
+                new net.minecraft.world.phys.AABB(pos)).isEmpty();
     }
 
     @Override

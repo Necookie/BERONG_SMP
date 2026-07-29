@@ -157,7 +157,8 @@ public abstract class HazardFacingBlock extends Block {
         for (Direction dir : Direction.values()) {
             if (lit.size() >= maxBlocks) break;
             BlockPos target = pos.relative(dir);
-            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)
+                    && !HazardBlock.isFrameNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit.add(target.immutable());
             }
@@ -174,7 +175,8 @@ public abstract class HazardFacingBlock extends Block {
         for (BlockPos target : BlockPos.betweenClosed(
                 pos.offset(-radius, -1, -radius), pos.offset(radius, 1, radius))) {
             if (lit.size() >= maxBlocks) break;
-            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)) {
+            if (level.getBlockState(target).isAir() && !HazardBlock.isPlayerNear(level, target)
+                    && !HazardBlock.isFrameNear(level, target)) {
                 level.setBlockAndUpdate(target, Blocks.FIRE.defaultBlockState());
                 lit.add(target.immutable());
             }
