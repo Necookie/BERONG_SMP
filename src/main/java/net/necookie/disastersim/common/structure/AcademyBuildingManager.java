@@ -75,6 +75,18 @@ public final class AcademyBuildingManager {
      */
     private static final AABB BUILDING_SCAN_BOUNDS = new AABB(-400, -80, -200, 400, 60, 400);
 
+    /**
+     * A tight box around just this building's interior — deliberately much narrower than
+     * {@link #BUILDING_SCAN_BOUNDS} above, which is intentionally map-wide for the stray-Cruz
+     * safety net. Used to scope decorative-item-frame attack protection (see
+     * {@code AcademyManager#onAttackEntity}) to the Academy alone, so it never affects New Sim
+     * Building 2.0's ~24 intentionally-poppable wall-mounted extinguisher frames (that building
+     * sits far north at Z 358+) or any other structure on the map (all elsewhere at X ≥ 0).
+     * Every known anchor inside the building (Cruz/Reyes/Santos/Morfe's own positions in
+     * {@link #VIEWPOINTS}, the stray-Cruz spot, Room 2's box) falls well within these bounds.
+     */
+    public static final AABB ACADEMY_BOUNDS = new AABB(-190, -40, -5, -95, -10, 95);
+
     /** A named F3-captured reference viewpoint inside the building, for {@code /bfp tutorial}. */
     public record Viewpoint(double x, double y, double z, float yaw, float pitch) {}
 
