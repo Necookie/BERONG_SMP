@@ -15,7 +15,7 @@ if ($PSScriptRoot -and (Test-Path $PSScriptRoot)) {
     $ScriptDir = Split-Path -Parent ([System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName)
 }
 $PayloadDir = Join-Path $ScriptDir "payload"
-$NeoForgeInstaller = Join-Path $PayloadDir "neoforge-26.2.0.0-beta-installer.jar"
+$NeoForgeInstaller = Join-Path $PayloadDir "neoforge-26.2.0.7-beta-installer.jar"
 $ModJar = Join-Path $PayloadDir "berongsmp-1.0.0.jar"
 
 function Write-Step($msg) { Write-Host ""; Write-Host "==> $msg" -ForegroundColor Cyan }
@@ -84,9 +84,9 @@ try {
     # -----------------------------------------------------------------------
     # 3. Silently install the NeoForge client loader.
     # -----------------------------------------------------------------------
-    Write-Step "Installing NeoForge 26.2.0.0-beta (this can take a minute)..."
+    Write-Step "Installing NeoForge 26.2.0.7-beta (this can take a minute)..."
     if (-not (Test-Path $NeoForgeInstaller)) {
-        Write-Fail "Missing bundled file: payload\neoforge-26.2.0.0-beta-installer.jar`n`nThis installer package is incomplete - re-download it."
+        Write-Fail "Missing bundled file: payload\neoforge-26.2.0.7-beta-installer.jar`n`nThis installer package is incomplete - re-download it."
     }
 
     $proc = Start-Process -FilePath $JavaExe `
@@ -125,7 +125,7 @@ try {
     Write-Host ""
     Write-Host "Next steps:"
     Write-Host "  1. Open the Minecraft Launcher"
-    Write-Host "  2. In the profile dropdown, select 'NeoForge 26.2.0.0-beta' and click Play"
+    Write-Host "  2. In the profile dropdown, select 'NeoForge 26.2.0.7-beta' and click Play"
     Write-Host "  3. Multiplayer -> Add Server -> paste the server address you were given -> Join"
 }
 catch {
