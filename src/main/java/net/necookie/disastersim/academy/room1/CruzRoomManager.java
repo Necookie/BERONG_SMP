@@ -209,6 +209,17 @@ public final class CruzRoomManager {
     private static CustomNpcEntity cachedCruz;
     private static UUID cachedCruzId;
     private static long lastStartingLineNudgeTick = Long.MIN_VALUE;
+    /**
+     * Set when {@link #resetCruz} is called while her chunk isn't currently loaded (e.g. right
+     * after a player is teleported to the lobby, far from the Academy building, before they walk
+     * or button-press their way back in) — nothing spawns Cruz on demand, so a silent no-op there
+     * would leave her wherever she was last positioned (mid-escort, or wherever the previous
+     * session ended) instead of at the briefing anchor the player is about to be shown. Checked
+     * every tick from {@link #tick} and applied the moment her chunk actually loads and
+     * {@link #findCruz} resolves her — same self-healing shape as
+     * {@code AcademyBuildingManager#sweepStrayCruz}.
+     */
+    private static volatile boolean pendingReset = false;
 
     private CruzRoomManager() {}
 
@@ -245,6 +256,13 @@ public final class CruzRoomManager {
     }
 
     public static void tick(ServerLevel level) {
+        if (pendingReset) {
+            CustomNpcEntity cruz = findCruz(level);
+            if (cruz != null) {
+                applyCruzReset(cruz);
+            }
+        }
+
         AcademySavedData data = AcademySavedData.get(level);
         ServerPlayer escortTarget = null;
 
@@ -477,16 +495,30 @@ public final class CruzRoomManager {
     }
 
     /**
-     * Instantly returns Cruz to her briefing anchor. Called by {@code /bfp tutorial [reset]}
-     * and Capt. Morfe's fail-reset so a restarting trainee always finds her waiting beside them at
-     * (-153.5,-33,32.5) — never stranded across the building where the last run left her.
+     * Returns Cruz to her briefing anchor — instantly if her chunk is currently loaded, or queued
+     * via {@link #pendingReset} for {@link #tick} to apply the moment it loads otherwise. Called by
+     * {@code /bfp tutorial [reset]}, Capt. Morfe's fail-reset, and {@code AcademyManager.startAcademyRun}
+     * (itself called from a lobby button press, i.e. while the player is still standing in the main
+     * lobby — far from the Academy building, so her chunk is frequently still unloaded at this exact
+     * call) so a restarting trainee always finds her waiting beside them at (-153.5,-33,32.5) —
+     * never stranded across the building where the last run left her.
      */
     public static void resetCruz(ServerLevel level) {
         CustomNpcEntity cruz = findCruz(level);
-        if (cruz == null) return;
+        if (cruz == null) {
+            // Her chunk isn't loaded right now — queue it instead of silently doing nothing, so
+            // she still ends up at the anchor once she attaches (see #pendingReset).
+            pendingReset = true;
+            return;
+        }
+        applyCruzReset(cruz);
+    }
+
+    private static void applyCruzReset(CustomNpcEntity cruz) {
         cruz.setEscortStuckCycles(0);
-        teleportCruzTo(level, cruz, BRIEFING_ANCHOR);
+        teleportCruzTo((ServerLevel) cruz.level(), cruz, BRIEFING_ANCHOR);
         cruz.setEscorting(false);
+        pendingReset = false;
     }
 
     /**
