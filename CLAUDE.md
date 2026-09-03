@@ -29,6 +29,7 @@ This file is a lean index; deep-dive content lives under `docs/`:
   [neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md](docs/history/neoforge-26.2.0.0-beta-retarget-log-2026-07-18.md),
   [neoforge-client-lwjgl-crash-fix-log-2026-07-20.md](docs/history/neoforge-client-lwjgl-crash-fix-log-2026-07-20.md)
 - **`docs/major_plan.md`** — phased implementation plan and Turso schema (see Master Plan above)
+- **`docs/commands.md`** — full player and admin command reference, one entry per command with permission level and usage
 - **`docs/code_review_2026-07-17.md`** — full-codebase architecture/security/performance review;
   see the Code Review Remediation Log below for what was fixed from it and what's still open
 - **`docs/academy_script.md`** — Academy dialogue script, coordinate tables, and flow diagram
