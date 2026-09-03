@@ -1,3 +1,10 @@
+This project was originally scaffolded from the NeoForge Mod Development Kit (MDK) template.
+The notice below is that template's own license, kept here for attribution. It covers only the
+original NeoForge MDK scaffolding this project started from, not this project's own code. This
+project's own code is covered by the LICENSE file at the repository root.
+
+---
+
 MIT License
 
 Copyright (c) 2023 NeoForged project
