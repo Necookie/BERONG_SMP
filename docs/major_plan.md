@@ -162,7 +162,7 @@ if (pathEfficiency < 0.50) → "§eNavigate directly — avoid backtracking in s
 - [x] `emergency_exit` zone check (AABB near library doors, placeholder → tune in-game)
 - [x] `map_metadata.json` (one-time static file written on first init by TelemetryCsvWriter, placeholder coords → tune after runServer)
 
-**Contract reference:** `telemetry_contract.md` (v1.1) in repo root.
+**Contract reference:** `telemetry_contract.md` (v1.1, this line is a historical phase-5 note; the current v1.2 contract now lives at `docs/telemetry_contract.md`).
 **See full brief:** `docs/instructions/phase-5-telemetry-ml.md`
 
 **Telemetry output location:** `run/telemetry/` (not committed — add to `.gitignore`)
