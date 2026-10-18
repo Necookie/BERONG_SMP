@@ -35,6 +35,10 @@ public final class BerongGameTests {
     private BerongGameTests() {}
 
     static void add(String caseId, int maxTicks, Consumer<GameTestHelper> body) {
+        // BERONG_GT_ONLY=G-SEC-12,G-COMP-10 reruns just those cases (retests after a fix).
+        String only = System.getenv("BERONG_GT_ONLY");
+        if (only != null && !only.isBlank()
+                && java.util.Arrays.stream(only.split(",")).noneMatch(id -> id.trim().equalsIgnoreCase(caseId))) return;
         TESTS.put(caseId.toLowerCase(), Map.entry(maxTicks, body));
     }
 
@@ -43,8 +47,16 @@ public final class BerongGameTests {
         // whose tursoUrl is a closed port; every other case runs in the default profile.
         if ("offline".equalsIgnoreCase(System.getenv("BERONG_GT_PROFILE"))) {
             OfflineGameTests.registerAll();
+        } else if ("category".equalsIgnoreCase(System.getenv("BERONG_GT_PROFILE"))) {
+            // Only the category campaign cases (performance, compatibility, usability, security, ...).
+            PerfCompGameTests.registerAll();
+            UseSecGameTests.registerAll();
+            RelDqGameTests.registerAll();
         } else {
             SimulationGameTests.registerAll();
+            PerfCompGameTests.registerAll();
+            UseSecGameTests.registerAll();
+            RelDqGameTests.registerAll();
         }
         for (var e : TESTS.entrySet()) {
             Consumer<GameTestHelper> body = e.getValue().getValue();
