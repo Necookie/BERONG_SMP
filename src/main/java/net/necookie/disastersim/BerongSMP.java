@@ -93,6 +93,10 @@ public class BerongSMP {
         ModEntities.register(modEventBus);
         ModCreativeTabs.register(modEventBus);
         ModSounds.register(modEventBus);
+        // In-world system tests: only registered on a game-test-enabled (dev) server.
+        if (net.neoforged.neoforge.gametest.GameTestHooks.isGametestEnabled()) {
+            net.necookie.disastersim.gametest.BerongGameTests.register(modEventBus);
+        }
         ModAttachments.register(modEventBus);
 
         // SimulationStatusPayload registers its own network channel via @SubscribeEvent

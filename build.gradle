@@ -70,6 +70,10 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            // Own world + config so game tests never touch run/ (whose config holds the live
+            // Turso credentials). JUnit-style results go to run-gametest/gametest-report.xml.
+            gameDirectory = project.file('run-gametest')
+            programArguments.addAll '--report', project.file('run-gametest/gametest-report.xml').absolutePath
         }
 
         data {

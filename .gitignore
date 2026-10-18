@@ -54,3 +54,6 @@ distribution/client-installer/*.zip
 
 ### Voiceover intermediate mp3s (regenerable from ElevenLabs — only the .ogg is shipped) ###
 voiceover/**/*.mp3
+
+### Game test server world/config (holds test DB credentials) ###
+run-gametest/
