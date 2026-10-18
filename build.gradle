@@ -106,6 +106,13 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    // Puts Minecraft/NeoForge on the unit-test classpath (via junit-fml) so tests can load
+    // classes that reference game types, e.g. AcademyProgress's Codec or SimulationFeedback.
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
