@@ -25,9 +25,12 @@ import net.necookie.disastersim.session.TursoClient;
 public class RegistrationCommands {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        // Passwords: word() only accepts letters, digits and _-.+, so a password like Pass#2026 failed
+        // with Brigadier's "trailing data" error. /register's password is followed by more arguments,
+        // so it takes a quoted string ("Pass#2026"); /login's is last, so it takes the rest of the line.
         dispatcher.register(Commands.literal("register")
                 .then(Commands.argument("username", StringArgumentType.word())
-                        .then(Commands.argument("password", StringArgumentType.word())
+                        .then(Commands.argument("password", StringArgumentType.string())
                                 .then(Commands.argument("student_id", StringArgumentType.word())
                                         .then(Commands.argument("section", StringArgumentType.word())
                                                 .then(Commands.argument("full_name", StringArgumentType.greedyString())
@@ -35,7 +38,7 @@ public class RegistrationCommands {
 
         dispatcher.register(Commands.literal("login")
                 .then(Commands.argument("username", StringArgumentType.word())
-                        .then(Commands.argument("password", StringArgumentType.word())
+                        .then(Commands.argument("password", StringArgumentType.greedyString())
                                 .executes(RegistrationCommands::doLogin))));
 
         dispatcher.register(Commands.literal("logout")
