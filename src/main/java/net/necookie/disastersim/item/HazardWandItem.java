@@ -1,5 +1,6 @@
 package net.necookie.disastersim.item;
 
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -39,6 +40,12 @@ public class HazardWandItem extends Item {
         if (ctx.getLevel().isClientSide()) return InteractionResult.SUCCESS;
         if (!(ctx.getLevel() instanceof ServerLevel level)) return InteractionResult.PASS;
         if (!(ctx.getPlayer() instanceof ServerPlayer player)) return InteractionResult.PASS;
+        // Same rule as the megaphone: a student who somehow holds the wand must not be able to
+        // disarm, re-arm or ignite hazards in a graded run.
+        if (!Commands.LEVEL_GAMEMASTERS.check(player.createCommandSourceStack().permissions())) {
+            player.sendSystemMessage(Component.literal("§7The hazard wand is an instructor tool (OP required)."));
+            return InteractionResult.PASS;
+        }
 
         BlockPos pos = ctx.getClickedPos();
         SimulationSession session = SimulationManager.getSession(player.getUUID());
