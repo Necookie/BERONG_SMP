@@ -360,7 +360,12 @@ public class SimulationManager {
             player.sendSystemMessage(Component.literal("§c§l⚠  FIRE PREVENTION DRILL — New Sim Building 2.0"));
             player.sendSystemMessage(Component.literal("§4§l━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
             player.sendSystemMessage(Component.literal("§e5 developing hazards are hidden somewhere in this building."));
-            player.sendSystemMessage(Component.literal("§fFind each one and §aright-click it bare-handed§f to prevent it — you have §c2:00§f."));
+            // Read the configured prevention window rather than a fixed "2:00", so the briefing stays
+            // true when an instructor shortens or lengthens newSimBuilding2PreventionTicks.
+            int preventionSecs = Config.NEW_SIM2_PREVENTION_TICKS.get() / 20;
+            player.sendSystemMessage(Component.literal(String.format(
+                    "§fFind each one and §aright-click it bare-handed§f to prevent it — you have §c%d:%02d§f.",
+                    preventionSecs / 60, preventionSecs % 60)));
             player.sendSystemMessage(Component.literal("§7Any hazard you miss will catch fire; you'll then need the §ecorrect extinguisher§7 to contain it."));
             player.sendSystemMessage(Component.literal("§7Extinguishers aren't issued — grab one from a wall-mounted frame when you need it."));
         } else if (state.isQuake()) {
