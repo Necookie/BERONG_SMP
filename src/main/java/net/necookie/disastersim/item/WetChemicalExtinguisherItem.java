@@ -64,6 +64,7 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
 
         if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
             level.destroyBlock(pos, false);
+            logFireBlockOut(user, pos);
             level.levelEvent(null, 1009, pos, 0);
             extinguished = true;
         } else if (isOxidizerHazard(state.getBlock())) {

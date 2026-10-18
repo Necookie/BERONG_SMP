@@ -324,6 +324,20 @@ public abstract class AbstractExtinguisherItem extends Item {
     }
 
     /** Sends a "wrong tool" chat warning, throttled per-player to once every {@link #WRONG_TOOL_WARNING_COOLDOWN_TICKS}. */
+    /**
+     * Records a fire block this spray just put out in the session's fire log, so the dashboard's
+     * fire replay shows it going out, and drops it from the fire-source pool new fire spreads from.
+     * Hazard props already do this in HazardManager.defuse; this covers plain fire blocks.
+     */
+    protected static void logFireBlockOut(Player user, BlockPos pos) {
+        if (!(user instanceof ServerPlayer sp)) return;
+        SimulationSession session = SimulationManager.getSession(sp.getUUID());
+        if (session == null) return;
+        session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                session.elapsedSeconds(), pos.getX(), pos.getY(), pos.getZ(), "extinguish"));
+        session.removeFireSource(pos.immutable());
+    }
+
     protected static void warnWrongTool(ServerPlayer player, String message) {
         long now = player.level().getGameTime();
         Long last = lastWrongToolWarningTick.get(player.getUUID());

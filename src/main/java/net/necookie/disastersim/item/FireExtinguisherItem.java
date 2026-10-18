@@ -69,6 +69,7 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
 
         if (state.is(Blocks.FIRE) || state.is(Blocks.SOUL_FIRE)) {
             level.destroyBlock(pos, false);
+            logFireBlockOut(user, pos);
             level.levelEvent(null, 1009, pos, 0); // vanilla fire-extinguish hiss + smoke
             extinguished = true;
         } else if (state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT)) {
