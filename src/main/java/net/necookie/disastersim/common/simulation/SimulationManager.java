@@ -1101,6 +1101,8 @@ public class SimulationManager {
         // Remove from pending-respawn before calling endSimulation: if the player was dead,
         // endSimulation would add them back to pendingLobbyRespawn, defeating this remove.
         pendingLobbyRespawn.remove(uuid);
-        endSimulation(uuid);
+        // "disconnected", not the default "timeout": a dropped student is not the same outcome as
+        // one who ran out of time, and New Sim scoring treats "timeout" as a failed evacuation.
+        endSimulation(uuid, "disconnected");
     }
 }

@@ -127,7 +127,9 @@ public class SimulationCommands {
                 .executes(context -> {
                     if (context.getSource().isPlayer()) {
                         UUID uuid = context.getSource().getPlayer().getUUID();
-                        SimulationManager.endSimulation(uuid);
+                        // Recorded as "stopped", not the default "timeout", so telemetry can tell an
+                        // instructor stop apart from a student running out of time.
+                        SimulationManager.endSimulation(uuid, "stopped");
                     }
                     context.getSource().sendSuccess(() -> Component.literal("Simulation stopped."), true);
                     return 1;
