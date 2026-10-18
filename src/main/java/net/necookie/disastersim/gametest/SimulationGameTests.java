@@ -143,6 +143,7 @@ final class SimulationGameTests {
 
     static void registerAll() {
         accountTests();
+        certificationTests();
         playerSafetyTests();
         newSimTests();
         extinguisherTests();
@@ -247,6 +248,47 @@ final class SimulationGameTests {
                 String why = p.messages.get(before);
                 actual("GS-02-06", "After /logout the simulation button was refused: \"" + why.trim().replace('\n', ' ') + "\"");
                 h.succeed();
+            }).start();
+        });
+    }
+
+    // ───────────────────────────── GS-06 Academy certification persistence ─────────────────────────────
+    private static void certificationTests() {
+        add("GS-06-03", 400000, h -> {   // also GS-06-04 (certification restored on /login at another station)
+            RecordingPlayer p = join(h, "gs0603");
+            String u = uniqueName("ac");
+            register(p, u);
+            boolean[] ok = new boolean[2];
+            AtomicReference<RecordingPlayer> p2 = new AtomicReference<>();
+            Function<String, String> certified = user ->
+                    str(query("SELECT tutorial_completed FROM student_accounts WHERE username = ?", user).get(0).getAsJsonObject(), "tutorial_completed");
+            flow(h).when(1, () -> AuthManager.current(p.getUUID()) != null, () -> {
+                // The same call MorfeRoomManager.runEvaluation makes on a PASS (score >= threshold, GS-06-02)
+                AuthManager.markTutorialCompleted(p.getUUID());
+            }).when(1, giveUpAfter(30, every(20, () -> "1".equals(certified.apply(u)))), () -> {
+                ok[0] = caseCheck("GS-06-03", () -> {
+                    String v = certified.apply(u);
+                    h.assertTrue("1".equals(v), "student_accounts.tutorial_completed = " + v);
+                    actual("GS-06-03", "Certifying account " + u + " set student_accounts.tutorial_completed = 1 in the test database.");
+                });
+                cmd(p, "logout", false);
+                p2.set(RecordingPlayer.join(h, "gs0604"));
+                cmd(p2.get(), "login " + u + " " + PW, false);
+            }).when(1, giveUpAfter(30, () -> AuthManager.current(p2.get().getUUID()) != null
+                    && SessionManager.getActiveSession(p2.get().getUUID()) != null), () -> {
+                ok[1] = caseCheck("GS-06-04", () -> {
+                    h.assertTrue(AuthManager.isTutorialCompleted(p2.get().getUUID()), "certification not restored on /login");
+                    pressLobbySimButton(p2.get());
+                    SimulationSession s = SimulationManager.getSession(p2.get().getUUID());
+                    h.assertTrue(s != null && s.getState() == SimulationState.NEW_SIM_BUILDING2_FIRE,
+                            "simulation button did not start New Sim Building 2.0; chat: " + p2.get().messages);
+                    actual("GS-06-04", "After /login at a new station the account was still certified (\""
+                            + p2.get().messages.stream().filter(m -> m.contains("certified")).findFirst().orElse("")
+                                    .replaceAll("(?s).*\\n", "").trim()
+                            + "\") and the simulation button started New Sim Building 2.0 without the Academy.");
+                });
+                reset(h);
+                finish(h, ok);
             }).start();
         });
     }
