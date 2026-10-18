@@ -77,8 +77,7 @@ public class RegistrationCommands {
         AuthManager.registerAsync(player, username, password, studentId, section, fullName,
                 offline -> {
                     RegistrationManager.register(player, studentId, section, fullName);
-                    SessionManager.checkin(player.getUUID(), player.getName().getString(), fullName, username);
-                    TursoClient.updateStudentInfo(player.getUUID().toString(), studentId, section);
+                    SessionManager.checkin(player.getUUID(), player.getName().getString(), fullName, username, studentId, section);
                     player.sendSystemMessage(Component.literal(
                             "§a✓ Registered as §f" + fullName + " §7(§f" + studentId + "§7) — Section §f" + section
                                     + "\n§eYou may now begin the tutorial."
@@ -102,8 +101,8 @@ public class RegistrationCommands {
         AuthManager.loginAsync(player, username, password,
                 account -> {
                     RegistrationManager.register(player, account.studentId(), account.section(), account.fullName());
-                    SessionManager.checkin(player.getUUID(), player.getName().getString(), account.fullName(), username);
-                    TursoClient.updateStudentInfo(player.getUUID().toString(), account.studentId(), account.section());
+                    SessionManager.checkin(player.getUUID(), player.getName().getString(), account.fullName(), username,
+                            account.studentId(), account.section());
                     player.sendSystemMessage(Component.literal(
                             "§a✓ Logged in as §f" + account.fullName() + " §7(@" + username + ")"
                                     + (account.tutorialCompleted()

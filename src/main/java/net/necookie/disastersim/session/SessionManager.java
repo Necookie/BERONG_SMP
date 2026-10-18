@@ -104,6 +104,17 @@ public class SessionManager {
      * where a station stays connected (e.g. an OP checks a new student in without disconnecting).
      */
     public static void checkin(UUID accountUuid, String accountName, String studentName, String username) {
+        checkin(accountUuid, accountName, studentName, username, null, null);
+    }
+
+    /**
+     * As above, with the student's ID and section written in the same INSERT. They used to be
+     * added by a separate UPDATE ... WHERE status='active' issued right after this method
+     * returned, which could run before the async INSERT had created the row and then matched
+     * nothing, leaving student_id/section empty on the dashboard.
+     */
+    public static void checkin(UUID accountUuid, String accountName, String studentName, String username,
+                               String studentId, String section) {
         // Close any in-progress session first
         checkout(accountUuid, "replaced");
 
@@ -125,9 +136,10 @@ public class SessionManager {
         // getDbRowId() > 0 before writing, so a command issued in the brief window before the
         // insert resolves just skips its own Turso write rather than blocking for it.
         TursoClient.insertAsync(
-                "INSERT INTO sessions (student_name, station_account, account_uuid, start_time, status, username) VALUES (?,?,?,?,?,?)",
+                "INSERT INTO sessions (student_name, station_account, account_uuid, start_time, status, username, student_id, section)"
+                        + " VALUES (?,?,?,?,?,?,?,?)",
                 studentName, accountName, accountUuid.toString(),
-                session.getStartTime().toString(), "active", username)
+                session.getStartTime().toString(), "active", username, studentId, section)
             .thenAccept(rowId -> {
                 session.setDbRowId(rowId);
                 BerongSMP.LOGGER.info("[SessionManager] Checked in: student='{}' account='{}' rowId={}",
