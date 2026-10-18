@@ -384,7 +384,7 @@ public class SimulationManager {
                 session.getSessionId(), uuid.toString(), state.name().toLowerCase(),
                 0.0, "session_start",
                 player.getX(), player.getY(), player.getZ(),
-                startHazDist, null, null));
+                startHazDist, null, null, null, null, session.firePhaseLabel()));
 
         if (state == SimulationState.NEW_SIM_BUILDING2_FIRE) {
             emitPhaseTransition(session, uuid, player, "prevention");
@@ -518,7 +518,7 @@ public class SimulationManager {
                     session.getState().name().toLowerCase(),
                     Math.round(elapsedT * 100.0) / 100.0, "session_end",
                     playerForCsv.getX(), playerForCsv.getY(), playerForCsv.getZ(),
-                    Math.round(endHazDist * 100.0) / 100.0, null, null));
+                    Math.round(endHazDist * 100.0) / 100.0, null, null, null, null, session.firePhaseLabel()));
         }
         java.util.Map<String, Object> meta = new java.util.HashMap<>();
         meta.put("player_id",                    uuid.toString());
@@ -764,7 +764,8 @@ public class SimulationManager {
                 session.getState().name().toLowerCase(),
                 Math.round(elapsedS * 100.0) / 100.0, "move_tick",
                 player.getX(), player.getY(), player.getZ(),
-                Math.round(hazDist * 100.0) / 100.0, null, null));
+                // Contract v1.2: every row of a phased (New Sim) run carries its phase; null elsewhere.
+                Math.round(hazDist * 100.0) / 100.0, null, null, null, null, session.firePhaseLabel()));
     }
 
     private static void tickWarmupCountdown(SimulationSession session, ServerPlayer player) {
