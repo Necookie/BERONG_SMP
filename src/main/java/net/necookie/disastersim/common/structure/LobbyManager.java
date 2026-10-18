@@ -203,8 +203,7 @@ public class LobbyManager {
         if (!RegistrationManager.isRegistered(player)) {
             return denyGate(player, event,
                 "§cPlease /register first! Usage: /register <username> <password> <student_id> <section> <full_name>"
-                    + "
-§7(Put the password in quotes if it has symbols, e.g. §f\"Pass#2026\"§7.)"
+                    + "\n§7(Put the password in quotes if it has symbols, e.g. §f\"Pass#2026\"§7.)"
                     + "\n§7(Already have an account? §f/login <username> <password>§7 instead.)");
         }
         if (SessionManager.getActiveSession(player.getUUID()) == null) {
