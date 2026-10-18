@@ -11,7 +11,6 @@ import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -45,7 +44,6 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
@@ -128,9 +126,6 @@ public class BerongSMP {
         // Shut down the session manager and flush pending DB writes on server stop.
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
 
-        // BuildCreativeModeTabContentsEvent lets us inject items into vanilla creative tabs.
-        modEventBus.addListener(this::addCreative);
-
         // Load berongsmp-common.toml and bind it to our Config class.
         // COMMON type means the file lives server-side; values sync to clients on join.
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
@@ -178,20 +173,6 @@ public class BerongSMP {
         // that properly closes out a StudentSession (and its Turso row) when a station disconnects
         // without an explicit /bfp checkout, instead of leaving it stuck at status='active'.
         SessionManager.bootstrap();
-    }
-
-    /**
-     * Injects mod items into vanilla creative mode tabs when NeoForge rebuilds
-     * the tab contents. The example block is added to the Building Blocks tab
-     * as a developer reference; production content should use the mod's own tab.
-     *
-     * @param event Provides the tab key and an output list to append items to.
-     */
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        // Only inject into the vanilla Building Blocks tab
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(ModItems.EXAMPLE_BLOCK_ITEM);
-        }
     }
 
     /**

@@ -121,9 +121,6 @@ public final class ModBlocks {
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(BerongSMP.MODID);
 
-    /** Example block registration. */
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
-
     /** Computer/terminal block — can be set LIT=true for Class C electrical fire scenarios. */
     public static final DeferredBlock<ComputerBlock> COMPUTER = BLOCKS.registerBlock("computer",
             ComputerBlock::new,

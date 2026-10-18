@@ -7,7 +7,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.equipment.ArmorMaterial;
@@ -66,9 +65,6 @@ public final class ModItems {
     public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NECOOKIE = ModItemsNpcSpawners.NPC_STUDENT_NECOOKIE;
     public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_NELL = ModItemsNpcSpawners.NPC_STUDENT_NELL;
     public static final DeferredItem<NpcSpawnerItem> NPC_STUDENT_PRINCESS = ModItemsNpcSpawners.NPC_STUDENT_PRINCESS;
-
-    /** Example block item registration. */
-    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", ModBlocks.EXAMPLE_BLOCK);
 
     /** Computer block item. */
     public static final DeferredItem<BlockItem> COMPUTER_ITEM = ITEMS.registerSimpleBlockItem("computer", ModBlocks.COMPUTER);
@@ -129,10 +125,6 @@ public final class ModItems {
     /** Plain handheld basketball — decorative, no special behaviour. */
     public static final DeferredItem<Item> BASKETBALL = ITEMS.registerSimpleItem("basketball",
             p -> p.stacksTo(16));
-
-    /** Example food item registration. */
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
 
     /** The Fire Extinguisher item registration. */
     public static final DeferredItem<FireExtinguisherItem> FIRE_EXTINGUISHER = ITEMS.registerItem("fire_extinguisher",
