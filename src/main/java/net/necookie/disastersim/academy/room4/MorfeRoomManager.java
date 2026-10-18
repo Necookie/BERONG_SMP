@@ -71,7 +71,7 @@ public final class MorfeRoomManager {
     private static void runEvaluation(ServerLevel level, ServerPlayer player, AcademySavedData data) {
         AcademyProgress progress = data.get(player.getUUID());
         AcademyScoring.Result result = AcademyScoring.evaluate(progress);
-        boolean passed = result.score() >= Config.ACADEMY_PASS_THRESHOLD.get();
+        boolean passed = AcademyScoring.isCertified(result.score(), Config.ACADEMY_PASS_THRESHOLD.get());
         player.sendSystemMessage(Component.literal("§eYour Academy score: §f" + result.score() + " / 100"));
 
         if (passed) {

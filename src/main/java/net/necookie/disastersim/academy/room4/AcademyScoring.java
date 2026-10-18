@@ -23,6 +23,11 @@ public final class AcademyScoring {
 
     public record Result(int score, List<String> weakAreas) {}
 
+    /** Certification rule applied by Capt. Morfe: a score at or above the configured threshold passes. */
+    public static boolean isCertified(int score, int passThreshold) {
+        return score >= passThreshold;
+    }
+
     public static Result evaluate(AcademyProgress progress) {
         List<String> weakAreas = new ArrayList<>();
 

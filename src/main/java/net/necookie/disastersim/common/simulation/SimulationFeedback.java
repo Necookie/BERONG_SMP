@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -24,6 +25,27 @@ public class SimulationFeedback {
 
     private SimulationFeedback() {}
 
+    /** Corrective messages the fire drill feedback can show. */
+    public enum FireWarning { SLOW_RESPONSE, LOW_ACCURACY, ERRATIC_MOVEMENT, INEFFICIENT_PATH }
+
+    /** The four behavioural metrics the fire feedback is based on. */
+    public record FireMetrics(double decisionDelay, double sprayAccuracy, double panicProxy, double pathEfficiency) {}
+
+    public static FireMetrics computeFireMetrics(List<SimulationEventLogger.SimEvent> events) {
+        return new FireMetrics(computeDecisionDelay(events), computeSprayAccuracy(events),
+                computePanicProxy(events), computePathEfficiency(events));
+    }
+
+    /** Applies the feedback thresholds; kept free of Minecraft types so it can be unit tested. */
+    public static EnumSet<FireWarning> fireWarnings(FireMetrics m) {
+        EnumSet<FireWarning> w = EnumSet.noneOf(FireWarning.class);
+        if (m.decisionDelay() > SLOW_DECISION_THRESHOLD_S) w.add(FireWarning.SLOW_RESPONSE);
+        if (m.sprayAccuracy() < POOR_ACCURACY_THRESHOLD) w.add(FireWarning.LOW_ACCURACY);
+        if (m.panicProxy() > HIGH_PANIC_THRESHOLD) w.add(FireWarning.ERRATIC_MOVEMENT);
+        if (m.pathEfficiency() < LOW_EFFICIENCY_THRESHOLD && m.pathEfficiency() > 0) w.add(FireWarning.INEFFICIENT_PATH);
+        return w;
+    }
+
     // -----------------------------------------------------------------------
     // Public entry points
     // -----------------------------------------------------------------------
@@ -31,16 +53,16 @@ public class SimulationFeedback {
     public static void sendFire(ServerPlayer player, SimulationEventLogger logger, int score) {
         List<SimulationEventLogger.SimEvent> events = logger.getEvents();
 
-        double delay    = computeDecisionDelay(events);
-        double accuracy = computeSprayAccuracy(events);
-        double panic    = computePanicProxy(events);
-        double path     = computePathEfficiency(events);
+        FireMetrics metrics = computeFireMetrics(events);
+        EnumSet<FireWarning> warnings = fireWarnings(metrics);
+        double delay    = metrics.decisionDelay();
+        double accuracy = metrics.sprayAccuracy();
 
         player.sendSystemMessage(Component.literal(""));
         player.sendSystemMessage(Component.literal("§6--- Fire Drill Feedback ---"));
 
         // Decision delay
-        if (delay > SLOW_DECISION_THRESHOLD_S) {
+        if (warnings.contains(FireWarning.SLOW_RESPONSE)) {
             player.sendSystemMessage(Component.literal(
                 "§c⚠ Slow response: §fyou took " + (int) delay +
                 "s to pull the pin. In a real fire, act within 10 seconds."));
@@ -50,7 +72,7 @@ public class SimulationFeedback {
         }
 
         // Spray accuracy
-        if (accuracy < POOR_ACCURACY_THRESHOLD) {
+        if (warnings.contains(FireWarning.LOW_ACCURACY)) {
             player.sendSystemMessage(Component.literal(
                 "§c⚠ Low accuracy (" + Math.round(accuracy * 100) +
                 "%): §faim at the §lbase§r§f of the flame, not the smoke above it."));
@@ -60,13 +82,13 @@ public class SimulationFeedback {
         }
 
         // Panic proxy (erratic movement)
-        if (panic > HIGH_PANIC_THRESHOLD) {
+        if (warnings.contains(FireWarning.ERRATIC_MOVEMENT)) {
             player.sendSystemMessage(Component.literal(
                 "§c⚠ Erratic movement detected: §fstay calm and move deliberately toward the exit."));
         }
 
         // Path efficiency
-        if (path < LOW_EFFICIENCY_THRESHOLD && path > 0) {
+        if (warnings.contains(FireWarning.INEFFICIENT_PATH)) {
             player.sendSystemMessage(Component.literal(
                 "§c⚠ Inefficient path: §favoid backtracking in smoke — " +
                 "know your exit before the fire starts."));
