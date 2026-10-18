@@ -721,6 +721,17 @@ work against the unchanged `26.2.0.0-beta` server. Full log:
 
 ---
 
+## System Testing (2026-10-18, branch `test/system-testing`)
+
+The thesis system test suite (catalog, results and defect log in `Thesis_Workspace/Testing/`) added two layers here:
+
+- **Unit tests** — `build.gradle` enables `neoForge.unitTest`, so JUnit can load classes that touch Minecraft types. System-test cases live in `src/test/java/.../scenario/` with `@DisplayName("GS-xx-yy")`. `SimulationFeedback.fireWarnings(FireMetrics)` and `AcademyScoring.isCertified` were extracted so the thresholds and the Academy pass rule are testable.
+- **In-world game tests** — `gametest/` (registered only when NeoForge game tests are enabled) runs mock-player tests named by case ID on vanilla's `minecraft:empty` structure. `RecordingPlayer` joins the real player list with a NeoForge mock connection and records chat. `./gradlew runGameTestServer` uses its own `run-gametest/` directory (gitignored; its config points at the **test** database, never `run/`) and writes `run-gametest/gametest-report.xml` plus per-case results in `gt_actuals.jsonl`. `BERONG_GT_PROFILE=offline` runs only the database-unreachable cases. Gotchas: tests run in registry order (group cases that share a run), and the server ticks unthrottled (wait on conditions, not tick counts, for anything async).
+
+Fixes from the run: `/register`/`/login` accept passwords with symbols (quote them in `/register`); CCS fire feedback counts the CO2 `pin_pull`/`ext_spray` events; extinguished fire blocks write `extinguish` rows to the fire log; `/sim_stop` and disconnects end with `stopped`/`disconnected`; `/bfp prep_level` stores upper case (`none` → NULL) and `/bfp confidence` stores rating / 5; `checkin` writes student ID and section in its INSERT (the separate UPDATE raced the async insert); the Library FIRE drill seeds a fire when the structure has no hazard props.
+
+---
+
 ## Synthetic Dataset Reference
 
 The companion dashboard repo (`BERONG_SMP_WEB/apps/dashboard/scripts/seed-synthetic.mjs`) contains a seeder for 20 sessions used for dashboard testing: 7 Library FIRE, 5 Library EARTHQUAKE, 5 CCS_FIRE, 3 CCS_EARTHQUAKE. All movement paths use real building coordinates and correctly cross the exit zones and assembly zones. Run with `node apps/dashboard/scripts/seed-synthetic.mjs` from the web repo root.
