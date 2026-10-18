@@ -276,7 +276,9 @@ public class SessionManager {
         if (session == null) return false;
         session.setConfidence(confidence);
         if (TursoClient.isReady() && session.getDbRowId() > 0) {
-            TursoClient.executeAsync("UPDATE sessions SET confidence=? WHERE id=?", confidence, session.getDbRowId());
+            // Instructors rate 1-5 in game, but the sessions.confidence column is 0.0-1.0 (the
+            // dashboard renders it as a percentage), so store rating / 5.
+            TursoClient.executeAsync("UPDATE sessions SET confidence=? WHERE id=?", confidence / 5.0, session.getDbRowId());
         }
         return true;
     }
@@ -287,7 +289,10 @@ public class SessionManager {
         if (session == null) return false;
         session.setPrepLevel(level);
         if (TursoClient.isReady() && session.getDbRowId() > 0) {
-            TursoClient.executeAsync("UPDATE sessions SET prep_level=? WHERE id=?", level, session.getDbRowId());
+            // The column holds HIGH/MODERATE/LOW, or NULL for "not assessed" (shown as PENDING by the
+            // dashboard). The command's lowercase literals and "none" are mapped onto that.
+            String stored = level == null || level.equalsIgnoreCase("none") ? null : level.toUpperCase(java.util.Locale.ROOT);
+            TursoClient.executeAsync("UPDATE sessions SET prep_level=? WHERE id=?", stored, session.getDbRowId());
         }
         return true;
     }
