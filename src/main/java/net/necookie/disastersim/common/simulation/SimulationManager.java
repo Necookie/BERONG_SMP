@@ -275,6 +275,15 @@ public class SimulationManager {
             if (!hazards.isEmpty()) {
                 BlockPos bootstrapHazard = hazards.get(level.getRandom().nextInt(hazards.size()));
                 HazardManager.forceFailure(level, session, bootstrapHazard, player);
+            } else {
+                // lspu_library_main.nbt contains no hazard props at all, so without this the Library
+                // FIRE drill never had a burning source and FireEffects.simulateFire never spread
+                // anything. Seed one fire block on a free floor spot instead.
+                BlockPos seed = findRandomSpawnInLibrary(level).immutable();
+                level.setBlockAndUpdate(seed, net.minecraft.world.level.block.Blocks.FIRE.defaultBlockState());
+                session.addFireSource(seed);
+                session.bufferFireLogRow(TelemetryCsvWriter.writeFireLogRow(session.getSessionId(),
+                        0.0, seed.getX(), seed.getY(), seed.getZ(), "ignite"));
             }
         }
 
