@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -91,8 +92,7 @@ public class BfpAdminCommands {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("bfp")
-                .requires(BfpAdminCommands::isBfpAuthorized)
+        var tree = Commands.literal("bfp")
 
                 .then(Commands.literal("login")
                         .then(Commands.argument("pin", StringArgumentType.word())
@@ -438,7 +438,23 @@ public class BfpAdminCommands {
                                             ctx.getSource().sendSuccess(() -> Component.literal(
                                                     "§7[Test Bypass] OFF for §f" + target.getName().getString()), true);
                                             return 1;
-                                        })))));
+                                        }))));
+
+        // Only "/bfp login" is open to everyone: an instructor without operator rights has to be able
+        // to type the PIN. Gating the whole /bfp root (as before) hid login from exactly those players.
+        var root = Commands.literal("bfp");
+        for (CommandNode<CommandSourceStack> child : tree.build().getChildren()) {
+            if (child.getName().equals("login")) root.then(child); else root.then(gated(child));
+        }
+        dispatcher.register(root);
+    }
+
+    /** Copy of {@code child} that only BFP-authorized players (PIN or operator) can see and run. */
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> gated(CommandNode<CommandSourceStack> child) {
+        var b = Commands.literal(child.getName()).requires(BfpAdminCommands::isBfpAuthorized);
+        if (child.getCommand() != null) b.executes(child.getCommand());
+        for (CommandNode<CommandSourceStack> grandchild : child.getChildren()) b.then(grandchild);
+        return b;
     }
 
     /**
