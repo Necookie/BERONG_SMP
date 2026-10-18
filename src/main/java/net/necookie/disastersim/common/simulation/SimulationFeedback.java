@@ -117,20 +117,25 @@ public class SimulationFeedback {
             .filter(e -> "SIM_START".equals(e.type()))
             .mapToLong(SimulationEventLogger.SimEvent::tOffsetMs)
             .findFirst().orElse(0L);
+        // Every extinguisher logs the contract v1.2 "pin_pull"; only the ABC unit also logs the legacy
+        // "EXT_PIN_PULL". Accept either, so CO2/wet-chemical runs (e.g. CCS_FIRE) are measured too.
         long pinPull = events.stream()
-            .filter(e -> "EXT_PIN_PULL".equals(e.type()))
+            .filter(e -> "pin_pull".equals(e.type()) || "EXT_PIN_PULL".equals(e.type()))
             .mapToLong(SimulationEventLogger.SimEvent::tOffsetMs)
             .findFirst().orElse(-1L);
         return pinPull < 0 ? 999.0 : (pinPull - simStart) / 1000.0;
     }
 
     private static double computeSprayAccuracy(List<SimulationEventLogger.SimEvent> events) {
+        // Prefer the v1.2 "ext_spray" stream (logged for all three extinguishers); fall back to the
+        // ABC-only "EXT_SPRAY" for older logs. Never count both, since ABC sprays emit the pair.
+        String sprayType = events.stream().anyMatch(e -> "ext_spray".equals(e.type())) ? "ext_spray" : "EXT_SPRAY";
         long hits  = events.stream()
-            .filter(e -> "EXT_SPRAY".equals(e.type()))
+            .filter(e -> sprayType.equals(e.type()))
             .filter(e -> Boolean.TRUE.equals(e.data().get("hit_fire")))
             .count();
         long total = events.stream()
-            .filter(e -> "EXT_SPRAY".equals(e.type()))
+            .filter(e -> sprayType.equals(e.type()))
             .count();
         return total == 0 ? 0.0 : (double) hits / total;
     }
