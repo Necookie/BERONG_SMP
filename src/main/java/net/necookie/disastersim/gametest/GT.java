@@ -173,6 +173,17 @@ final class GT {
         level.getBlockState(pos).useWithoutItem(level, p, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
     }
 
+    /** Writes measurements for a case (e.g. tick-time samples) to run-gametest/gt_metrics.jsonl for the report charts. */
+    static void metric(String caseId, Object data) {
+        JsonObject o = new JsonObject();
+        o.addProperty("case_id", caseId);
+        o.add("data", new com.google.gson.Gson().toJsonTree(data));
+        try {
+            Files.writeString(Path.of("gt_metrics.jsonl"), o + "\n", StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException ignored) { }
+    }
+
     /** Records a passing case and its observed result in run-gametest/gt_actuals.jsonl (merged into results later). */
     static void actual(String caseId, String text) { record(caseId, "PASS", text); }
 
