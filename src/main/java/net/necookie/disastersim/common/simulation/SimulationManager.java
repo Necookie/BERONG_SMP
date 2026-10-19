@@ -463,7 +463,7 @@ public class SimulationManager {
                 session.getState().name().toLowerCase(),
                 tRounded, "door_open",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, targetName, null));
+                hazRounded, targetName, null, null, null, session.firePhaseLabel()));
     }
 
     public static synchronized void endSimulation(UUID uuid) {
@@ -801,7 +801,7 @@ public class SimulationManager {
                 session.getState().name().toLowerCase(),
                 tRounded, "emergency_exit",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, exit.label(), null));
+                hazRounded, exit.label(), null, null, null, session.firePhaseLabel()));
     }
 
     /** Returns true if simulation ended (caller should continue outer loop). */

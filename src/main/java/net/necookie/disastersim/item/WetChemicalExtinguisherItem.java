@@ -110,7 +110,7 @@ public class WetChemicalExtinguisherItem extends AbstractExtinguisherItem {
                         Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
                         sp.getX(), sp.getY(), sp.getZ(),
                         Math.round(hazDist * 100.0) / 100.0,
-                        "wet_chemical_extinguisher", countNearbyPlayers(level, sp, 5.0)));
+                        "wet_chemical_extinguisher", countNearbyPlayers(level, sp, 5.0), null, null, session.firePhaseLabel()));
             }
         }
 

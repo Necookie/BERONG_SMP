@@ -204,6 +204,6 @@ public final class DuckCoverHoldManager {
                 session.getSessionId(), player.getUUID().toString(),
                 session.getState().name().toLowerCase(),
                 Math.round(elapsedS * 100.0) / 100.0, "duck_cover_hold",
-                player.getX(), player.getY(), player.getZ(), 0.0, null, null));
+                player.getX(), player.getY(), player.getZ(), 0.0, null, null, null, null, session.firePhaseLabel()));
     }
 }

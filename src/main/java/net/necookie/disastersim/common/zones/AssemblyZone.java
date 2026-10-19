@@ -117,7 +117,7 @@ public class AssemblyZone {
                 session.getState().name().toLowerCase(),
                 tRounded, "assembly_area_reached",
                 player.getX(), player.getY(), player.getZ(),
-                hazRounded, null, null));
+                hazRounded, null, null, null, null, session.firePhaseLabel()));
 
         Vec3 pos = player.position();
         level.sendParticles(ParticleTypes.HAPPY_VILLAGER,

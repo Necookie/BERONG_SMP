@@ -143,7 +143,7 @@ public class FireAlarmBlock extends Block {
                 Math.round(t * 100.0) / 100.0, "fire_alarm_activate",
                 player.getX(), player.getY(), player.getZ(),
                 Math.round(hazardDist * 100.0) / 100.0,
-                "fire_alarm", null));
+                "fire_alarm", null, null, null, session.firePhaseLabel()));
 
         return InteractionResult.SUCCESS;
     }

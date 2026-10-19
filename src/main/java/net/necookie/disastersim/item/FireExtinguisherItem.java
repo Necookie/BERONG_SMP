@@ -123,7 +123,7 @@ public class FireExtinguisherItem extends AbstractExtinguisherItem {
                     Math.round(elapsedS * 100.0) / 100.0, "extinguisher_use",
                     sp.getX(), sp.getY(), sp.getZ(),
                     Math.round(hazDist * 100.0) / 100.0,
-                    "fire_block", countNearbyPlayers(level, sp, 5.0)));
+                    "fire_block", countNearbyPlayers(level, sp, 5.0), null, null, session.firePhaseLabel()));
         }
     }
 
