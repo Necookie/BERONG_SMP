@@ -124,8 +124,7 @@ public class TursoClient {
         try {
             return CompletableFuture.runAsync(() -> {
                 try {
-                    HttpRequest req = buildRequest(body);
-                    HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> resp = send(body);
                     if (resp.statusCode() >= 400) {
                         BerongSMP.LOGGER.warn("[TursoClient] Write failed HTTP {}: {}", resp.statusCode(), resp.body());
                     } else if (resp.body().contains("\"type\":\"error\"")) {
@@ -179,8 +178,7 @@ public class TursoClient {
         if (!ready) return null;
         String body = buildBody(sql, args);
         try {
-            HttpRequest req = buildRequest(body);
-            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> resp = send(body);
             if (resp.statusCode() >= 400) {
                 BerongSMP.LOGGER.warn("[TursoClient] Query failed ({}): {}", resp.statusCode(), resp.body());
                 return null;
@@ -190,6 +188,29 @@ public class TursoClient {
             BerongSMP.LOGGER.warn("[TursoClient] Query error: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Sends one pipeline request, retrying once when the connection itself dropped. Turso closes
+     * idle keep-alive connections; the JDK client then reuses the dead socket and fails with
+     * "header parser received no bytes" before the server ever saw the request. Without this, such
+     * a failure silently lost the write (for example a whole session's end-of-run upload).
+     */
+    private static HttpResponse<String> send(String body) throws java.io.IOException, InterruptedException {
+        try {
+            return httpClient.send(buildRequest(body), HttpResponse.BodyHandlers.ofString());
+        } catch (java.io.IOException e) {
+            if (!isDroppedConnection(e)) throw e;
+            BerongSMP.LOGGER.info("[TursoClient] Connection dropped ({}), retrying once.", e.getMessage());
+            return httpClient.send(buildRequest(body), HttpResponse.BodyHandlers.ofString());
+        }
+    }
+
+    private static boolean isDroppedConnection(java.io.IOException e) {
+        if (e instanceof java.net.http.HttpTimeoutException) return false;   // slow server, not a dead socket
+        if (e instanceof java.io.EOFException) return true;
+        String m = String.valueOf(e.getMessage()).toLowerCase();
+        return m.contains("received no bytes") || m.contains("connection reset") || m.contains("closed");
     }
 
     /**
@@ -365,8 +386,7 @@ public class TursoClient {
         try {
             CompletableFuture.runAsync(() -> {
                 try {
-                    HttpRequest req = buildRequest(body);
-                    httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+                    send(body);
                     // Status is intentionally ignored — Turso returns an error if the column already
                     // exists, which is the expected case on all subsequent server starts.
                 } catch (Exception e) {
