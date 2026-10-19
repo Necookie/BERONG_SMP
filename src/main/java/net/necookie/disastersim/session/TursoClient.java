@@ -68,6 +68,12 @@ public class TursoClient {
         String base = dbUrl.endsWith("/") ? dbUrl.substring(0, dbUrl.length() - 1) : dbUrl;
         pipelineUrl = base + "/v2/pipeline";
         authHeader = "Bearer " + token;
+        // The JDK keeps idle connections for 20 minutes by default, far longer than Turso keeps them
+        // open, so the pool filled with dead sockets. Expire them sooner (read when the JDK HTTP
+        // client first loads; an explicit -D setting still wins).
+        if (System.getProperty("jdk.httpclient.keepalive.timeout") == null) {
+            System.setProperty("jdk.httpclient.keepalive.timeout", "10");
+        }
         httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(TIMEOUT_SECONDS))
                 .build();
@@ -197,14 +203,19 @@ public class TursoClient {
      * a failure silently lost the write (for example a whole session's end-of-run upload).
      */
     private static HttpResponse<String> send(String body) throws java.io.IOException, InterruptedException {
-        try {
-            return httpClient.send(buildRequest(body), HttpResponse.BodyHandlers.ofString());
-        } catch (java.io.IOException e) {
-            if (!isDroppedConnection(e)) throw e;
-            BerongSMP.LOGGER.info("[TursoClient] Connection dropped ({}), retrying once.", e.getMessage());
-            return httpClient.send(buildRequest(body), HttpResponse.BodyHandlers.ofString());
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return httpClient.send(buildRequest(body), HttpResponse.BodyHandlers.ofString());
+            } catch (java.io.IOException e) {
+                // Each failure discards that dead pooled socket, so the next attempt gets another
+                // (or a fresh) connection. Several pooled sockets can go stale at once, hence 3 tries.
+                if (!isDroppedConnection(e) || attempt >= MAX_SEND_ATTEMPTS) throw e;
+                BerongSMP.LOGGER.info("[TursoClient] Connection dropped ({}), retry {} of {}.", e.getMessage(), attempt, MAX_SEND_ATTEMPTS - 1);
+            }
         }
     }
+
+    private static final int MAX_SEND_ATTEMPTS = 3;
 
     private static boolean isDroppedConnection(java.io.IOException e) {
         if (e instanceof java.net.http.HttpTimeoutException) return false;   // slow server, not a dead socket
