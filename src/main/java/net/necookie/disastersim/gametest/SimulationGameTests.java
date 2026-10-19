@@ -769,15 +769,16 @@ final class SimulationGameTests {
                 p.setInvulnerable(true);
             }).after(WARMUP + 60, () -> tp(p, 50.5, -33, 70.5))   // evacuate to the Library assembly zone
               .when(1, () -> SimulationManager.getSession(p.getUUID()) == null, () -> { })
-              .when(1, every(20, () -> {
+              .when(1, giveUpAfter(120, every(20, () -> {
                   JsonArray rows = query("SELECT * FROM sessions WHERE username = ? ORDER BY id DESC", u);
                   if (rows.isEmpty()) return false;
                   JsonObject r = rows.get(0).getAsJsonObject();
                   if (!"completed".equals(str(r, "status")) || str(r, "move_log_csv") == null) return false;
                   row.set(r);
                   return true;
-              }), () -> {
+              })), () -> {
                 JsonObject r = row.get();
+                h.assertTrue(r != null, "the uploaded row never appeared as completed within 120 s");
                 int logged = sess.get().logger.getEvents().size();
                 boolean a = caseCheck("GS-20-01", () -> actual("GS-20-01", "sessions row " + str(r, "id") + " for " + u
                         + ": status completed, simulation_type " + str(r, "simulation_type") + ", score " + str(r, "simulation_score") + "."));
@@ -807,12 +808,13 @@ final class SimulationGameTests {
             AtomicReference<JsonObject> row = new AtomicReference<>();
             flow(h).when(1, () -> SessionManager.findActiveSessionRowId(p.getUUID()) > 0, () -> start(p, SimulationState.NEW_SIM_BUILDING2_FIRE))
                    .after(WARMUP + 20, () -> SimulationManager.endSimulation(p.getUUID(), "timeout"))
-                   .when(1, every(20, () -> {
+                   .when(1, giveUpAfter(120, every(20, () -> {
                        JsonArray rows = query("SELECT simulation_type, prep_level, status FROM sessions WHERE username = ? ORDER BY id DESC", u);
                        if (rows.isEmpty() || !"completed".equals(str(rows.get(0).getAsJsonObject(), "status"))) return false;
                        row.set(rows.get(0).getAsJsonObject());
                        return true;
-                   }), () -> {
+                   })), () -> {
+                       h.assertTrue(row.get() != null, "the uploaded row never appeared as completed within 120 s");
                        String type = str(row.get(), "simulation_type");
                        h.assertTrue("NEW_SIM_BUILDING2_FIRE".equals(type), "simulation_type " + type);
                        actual("GS-20-05", "New Sim Building 2.0 row stored simulation_type = \"" + type + "\" (prep_level " + str(row.get(), "prep_level") + ").");

@@ -481,15 +481,16 @@ final class RelDqGameTests {
             }).when(1, () -> sess.get().getFirePhase() == SimulationSession.FirePhase.EVACUATION, () -> tp(p, -150.5, -33, 470.5))
               .after(3, () -> tp(p, -155.5, -33, 480.5))
               .when(1, () -> SimulationManager.getSession(p.getUUID()) == null, () -> { })
-              .when(1, every(20, () -> {
+              .when(1, giveUpAfter(120, every(20, () -> {
                   JsonArray rows = query("SELECT * FROM sessions WHERE username = ? ORDER BY id DESC", u);
                   if (rows.isEmpty()) return false;
                   JsonObject r = rows.get(0).getAsJsonObject();
                   if (!"completed".equals(str(r, "status")) || str(r, "move_log_csv") == null) return false;
                   row.set(r);
                   return true;
-              }), () -> {
+              })), () -> {
                   JsonObject r = row.get();
+                h.assertTrue(r != null, "the uploaded row never appeared as completed within 120 s");
                   SimulationSession s = sess.get();
                   Map<String, Object> seed = new LinkedHashMap<>();
                   seed.put("username", u);
