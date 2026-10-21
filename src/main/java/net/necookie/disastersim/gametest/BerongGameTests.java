@@ -39,6 +39,11 @@ public final class BerongGameTests {
         String only = System.getenv("BERONG_GT_ONLY");
         if (only != null && !only.isBlank()
                 && java.util.Arrays.stream(only.split(",")).noneMatch(id -> id.trim().equalsIgnoreCase(caseId))) return;
+        // BERONG_GT_PREFIX=FS-,EQ- loads only cases whose id starts with one of the prefixes, so a
+        // big campaign can run in small slices instead of registering every case in one JVM.
+        String prefix = System.getenv("BERONG_GT_PREFIX");
+        if (prefix != null && !prefix.isBlank()
+                && java.util.Arrays.stream(prefix.split(",")).noneMatch(p -> caseId.toLowerCase().startsWith(p.trim().toLowerCase()))) return;
         TESTS.put(caseId.toLowerCase(), Map.entry(maxTicks, body));
     }
 
@@ -47,6 +52,13 @@ public final class BerongGameTests {
         // whose tursoUrl is a closed port; every other case runs in the default profile.
         if ("offline".equalsIgnoreCase(System.getenv("BERONG_GT_PROFILE"))) {
             OfflineGameTests.registerAll();
+        } else if ("ian".equalsIgnoreCase(System.getenv("BERONG_GT_PROFILE"))) {
+            // Ian's testing-instrument IDs, 20 variants each (select slices with BERONG_GT_PREFIX).
+            IanFireTests.registerAll();
+            IanAccountTests.registerAll();
+            IanQuakeTests.registerAll();
+            IanLoggingTests.registerAll();
+            IanAcademyRecoveryTests.registerAll();
         } else if ("category".equalsIgnoreCase(System.getenv("BERONG_GT_PROFILE"))) {
             // Only the category campaign cases (performance, compatibility, usability, security, ...).
             PerfCompGameTests.registerAll();
